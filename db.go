@@ -22,7 +22,7 @@ import (
 	"time"
 
 	// Enable SQLLite
-	"github.com/uadmin/uadmin/colors"
+	"github.com/sergeyglazyrindev/uadmin/colors"
 	"gorm.io/driver/sqlite"
 )
 

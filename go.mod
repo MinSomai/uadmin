@@ -14,7 +14,7 @@ require (
 	github.com/otiai10/copy v1.6.0
 	github.com/pquerna/otp v1.3.0
 	github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640
-	github.com/uadmin/uadmin v0.6.2
+	github.com/sergeyglazyrindev/uadmin v0.6.3
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
 	golang.org/x/mod v0.4.2
 	golang.org/x/net v0.0.0-20210508051633-16afe75a6701
