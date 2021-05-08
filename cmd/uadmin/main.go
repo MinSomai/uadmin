@@ -10,6 +10,7 @@ import (
 
 	"github.com/uadmin/uadmin"
 
+	"github.com/otiai10/copy"
 	"golang.org/x/mod/modfile"
 )
 
@@ -162,7 +163,7 @@ func main() {
 			}
 			dst = filepath.Join(ex, v)
 			src = filepath.Join(uadminPath, v)
-			err := Copy(src, dst)
+			err := copy.Copy(src, dst)
 			if err != nil {
 				uadmin.Trail(uadmin.WARNING, "Unable to copy \"%s\" folder: %s", v, err)
 			} else {
