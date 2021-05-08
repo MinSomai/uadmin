@@ -152,6 +152,8 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640 h1:A8ZPAW0kgZQ9MaqZRJyq9Zb39Zsf84G2Ypafszsttb8=
 github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640/go.mod h1:Xo1H4x3+D6gR2/pDDHOLe3uvF7Y59Sro7ErzHnDuLfs=
+github.com/uadmin/uadmin v0.6.2 h1:6FxoeIAA5RmfD3qjxBifv4IKhAAicKoMiO/UtmznWgI=
+github.com/uadmin/uadmin v0.6.2/go.mod h1:cN8BtRYDCyUo2VS+LvUSCEddzMs+kt8bpT+Gnald1UM=
 github.com/xuri/efp v0.0.0-20191019043341-b7dc4fe9aa91/go.mod h1:uBiSUepVYMhGTfDeBKKasV4GpgBlzJ46gXUBAqV8qLk=
 github.com/xuri/efp v0.0.0-20200605144744-ba689101faaf h1:spotWVWg9DP470pPFQ7LaYtUqDpWEOS/BUrSmwFZE4k=
 github.com/xuri/efp v0.0.0-20200605144744-ba689101faaf/go.mod h1:uBiSUepVYMhGTfDeBKKasV4GpgBlzJ46gXUBAqV8qLk=
