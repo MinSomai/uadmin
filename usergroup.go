@@ -10,6 +10,11 @@ func (u UserGroup) String() string {
 	return u.GroupName
 }
 
+// Save !
+func (u *UserGroup) Save() {
+	Save(u)
+}
+
 // HasAccess !
 func (u *UserGroup) HasAccess(modelName string) GroupPermission {
 	Trail(WARNING, "UserGroup.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")

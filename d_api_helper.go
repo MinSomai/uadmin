@@ -201,82 +201,88 @@ func getQueryOperator(r *http.Request, v string, tableName string) string {
 		return ""
 	}
 	if !strings.Contains(v, ".") {
-		v = "`" + tableName + "`.`" + v
+		v = `"` + tableName + `"."` + v
 	} else {
 		vParts := strings.SplitN(v, ".", 2)
-		v = "`" + vParts[0] + "`.`" + vParts[1]
+		v = `"` + vParts[0] + `"."` + vParts[1]
 	}
 
 	if strings.HasSuffix(v, "__gt") {
 		if n {
-			return strings.TrimSuffix(v, "__gt") + "` <= ?"
+			return strings.TrimSuffix(v, "__gt") + "\" <= ?"
 		}
-		return strings.TrimSuffix(v, "__gt") + "` > ?"
+		return strings.TrimSuffix(v, "__gt") + "\" > ?"
 	}
 	if strings.HasSuffix(v, "__gte") {
 		if n {
-			return strings.TrimSuffix(v, "__gte") + "` < ?"
+			return strings.TrimSuffix(v, "__gte") + "\" < ?"
 		}
-		return strings.TrimSuffix(v, "__gte") + "` >= ?"
+		return strings.TrimSuffix(v, "__gte") + "\" >= ?"
 	}
 	if strings.HasSuffix(v, "__lt") {
 		if n {
-			return strings.TrimSuffix(v, "__lt") + "` >= ?"
+			return strings.TrimSuffix(v, "__lt") + "\" >= ?"
 		}
-		return strings.TrimSuffix(v, "__lt") + "` < ?"
+		return strings.TrimSuffix(v, "__lt") + "\" < ?"
 	}
 	if strings.HasSuffix(v, "__lte") {
 		if n {
-			return strings.TrimSuffix(v, "__lte") + "` > ?"
+			return strings.TrimSuffix(v, "__lte") + "\" > ?"
 		}
-		return strings.TrimSuffix(v, "__lte") + "` <= ?"
+		return strings.TrimSuffix(v, "__lte") + "\" <= ?"
 	}
 	if strings.HasSuffix(v, "__in") {
-		return strings.TrimSuffix(v, "__in") + nTerm + "` IN (?)"
+		return strings.TrimSuffix(v, "__in") + nTerm + "\" IN (?)"
 	}
 	if strings.HasSuffix(v, "__is") {
-		return strings.TrimSuffix(v, "__is") + "` IS" + nTerm + " ?"
+		return strings.TrimSuffix(v, "__is") + "\" IS" + nTerm + " ?"
 	}
 	if strings.HasSuffix(v, "__contains") {
 		if Database.Type == "mysql" {
-			return strings.TrimSuffix(v, "__contains") + "`" + nTerm + " LIKE BINARY ?"
+			return strings.TrimSuffix(v, "__contains") + "\"" + nTerm + " LIKE BINARY ?"
+		} else if Database.Type == "postgresql" {
+			return strings.TrimSuffix(v, "__contains") + "\"" + nTerm + " LIKE BINARY ?"
 		} else if Database.Type == "sqlite" {
-			return strings.TrimSuffix(v, "__contains") + "`" + nTerm + " LIKE ?"
+			return strings.TrimSuffix(v, "__contains") + "\"" + nTerm + " LIKE ?"
 		}
 	}
 	if strings.HasSuffix(v, "__between") {
-		return strings.TrimSuffix(v, "__between") + "`" + nTerm + " BETWEEN ? AND ?"
+		return strings.TrimSuffix(v, "__between") + "\"" + nTerm + " BETWEEN ? AND ?"
 	}
 	if strings.HasSuffix(v, "__startswith") {
 		if Database.Type == "mysql" {
-			return strings.TrimSuffix(v, "__startswith") + "`" + nTerm + " LIKE BINARY ?"
+			return strings.TrimSuffix(v, "__startswith") + "\"" + nTerm + " LIKE BINARY ?"
+		} else if Database.Type == "postgresql" {
+			return strings.TrimSuffix(v, "__startswith") + "\"" + nTerm + " LIKE BINARY ?"
 		} else if Database.Type == "sqlite" {
-			return strings.TrimSuffix(v, "__startswith") + "`" + nTerm + " LIKE ?"
+			return strings.TrimSuffix(v, "__startswith") + "\"" + nTerm + " LIKE ?"
 		}
 	}
 	if strings.HasSuffix(v, "__endswith") {
 		if Database.Type == "mysql" {
-			return strings.TrimSuffix(v, "__endswith") + "`" + nTerm + " LIKE BINARY ?"
+			return strings.TrimSuffix(v, "__endswith") + "\"" + nTerm + " LIKE BINARY ?"
+		} else if Database.Type == "postgresql" {
+			return strings.TrimSuffix(v, "__endswith") + "\"" + nTerm + " LIKE BINARY ?"
 		} else if Database.Type == "sqlite" {
-			return strings.TrimSuffix(v, "__endswith") + "`" + nTerm + " LIKE ?"
+			return strings.TrimSuffix(v, "__endswith") + "\"" + nTerm + " LIKE ?"
 		}
 	}
 	if strings.HasSuffix(v, "__re") {
 		return strings.TrimSuffix(v, "__re") + nTerm + " REGEXP ?"
 	}
 	if strings.HasSuffix(v, "__icontains") {
-		return "UPPER(" + strings.TrimSuffix(v, "__icontains") + "`)" + nTerm + " LIKE UPPER(?)"
+		return "UPPER(" + strings.TrimSuffix(v, "__icontains") + "\")" + nTerm + " LIKE UPPER(?)"
 	}
 	if strings.HasSuffix(v, "__istartswith") {
-		return "UPPER(" + strings.TrimSuffix(v, "__istartswith") + "`)" + nTerm + " LIKE UPPER(?)"
+		return "UPPER(" + strings.TrimSuffix(v, "__istartswith") + "\")" + nTerm + " LIKE UPPER(?)"
 	}
 	if strings.HasSuffix(v, "__iendswith") {
-		return "UPPER(" + strings.TrimSuffix(v, "__iendswith") + "`)" + nTerm + " LIKE UPPER(?)"
+		return "UPPER(" + strings.TrimSuffix(v, "__iendswith") + "\")" + nTerm + " LIKE UPPER(?)"
 	}
 	if n {
-		return v + "` <> ?"
+		return v + "\" <> ?"
 	}
-	return v + "` = ?"
+	return v + "\" = ?"
 }
 
 func getQueryArg(k, v string) []interface{} {
@@ -346,10 +352,10 @@ func getQueryFields(r *http.Request, params map[string]string, tableName string)
 
 			//add table name
 			if !strings.Contains(fieldParts[0], ".") {
-				fieldParts[0] = "`" + tableName + "`.`" + fieldParts[0] + "`"
+				fieldParts[0] = "\"" + tableName + "\".\"" + fieldParts[0] + "\""
 			} else {
 				fieldNameParts := strings.Split(fieldParts[0], ".")
-				fieldParts[0] = "`" + fieldNameParts[0] + "`.`" + fieldNameParts[1] + "`"
+				fieldParts[0] = "\"" + fieldNameParts[0] + "\".\"" + fieldNameParts[1] + "\""
 			}
 
 			switch fieldParts[1] {
@@ -367,13 +373,13 @@ func getQueryFields(r *http.Request, params map[string]string, tableName string)
 		} else {
 			//add table name
 			if !strings.Contains(field, ".") {
-				field = "`" + tableName + "`.`" + field + "`"
+				field = "\"" + tableName + "\".\"" + field + "\""
 			} else {
 				fieldNameParts := strings.Split(field, ".")
 				if fieldNameParts[0] != tableName {
 					customSchema = true
 				}
-				field = "`" + fieldNameParts[0] + "`.`" + fieldNameParts[1] + "`" + " AS " + strings.Replace(field, ".", "__", -1)
+				field = "\"" + fieldNameParts[0] + "\".\"" + fieldNameParts[1] + "\"" + " AS " + strings.Replace(field, ".", "__", -1)
 			}
 		}
 		fieldArray = append(fieldArray, field)
@@ -566,7 +572,7 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 	// Create a list of M2M
 	// SELECT `cards`.*  FROM `cards` INNER JOIN `customer_card` ON `customer_card`.`table2_id`=`cards`.`id` WHERE `customer_card`.`table1_id` = 1
 	// SELECT `cards`.id FROM `cards` INNER JOIN `customer_card` ON `customer_card`.`table2_id`=`cards`.`id` WHERE `customer_card`.`table1_id` = 1
-	m2mTmpl := "SELECT `{TABLE_NAME}`.{FIELDS} FROM `{TABLE_NAME}` INNER JOIN `{M2M_TABLE_NAME}` ON `{M2M_TABLE_NAME}`.table2_id=`{TABLE_NAME}`.id WHERE `{M2M_TABLE_NAME}`.table1_id=? AND `{TABLE_NAME}`.deleted_at IS NULL"
+	m2mTmpl := "SELECT \"{TABLE_NAME}\".{FIELDS} FROM \"{TABLE_NAME}\" INNER JOIN \"{M2M_TABLE_NAME}\" ON \"{M2M_TABLE_NAME}\".table2_id=\"{TABLE_NAME}\".id WHERE \"{M2M_TABLE_NAME}\".table1_id=? AND \"{TABLE_NAME}\".deleted_at IS NULL"
 	m2mStmt := map[string]string{}
 	m2mModelName := map[string]string{}
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uadmin/rrd"
+	"free-life/third_party/rrd"
 )
 
 func getRRDTemplate(name string) (*rrd.RRD, error) {

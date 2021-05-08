@@ -7,8 +7,9 @@ import (
 	"reflect"
 	"strings"
 
+	"free-life/third_party/uadmin/helper"
+
 	"github.com/jinzhu/inflection"
-	"github.com/uadmin/uadmin/helper"
 )
 
 // HideInDashboarder used to check if a model should be hidden in
@@ -173,6 +174,10 @@ func Register(m ...interface{}) {
 		adminPassword = os.Getenv("UADMIN_PASS")
 	}
 	if Count(&users, "") == 0 {
+		usergroup := UserGroup{
+			GroupName: "Superusers",
+		}
+		usergroup.Save()
 		admin := User{
 			FirstName:    "System",
 			LastName:     "Admin",
@@ -181,6 +186,7 @@ func Register(m ...interface{}) {
 			Admin:        true,
 			RemoteAccess: true,
 			Active:       true,
+			UserGroup:    usergroup,
 		}
 		admin.Save()
 		Trail(INFO, "Auto generated admin user. Username:%s, Password:%s.", adminUsername, adminPassword)

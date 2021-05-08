@@ -101,6 +101,8 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 			db = db.Raw("SELECT last_insert_rowid() AS lastid")
 		} else if Database.Type == "mysql" {
 			db = db.Raw("SELECT LAST_INSERT_ID() AS lastid")
+		} else if Database.Type == "postgresql" {
+			db = db.Raw("SELECT LAST_INSERT_ID() AS lastid")
 		}
 		db.Pluck("lastid", &id)
 		db.Commit()

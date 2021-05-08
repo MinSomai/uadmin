@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/uadmin/uadmin/colors"
+	"free-life/third_party/uadmin/colors"
 )
 
 const welcomeMessage = "" +
@@ -33,7 +33,8 @@ const welcomeMessage = "" +
 var ServerReady = false
 
 // StartServer !
-func StartServer() {
+func StartServer(config *UadminConfig) {
+	InitializeDbSettingsFromConfig(config)
 	if !registered {
 		Register()
 	}
@@ -79,7 +80,8 @@ func StartServer() {
 }
 
 // StartSecureServer !
-func StartSecureServer(certFile, keyFile string) {
+func StartSecureServer(certFile, keyFile string, config *UadminConfig) {
+	InitializeDbSettingsFromConfig(config)
 	if !registered {
 		Register()
 	}

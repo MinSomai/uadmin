@@ -194,7 +194,6 @@ func TestRevertLogHandler(t *testing.T) {
 	// get the log of the delete action
 	log = Log{}
 	Get(&log, "table_name = ? AND table_id = ? AND action = ?", "testmodelb", mB2.ID, log.Action.Deleted())
-
 	// Send a request to undelete the record
 	w = httptest.NewRecorder()
 	r = httptest.NewRequest("GET", RootURL+"revertHandler/?log_id="+fmt.Sprint(log.ID)+"&x-csrf-token="+s1.Key, nil)

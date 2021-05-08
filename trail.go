@@ -6,7 +6,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/uadmin/uadmin/colors"
+	"free-life/third_party/uadmin/colors"
 )
 
 // Reporting Levels

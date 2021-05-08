@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uadmin/uadmin/helper"
+	"free-life/third_party/uadmin/helper"
 )
 
 // GetListSchema returns a schema for list view

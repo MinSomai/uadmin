@@ -23,12 +23,12 @@ func (l Language) String() string {
 // Save !
 func (l *Language) Save() {
 	if l.Default {
-		Update([]Language{}, "default", false, "`default` = ?", true)
+		Update([]Language{}, "default", false, "\"default\" = ?", true)
 		defaultLang = *l
 	}
 	Save(l)
 	tempActiveLangs := []Language{}
-	Filter(&tempActiveLangs, "`active` = ?", true)
+	Filter(&tempActiveLangs, "\"active\" = ?", true)
 	activeLangs = tempActiveLangs
 
 	tanslationList := []translation{}

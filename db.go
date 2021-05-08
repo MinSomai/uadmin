@@ -11,6 +11,7 @@ import (
 
 	// Enable MYSQL
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm/logger"
 
 	//_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -21,8 +22,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
+
 	// Enable SQLLite
-	"github.com/uadmin/uadmin/colors"
+	"free-life/third_party/uadmin/colors"
+
 	"gorm.io/driver/sqlite"
 )
 
@@ -34,6 +38,12 @@ var sqlDialect = map[string]map[string]string{
 		"selectM2M":      "SELECT `table2_id` FROM `{TABLE1}_{TABLE2}` WHERE table1_id={TABLE1_ID};",
 		"deleteM2M":      "DELETE FROM `{TABLE1}_{TABLE2}` WHERE `table1_id`={TABLE1_ID};",
 		"insertM2M":      "INSERT INTO `{TABLE1}_{TABLE2}` VALUES ({TABLE1_ID}, {TABLE2_ID});",
+	},
+	"postgresql": {
+		"createM2MTable": "CREATE TABLE \"{TABLE1}_{TABLE2}\" (\"table1_id\" int(10) unsigned NOT NULL, \"table2_id\" int(10) unsigned NOT NULL, PRIMARY KEY (\"table1_id\",\"table2_id\"));",
+		"selectM2M":      "SELECT \"table2_id\" FROM \"{TABLE1}_{TABLE2}\" WHERE table1_id={TABLE1_ID};",
+		"deleteM2M":      "DELETE FROM \"{TABLE1}_{TABLE2}\" WHERE \"table1_id\"={TABLE1_ID};",
+		"insertM2M":      "INSERT INTO \"{TABLE1}_{TABLE2}\" VALUES ({TABLE1_ID}, {TABLE2_ID});",
 	},
 	"sqlite": {
 		//"createM2MTable": "CREATE TABLE `{TABLE1}_{TABLE2}` (`{TABLE1}_id`	INTEGER NOT NULL,`{TABLE2}_id` INTEGER NOT NULL, PRIMARY KEY(`{TABLE1}_id`,`{TABLE2}_id`));",
@@ -97,6 +107,10 @@ func customMigration(a interface{}) (err error) {
 	return err
 }
 
+func InitializeDbSettingsFromConfig(config *UadminConfig) {
+	Database = config.D.Db.Default
+}
+
 // GetDB returns a pointer to the DB
 func GetDB() *gorm.DB {
 	if db != nil {
@@ -129,6 +143,47 @@ func GetDB() *gorm.DB {
 		db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		})
+	} else if strings.ToLower(Database.Type) == "postgresql" {
+		if Database.Host == "" || Database.Host == "localhost" {
+			Database.Host = "127.0.0.1"
+		}
+		if Database.Port == 0 {
+			Database.Port = 5432
+		}
+
+		if Database.User == "" {
+			Database.User = "root"
+		}
+
+		credential := Database.User
+
+		if Database.Password != "" {
+			credential = fmt.Sprintf("%s:%s", Database.User, Database.Password)
+		}
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC",
+			Database.Host,
+			Database.User,
+			Database.Password,
+			Database.Name,
+			Database.Port,
+		)
+		spew.Dump(dsn)
+		spew.Dump(Database)
+		spew.Dump(credential)
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+
+		// Check if the error is DB doesn't exist and create it
+		if err != nil && err.Error() == "Error 1049: Unknown database '"+Database.Name+"'" {
+			err = createDB()
+
+			if err == nil {
+				db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+					Logger: logger.Default.LogMode(logger.Info),
+				})
+			}
+		}
 	} else if strings.ToLower(Database.Type) == "mysql" {
 		if Database.Host == "" || Database.Host == "localhost" {
 			Database.Host = "127.0.0.1"
@@ -203,6 +258,32 @@ func createDB() error {
 		}
 
 		return nil
+	} else if Database.Type == "postgresql" {
+		// credential := Database.User
+
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC",
+			Database.Host,
+			Database.User,
+			Database.Password,
+			Database.Name,
+			Database.Port,
+		)
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+		if err != nil {
+			return err
+		}
+
+		Trail(INFO, "Database doens't exist, creating a new database")
+		db = db.Exec("CREATE SCHEMA \"" + Database.Name + "\" DEFAULT CHARACTER SET utf8 COLLATE utf8_bin")
+
+		if db.Error != nil {
+			return fmt.Errorf(db.Error.Error())
+		}
+
+		return nil
+
 	}
 	return fmt.Errorf("CreateDB: Unknown database type " + Database.Type)
 }
@@ -423,10 +504,10 @@ func GetForm(a interface{}, s *ModelSchema, query interface{}, args ...interface
 			if f.Type == cM2M {
 				m2mList = append(m2mList, f.ColumnName)
 			} else if f.Type == cFK {
-				columnList = append(columnList, "`"+f.ColumnName+"_id`")
+				columnList = append(columnList, "\""+f.ColumnName+"_id\"")
 				// } else if f.IsMethod {
 			} else {
-				columnList = append(columnList, "`"+f.ColumnName+"`")
+				columnList = append(columnList, "\""+f.ColumnName+"\"")
 			}
 		}
 	}
@@ -638,7 +719,7 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 		if asc {
 			orderby = " asc"
 		}
-		order = "`" + order + "`"
+		order = "\"" + order + "\""
 		orderby += " "
 		order += orderby
 	} else {
@@ -684,11 +765,11 @@ func FilterList(s *ModelSchema, order string, asc bool, offset int, limit int, a
 	for _, f := range s.Fields {
 		if f.ListDisplay {
 			if f.Type == cFK {
-				columnList = append(columnList, "`"+GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"_id`")
+				columnList = append(columnList, "\""+GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"_id\"")
 			} else if f.Type == cM2M {
 			} else if f.IsMethod {
 			} else {
-				columnList = append(columnList, "`"+GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"`")
+				columnList = append(columnList, "\""+GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"\"")
 			}
 		}
 	}
@@ -697,7 +778,7 @@ func FilterList(s *ModelSchema, order string, asc bool, offset int, limit int, a
 		if asc {
 			orderby = " asc"
 		}
-		order = "`" + order + "`"
+		order = "\"" + order + "\""
 		orderby += " "
 		order += orderby
 	} else {

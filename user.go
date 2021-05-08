@@ -55,7 +55,7 @@ func (u *User) Save() {
 // GetActiveSession !
 func (u *User) GetActiveSession() *Session {
 	s := Session{}
-	Get(&s, "`user_id` = ? AND `active` = ?", u.ID, true)
+	Get(&s, "\"user_id\" = ? AND \"active\" = ?", u.ID, true)
 	if s.ID == 0 {
 		return nil
 	}

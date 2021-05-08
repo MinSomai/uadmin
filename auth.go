@@ -84,7 +84,7 @@ func IsAuthenticated(r *http.Request) *Session {
 	if CacheSessions {
 		s = cachedSessions[key]
 	} else {
-		Get(&s, "`key` = ?", key)
+		Get(&s, "\"key\" = ?", key)
 	}
 	if isValidSession(r, &s) {
 		return &s
@@ -159,7 +159,7 @@ func getSessionFromRequest(r *http.Request) *Session {
 	if CacheSessions {
 		s = cachedSessions[key]
 	} else {
-		Get(&s, "`key` = ?", key)
+		Get(&s, "\"key\" = ?", key)
 	}
 
 	if s.ID != 0 {

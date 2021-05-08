@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/uadmin/uadmin/colors"
+	"free-life/third_party/uadmin/colors"
 )
 
 // Translation is for multilingual fields
@@ -47,7 +47,7 @@ func initializeLanguage() {
 		Filter(&activeLangs, "active = ?", true)
 
 		// Setup default language
-		Get(&defaultLang, "`default` = ?", true)
+		Get(&defaultLang, "\"default\" = ?", true)
 		return
 	}
 
@@ -282,7 +282,7 @@ func Translate(raw string, lang string, args ...bool) string {
 		return ""
 	}
 
-	Get(&defaultLang, "`default` = ?", true)
+	Get(&defaultLang, "\"default\" = ?", true)
 	transtedStr = string(langParser[defaultLang.Code])
 
 	if len(transtedStr) > 2 {

@@ -96,6 +96,28 @@ func dAPIDeleteHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 				}
 			}
 
+		} else if Database.Type == "postgres" {
+			db := GetDB()
+
+			if log {
+				db.Model(model.Interface()).Where(q, args...).Scan(modelArray.Interface())
+			}
+
+			db = db.Where(q, args...).Delete(model.Interface())
+			if db.Error != nil {
+				ReturnJSON(w, r, map[string]interface{}{
+					"status":  "error",
+					"err_msg": "Unable to execute DELETE SQL. " + db.Error.Error(),
+				})
+				return
+			}
+			rowsCount = db.RowsAffected
+			if log {
+				for i := 0; i < modelArray.Elem().Len(); i++ {
+					createAPIDeleteLog(modelName, modelArray.Elem().Index(i).Interface(), &s.User, r)
+				}
+			}
+
 		} else if Database.Type == "sqlite" {
 			db := GetDB().Begin()
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/uadmin/uadmin/colors"
+	"free-life/third_party/uadmin/colors"
 )
 
 // DataType is a list of data types used for settings
