@@ -97,13 +97,9 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 			rowsCount += db.RowsAffected
 		}
 		id := []int{}
-		if Database.Type == "sqlite" {
-			db = db.Raw("SELECT last_insert_rowid() AS lastid")
-		} else if Database.Type == "mysql" {
-			db = db.Raw("SELECT LAST_INSERT_ID() AS lastid")
-		} else if Database.Type == "postgresql" {
-			db = db.Raw("SELECT LAST_INSERT_ID() AS lastid")
-		}
+		dialect := getDialectForDb()
+		dialect.GetLastInsertId()
+		db.Raw(dialect.ToString())
 		db.Pluck("lastid", &id)
 		db.Commit()
 

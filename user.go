@@ -55,7 +55,8 @@ func (u *User) Save() {
 // GetActiveSession !
 func (u *User) GetActiveSession() *Session {
 	s := Session{}
-	Get(&s, "\"user_id\" = ? AND \"active\" = ?", u.ID, true)
+	dialect := getDialectForDb()
+	Get(&s, dialect.Quote("user_id")+" = ? AND "+dialect.Quote("active")+" = ?", u.ID, true)
 	if s.ID == 0 {
 		return nil
 	}

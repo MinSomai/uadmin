@@ -45,7 +45,9 @@ func (s *Session) GenerateKey() {
 	for {
 		// TODO: Increase the session length to 124 and add 4 bytes for User.ID
 		s.Key = GenerateBase64(24)
-		Get(&session, "\"key\" = ?", s.Key)
+		dialect := getDialectForDb()
+		dialect.Equals("key", s.Key)
+		Get(&session, dialect.ToString(), s.Key)
 		if session.ID == 0 {
 			break
 		}

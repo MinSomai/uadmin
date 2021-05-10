@@ -77,7 +77,6 @@ func setupFunction() {
 	schema.FormTheme = "default"
 	Schema["testmodelb"] = schema
 
-	Port = 5000
 	EmailFrom = "uadmin@example.com"
 	EmailPassword = "password"
 	EmailUsername = "uadmin@example.com"
@@ -92,7 +91,7 @@ func setupFunction() {
 		}
 	}
 
-	go StartServer()
+	go StartServer(NewConfig("test.yaml"))
 	//time.Sleep(time.Second * 10)
 	for !dbOK {
 		time.Sleep(time.Millisecond * 100)

@@ -78,7 +78,9 @@ func revertLogHandler(w http.ResponseWriter, r *http.Request) {
 				if t.Field(index).Tag.Get("multilingual") == cTRUE {
 					tVal := map[string]string{}
 					langs := []Language{}
-					Filter(&langs, "\"active\" = ?", true)
+					dialect := getDialectForDb()
+					dialect.Equals("active", true)
+					Filter(&langs, dialect.ToString(), true)
 					for _, lang := range langs {
 						tVal[lang.Code] = fmt.Sprint(langParser[lang.Code+"-"+t.Field(index).Name])
 					}

@@ -61,7 +61,8 @@ func getFilter(r *http.Request, session *Session, schema *ModelSchema) (interfac
 		if SQLInjection(r, queryParts[0], "") {
 			continue
 		}
-		query := "\"" + queryParts[0] + "\""
+		dialect := getDialectForDb()
+		query := dialect.Quote(queryParts[0])
 		if len(queryParts) > 1 {
 			if queryParts[1] == "lt" {
 				// Less than

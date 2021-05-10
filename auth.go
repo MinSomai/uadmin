@@ -84,7 +84,9 @@ func IsAuthenticated(r *http.Request) *Session {
 	if CacheSessions {
 		s = cachedSessions[key]
 	} else {
-		Get(&s, "\"key\" = ?", key)
+		dialect := getDialectForDb()
+		dialect.Equals("key", key)
+		Get(&s, dialect.ToString(), key)
 	}
 	if isValidSession(r, &s) {
 		return &s
@@ -159,7 +161,9 @@ func getSessionFromRequest(r *http.Request) *Session {
 	if CacheSessions {
 		s = cachedSessions[key]
 	} else {
-		Get(&s, "\"key\" = ?", key)
+		dialect := getDialectForDb()
+		dialect.Equals("key", key)
+		Get(&s, dialect.ToString(), key)
 	}
 
 	if s.ID != 0 {

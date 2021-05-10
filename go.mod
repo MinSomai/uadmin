@@ -13,6 +13,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/otiai10/copy v1.6.0
 	github.com/pquerna/otp v1.3.0
+	github.com/stretchr/testify v1.6.1
 	github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
 	golang.org/x/mod v0.4.2

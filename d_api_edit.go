@@ -265,7 +265,7 @@ func getEditMap(params map[string]string, schema *ModelSchema, model *reflect.Va
 
 func getWriteQueryFields(v string) string {
 	if strings.HasPrefix(v, "_") {
-		return "\"" + strings.TrimPrefix(v, "_") + "\""
+		return getDialectForDb().Quote(strings.TrimPrefix(v, "_"))
 	}
 	return ""
 }

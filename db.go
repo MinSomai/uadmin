@@ -24,11 +24,16 @@ import (
 
 	// Enable SQLLite
 	"github.com/uadmin/uadmin/colors"
+	dialectmodule "github.com/uadmin/uadmin/dialect"
 
 	"gorm.io/driver/sqlite"
 )
 
 var db *gorm.DB
+
+func getDialectForDb() *dialectmodule.CommonDialect {
+	return dialectmodule.NewCommonDialect(db, Database.Type)
+}
 
 var sqlDialect = map[string]map[string]string{
 	"mysql": {
@@ -487,16 +492,17 @@ func GetStringer(a interface{}, query interface{}, args ...interface{}) (err err
 func GetForm(a interface{}, s *ModelSchema, query interface{}, args ...interface{}) (err error) {
 	// get a list of visible fields
 	columnList := []string{}
+	dialect := getDialectForDb()
 	m2mList := []string{}
 	for _, f := range s.Fields {
 		if !f.Hidden {
 			if f.Type == cM2M {
 				m2mList = append(m2mList, f.ColumnName)
 			} else if f.Type == cFK {
-				columnList = append(columnList, "\""+f.ColumnName+"_id\"")
+				columnList = append(columnList, dialect.Quote(f.ColumnName+"_id"))
 				// } else if f.IsMethod {
 			} else {
-				columnList = append(columnList, "\""+f.ColumnName+"\"")
+				columnList = append(columnList, dialect.Quote(f.ColumnName))
 			}
 		}
 	}
@@ -703,12 +709,13 @@ func FilterBuilder(params map[string]interface{}) (query string, args []interfac
 
 // AdminPage !
 func AdminPage(order string, asc bool, offset int, limit int, a interface{}, query interface{}, args ...interface{}) (err error) {
+	dialect := getDialectForDb()
 	if order != "" {
 		orderby := " desc"
 		if asc {
 			orderby = " asc"
 		}
-		order = "\"" + order + "\""
+		order = dialect.Quote(order)
 		orderby += " "
 		order += orderby
 	} else {
@@ -749,16 +756,17 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 // FilterList fetches the all record from the database matching query and args
 // where it selects only visible fields in the form based on given schema
 func FilterList(s *ModelSchema, order string, asc bool, offset int, limit int, a interface{}, query interface{}, args ...interface{}) (err error) {
+	dialect := getDialectForDb()
 	// get a list of visible fields
 	columnList := []string{}
 	for _, f := range s.Fields {
 		if f.ListDisplay {
 			if f.Type == cFK {
-				columnList = append(columnList, "\""+GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"_id\"")
+				columnList = append(columnList, dialect.Quote(GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"_id"))
 			} else if f.Type == cM2M {
 			} else if f.IsMethod {
 			} else {
-				columnList = append(columnList, "\""+GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"\"")
+				columnList = append(columnList, dialect.Quote(GetDB().Config.NamingStrategy.ColumnName("", f.Name)))
 			}
 		}
 	}
@@ -767,7 +775,7 @@ func FilterList(s *ModelSchema, order string, asc bool, offset int, limit int, a
 		if asc {
 			orderby = " asc"
 		}
-		order = "\"" + order + "\""
+		order = dialect.Quote(order)
 		orderby += " "
 		order += orderby
 	} else {

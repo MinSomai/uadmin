@@ -28,7 +28,9 @@ func (l *Language) Save() {
 	}
 	Save(l)
 	tempActiveLangs := []Language{}
-	Filter(&tempActiveLangs, "\"active\" = ?", true)
+	dialect := getDialectForDb()
+	dialect.Equals("active", true)
+	Filter(&tempActiveLangs, dialect.ToString(), true)
 	activeLangs = tempActiveLangs
 
 	tanslationList := []translation{}

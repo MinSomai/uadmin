@@ -44,10 +44,14 @@ func initializeLanguage() {
 	if Count(&langList, "") != 0 {
 		// Setup Active languages
 		activeLangs = []Language{}
-		Filter(&activeLangs, "active = ?", true)
+		dialect := getDialectForDb()
+		dialect.Equals("active", true)
+		Filter(&activeLangs, dialect.ToString(), true)
 
+		dialect = getDialectForDb()
+		dialect.Equals("default", true)
 		// Setup default language
-		Get(&defaultLang, "\"default\" = ?", true)
+		Get(&defaultLang, dialect.ToString(), true)
 		return
 	}
 
@@ -281,8 +285,9 @@ func Translate(raw string, lang string, args ...bool) string {
 	if len(args) > 0 && !args[0] {
 		return ""
 	}
-
-	Get(&defaultLang, "\"default\" = ?", true)
+	dialect := getDialectForDb()
+	dialect.Equals("default", true)
+	Get(&defaultLang, dialect.ToString(), true)
 	transtedStr = string(langParser[defaultLang.Code])
 
 	if len(transtedStr) > 2 {
