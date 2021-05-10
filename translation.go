@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"free-life/third_party/uadmin/colors"
+	"github.com/uadmin/uadmin/colors"
 )
 
 // Translation is for multilingual fields

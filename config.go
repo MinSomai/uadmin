@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,6 +18,18 @@ type UadminConfig struct {
 		Auth struct {
 			JWT_SECRET_TOKEN string `yaml:"jwt_secret_token"`
 		} `yaml: "auth"`
+		Admin struct {
+			ListenPort int `yaml:"listen_port"`
+			SSL        struct {
+				ListenPort int `yaml:"listen_port"`
+			} `yaml:"ssl"`
+		} `yaml:"admin"`
+		Api struct {
+			ListenPort int `yaml:"listen_port"`
+			SSL        struct {
+				ListenPort int `yaml:"listen_port"`
+			} `yaml:"ssl"`
+		} `yaml:"api"`
 	}
 }
 
@@ -37,6 +48,5 @@ func NewConfig(file string) *UadminConfig {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	spew.Dump(c.D.Db.Default)
 	return c
 }

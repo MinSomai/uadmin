@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"free-life/third_party/uadmin"
+	"github.com/uadmin/uadmin"
 )
 
 // Compress takes a folder path and compresses the files inside it

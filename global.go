@@ -126,9 +126,6 @@ var MaxUploadFileSize = int64(25 * 1024 * 1024)
 // BindIP is the IP the application listens to.
 var BindIP = ""
 
-// Port is the port used for http or https server.
-var Port = 8080
-
 // EmailFrom identifies where the email is coming from.
 var EmailFrom string
 

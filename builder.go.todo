@@ -1,7 +1,7 @@
 package uadmin
 
 import (
-	"free-life/third_party/uadmin/helper"
+	"github.com/uadmin/uadmin/helper"
 	"io/ioutil"
 	"strings"
 )
@@ -32,7 +32,7 @@ func (b *Builder) Save() {
 	fields := []BuilderField{}
 	Filter(&fields, "builder_id = ?", b.ID)
 
-	imports := []string{"\t\"free-life/third_party/uadmin\""}
+	imports := []string{"\t\"github.com/uadmin/uadmin\""}
 	fCodes := []string{"\tuadmin.Model"}
 
 	for _, f := range fields {

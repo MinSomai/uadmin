@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"free-life/third_party/uadmin/colors"
+	"github.com/uadmin/uadmin/colors"
 )
 
 // DataType is a list of data types used for settings
@@ -187,7 +187,7 @@ func (s *Setting) ApplyValue() {
 	case "uAdmin.MaxUploadFileSize":
 		MaxUploadFileSize = int64(v.(int))
 	case "uAdmin.Port":
-		Port = v.(int)
+		// Port = v.(int)
 	case "uAdmin.EmailFrom":
 		EmailFrom = v.(string)
 	case "uAdmin.EmailUsername":
@@ -376,7 +376,7 @@ func syncSystemSettings() {
 		},
 		{
 			Name:         "Port",
-			Value:        fmt.Sprint(Port),
+			Value:        fmt.Sprint(8080),
 			DefaultValue: "8080",
 			DataType:     t.Integer(),
 			Help:         "is the port used for http or https server",

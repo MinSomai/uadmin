@@ -19,7 +19,7 @@ require (
 	golang.org/x/net v0.0.0-20210508051633-16afe75a6701
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	gopkg.in/yaml.v2 v2.2.8
 	gorm.io/driver/mysql v1.0.6
 	gorm.io/driver/postgres v1.0.8
 	gorm.io/driver/sqlite v1.1.4

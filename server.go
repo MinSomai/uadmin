@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"free-life/third_party/uadmin/colors"
+	"github.com/uadmin/uadmin/colors"
 )
 
 const welcomeMessage = "" +
@@ -72,11 +72,11 @@ func StartServer(config *UadminConfig) {
 		}
 	}
 
-	Trail(OK, "Server Started: http://%s:%d", BindIP, Port)
+	Trail(OK, "Server Started: http://%s:%d", BindIP, config.D.Admin.ListenPort)
 	fmt.Println(welcomeMessage)
 	dbOK = true
 	ServerReady = true
-	log.Println(http.ListenAndServe(fmt.Sprintf("%s:%d", BindIP, Port), nil))
+	log.Println(http.ListenAndServe(fmt.Sprintf("%s:%d", BindIP, config.D.Admin.ListenPort), nil))
 }
 
 // StartSecureServer !
@@ -119,11 +119,11 @@ func StartSecureServer(certFile, keyFile string, config *UadminConfig) {
 		}
 	}
 
-	Trail(OK, "Server Started: https://%s:%d\n", BindIP, Port)
+	Trail(OK, "Server Started: https://%s:%d\n", BindIP, config.D.Admin.SSL.ListenPort)
 	fmt.Println(welcomeMessage)
 	dbOK = true
 	ServerReady = true
-	log.Println(http.ListenAndServeTLS(fmt.Sprintf("%s:%d", BindIP, Port), certFile, keyFile, nil))
+	log.Println(http.ListenAndServeTLS(fmt.Sprintf("%s:%d", BindIP, config.D.Admin.SSL.ListenPort), certFile, keyFile, nil))
 }
 
 func getBindIP() string {

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strings"
 
-	"free-life/third_party/uadmin/helper"
+	"github.com/uadmin/uadmin/helper"
 
 	"github.com/jinzhu/inflection"
 )

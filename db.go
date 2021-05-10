@@ -22,10 +22,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
-
 	// Enable SQLLite
-	"free-life/third_party/uadmin/colors"
+	"github.com/uadmin/uadmin/colors"
 
 	"gorm.io/driver/sqlite"
 )
@@ -155,11 +153,6 @@ func GetDB() *gorm.DB {
 			Database.User = "root"
 		}
 
-		credential := Database.User
-
-		if Database.Password != "" {
-			credential = fmt.Sprintf("%s:%s", Database.User, Database.Password)
-		}
 		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC",
 			Database.Host,
 			Database.User,
@@ -167,15 +160,12 @@ func GetDB() *gorm.DB {
 			Database.Name,
 			Database.Port,
 		)
-		spew.Dump(dsn)
-		spew.Dump(Database)
-		spew.Dump(credential)
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		})
 
 		// Check if the error is DB doesn't exist and create it
-		if err != nil && err.Error() == "Error 1049: Unknown database '"+Database.Name+"'" {
+		if err != nil && strings.Contains(err.Error(), "does not exist") {
 			err = createDB()
 
 			if err == nil {
@@ -261,11 +251,10 @@ func createDB() error {
 	} else if Database.Type == "postgresql" {
 		// credential := Database.User
 
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC",
+		dsn := fmt.Sprintf("host=%s user=%s password=%s port=%d sslmode=disable TimeZone=UTC",
 			Database.Host,
 			Database.User,
 			Database.Password,
-			Database.Name,
 			Database.Port,
 		)
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -276,7 +265,7 @@ func createDB() error {
 		}
 
 		Trail(INFO, "Database doens't exist, creating a new database")
-		db = db.Exec("CREATE SCHEMA \"" + Database.Name + "\" DEFAULT CHARACTER SET utf8 COLLATE utf8_bin")
+		db = db.Exec("CREATE DATABASE \"" + Database.Name + "\";")
 
 		if db.Error != nil {
 			return fmt.Errorf(db.Error.Error())
