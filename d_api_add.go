@@ -131,7 +131,8 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 					if m2mFields[i][m2mModelName] == "" {
 						continue
 					}
-					sql := sqlDialect[Database.Type]["insertM2M"]
+					sqlDialectStrings := dialect.GetSqlDialectStrings()
+					sql := sqlDialectStrings["insertM2M"]
 					sql = strings.Replace(sql, "{TABLE1}", table1, -1)
 					sql = strings.Replace(sql, "{TABLE2}", table2, -1)
 					sql = strings.Replace(sql, "{TABLE1_ID}", fmt.Sprint(createdIDs[i]), -1)

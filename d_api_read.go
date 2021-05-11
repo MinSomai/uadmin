@@ -127,76 +127,26 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 		} else {
 			m = []map[string]interface{}{}
 		}
-
-		if Database.Type == "mysql" {
-			db := GetDB()
-			if !customSchema {
-				db.Raw(SQL, args...).Scan(m)
-			} else {
-				rows, err = db.Raw(SQL, args...).Rows()
-				if err != nil {
-					w.WriteHeader(500)
-					ReturnJSON(w, r, map[string]interface{}{
-						"status":  "error",
-						"err_msg": "Unable to execute SQL. " + err.Error(),
-					})
-					Trail(ERROR, "SQL: %v\nARGS: %v", SQL, args)
-					return
-				}
-				m = parseCustomDBSchema(rows)
+		dialect := getDialectForDb()
+		db := GetDB().Begin()
+		rows, err = dialect.ReadRows(db, customSchema, SQL, m, args...)
+		if customSchema {
+			if err != nil {
+				w.WriteHeader(500)
+				ReturnJSON(w, r, map[string]interface{}{
+					"status":  "error",
+					"err_msg": "Unable to execute SQL. " + err.Error(),
+				})
+				Trail(ERROR, "SQL: %v\nARGS: %v", SQL, args)
+				return
 			}
-			if a, ok := m.([]map[string]interface{}); ok {
-				rowsCount = int64(len(a))
-			} else {
-				rowsCount = int64(reflect.ValueOf(m).Elem().Len())
-			}
-		} else if Database.Type == "postgresql" {
-			db := GetDB()
-			if !customSchema {
-				db.Raw(SQL, args...).Scan(m)
-			} else {
-				rows, err = db.Raw(SQL, args...).Rows()
-				if err != nil {
-					w.WriteHeader(500)
-					ReturnJSON(w, r, map[string]interface{}{
-						"status":  "error",
-						"err_msg": "Unable to execute SQL. " + err.Error(),
-					})
-					Trail(ERROR, "SQL: %v\nARGS: %v", SQL, args)
-					return
-				}
-				m = parseCustomDBSchema(rows)
-			}
-			if a, ok := m.([]map[string]interface{}); ok {
-				rowsCount = int64(len(a))
-			} else {
-				rowsCount = int64(reflect.ValueOf(m).Elem().Len())
-			}
-		} else if Database.Type == "sqlite" {
-			db := GetDB().Begin()
-			db.Exec("PRAGMA case_sensitive_like=ON;")
-			if !customSchema {
-				db.Raw(SQL, args...).Scan(m)
-			} else {
-				rows, err = db.Raw(SQL, args...).Rows()
-				if err != nil {
-					w.WriteHeader(500)
-					ReturnJSON(w, r, map[string]interface{}{
-						"status":  "error",
-						"err_msg": "Unable to execute SQL. " + err.Error(),
-					})
-					Trail(ERROR, "SQL: %v\nARGS: %v", SQL, args)
-					return
-				}
-				m = parseCustomDBSchema(rows)
-			}
-			db.Exec("PRAGMA case_sensitive_like=OFF;")
-			db.Commit()
-			if a, ok := m.([]map[string]interface{}); ok {
-				rowsCount = int64(len(a))
-			} else {
-				rowsCount = int64(reflect.ValueOf(m).Elem().Len())
-			}
+			m = parseCustomDBSchema(rows)
+		}
+		db.Commit()
+		if a, ok := m.([]map[string]interface{}); ok {
+			rowsCount = int64(len(a))
+		} else {
+			rowsCount = int64(reflect.ValueOf(m).Elem().Len())
 		}
 		// Preload
 		if params["$preload"] == "1" {
