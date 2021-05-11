@@ -10,7 +10,6 @@ import (
 func TestPage404Handler(t *testing.T) {
 	r := httptest.NewRequest("GET", "http://0.0.0.0:5000/none-handled-url", nil)
 	w := httptest.NewRecorder()
-
 	pageErrorHandler(w, r, nil)
 
 	if w.Code != http.StatusNotFound {

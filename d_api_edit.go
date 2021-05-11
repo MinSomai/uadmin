@@ -11,8 +11,16 @@ import (
 func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 	urlParts := strings.Split(r.URL.Path, "/")
 	modelName := urlParts[0]
-	model, _ := NewModel(modelName, false)
-	schema, _ := getSchema(modelName)
+	model, ok := NewModel(modelName, false)
+	if !ok {
+		Trail(ERROR, "Couldnt return model for model name. %s", modelName)
+		ReturnJSON(w, r, map[string]interface{}{
+			"status":  "error",
+			"err_msg": "Unknown model.",
+		})
+		return
+	}
+	schema, _ := getSchema(model)
 	tableName := schema.TableName
 
 	// Check CSRF
@@ -121,7 +129,8 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 		table1 := schema.ModelName
 		for i := 0; i < modelArray.Elem().Len(); i++ {
 			for k, v := range m2mMap {
-				t2Schema, _ := getSchema(k)
+				model, _ := NewModel(k, false)
+				t2Schema, _ := getSchema(model)
 				table2 := t2Schema.ModelName
 				// First delete exisiting records
 				sql := sqlDialect[Database.Type]["deleteM2M"]
@@ -175,7 +184,8 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 		db = GetDB().Begin()
 		table1 := schema.ModelName
 		for k, v := range m2mMap {
-			t2Schema, _ := getSchema(k)
+			model, _ := NewModel(k, false)
+			t2Schema, _ := getSchema(model)
 			table2 := t2Schema.ModelName
 			// First delete exisiting records
 			sql := sqlDialect[Database.Type]["deleteM2M"]

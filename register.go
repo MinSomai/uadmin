@@ -36,8 +36,7 @@ var modelList []interface{}
 func Register(m ...interface{}) {
 	modelList = []interface{}{}
 
-	if models == nil {
-		models = map[string]interface{}{}
+	if len(models) == 0 {
 
 		// Initialize system models
 		modelList = []interface{}{
@@ -84,6 +83,28 @@ func Register(m ...interface{}) {
 		modelExists = false
 		t := reflect.TypeOf(modelList[i])
 		name := strings.ToLower(t.Name())
+		// if modelList[i] == nil || modelList[i] == "" || modelList[i] == "0" {
+		// 	if name == "user" {
+		// 		models[name] = User{}
+		// 	} else if name == "dashboardmenu" {
+		// 		models[name] = DashboardMenu{}
+		// 	} else if name == "usergroup" {
+		// 		models[name] = UserGroup{}
+		// 	} else if name == "session" {
+		// 		models[name] = Session{}
+		// 	} else if name == "userpermission" {
+		// 		models[name] = UserPermission{}
+		// 	} else if name == "grouppermission" {
+		// 		models[name] = GroupPermission{}
+		// 	} else if name == "language" {
+		// 		models[name] = Language{}
+		// 	} else if name == "log" {
+		// 		models[name] = Log{}
+		// 	} else if name == "log" {
+		// 		models[name] = Log{}
+		// 	}
+		// }
+		// Trail(ERROR, "Register model: %s - %v", name, modelList[i])
 		models[name] = modelList[i]
 
 		// Get Hidden model status
@@ -126,7 +147,6 @@ func Register(m ...interface{}) {
 			}
 		}
 	}
-
 	// Check if encrypt key is there or generate it
 	if _, err := os.Stat(".key"); os.IsNotExist(err) {
 		EncryptKey = generateByteArray(32)

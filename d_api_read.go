@@ -14,9 +14,17 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 
 	urlParts := strings.Split(r.URL.Path, "/")
 	modelName := urlParts[0]
-	model, _ := NewModel(modelName, false)
+	model, ok := NewModel(modelName, false)
+	if !ok {
+		w.WriteHeader(401)
+		ReturnJSON(w, r, map[string]interface{}{
+			"status":  "error",
+			"err_msg": "No model found",
+		})
+		return
+	}
 	params := getURLArgs(r)
-	schema, _ := getSchema(modelName)
+	schema, _ := getSchema(model.Interface())
 
 	// Check permission
 	allow := false
@@ -111,7 +119,6 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 			Trail(DEBUG, SQL)
 			Trail(DEBUG, "%#v", args)
 		}
-
 		var rows *sql.Rows
 
 		if !customSchema {

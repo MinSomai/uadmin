@@ -62,7 +62,7 @@ func TestDAPI(t *testing.T) {
 				obj := map[string]interface{}{}
 				json.Unmarshal([]byte(v), &obj)
 				if result, ok := obj["result"].([]interface{}); !ok {
-					return fmt.Sprintf("Invalid return for dAPI url=%%s. No 'result' in response")
+					return fmt.Sprintf("Invalid return for dAPI url=%%s. No 'result' in response. %v", obj)
 				} else if len(result) != 2 {
 					return fmt.Sprintf("Invalid length of 'result' dAPI url=%%s. Expected %d got %d", 2, len(result))
 				}

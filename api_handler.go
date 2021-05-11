@@ -13,7 +13,6 @@ import (
 func apiHandler(w http.ResponseWriter, r *http.Request) {
 	session := IsAuthenticated(r)
 	Path := strings.TrimPrefix(r.URL.Path, RootURL+"api")
-
 	// Handle requests for dAPI
 	if strings.HasPrefix(Path, "/d/") || Path == "/d" {
 		dAPIHandler(w, r, session)
@@ -39,7 +38,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			pageErrorHandler(w, r, session)
 			return
 		}
-		s, _ := getSchema(modelName)
+		s, _ := getSchema(model)
 
 		query := ""
 		args := []interface{}{}

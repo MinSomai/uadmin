@@ -50,8 +50,8 @@ func processDelete(a interface{}, w http.ResponseWriter, r *http.Request, sessio
 				Trail(ERROR, "processDelete invalid model name: %s", modelName)
 			}
 			Get(m.Addr().Interface(), "id = ?", v)
-
-			s, _ := getSchema(modelName)
+			model, _ := NewModel(modelName, false)
+			s, _ := getSchema(model)
 			getFormData(m.Interface(), r, session, &s, user)
 			jsonifyValue := map[string]string{}
 			for _, ff := range s.Fields {

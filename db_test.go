@@ -2,50 +2,7 @@ package uadmin
 
 import (
 	"testing"
-	"time"
 )
-
-type TestStruct struct {
-	Model
-	Name         string
-	Children     []TestStruct
-	Parent       *TestStruct
-	ParentID     uint
-	OtherModel   TestStruct1
-	OtherModelID uint
-}
-
-type TestStruct1 struct {
-	Model
-	Name  string `uadmin:"search"`
-	Value int
-}
-
-type TestType int
-
-func (TestType) Active() TestType {
-	return 1
-}
-
-func (TestType) Inactive() TestType {
-	return 2
-}
-
-type TestStruct2 struct {
-	Model
-	Name           string
-	Count          int
-	Value          float64
-	Start          time.Time
-	End            *time.Time
-	Type           TestType
-	OtherModel     TestStruct1
-	OtherModelID   uint
-	AnotherModel   *TestStruct1
-	AnotherModelID uint
-	Active         bool
-	Hidden         string `uadmin:"list_exclude"`
-}
 
 // TestInitializeDB is a unit testing function for initializeDB() function
 func TestInitializeDB(t *testing.T) {

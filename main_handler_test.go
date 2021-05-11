@@ -1,15 +1,76 @@
 package uadmin
 
 import (
-	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"os"
 	"testing"
-
-	"golang.org/x/net/html"
+	"time"
 )
+
+func setupFunction() {
+	Register(
+		TestStruct1{},
+		TestModelA{},
+		TestModelB{},
+		TestApproval{},
+	)
+
+	schema := Schema["testmodelb"]
+	schema.ListTheme = "default"
+	schema.FormTheme = "default"
+	Schema["testmodelb"] = schema
+
+	EmailFrom = "uadmin@example.com"
+	EmailPassword = "password"
+	EmailUsername = "uadmin@example.com"
+	EmailSMTPServer = "localhost"
+	EmailSMTPServerPort = 2525
+
+	RegisterInlines(TestModelA{}, map[string]string{"TestModelB": "OtherModelID"})
+
+	ErrorHandleFunc = func(level int, err string, stack string) {
+		if level >= ERROR {
+			Trail(DEBUG, stack)
+		}
+	}
+
+	go StartServer(NewConfig("test.yaml"))
+	//time.Sleep(time.Second * 10)
+	for !dbOK {
+		time.Sleep(time.Millisecond * 100)
+	}
+	RateLimit = 1000000
+	RateLimitBurst = 1000000
+	go startEmailServer()
+
+	PasswordAttempts = 1000000
+	AllowedHosts += ",example.com"
+}
+
+func teardownFunction() {
+	// Remove Generated Files
+	os.Remove("uadmin.db")
+	os.Remove(".key")
+	os.Remove(".salt")
+	os.Remove(".uproj")
+	os.Remove(".bindip")
+
+	// Delete temp media file
+	os.RemoveAll("./media")
+	os.RemoveAll("./static/i18n")
+}
+
+func TestMain(t *testing.M) {
+	teardownFunction()
+	setupFunction()
+	//te := testing.T{}
+	//TestSendEmail(&te)
+	//time.Sleep(time.Second * 20)
+	retCode := t.Run()
+	teardownFunction()
+	os.Exit(retCode)
+}
 
 // TestMainHandler is a unit testing function for mainHandler() function
 func TestMainHandler(t *testing.T) {
@@ -58,8 +119,8 @@ func TestMainHandler(t *testing.T) {
 		{httptest.NewRequest("GET", "http://0.0.0.0:5000/profile", nil), "10.0.0.1", "", "", s2, 200, "uAdmin - u1's Profile", ""},
 		{httptest.NewRequest("GET", "http://0.0.0.0:5000/settings", nil), "10.0.0.1", "", "", s1, 200, "uAdmin - Settings", ""},
 		{httptest.NewRequest("GET", "http://0.0.0.0:5000/user", nil), "10.0.0.1", "", "", s1, 200, "uAdmin - User", ""},
-		{httptest.NewRequest("GET", "http://0.0.0.0:5000/user/1", nil), "10.0.0.1", "", "", s1, 200, "uAdmin - User", ""},
-		{httptest.NewRequest("GET", "http://0.0.0.0:5000/user/1/1", nil), "10.0.0.1", "", "", s1, 404, "uAdmin - 404", ""},
+		{httptest.NewRequest("GET", "http://0.0.0.0:5000/users/1", nil), "10.0.0.1", "", "", s1, 200, "uAdmin - User", ""},
+		{httptest.NewRequest("GET", "http://0.0.0.0:5000/users/1/1", nil), "10.0.0.1", "", "", s1, 404, "uAdmin - 404", ""},
 		{httptest.NewRequest("GET", "http://0.0.0.0:5000/logout", nil), "10.0.0.1", "", "", s1, 303, "", ""},
 	}
 
@@ -131,97 +192,4 @@ func TestMainHandler(t *testing.T) {
 	Delete(s1)
 	Delete(s2)
 	Delete(u1)
-}
-
-func traverse(n *html.Node, tag string) (string, map[string]string, bool) {
-	if isTagElement(n, tag) {
-		tempMap := map[string]string{}
-		for i := range n.Attr {
-			tempMap[n.Attr[i].Key] = n.Attr[i].Val
-		}
-		if n.FirstChild == nil {
-			return "", tempMap, true
-		}
-		return strings.TrimSpace(n.FirstChild.Data), tempMap, true
-	}
-
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		result, attr, ok := traverse(c, tag)
-		if ok {
-			return result, attr, ok
-		}
-	}
-
-	return "", map[string]string{}, false
-}
-
-func getHTMLTag(r io.Reader, tag string) (string, map[string]string, bool) {
-	doc, err := html.Parse(r)
-	if err != nil {
-		Trail(ERROR, "Fail to parse html")
-		return "", map[string]string{}, false
-	}
-
-	return traverse(doc, tag)
-}
-
-func isTagElement(n *html.Node, tag string) bool {
-	return n.Type == html.ElementNode && n.Data == tag
-}
-
-func tagSearch(n *html.Node, tag string, path string, index int) ([]string, []string, []map[string]string) {
-	paths := []string{}
-	content := []string{}
-	attr := []map[string]string{}
-
-	if path == "" {
-		if n.Data != "" {
-			path = fmt.Sprintf("%s[%d]", n.Data, index)
-		}
-	} else {
-		path = path + "/" + fmt.Sprintf("%s[%d]", n.Data, index)
-	}
-
-	if isTagElement(n, tag) {
-		if n.FirstChild == nil {
-			content = append(content, "")
-		} else {
-			content = append(content, strings.TrimSpace(n.FirstChild.Data))
-		}
-		paths = append(paths, path)
-		tempMap := map[string]string{}
-		for i := range n.Attr {
-			tempMap[n.Attr[i].Key] = n.Attr[i].Val
-		}
-		attr = append(attr, tempMap)
-	}
-
-	index = 0
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		childPaths, childContent, childAttr := tagSearch(c, tag, path, index)
-		paths = append(paths, childPaths...)
-		content = append(content, childContent...)
-		attr = append(attr, childAttr...)
-		if c.Type == html.ElementNode {
-			index++
-		}
-	}
-	return paths, content, attr
-}
-
-// func getHTMLTagList(r io.Reader, tag string) (paths []string, content []string, attr []map[string]string) {
-// 	doc, err := html.Parse(r)
-// 	if err != nil {
-// 		Trail(ERROR, "Failed to parse html")
-// 		return
-// 	}
-// 	return tagSearch(doc, tag, "", 0)
-// }
-
-func parseHTML(r io.Reader, t *testing.T) (*html.Node, error) {
-	doc, err := html.Parse(r)
-	if err != nil {
-		t.Errorf("Unable to parse html stream")
-	}
-	return doc, err
 }

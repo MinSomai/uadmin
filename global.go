@@ -369,7 +369,7 @@ var activeLangs []Language
 var langMapCache = map[string][]byte{}
 
 // Models is where we keep all registered models
-var models map[string]interface{}
+var models map[string]interface{} = make(map[string]interface{})
 
 // Inlines is where we keep all registered models' inlines
 var inlines map[string][]interface{}

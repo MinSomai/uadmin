@@ -27,7 +27,6 @@ func getSchema(a interface{}) (s ModelSchema, ok bool) {
 
 	if t.Kind() != reflect.Struct {
 		Trail(WARNING, string(debug.Stack()))
-		Trail(WARNING, "Unable to get schema for none struct type (%s). %v", t.Name(), a)
 		return
 	}
 
@@ -35,7 +34,7 @@ func getSchema(a interface{}) (s ModelSchema, ok bool) {
 	s.Name = t.Name()
 	s.ModelName = strings.ToLower(t.Name())
 	s.DisplayName = getDisplayName(t.Name())
-	s.TableName = GetDB().Config.NamingStrategy.TableName(s.ModelName)
+	s.TableName = GetDB().Config.NamingStrategy.TableName(t.Name())
 
 	// Analize the fields of the model and add them to the fields list
 	s.Fields = []F{}

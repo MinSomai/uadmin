@@ -134,7 +134,8 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *Session) {
 	// TODO: Call ListSchemaModifier of the schema and use the modified one
 
 	modelName := r.URL.Query().Get("m")
-	schema, ok := getSchema(modelName)
+	model, _ := NewModel(modelName, false)
+	schema, ok := getSchema(model)
 	if !ok {
 		pageErrorHandler(w, r, session)
 		return

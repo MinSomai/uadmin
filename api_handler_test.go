@@ -19,7 +19,6 @@ func TestAPIHandler(t *testing.T) {
 	// Test with no auth
 	r := httptest.NewRequest("GET", "/api", nil)
 	w := httptest.NewRecorder()
-
 	apiHandler(w, r)
 
 	if w.Code != http.StatusOK {

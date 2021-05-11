@@ -109,7 +109,6 @@ func makeResultReceiver(length int) []interface{} {
 func getFilters(r *http.Request, params map[string]string, tableName string, schema *ModelSchema) (query string, args []interface{}) {
 	qParts := []string{}
 	args = []interface{}{}
-
 	for k, v := range params {
 		// TODO: Explain the condition with a URL to specs
 		// Anything that starts with a '$' or '_' in assigning a field name
@@ -202,10 +201,10 @@ func getQueryOperator(r *http.Request, v string, tableName string) string {
 	}
 	if !strings.Contains(v, ".") {
 
-		v = dialect.Quote(tableName) + `.` + v
+		v = dialect.QuoteTableName(tableName) + "." + v
 	} else {
 		vParts := strings.SplitN(v, ".", 2)
-		v = dialect.Quote(vParts[0]) + `.` + vParts[1]
+		v = dialect.QuoteTableName(vParts[0]) + "." + vParts[1]
 	}
 
 	if strings.HasSuffix(v, "__gt") {
@@ -341,10 +340,10 @@ func getQueryFields(r *http.Request, params map[string]string, tableName string)
 
 			//add table name
 			if !strings.Contains(fieldParts[0], ".") {
-				fieldParts[0] = dialect.Quote(tableName) + "." + dialect.Quote(fieldParts[0])
+				fieldParts[0] = dialect.QuoteTableName(tableName) + "." + dialect.Quote(fieldParts[0])
 			} else {
 				fieldNameParts := strings.Split(fieldParts[0], ".")
-				fieldParts[0] = dialect.Quote(fieldNameParts[0]) + "." + dialect.Quote(fieldNameParts[1])
+				fieldParts[0] = dialect.QuoteTableName(fieldNameParts[0]) + "." + dialect.Quote(fieldNameParts[1])
 			}
 
 			switch fieldParts[1] {
@@ -362,13 +361,13 @@ func getQueryFields(r *http.Request, params map[string]string, tableName string)
 		} else {
 			//add table name
 			if !strings.Contains(field, ".") {
-				field = dialect.Quote(tableName) + "." + dialect.Quote(field)
+				field = dialect.QuoteTableName(tableName) + "." + dialect.Quote(field)
 			} else {
 				fieldNameParts := strings.Split(field, ".")
 				if fieldNameParts[0] != tableName {
 					customSchema = true
 				}
-				field = dialect.Quote(fieldNameParts[0]) + "." + dialect.Quote(fieldNameParts[1]) + " AS " + dialect.Quote(strings.Replace(field, ".", "__", -1))
+				field = dialect.QuoteTableName(fieldNameParts[0]) + "." + dialect.Quote(fieldNameParts[1]) + " AS " + dialect.Quote(strings.Replace(field, ".", "__", -1))
 			}
 		}
 		fieldArray = append(fieldArray, field)
@@ -578,7 +577,7 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 				table2 = Schema[strings.ToLower(f.TypeName)].TableName
 				m2mTable := s.ModelName + "_" + Schema[strings.ToLower(f.TypeName)].ModelName
 				m2mStmt[f.Name] = m2mTmpl
-				table_name = dialect.Quote(table2)
+				table_name = dialect.QuoteTableName(table2)
 				m2m_table_name = dialect.Quote(m2mTable)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{TABLE_NAME}", table_name, -1)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{FIELDS}", fillType, -1)

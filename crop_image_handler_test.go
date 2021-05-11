@@ -156,6 +156,6 @@ func TestCropImageHandler(t *testing.T) {
 
 	// Clean up
 	Delete(s1)
-	Delete(u1)
+	Delete(&u1)
 	Delete(s2)
 }

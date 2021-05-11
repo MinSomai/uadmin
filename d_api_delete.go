@@ -11,8 +11,17 @@ func dAPIDeleteHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 	var rowsCount int64
 	urlParts := strings.Split(r.URL.Path, "/")
 	modelName := urlParts[0]
-	model, _ := NewModel(modelName, false)
-	schema, _ := getSchema(modelName)
+	model, ok := NewModel(modelName, false)
+	if !ok {
+		Trail(ERROR, "Couldnt return model for model name. %s", modelName)
+		ReturnJSON(w, r, map[string]interface{}{
+			"status":  "error",
+			"err_msg": "Unknown model.",
+		})
+		return
+	}
+
+	schema, _ := getSchema(model)
 	tableName := schema.TableName
 	params := getURLArgs(r)
 
@@ -81,7 +90,7 @@ func dAPIDeleteHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 				db.Model(model.Interface()).Where(q, args...).Scan(modelArray.Interface())
 			}
 
-			db = db.Where(q, args...).Delete(model.Interface())
+			db = db.Where(q, args...).Delete(model)
 			if db.Error != nil {
 				ReturnJSON(w, r, map[string]interface{}{
 					"status":  "error",
@@ -126,7 +135,7 @@ func dAPIDeleteHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 			}
 
 			db = db.Exec("PRAGMA case_sensitive_like=ON;")
-			db = db.Where(q, args...).Delete(model.Interface())
+			db = db.Where(q, args...).Delete(&model)
 			db = db.Exec("PRAGMA case_sensitive_like=OFF;")
 			db.Commit()
 			if db.Error != nil {

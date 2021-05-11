@@ -16,7 +16,7 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 	urlParts := strings.Split(r.URL.Path, "/")
 	modelName := urlParts[0]
 	model, _ := NewModel(modelName, false)
-	schema, _ := getSchema(modelName)
+	schema, _ := getSchema(model)
 	tableName := schema.TableName
 
 	// Check CSRF
@@ -96,11 +96,11 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 			db = db.Exec("INSERT INTO "+tableName+" ("+q[i]+") VALUES ("+strings.Join(argsPlaceHolder, ",")+")", args[i]...)
 			rowsCount += db.RowsAffected
 		}
-		id := []int{}
+		last_ids := []int{}
 		dialect := getDialectForDb()
 		dialect.GetLastInsertId()
-		db.Raw(dialect.ToString())
-		db.Pluck("lastid", &id)
+		db = db.Raw(dialect.ToString())
+		db = db.Pluck("lastid", &last_ids)
 		db.Commit()
 
 		if db.Error != nil {
@@ -113,7 +113,7 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 
 		intRowsCount := int(rowsCount)
 		for i := 1; i <= intRowsCount; i++ {
-			createdIDs = append(createdIDs, id[0]-(intRowsCount-i))
+			createdIDs = append(createdIDs, last_ids[0]-(intRowsCount-i))
 		}
 
 		// Add M2M records
@@ -124,7 +124,8 @@ func dAPIAddHandler(w http.ResponseWriter, r *http.Request, s *Session) {
 		for i := range m2mFields {
 			table1 := schema.ModelName
 			for m2mModelName := range m2mFields[i] {
-				t2Schema, _ := getSchema(m2mModelName)
+				model, _ := NewModel(m2mModelName, false)
+				t2Schema, _ := getSchema(model)
 				table2 := t2Schema.ModelName
 				for _, id := range strings.Split(m2mFields[i][m2mModelName], ",") {
 					if m2mFields[i][m2mModelName] == "" {

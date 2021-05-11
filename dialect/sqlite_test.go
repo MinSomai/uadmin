@@ -62,4 +62,20 @@ func TestSqlite(t *testing.T) {
 	assert.Equal(t, quoted_field, "`test`")
 	quoted_field = sql_dialect.LikeOperator()
 	assert.Equal(t, quoted_field, " LIKE ")
+	quoted_table_name := sql_dialect.QuoteTableName("TestModelA")
+	assert.Equal(t, quoted_table_name, "`TestModelA`")
+	quoted_table_name = sql_dialect.QuoteTableName("testmodela")
+	assert.Equal(t, quoted_table_name, "`testmodela`")
+}
+
+func TestSqliteFunctional(t *testing.T) {
+	db := GetDb().Begin()
+	db = db.Exec("INSERT INTO users (`username`) VALUES (\"test\")")
+	last_ids := []int{}
+	sql_dialect := NewCommonDialect(db, "sqlite")
+	sql_dialect.GetLastInsertId()
+	db = db.Raw(sql_dialect.ToString())
+	db = db.Pluck("lastid", &last_ids)
+	db.Commit()
+	assert.Equal(t, 1, len(last_ids))
 }

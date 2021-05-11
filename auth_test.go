@@ -274,17 +274,17 @@ func TestIsAuthenticated(t *testing.T) {
 	}
 
 	// Clean up
-	Delete(s1)
-	Delete(s2)
-	Delete(s3)
-	Delete(s4)
-	Delete(s5)
-	Delete(s6)
-	Delete(s7)
-	Delete(s8)
-	Delete(u1)
-	Delete(u2)
-	Delete(u3)
+	Delete(&s1)
+	Delete(&s2)
+	Delete(&s3)
+	Delete(&s4)
+	Delete(&s5)
+	Delete(&s6)
+	Delete(&s7)
+	Delete(&s8)
+	Delete(&u1)
+	Delete(&u2)
+	Delete(&u3)
 }
 
 // TestGetUserFromRequest is a unit testing function for GetUserFromRequest() function
@@ -328,7 +328,7 @@ func TestGetUserFromRequest(t *testing.T) {
 		}
 	}
 
-	Delete(s1)
+	Delete(&s1)
 }
 
 // TestLogin is a unit testing function for Login() function
@@ -423,10 +423,10 @@ func TestLogin(t *testing.T) {
 			t.Errorf("Invalid OTPRequired output from Login: %v, expected %v", otpRequired, e.u.OTPRequired)
 		}
 	}
-	Delete(u1)
-	Delete(u2)
-	Delete(u3)
-	Delete(u4)
+	Delete(&u1)
+	Delete(&u2)
+	Delete(&u3)
+	Delete(&u4)
 }
 
 // TestLogin2FA is a unit testing function for Login2FA() function
@@ -477,7 +477,7 @@ func TestLogin2FA(t *testing.T) {
 			t.Errorf("Invalid pending otp status Got: %v, expected %v in test %d", tempU.PendingOTP, e.PendingOTP, i)
 		}
 	}
-	Delete(u1)
+	Delete(&u1)
 }
 
 // TestLogout is a unit testing function for Logout() function
@@ -556,7 +556,7 @@ func TestGetSessionByKey(t *testing.T) {
 	if s3 != nil {
 		t.Errorf("getSessionByKey returned an invalid session")
 	}
-	Delete(s1)
+	Delete(&s1)
 }
 
 // TestGetSession is a unit testing function for getSession() function
@@ -596,5 +596,5 @@ func TestGetSession(t *testing.T) {
 		}
 	}
 
-	Delete(s1)
+	Delete(&s1)
 }

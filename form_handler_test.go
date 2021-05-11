@@ -195,10 +195,10 @@ func TestFormHandler(t *testing.T) {
 		expected      bool
 	}
 
-	fileR1, _ := newfileUploadRequest(fmt.Sprintf("/testmodelb/%d", m6.ID), map[string]string{}, "File", "./static/uadmin/favicon.ico")
-	fileR2, _ := newfileUploadRequest(fmt.Sprintf("/testmodelb/%d", m6.ID), map[string]string{}, "Image", "./media/user/image_raw.png")
-	fileR3, _ := newfileUploadRequest(fmt.Sprintf("/testmodelb/%d", m6.ID), map[string]string{}, "Image", "./media/user/image_raw.jpg")
-	fileR4, _ := newfileUploadRequest(fmt.Sprintf("/testmodelb/%d", m6.ID), map[string]string{}, "Image", "./media/user/image_raw.gif")
+	fileR1, _ := newfileUploadRequest(fmt.Sprintf("/test_model_b/%d", m6.ID), map[string]string{}, "File", "./static/uadmin/favicon.ico")
+	fileR2, _ := newfileUploadRequest(fmt.Sprintf("/test_model_b/%d", m6.ID), map[string]string{}, "Image", "./media/user/image_raw.png")
+	fileR3, _ := newfileUploadRequest(fmt.Sprintf("/test_model_b/%d", m6.ID), map[string]string{}, "Image", "./media/user/image_raw.jpg")
+	fileR4, _ := newfileUploadRequest(fmt.Sprintf("/test_model_b/%d", m6.ID), map[string]string{}, "Image", "./media/user/image_raw.gif")
 
 	// Test get form with existing record
 	examples := []struct {
@@ -284,7 +284,7 @@ func TestFormHandler(t *testing.T) {
 		},
 		//4
 		{
-			httptest.NewRequest("GET", fmt.Sprintf("/testmodela/%d", m5.ID), nil),
+			httptest.NewRequest("GET", fmt.Sprintf("/test_model_a/%d", m5.ID), nil),
 			http.StatusOK,
 			s1,
 			map[string][]string{},
@@ -391,7 +391,7 @@ func TestFormHandler(t *testing.T) {
 		},
 		//7
 		{
-			httptest.NewRequest("GET", fmt.Sprintf("/testmodela/%d", m5.ID), nil),
+			httptest.NewRequest("GET", fmt.Sprintf("/test_model_a/%d", m5.ID), nil),
 			http.StatusOK,
 			s2,
 			map[string][]string{},
@@ -406,7 +406,7 @@ func TestFormHandler(t *testing.T) {
 		},
 		// 8
 		{
-			httptest.NewRequest("GET", fmt.Sprintf("/testmodela/%d", m5.ID), nil),
+			httptest.NewRequest("GET", fmt.Sprintf("/test_model_a/%d", m5.ID), nil),
 			http.StatusOK,
 			s3,
 			map[string][]string{},
@@ -421,7 +421,7 @@ func TestFormHandler(t *testing.T) {
 		},
 		// 9
 		{
-			httptest.NewRequest("GET", "/testmodela/new", nil),
+			httptest.NewRequest("GET", "/test_model_a/new", nil),
 			http.StatusOK,
 			s2,
 			map[string][]string{},
@@ -436,7 +436,7 @@ func TestFormHandler(t *testing.T) {
 		},
 		// 10
 		{
-			httptest.NewRequest("GET", "/testmodela/new", nil),
+			httptest.NewRequest("GET", "/test_model_a/new", nil),
 			http.StatusOK,
 			s3,
 			map[string][]string{},

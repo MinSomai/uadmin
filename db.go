@@ -583,7 +583,6 @@ func customGet(m interface{}, m2m ...string) (err error) {
 			for rows.Next() {
 				rows.Scan(&fkID)
 				tempModel := reflect.New(t.Field(i).Type.Elem()).Elem()
-
 				Get(tempModel.Addr().Interface(), "id = ?", fkID)
 				tmpDst = reflect.Append(tmpDst, tempModel)
 			}
@@ -615,8 +614,9 @@ func Filter(a interface{}, query interface{}, args ...interface{}) (err error) {
 // to be preloaded. If nothing is passed, every foreign key is preloaded
 func Preload(a interface{}, preload ...string) (err error) {
 	modelName := strings.ToLower(reflect.TypeOf(a).Elem().Name())
+	model, _ := NewModel(modelName, false)
 	if len(preload) == 0 {
-		if schema, ok := getSchema(modelName); ok {
+		if schema, ok := getSchema(model); ok {
 			for _, f := range schema.Fields {
 				if f.Type == "fk" {
 					preload = append(preload, f.Name)

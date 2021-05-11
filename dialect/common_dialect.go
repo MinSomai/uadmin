@@ -66,3 +66,7 @@ func (d *CommonDialect) buildClauses(clause_interfaces []clause.Interface) {
 	}
 	d.Statement.Build(buildNames...)
 }
+
+func (d *CommonDialect) QuoteTableName(tableName string) string {
+	return d.Statement.Quote(tableName)
+}
