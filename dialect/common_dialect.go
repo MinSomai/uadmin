@@ -75,6 +75,7 @@ func (d *CommonDialect) QuoteTableName(tableName string) string {
 	return d.Statement.Quote(tableName)
 }
 
+// @todo analyze
 func (d *CommonDialect) Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB {
 	// if Database.Type == "mysql" {
 	// 	db := GetDB()
@@ -127,6 +128,7 @@ func (d *CommonDialect) Delete(db *gorm.DB, model reflect.Value, query interface
 	return db
 }
 
+// @todo analyze
 func (d *CommonDialect) ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error) {
 	// if Database.Type == "mysql" {
 	// 	db := GetDB()
@@ -184,6 +186,7 @@ func (d *CommonDialect) ReadRows(db *gorm.DB, customSchema bool, SQL string, m i
 	return rows, err
 }
 
+// @todo analyze
 func (d *CommonDialect) GetSqlDialectStrings() map[string]string {
 	// var sqlDialect = map[string]map[string]string{
 	// 	"mysql": {
@@ -215,6 +218,7 @@ func (d *CommonDialect) GetSqlDialectStrings() map[string]string {
 	}
 }
 
+// @todo analyze
 func (d *CommonDialect) GetDb(host string, user string, password string, name string, port int) (*gorm.DB, error) {
 	// } else if strings.ToLower(Database.Type) == "postgresql" {
 	// 	if Database.Host == "" || Database.Host == "localhost" {
@@ -302,6 +306,7 @@ func (d *CommonDialect) GetDb(host string, user string, password string, name st
 	return db, err
 }
 
+// @todo analyze
 func (d *CommonDialect) CreateDb() error {
 	// if Database.Type == "mysql" {
 	// 	credential := Database.User

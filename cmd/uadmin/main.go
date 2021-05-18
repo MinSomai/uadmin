@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/uadmin/uadmin/preloaded"
+	"github.com/uadmin/uadmin/utils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/uadmin/uadmin"
 
 	"github.com/otiai10/copy"
 	"golang.org/x/mod/modfile"
@@ -65,9 +65,9 @@ func main() {
 			if _, err = os.Stat(dst); os.IsNotExist(err) {
 				err = os.MkdirAll(dst, os.FileMode(0744))
 				if err != nil {
-					uadmin.Trail(uadmin.WARNING, "Unable to create \"%s\" folder: %s", v, err)
+					utils.Trail(utils.WARNING, "Unable to create \"%s\" folder: %s", v, err)
 				} else {
-					uadmin.Trail(uadmin.OK, "Created: %s", dst)
+					utils.Trail(utils.OK, "Created: %s", dst)
 				}
 			}
 		}
@@ -81,7 +81,7 @@ func main() {
 			} else {
 				goPath = filepath.Join(os.Getenv("HOME"), "go")
 			}
-			uadmin.Trail(uadmin.INFO, "Your GOPATH environment variable is not set. Using the default path: %s", goPath)
+			utils.Trail(utils.INFO, "Your GOPATH environment variable is not set. Using the default path: %s", goPath)
 		}
 
 		// The path from where to copy static files and templates will depend on
@@ -90,7 +90,7 @@ func main() {
 		// 1.16 and above: $GOPATH/pkg/mod/github.com/uadmin/uadmin@$uadmin.Version
 		// where uadmin.Verion is the installed version of uAdmin
 		uadminPathSrc := []string{goPath, "src", "github.com", "uadmin", "uadmin"}
-		uadminPathMod := []string{goPath, "pkg", "mod", "github.com", "uadmin", "uadmin@v" + uadmin.Version}
+		uadminPathMod := []string{goPath, "pkg", "mod", "github.com", "uadmin", "uadmin@v" + preloaded.Version}
 
 		if _, err := os.Stat("go.mod"); err == nil {
 			// check if there is a go.mod file and the version from that
@@ -128,7 +128,7 @@ func main() {
 			uadminPath = filepath.Join(uadminPathSrc...)
 		}
 
-		uadmin.Trail(uadmin.INFO, "Copying static/templates from: %s", uadminPath)
+		utils.Trail(utils.INFO, "Copying static/templates from: %s", uadminPath)
 
 		for _, v := range folderList {
 			msg := "Updated"
@@ -139,14 +139,14 @@ func main() {
 			src = filepath.Join(uadminPath, v)
 			err := copy.Copy(src, dst)
 			if err != nil {
-				uadmin.Trail(uadmin.WARNING, "Unable to copy \"%s\" folder: %s", v, err)
+				utils.Trail(utils.WARNING, "Unable to copy \"%s\" folder: %s", v, err)
 			} else {
-				uadmin.Trail(uadmin.OK, msg+": %s", dst)
+				utils.Trail(utils.OK, msg+": %s", dst)
 			}
 		}
 		return
 	} else if command == "version" {
-		uadmin.Trail(uadmin.INFO, uadmin.Version)
+		utils.Trail(utils.INFO, preloaded.Version)
 		return
 	}
 }

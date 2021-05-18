@@ -3,13 +3,12 @@ package main
 import (
 	"archive/zip"
 	"fmt"
+	"github.com/uadmin/uadmin/utils"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/uadmin/uadmin"
 )
 
 // Compress takes a folder path and compresses the files inside it
@@ -28,7 +27,7 @@ func Compress(path string) {
 	totalCount = countFiles(path)
 	currentCount = 0
 	addFiles(w, path, "")
-	uadmin.Trail(uadmin.OK, "Compressing [%d/%d]", totalCount, totalCount)
+	utils.Trail(utils.OK, "Compressing [%d/%d]", totalCount, totalCount)
 
 	if err != nil {
 		fmt.Println(err)
@@ -54,7 +53,7 @@ func addFiles(w *zip.Writer, basePath, baseInZip string) {
 	var fullPath string
 	for _, file := range files {
 		currentCount++
-		uadmin.Trail(uadmin.WORKING, "Compressing [%d/%d]", currentCount, totalCount)
+		utils.Trail(utils.WORKING, "Compressing [%d/%d]", currentCount, totalCount)
 		if ignoreFile(file) {
 			continue
 		}
