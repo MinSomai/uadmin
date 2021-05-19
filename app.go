@@ -1,4 +1,4 @@
-package app
+package uadmin
 
 import (
 	// userblueprintapi "github.com/uadmin/uadmin/blueprint/user/api"

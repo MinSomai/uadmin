@@ -138,38 +138,39 @@ func Login(r *http.Request, username string, password string) (*sessionmodel.Ses
 		}()
 		return nil, false
 	}
-	s := user.Login(password, "")
-	if s != nil && s.ID != 0 {
-		s.IP, _, _ = net.SplitHostPort(r.RemoteAddr)
-		s.Save()
-		if s.Active && (s.ExpiresOn == nil || s.ExpiresOn.After(time.Now())) {
-			s.User = user
-			if s.User.Active && (s.User.ExpiresOn == nil || s.User.ExpiresOn.After(time.Now())) {
-				metrics.IncrementMetric("uadmin/security/validlogin")
-				// Store login successful to the user log
-				go func() {
-					log := &logmodel.Log{}
-					if r.Form == nil {
-						r.ParseForm()
-					}
-					log.SignIn(user.Username, log.Action.LoginSuccessful(), r)
-					log.Save()
-				}()
-				return s, s.User.OTPRequired
-			}
+	// @todo, redo
+	// s := user.Login(password, "")
+	//if s != nil && s.ID != 0 {
+	//	s.IP, _, _ = net.SplitHostPort(r.RemoteAddr)
+	//	s.Save()
+	//	if s.Active && (s.ExpiresOn == nil || s.ExpiresOn.After(time.Now())) {
+	//		s.User = user
+	//		if s.User.Active && (s.User.ExpiresOn == nil || s.User.ExpiresOn.After(time.Now())) {
+	//			metrics.IncrementMetric("uadmin/security/validlogin")
+	//			// Store login successful to the user log
+	//			go func() {
+	//				log := &logmodel.Log{}
+	//				if r.Form == nil {
+	//					r.ParseForm()
+	//				}
+	//				log.SignIn(user.Username, log.Action.LoginSuccessful(), r)
+	//				log.Save()
+	//			}()
+	//			return s, s.User.OTPRequired
+	//		}
+	//	}
+	//} else {
+	go func() {
+		log := &logmodel.Log{}
+		if r.Form == nil {
+			r.ParseForm()
 		}
-	} else {
-		go func() {
-			log := &logmodel.Log{}
-			if r.Form == nil {
-				r.ParseForm()
-			}
-			ctx := context.WithValue(r.Context(), preloaded.CKey("login-status"), "invalid password or inactive user")
-			r = r.WithContext(ctx)
-			log.SignIn(username, log.Action.LoginDenied(), r)
-			log.Save()
-		}()
-	}
+		ctx := context.WithValue(r.Context(), preloaded.CKey("login-status"), "invalid password or inactive user")
+		r = r.WithContext(ctx)
+		log.SignIn(username, log.Action.LoginDenied(), r)
+		log.Save()
+	}()
+	// }
 
 	// Increment password attempts and check if it reached
 	// the maximum invalid password attempts

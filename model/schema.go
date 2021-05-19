@@ -3,11 +3,8 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
+	// usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/translation"
-	"reflect"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -31,8 +28,8 @@ type ModelSchema struct {
 	Fields        []F
 	IncludeFormJS []string
 	IncludeListJS []string
-	FormModifier  func(*ModelSchema, interface{}, *usermodel.User)            `json:"-"`
-	ListModifier  func(*ModelSchema, *usermodel.User) (string, []interface{}) `json:"-"`
+	// FormModifier  func(*ModelSchema, interface{}, *usermodel.User)            `json:"-"`
+	// ListModifier  func(*ModelSchema, *usermodel.User) (string, []interface{}) `json:"-"`
 	FormTheme     string
 	ListTheme     string
 }
@@ -95,18 +92,22 @@ func (s ModelSchema) MarshalJSON() ([]byte, error) {
 		IncludeFormJS: s.IncludeFormJS,
 		IncludeListJS: s.IncludeListJS,
 		FormModifier: func() *string {
-			if s.FormModifier == nil {
-				return nil
-			}
-			v := runtime.FuncForPC(reflect.ValueOf(s.FormModifier).Pointer()).Name()
-			return &v
+			return nil
+			// @todo, return probably
+			//if s.FormModifier == nil {
+			//	return nil
+			//}
+			//v := runtime.FuncForPC(reflect.ValueOf(s.FormModifier).Pointer()).Name()
+			//return &v
 		}(),
 		ListModifier: func() *string {
-			if s.ListModifier == nil {
-				return nil
-			}
-			v := runtime.FuncForPC(reflect.ValueOf(s.ListModifier).Pointer()).Name()
-			return &v
+			return nil
+			// @todo, return probably
+			//if s.ListModifier == nil {
+			//	return nil
+			//}
+			//v := runtime.FuncForPC(reflect.ValueOf(s.ListModifier).Pointer()).Name()
+			//return &v
 		}(),
 		FormTheme: s.FormTheme,
 		ListTheme: s.ListTheme,
@@ -149,12 +150,13 @@ type F struct {
 	ListDisplay       bool
 	FormDisplay       bool
 	CategoricalFilter bool
-	Translations      []translation.Translation
+	// @todo, redo
+	// Translations      []translation.Translation
 	Choices           []Choice
 	IsMethod          bool
 	ErrMsg            string
 	ProgressBar       map[float64]string                       `json:"-"`
-	LimitChoicesTo    func(interface{}, *usermodel.User) []Choice `json:"-"`
+	// LimitChoicesTo    func(interface{}, *usermodel.User) []Choice `json:"-"`
 	UploadTo          string
 	Encrypt           bool
 	Approval          bool
@@ -194,7 +196,8 @@ func (f F) MarshalJSON() ([]byte, error) {
 		ListDisplay       bool
 		FormDisplay       bool
 		CategoricalFilter bool
-		Translations      []translation.Translation
+		// @todo, redo
+		// Translations      []translation.Translation
 		Choices           []Choice
 		IsMethod          bool
 		ErrMsg            string
@@ -235,7 +238,8 @@ func (f F) MarshalJSON() ([]byte, error) {
 		ListDisplay:       f.ListDisplay,
 		FormDisplay:       f.FormDisplay,
 		CategoricalFilter: f.CategoricalFilter,
-		Translations:      f.Translations,
+		// @todo, redo
+		// Translations:      f.Translations,
 		Choices:           f.Choices,
 		IsMethod:          f.IsMethod,
 		ErrMsg:            f.ErrMsg,
@@ -247,11 +251,13 @@ func (f F) MarshalJSON() ([]byte, error) {
 			return tempMap
 		}(),
 		LimitChoicesTo: func() *string {
-			if f.LimitChoicesTo == nil {
-				return nil
-			}
-			v := runtime.FuncForPC(reflect.ValueOf(f.LimitChoicesTo).Pointer()).Name()
-			return &v
+			return nil
+			// @todo, redo
+			//if f.LimitChoicesTo == nil {
+			//	return nil
+			//}
+			//v := runtime.FuncForPC(reflect.ValueOf(f.LimitChoicesTo).Pointer()).Name()
+			//return &v
 		}(),
 		UploadTo:       f.UploadTo,
 		Encrypt:        f.Encrypt,

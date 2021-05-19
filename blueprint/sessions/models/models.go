@@ -6,7 +6,6 @@ import (
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/dialect"
-	"github.com/uadmin/uadmin/blueprint/auth/services"
 	"time"
 )
 
@@ -38,9 +37,11 @@ func (s *Session) Save() {
 	if preloaded.CacheSessions {
 		if s.Active {
 			database.Preload(s)
-			services.CachedSessions[s.Key] = *s
+			// @todo, redo
+			// services.CachedSessions[s.Key] = *s
 		} else {
-			delete(services.CachedSessions, s.Key)
+			// @todo, redo
+			// delete(services.CachedSessions, s.Key)
 		}
 	}
 }
@@ -50,10 +51,11 @@ func (s *Session) GenerateKey() {
 	session := Session{}
 	for {
 		// TODO: Increase the session length to 124 and add 4 bytes for User.ID
-		s.Key = services.GenerateBase64(24)
-		dialect := dialect.GetDialectForDb()
-		dialect.Equals("key", s.Key)
-		database.Get(&session, dialect.ToString(), s.Key)
+		// @todo, redo
+		// s.Key = services.GenerateBase64(24)
+		dialect1 := dialect.GetDialectForDb()
+		dialect1.Equals("key", s.Key)
+		database.Get(&session, dialect1.ToString(), s.Key)
 		if session.ID == 0 {
 			break
 		}
@@ -74,10 +76,12 @@ func (Session) HideInDashboard() bool {
 func LoadSessions() {
 	sList := []Session{}
 	database.Filter(&sList, "active = ? AND (expires_on IS NULL OR expires_on > ?)", true, time.Now())
-	services.CachedSessions = map[string]Session{}
+	// @todo, redo
+	// services.CachedSessions = map[string]Session{}
 	for _, s := range sList {
 		database.Preload(&s)
 		database.Preload(&s.User)
-		services.CachedSessions[s.Key] = s
+		// @todo, redo
+		// services.CachedSessions[s.Key] = s
 	}
 }

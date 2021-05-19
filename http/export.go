@@ -8,7 +8,7 @@ import (
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/dialect"
 	model2 "github.com/uadmin/uadmin/model"
-	"github.com/uadmin/uadmin/preloaded"
+	preloaded2 "github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/security"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
@@ -104,7 +104,7 @@ func GetFilter(r *http.Request, session *sessionmodel.Session, schema *model2.Mo
 			for i := range schema.Fields {
 				columnName = dialect.GetDB().Config.NamingStrategy.ColumnName("", schema.Fields[i].Name)
 				if columnName == queryParts[0] {
-					if schema.Fields[i].Type == preloaded.CDATE {
+					if schema.Fields[i].Type == preloaded2.CDATE {
 						dateType = true
 						break
 					}
@@ -235,7 +235,7 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel
 
 	// Add header
 	for i := 0; i < m.NumField(); i++ {
-		if !schema.FieldByName(t.Field(i).Name).ListDisplay || m.Field(i).Type().Name() == "Model" || (m.Field(i).Type().Kind() == reflect.Uint && strings.HasSuffix(t.Field(i).Name, "ID")) || schema.FieldByName(t.Field(i).Name).Type == cLINK {
+		if !schema.FieldByName(t.Field(i).Name).ListDisplay || m.Field(i).Type().Name() == "Model" || (m.Field(i).Type().Kind() == reflect.Uint && strings.HasSuffix(t.Field(i).Name, "ID")) || schema.FieldByName(t.Field(i).Name).Type == preloaded2.CLINK {
 			continue
 		}
 		colIndex++
@@ -250,7 +250,7 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel
 		colIndex = 0
 		preloaded = false
 		for c := 0; c < m.NumField(); c++ {
-			if !schema.FieldByName(t.Field(c).Name).ListDisplay || m.Field(c).Type().Name() == "Model" || (m.Field(c).Type().Kind() == reflect.Uint && strings.HasSuffix(t.Field(c).Name, "ID")) || schema.FieldByName(t.Field(c).Name).Type == cLINK {
+			if !schema.FieldByName(t.Field(c).Name).ListDisplay || m.Field(c).Type().Name() == "Model" || (m.Field(c).Type().Kind() == reflect.Uint && strings.HasSuffix(t.Field(c).Name, "ID")) || schema.FieldByName(t.Field(c).Name).Type == preloaded2.CLINK {
 				continue
 			}
 			colIndex++
@@ -258,7 +258,7 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel
 			cellName := fmt.Sprintf(colName+"%d", i+2)
 
 			// Determine the data type
-			if schema.FieldByName(t.Field(c).Name).Type == preloaded.CDATE {
+			if schema.FieldByName(t.Field(c).Name).Type == preloaded2.CDATE {
 				// Process Date/Time
 				var cDate time.Time
 				if t.Field(c).Type.Kind() == reflect.Ptr {
@@ -281,7 +281,7 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel
 			} else if t.Field(c).Type.Kind() == reflect.Struct || (t.Field(c).Type.Kind() == reflect.Ptr && t.Field(c).Type.Elem().Kind() == reflect.Struct) {
 				// Process forign keys
 				if !preloaded {
-					Preload(a.Index(i).Addr().Interface())
+					database.Preload(a.Index(i).Addr().Interface())
 				}
 				file.SetCellValue(sheetName, cellName, utils.GetString(a.Index(i).Field(c).Interface()))
 				file.SetCellStyle(sheetName, cellName, cellName, bodyStyle)
@@ -289,10 +289,10 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel
 			} else if t.Field(c).Type.Kind() == reflect.Int && t.Field(c).Type != reflect.TypeOf(0) {
 				// Process static list type
 				value := a.Index(i).Field(c).Interface()
-				file.SetCellValue(sheetName, cellName, GetString(value))
+				file.SetCellValue(sheetName, cellName, utils.GetString(value))
 				file.SetCellStyle(sheetName, cellName, cellName, bodyStyle)
 				excelAdjustWidthHight(file, sheetName, colName, cellName, i+2, utils.GetString(value))
-			} else if schema.FieldByName(t.Field(c).Name).Type == preloaded.CIMAGE {
+			} else if schema.FieldByName(t.Field(c).Name).Type == preloaded2.CIMAGE {
 				// Process images
 				if a.Index(i).Field(c).String() == "" {
 					continue
@@ -301,7 +301,7 @@ func exportHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel
 				file.SetColWidth(sheetName, colName, colName, 25)
 				file.AddPicture(sheetName, cellName, a.Index(i).Field(c).String()[1:], `{"autofit": true, "print_obj": true, "lock_aspect_ratio": true, "locked": false, "positioning": "oneCell", "x_scale":5.0, "y_scale":5.0}`)
 				file.SetCellStyle(sheetName, cellName, cellName, bodyStyle)
-			} else if schema.FieldByName(t.Field(c).Name).Type == preloaded.CCODE {
+			} else if schema.FieldByName(t.Field(c).Name).Type == preloaded2.CCODE {
 				file.SetCellValue(sheetName, cellName, a.Index(i).Field(c).Interface())
 				file.SetCellStyle(sheetName, cellName, cellName, codeStyle)
 				excelAdjustWidthHight(file, sheetName, colName, cellName, i+2, fmt.Sprint(a.Index(i).Field(c).Interface()))

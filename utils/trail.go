@@ -78,9 +78,13 @@ func Trail(level int, msg interface{}, i ...interface{}) {
 		}
 
 		// Log to syslog
-		if preloaded.LogTrail && level >= preloaded.TrailLoggingLevel && level != WORKING {
+		if preloaded.LogTrail && level >= TrailLoggingLevel && level != WORKING {
 			// Send log to syslog
 			Syslogf(level, message, i...)
 		}
 	}
 }
+
+// TrailLoggingLevel is the minimum level to be logged into syslog
+var TrailLoggingLevel = INFO
+

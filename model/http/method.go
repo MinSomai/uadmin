@@ -5,7 +5,6 @@ import (
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"github.com/uadmin/uadmin/database"
 	model2 "github.com/uadmin/uadmin/model"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"reflect"
 	"strings"
@@ -20,20 +19,22 @@ func dAPIMethodHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.S
 
 	if len(urlParts) < 4 {
 		w.WriteHeader(400)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Bad request, URL format should be api/d/model/method/{METHOD_NAME}/{ID}",
-		})
+		// @todo, redo
+		// utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "Bad request, URL format should be api/d/model/method/{METHOD_NAME}/{ID}",
+		//})
 		return
 	}
 
-	if utils.CheckCSRF(r) {
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Failed CSRF protection.",
-		})
-		return
-	}
+	// @todo, redo
+	//if utils.CheckCSRF(r) {
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "Failed CSRF protection.",
+		//})
+	//	return
+	//}
 
 	f := model.MethodByName(urlParts[2])
 	if !f.IsValid() {
@@ -42,20 +43,22 @@ func dAPIMethodHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.S
 
 	if !f.IsValid() {
 		w.WriteHeader(404)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Method (" + urlParts[2] + ") doesn't exist.",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "Method (" + urlParts[2] + ") doesn't exist.",
+		//})
 		return
 	}
 
 	database.Get(model.Interface(), "id = ?", urlParts[3])
 	if database.GetID(model) == 0 {
 		w.WriteHeader(404)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "ID doesn't exist (" + urlParts[3] + ").",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "ID doesn't exist (" + urlParts[3] + ").",
+		//})
 		return
 	}
 

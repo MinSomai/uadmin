@@ -4,17 +4,15 @@ import (
 	"fmt"
 	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
-	imageapi "github.com/uadmin/uadmin/blueprint/image/api"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/database"
-	uadminhttp "github.com/uadmin/uadmin/http"
 	"github.com/uadmin/uadmin/metrics"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/translation"
+	// "github.com/uadmin/uadmin/translation"
 	"github.com/uadmin/uadmin/utils"
 	"net"
 	"net/http"
@@ -61,7 +59,8 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 
 	c := Context{}
 	c.RootURL = preloaded.RootURL
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.SiteName = preloaded.SiteName
 	user := session.User
 	c.User = user.Username
@@ -86,7 +85,8 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 
 	c.Schema, _ = model.GetSchema(user)
 	r.Form.Set("ModelID", fmt.Sprint(user.ID))
-	model.GetFormData(user, r, session, &c.Schema, &user)
+	// @todo probably, return
+	// model.GetFormData(user, r, session, &c.Schema, &user)
 
 	if r.Method == preloaded.CPOST {
 		c.IsUpdated = true
@@ -95,38 +95,41 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 			user.FirstName = r.FormValue("FirstName")
 			user.LastName = r.FormValue("LastName")
 			user.Email = r.FormValue("Email")
-			f := c.Schema.FieldByName("Photo")
-			if _, _, err := r.FormFile("Photo"); err == nil {
-				user.Photo = imageapi.ProcessUpload(r, f, "user", session, &c.Schema)
-			}
+			// @todo, redo
+			// f := c.Schema.FieldByName("Photo")
+			//if _, _, err := r.FormFile("Photo"); err == nil {
+			//	user.Photo = imageapi.ProcessUpload(r, f, "user", session, &c.Schema)
+			//}
 			(&user).Save()
 			c.ProfilePhoto = user.Photo
 		}
 		if r.FormValue("save") == "password" {
-			oldPassword := r.FormValue("oldPassword")
-			newPassword := r.FormValue("newPassword")
-			confirmPassword := r.FormValue("confirmPassword")
-			_session := user.Login(oldPassword, "")
-
-			if _session == nil || !user.Active {
-				c.Status = true
-				c.Notif = "Incorrent old password."
-			} else if newPassword != confirmPassword {
-				c.Status = true
-				c.Notif = "New password and confirm password do not match."
-			} else {
-				user.Password = authservices.HashPass(newPassword)
-				user.Save()
-
-				// To logout
-				authapi.Logout(r)
-
-				return
-			}
+			// @todo, redo
+			//oldPassword := r.FormValue("oldPassword")
+			//newPassword := r.FormValue("newPassword")
+			//confirmPassword := r.FormValue("confirmPassword")
+			//_session := user.Login(oldPassword, "")
+			//
+			//if _session == nil || !user.Active {
+			//	c.Status = true
+			//	c.Notif = "Incorrent old password."
+			//} else if newPassword != confirmPassword {
+			//	c.Status = true
+			//	c.Notif = "New password and confirm password do not match."
+			//} else {
+			//	user.Password = authservices.HashPass(newPassword)
+			//	user.Save()
+			//
+			//	// To logout
+			//	authapi.Logout(r)
+			//
+			//	return
+			//}
 		}
 	}
 
-	uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/profile.html", c)
+	// @todo, redo
+	// uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/profile.html", c)
 }
 
 func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
@@ -144,7 +147,8 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 	c := Context{}
 	c.SiteName = preloaded.SiteName
 	c.RootURL = preloaded.RootURL
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.Logo = preloaded.Logo
 	c.FavIcon = preloaded.FavIcon
 
@@ -160,7 +164,8 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 			log.PasswordReset(userID, log.Action.PasswordResetDenied(), r)
 			log.Save()
 		}()
-		uadminhttp.PageErrorHandler(w, r, nil)
+		// @todo, redo
+		// uadminhttp.PageErrorHandler(w, r, nil)
 		return
 	}
 	otpCode := r.FormValue("key")
@@ -171,7 +176,8 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 			log.PasswordReset(user.Username, log.Action.PasswordResetDenied(), r)
 			log.Save()
 		}()
-		uadminhttp.PageErrorHandler(w, r, nil)
+		// @todo, redo
+		// uadminhttp.PageErrorHandler(w, r, nil)
 		return
 	}
 
@@ -193,8 +199,8 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/resetpassword.html", c)
+	// @todo, redo
+	// uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/resetpassword.html", c)
 }
 
 // logoutHandler !
@@ -228,7 +234,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	c := Context{}
 	c.SiteName = preloaded.SiteName
 	c.RootURL = preloaded.RootURL
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.Logo = preloaded.Logo
 	c.FavIcon = preloaded.FavIcon
 
@@ -302,7 +309,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	c.Languages = langmodel.ActiveLangs
-	uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/login.html", c)
+	// @todo, redo
+	// uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/login.html", c)
 }
 
 // forgotPasswordHandler !

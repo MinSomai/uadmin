@@ -60,7 +60,8 @@ func (l *Language) Save() {
 	for modelName := range model.Schema {
 		for i := range model.Schema[modelName].Fields {
 			if model.Schema[modelName].Fields[i].Type == preloaded.CMULTILINGUAL {
-				model.Schema[modelName].Fields[i].Translations = tanslationList
+				// @todo, redo
+				// model.Schema[modelName].Fields[i].Translations = tanslationList
 			}
 		}
 	}

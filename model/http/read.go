@@ -10,7 +10,6 @@ import (
 	"github.com/uadmin/uadmin/dialect"
 	model2 "github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"reflect"
 	"strings"
@@ -25,10 +24,11 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 	model, ok := model2.NewModel(modelName, false)
 	if !ok {
 		w.WriteHeader(401)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "No model found",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "No model found",
+		//})
 		return
 	}
 	params := getURLArgs(r)
@@ -42,10 +42,11 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		allow = !allow
 		if !allow {
 			w.WriteHeader(401)
-			utils.ReturnJSON(w, r, map[string]interface{}{
-				"status":  "error",
-				"err_msg": "Permission denied",
-			})
+			// @todo, redo
+			//utils.ReturnJSON(w, r, map[string]interface{}{
+			//	"status":  "error",
+			//	"err_msg": "Permission denied",
+			//})
 			return
 		}
 	}
@@ -57,10 +58,11 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 	}
 	if !allow {
 		w.WriteHeader(401)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Permission denied",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "Permission denied",
+		//})
 		return
 	}
 
@@ -124,8 +126,9 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		}
 
 		if preloaded.DebugDB {
-			utils.Trail(utils.DEBUG, SQL)
-			utils.Trail(utils.DEBUG, "%#v", args)
+			// @todo, redo
+			//utils.Trail(utils.DEBUG, SQL)
+			//utils.Trail(utils.DEBUG, "%#v", args)
 		}
 		var rows *sql.Rows
 
@@ -141,11 +144,12 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		if customSchema {
 			if err != nil {
 				w.WriteHeader(500)
-				utils.ReturnJSON(w, r, map[string]interface{}{
-					"status":  "error",
-					"err_msg": "Unable to execute SQL. " + err.Error(),
-				})
-				utils.Trail(utils.ERROR, "SQL: %v\nARGS: %v", SQL, args)
+				// @todo, redo
+				//utils.ReturnJSON(w, r, map[string]interface{}{
+				//	"status":  "error",
+				//	"err_msg": "Unable to execute SQL. " + err.Error(),
+				//})
+				//utils.Trail(utils.ERROR, "SQL: %v\nARGS: %v", SQL, args)
 				return
 			}
 			m = parseCustomDBSchema(rows)
@@ -205,10 +209,11 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 	} else {
 		// Error: Unknown format
 		w.WriteHeader(404)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "invalid format (" + r.URL.Path + ")",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "invalid format (" + r.URL.Path + ")",
+		//})
 		return
 	}
 }

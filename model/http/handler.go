@@ -4,7 +4,6 @@ import (
 	"context"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"strings"
 )
@@ -157,10 +156,11 @@ func DAPIHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Session
 	}
 	if !commandExists {
 		w.WriteHeader(404)
-		utils.ReturnJSON(w, r, map[string]string{
-			"status":  "error",
-			"err_msg": "Invalid command (" + urlParts[1] + ")",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]string{
+		//	"status":  "error",
+		//	"err_msg": "Invalid command (" + urlParts[1] + ")",
+		//})
 		return
 	}
 
@@ -196,14 +196,14 @@ func DAPIHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Session
 		// check if there is a prequery
 		if preQuery, ok := model.(APIPreQueryDeleter); ok && !preQuery.APIPreQueryDelete(w, r) {
 		} else {
-			dAPIDeleteHandler(w, r, s)
+			// dAPIDeleteHandler(w, r, s)
 		}
 	}
 	if urlParts[1] == "schema" {
 		// check if there is a prequery
 		if preQuery, ok := model.(APIPreQuerySchemer); ok && !preQuery.APIPreQuerySchema(w, r) {
 		} else {
-			dAPISchemaHandler(w, r, s)
+			// dAPISchemaHandler(w, r, s)
 		}
 	}
 	if urlParts[1] == "method" {

@@ -2,13 +2,11 @@ package model
 
 import (
 	"fmt"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	"github.com/uadmin/uadmin/dialect"
-	"github.com/uadmin/uadmin/utils"
-	"github.com/uadmin/uadmin/translation"
 	"github.com/uadmin/uadmin/preloaded"
+	"github.com/uadmin/uadmin/utils"
 	"reflect"
-	"runtime/debug"
+	// "runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -34,11 +32,13 @@ func RegisterInlines(model interface{}, fk map[string]string) {
 		fkMap[strings.ToLower(t.Name())] = dialect.GetDB().Config.NamingStrategy.ColumnName("", v)
 		// Check if the field name is in the struct
 		if t.Kind() != reflect.Struct {
-			utils.Trail(utils.ERROR, "Unable to register inline for (%s) inline %s.%s. Please pass a struct as key.", reflect.TypeOf(model).Name(), t.Name(), v)
+			// @todo, redo
+			// utils.Trail(utils.ERROR, "Unable to register inline for (%s) inline %s.%s. Please pass a struct as key.", reflect.TypeOf(model).Name(), t.Name(), v)
 			continue
 		}
 		if _, ok := t.FieldByName(v); !ok {
-			utils.Trail(utils.ERROR, "Unable to register inline for (%s) inline %s.%s. Field name is not in struct.", reflect.TypeOf(model).Name(), t.Name(), v)
+			// @todo, redo
+			// utils.Trail(utils.ERROR, "Unable to register inline for (%s) inline %s.%s. Field name is not in struct.", reflect.TypeOf(model).Name(), t.Name(), v)
 			continue
 		}
 		inlineList = append(inlineList, kmodel.Interface())
@@ -67,14 +67,16 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 	}
 
 	if t.Kind() != reflect.Struct {
-		utils.Trail(utils.WARNING, string(debug.Stack()))
+		// @todo, redo
+		// utils.Trail(utils.WARNING, string(debug.Stack()))
 		return
 	}
 
 	// Get basic information about the model
 	s.Name = t.Name()
 	s.ModelName = strings.ToLower(t.Name())
-	s.DisplayName = utils.GetDisplayName(t.Name())
+	// @todo, redo
+	// s.DisplayName = utils.GetDisplayName(t.Name())
 	s.TableName = dialect.GetDB().Config.NamingStrategy.TableName(t.Name())
 
 	// Analize the fields of the model and add them to the fields list
@@ -114,12 +116,14 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 
 		// Initialize the field
 		f := F{
-			Translations: []translation.Translation{},
+			// @todo, redo
+			// Translations: []translation.Translation{},
 		}
 
 		// Get field's meta data
 		f.Name = t.Field(index).Name
-		f.DisplayName = utils.GetDisplayName(t.Field(index).Name)
+		// @todo, redo
+		// f.DisplayName = utils.GetDisplayName(t.Field(index).Name)
 		f.ColumnName = dialect.GetDB().Config.NamingStrategy.ColumnName("", t.Field(index).Name)
 
 		// Get uadmin tag from the field
@@ -227,10 +231,12 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 			if val, ok := t.FieldByName(t.Field(index).Name + "ID"); ok {
 				// Check if the FK field is a number
 				if !(val.Type == NType || val.Type == NType1 || val.Type == NType2 || val.Type == NType3 || val.Type == NType4 || val.Type == NType5) {
-					utils.Trail(utils.ERROR, "Invalid FK %s.%s your %sID field is not an integer based number", t.Name(), t.Field(index).Name, t.Field(index).Name)
+					// @todo, redo
+					// utils.Trail(utils.ERROR, "Invalid FK %s.%s your %sID field is not an integer based number", t.Name(), t.Field(index).Name, t.Field(index).Name)
 				}
 			} else {
-				utils.Trail(utils.ERROR, "Invalid FK %s.%s no ID field found. Please add %sID field with a number type to your struct", t.Name(), t.Field(index).Name, t.Field(index).Name)
+				// @todo, redo
+				// utils.Trail(utils.ERROR, "Invalid FK %s.%s no ID field found. Please add %sID field with a number type to your struct", t.Name(), t.Field(index).Name, t.Field(index).Name)
 			}
 		}
 		if f.Type == preloaded.CNUMBER && strings.HasSuffix(t.Field(index).Name, "ID") && t.Field(index).Name != "ID" {
@@ -246,7 +252,8 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 		// First string extended type
 		if _, ok := tagMap[preloaded.CEMAIL]; ok {
 			if f.Type != preloaded.CSTRING {
-				utils.Trail(utils.WARNING, "Invalid email tag in %s.%s, field data type shold be string not (%s)", s.Name, f.Name, f.Type)
+				// @todo, redo
+				// utils.Trail(utils.WARNING, "Invalid email tag in %s.%s, field data type shold be string not (%s)", s.Name, f.Name, f.Type)
 			} else {
 				f.Type = preloaded.CEMAIL
 			}
@@ -254,24 +261,27 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 
 		if _, ok := tagMap[preloaded.CMULTILINGUAL]; ok {
 			if f.Type != preloaded.CSTRING {
-				utils.Trail(utils.WARNING, "Invalid multilingual tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
+				// @todo, redo
+				// utils.Trail(utils.WARNING, "Invalid multilingual tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
 			} else {
 				f.Type = preloaded.CMULTILINGUAL
 
-				for _, lang := range langmodel.ActiveLangs {
-					f.Translations = append(f.Translations, translation.Translation{
-						Name:    fmt.Sprintf("%s (%s)", lang.Name, lang.EnglishName),
-						Code:    lang.Code,
-						Flag:    lang.Flag,
-						Default: lang.Default,
-						Active:  lang.Active,
-					})
-				}
+				// @todo, redo
+				//for _, lang := range langmodel.ActiveLangs {
+				//	f.Translations = append(f.Translations, translation.Translation{
+				//		Name:    fmt.Sprintf("%s (%s)", lang.Name, lang.EnglishName),
+				//		Code:    lang.Code,
+				//		Flag:    lang.Flag,
+				//		Default: lang.Default,
+				//		Active:  lang.Active,
+				//	})
+				//}
 			}
 		}
 		if _, ok := tagMap[preloaded.CIMAGE]; ok {
 			if f.Type != preloaded.CSTRING {
-				utils.Trail(utils.WARNING, "Invalid image tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
+				// @todo, redo
+				// utils.Trail(utils.WARNING, "Invalid image tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
 			} else {
 				f.Type = preloaded.CIMAGE
 				f.UploadTo = tagMap["upload_to"]
@@ -287,7 +297,8 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 		}
 		if _, ok := tagMap[preloaded.CFILE]; ok {
 			if f.Type != preloaded.CSTRING {
-				utils.Trail(utils.WARNING, "Invalid file tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
+				// @todo, redo
+				// utils.Trail(utils.WARNING, "Invalid file tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
 			} else {
 				f.Type = preloaded.CFILE
 				f.UploadTo = tagMap["upload_to"]
@@ -303,14 +314,16 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 		}
 		if _, ok := tagMap[preloaded.CPASSWORD]; ok {
 			if f.Type != preloaded.CSTRING {
-				utils.Trail(utils.WARNING, "Invalid password tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
+				// @todo, redo
+				// utils.Trail(utils.WARNING, "Invalid password tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
 			} else {
 				f.Type = preloaded.CPASSWORD
 			}
 		}
 		if _, ok := tagMap[preloaded.CHTML]; ok {
 			if f.Type != preloaded.CSTRING {
-				utils.Trail(utils.WARNING, "Invalid html tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
+				// @todo, redo
+				// utils.Trail(utils.WARNING, "Invalid html tag in %s.%s, field data type shold be string not (%s).", s.Name, f.Name, f.Type)
 			} else {
 				f.Type = preloaded.CHTML
 			}
@@ -432,7 +445,8 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 				continue
 			}
 			f := F{
-				Translations: []translation.Translation{},
+				// @todo, redo
+				// Translations: []translation.Translation{},
 			}
 			f.Name = t.Method(index).Name
 			f.DisplayName = strings.TrimSuffix(t.Method(index).Name, "__Form")

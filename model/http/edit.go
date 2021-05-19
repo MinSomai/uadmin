@@ -10,7 +10,6 @@ import (
 	"github.com/uadmin/uadmin/dialect"
 	model2 "github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"reflect"
 	"strings"
@@ -21,24 +20,26 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 	modelName := urlParts[0]
 	model, ok := model2.NewModel(modelName, false)
 	if !ok {
-		utils.Trail(utils.ERROR, "Couldnt return model for model name. %s", modelName)
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Unknown model.",
-		})
+		// @todo, redo
+		// utils.Trail(utils.ERROR, "Couldnt return model for model name. %s", modelName)
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "Unknown model.",
+		//})
 		return
 	}
 	schema, _ := model2.GetSchema(model)
 	tableName := schema.TableName
 
+	// @todo, redo
 	// Check CSRF
-	if utils.CheckCSRF(r) {
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Failed CSRF protection.",
-		})
-		return
-	}
+	//if utils.CheckCSRF(r) {
+	//	utils.ReturnJSON(w, r, map[string]interface{}{
+	//		"status":  "error",
+	//		"err_msg": "Failed CSRF protection.",
+	//	})
+	//	return
+	//}
 
 	// Check permission
 	allow := false
@@ -47,10 +48,11 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		// This is a "Disable" method
 		allow = !allow
 		if !allow {
-			utils.ReturnJSON(w, r, map[string]interface{}{
-				"status":  "error",
-				"err_msg": "Permission denied",
-			})
+			// @todo, redo
+			//utils.ReturnJSON(w, r, map[string]interface{}{
+			//	"status":  "error",
+			//	"err_msg": "Permission denied",
+			//})
 			return
 		}
 	}
@@ -61,10 +63,11 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		allow = s.User.GetAccess(modelName).Edit
 	}
 	if !allow {
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "Permission denied",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "Permission denied",
+		//})
 		return
 	}
 
@@ -94,7 +97,8 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 	// Process Upload files
 	fileList, err := dAPIUpload(w, r, &schema)
 	if err != nil {
-		utils.Trail(utils.ERROR, "dAPI Add Upload error processing. %s", err)
+		// @todo, redo
+		// utils.Trail(utils.ERROR, "dAPI Add Upload error processing. %s", err)
 	}
 	for k, v := range fileList {
 		params["_"+k] = v
@@ -127,10 +131,11 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		}
 		db = db.Model(model.Interface()).Where(q, args...).Updates(writeMap)
 		if db.Error != nil {
-			utils.ReturnJSON(w, r, map[string]interface{}{
-				"status":  "error",
-				"err_msg": "Unable to update database. " + db.Error.Error(),
-			})
+			// @todo redo
+			//utils.ReturnJSON(w, r, map[string]interface{}{
+			//	"status":  "error",
+			//	"err_msg": "Unable to update database. " + db.Error.Error(),
+			//})
 			return
 		}
 
@@ -183,10 +188,11 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		}
 		db = db.Model(model.Interface()).Where("id = ?", urlParts[2]).Updates(writeMap)
 		if db.Error != nil {
-			utils.ReturnJSON(w, r, map[string]interface{}{
-				"status":  "error",
-				"err_msg": "Unable to update database. " + db.Error.Error(),
-			})
+			// @todo, redo
+			//utils.ReturnJSON(w, r, map[string]interface{}{
+			//	"status":  "error",
+			//	"err_msg": "Unable to update database. " + db.Error.Error(),
+			//})
 			return
 		}
 
@@ -230,10 +236,11 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		}, params, "edit", model.Interface())
 	} else {
 		// Error: Unknown format
-		utils.ReturnJSON(w, r, map[string]interface{}{
-			"status":  "error",
-			"err_msg": "invalid format (" + r.URL.Path + ")",
-		})
+		// @todo, redo
+		//utils.ReturnJSON(w, r, map[string]interface{}{
+		//	"status":  "error",
+		//	"err_msg": "invalid format (" + r.URL.Path + ")",
+		//})
 		return
 	}
 }

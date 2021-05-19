@@ -4,7 +4,7 @@ import (
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/translation"
+	// "github.com/uadmin/uadmin/translation"
 	"net/http"
 	"strconv"
 )
@@ -28,7 +28,8 @@ func PageErrorHandler(w http.ResponseWriter, r *http.Request, session *sessionmo
 
 	c.RootURL = preloaded.RootURL
 	c.SiteName = preloaded.SiteName
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.ErrMsg = "Page Not Found"
 	c.ErrCode = 404
 	c.Logo = preloaded.Logo

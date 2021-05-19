@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	models2 "github.com/uadmin/uadmin/blueprint/abtest/models"
+	// models2 "github.com/uadmin/uadmin/blueprint/abtest/models"
 	"github.com/uadmin/uadmin/colors"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/dialect"
@@ -272,37 +272,38 @@ func Get(a interface{}, query interface{}, args ...interface{}) (err error) {
 	return nil
 }
 
+// @todo redo
 // GetABTest is like Get function but implements AB testing for the results
 func GetABTest(r *http.Request, a interface{}, query interface{}, args ...interface{}) (err error) {
-	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		Get(a, query, args...)
-	})
-
-	// Check if there are any active A/B tests for any field in this model
-	abt := models2.GetABT(r)
-	modelName := model.GetModelName(a)
-	models2.AbTestsMutex.Lock()
-	for k, v := range models2.ModelABTests {
-		if strings.HasPrefix(k, modelName+"__") && strings.HasSuffix(k, "__"+fmt.Sprint(GetID(reflect.ValueOf(a)))) {
-			if len(v) != 0 {
-				index := abt % len(v)
-				fName := model.Schema[modelName].Fields[v[index].fname].Name
-
-				// TODO: Support more data types
-				switch model.Schema[modelName].Fields[v[index].fname].Type {
-				case preloaded.CSTRING:
-					reflect.ValueOf(a).Elem().FieldByName(fName).SetString(v[index].v)
-				case preloaded.CIMAGE:
-					reflect.ValueOf(a).Elem().FieldByName(fName).SetString(v[index].v)
-				}
-
-				// Increment impressions
-				v[index].imp++
-				models2.ModelABTests[k] = v
-			}
-		}
-	}
-	models2.AbTestsMutex.Unlock()
+	//metrics.TimeMetric("uadmin/db/duration", 1000, func() {
+	//	Get(a, query, args...)
+	//})
+	//
+	//// Check if there are any active A/B tests for any field in this model
+	//abt := models2.GetABT(r)
+	//modelName := model.GetModelName(a)
+	//models2.AbTestsMutex.Lock()
+	//for k, v := range models2.ModelABTests {
+	//	if strings.HasPrefix(k, modelName+"__") && strings.HasSuffix(k, "__"+fmt.Sprint(GetID(reflect.ValueOf(a)))) {
+	//		if len(v) != 0 {
+	//			index := abt % len(v)
+	//			fName := model.Schema[modelName].Fields[v[index].fname].Name
+	//
+	//			// TODO: Support more data types
+	//			switch model.Schema[modelName].Fields[v[index].fname].Type {
+	//			case preloaded.CSTRING:
+	//				reflect.ValueOf(a).Elem().FieldByName(fName).SetString(v[index].v)
+	//			case preloaded.CIMAGE:
+	//				reflect.ValueOf(a).Elem().FieldByName(fName).SetString(v[index].v)
+	//			}
+	//
+	//			// Increment impressions
+	//			v[index].imp++
+	//			models2.ModelABTests[k] = v
+	//		}
+	//	}
+	//}
+	//models2.AbTestsMutex.Unlock()
 	return nil
 }
 

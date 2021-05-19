@@ -2,16 +2,14 @@ package models
 
 import (
 	"fmt"
-	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
 	otpservices "github.com/uadmin/uadmin/blueprint/otp/services"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
 	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/dialect"
+	// "github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
-	"golang.org/x/crypto/bcrypt"
+	// "golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
 )
@@ -43,70 +41,75 @@ func (u User) String() string {
 
 // Save !
 func (u *User) Save() {
-	if !strings.HasPrefix(u.Password, "$2a$") && len(u.Password) != 60 {
-		u.Password = authservices.HashPass(u.Password)
-	}
+	// @todo, redo
+	//if !strings.HasPrefix(u.Password, "$2a$") && len(u.Password) != 60 {
+	//	u.Password = authservices.HashPass(u.Password)
+	//}
 	if u.OTPSeed == "" {
-		u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
+		// @todo, redo
+		// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
 	} else if u.ID != 0 {
 		oldUser := User{}
 		database.Get(&oldUser, "id = ?", u.ID)
 		if !oldUser.OTPRequired && u.OTPRequired {
-			u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
+			// @todo, redo
+			// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
 		}
 	}
 	u.Username = strings.ToLower(u.Username)
 	database.Save(u)
 }
 
-// GetActiveSession !
-func (u *User) GetActiveSession() *sessionmodel.Session {
-	s := sessionmodel.Session{}
-	dialect1 := dialect.GetDialectForDb()
-	database.Get(&s, dialect1.Quote("user_id")+" = ? AND "+dialect1.Quote("active")+" = ?", u.ID, true)
-	if s.ID == 0 {
-		return nil
-	}
-	return &s
-}
+// @todo, redo
+//// GetActiveSession !
+//func (u *User) GetActiveSession() *sessionmodel.Session {
+//	s := sessionmodel.Session{}
+//	dialect1 := dialect.GetDialectForDb()
+//	database.Get(&s, dialect1.Quote("user_id")+" = ? AND "+dialect1.Quote("active")+" = ?", u.ID, true)
+//	if s.ID == 0 {
+//		return nil
+//	}
+//	return &s
+//}
 
-// Login Logs in user using password and otp. If there is no OTP, just pass an empty string
-func (u *User) Login(pass string, otp string) *sessionmodel.Session {
-	if u == nil {
-		return nil
-	}
-
-	password := []byte(pass + authservices.Salt)
-	hashedPassword := []byte(u.Password)
-	err := bcrypt.CompareHashAndPassword(hashedPassword, password)
-	if err == nil && u.ID != 0 {
-		s := u.GetActiveSession()
-		if s == nil {
-			s = &sessionmodel.Session{}
-			s.Active = true
-			s.UserID = u.ID
-			s.LoginTime = time.Now()
-			s.GenerateKey()
-			if authservices.CookieTimeout > -1 {
-				ExpiresOn := s.LoginTime.Add(time.Second * time.Duration(authservices.CookieTimeout))
-				s.ExpiresOn = &ExpiresOn
-			}
-		}
-		s.LastLogin = time.Now()
-		if u.OTPRequired {
-			if otp == "" {
-				s.PendingOTP = true
-			} else {
-				s.PendingOTP = !u.VerifyOTP(otp)
-			}
-		}
-		u.LastLogin = &s.LastLogin
-		u.Save()
-		s.Save()
-		return s
-	}
-	return nil
-}
+// @todo, redo
+//// Login Logs in user using password and otp. If there is no OTP, just pass an empty string
+//func (u *User) Login(pass string, otp string) *sessionmodel.Session {
+//	if u == nil {
+//		return nil
+//	}
+//
+//	password := []byte(pass + authservices.Salt)
+//	hashedPassword := []byte(u.Password)
+//	err := bcrypt.CompareHashAndPassword(hashedPassword, password)
+//	if err == nil && u.ID != 0 {
+//		s := u.GetActiveSession()
+//		if s == nil {
+//			s = &sessionmodel.Session{}
+//			s.Active = true
+//			s.UserID = u.ID
+//			s.LoginTime = time.Now()
+//			s.GenerateKey()
+//			if authservices.CookieTimeout > -1 {
+//				ExpiresOn := s.LoginTime.Add(time.Second * time.Duration(authservices.CookieTimeout))
+//				s.ExpiresOn = &ExpiresOn
+//			}
+//		}
+//		s.LastLogin = time.Now()
+//		if u.OTPRequired {
+//			if otp == "" {
+//				s.PendingOTP = true
+//			} else {
+//				s.PendingOTP = !u.VerifyOTP(otp)
+//			}
+//		}
+//		u.LastLogin = &s.LastLogin
+//		u.Save()
+//		s.Save()
+//		return s
+//	}
+//	return nil
+//}
 
 // GetDashboardMenu !
 func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {

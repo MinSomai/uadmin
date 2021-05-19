@@ -104,6 +104,7 @@ func TestRevertLogHandler(t *testing.T) {
 
 	r.AddCookie(&http.Cookie{Name: "session", Value: s1.Key})
 
+    // @todo, redo
 	formHandler(w, r, s1)
 
 	log := Log{}

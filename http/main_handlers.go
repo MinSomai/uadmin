@@ -39,7 +39,8 @@ func listHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 	c := Context{}
 	c.RootURL = preloaded.RootURL
 	c.SiteName = preloaded.SiteName
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.User = session.User.Username
 	c.CSRF = session.Key
 	c.Logo = preloaded.Logo
@@ -84,22 +85,25 @@ func listHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 		if c.Schema.Fields[i].CategoricalFilter {
 			c.HasCategorical = true
 		}
-		if c.Schema.Fields[i].Filter && c.Schema.Fields[i].Type == preloaded.CFK {
-			c.Schema.Fields[i].Choices = utils.GetChoices(strings.ToLower(c.Schema.Fields[i].TypeName))
-		}
+		// @todo, probably return
+		//if c.Schema.Fields[i].Filter && c.Schema.Fields[i].Type == preloaded.CFK {
+		//	c.Schema.Fields[i].Choices = utils.GetChoices(strings.ToLower(c.Schema.Fields[i].TypeName))
+		//}
 		if c.Schema.Fields[i].Searchable {
 			c.Searchable = true
 		}
 	}
 
 	// func (*ModelSchema, *User) (string, []interface{})
-	query := ""
-	args := []interface{}{}
-	if c.Schema.ListModifier != nil {
-		query, args = c.Schema.ListModifier(&c.Schema, &user)
-	}
+	// @todo, redo
+	//query := ""
+	//args := []interface{}{}
+	//if c.Schema.ListModifier != nil {
+	//	query, args = c.Schema.ListModifier(&c.Schema, &user)
+	//}
 
-	c.Data = model.GetListData(m.Interface(), preloaded.PageLength, r, session, query, args...)
+	// @todo, probably return
+	// c.Data = model.GetListData(m.Interface(), preloaded.PageLength, r, session, query, args...)
 	c.Pagination = utils.PaginationHandler(c.Data.Count, preloaded.PageLength)
 
 	RenderHTML(w, r, "./templates/uadmin/"+c.Schema.GetListTheme()+"/list.html", c)
@@ -121,7 +125,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 	c := Context{}
 
 	c.RootURL = preloaded.RootURL
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.SiteName = preloaded.SiteName
 	c.User = session.User.Username
 	c.Logo = preloaded.Logo

@@ -267,7 +267,7 @@ func (s *Setting) ApplyValue() {
 	case "uAdmin.LogTrail":
 		preloaded.LogTrail = v.(bool)
 	case "uAdmin.TrailLoggingLevel":
-		preloaded.TrailLoggingLevel = v.(int)
+		utils.TrailLoggingLevel = v.(int)
 	case "uAdmin.SystemMetrics":
 		metrics.SystemMetrics = v.(bool)
 	case "uAdmin.UserMetrics":
@@ -735,7 +735,7 @@ func syncSystemSettings() {
 		},
 		{
 			Name:         "Trail Logging Level",
-			Value:        fmt.Sprint(preloaded.TrailLoggingLevel),
+			Value:        fmt.Sprint(utils.TrailLoggingLevel),
 			DefaultValue: "2",
 			DataType:     t.Integer(),
 			Help:         "Is the minimum level to be logged into syslog.",

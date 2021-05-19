@@ -3,13 +3,9 @@ package translation
 import (
 	"bytes"
 	"encoding/json"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 	"io/ioutil"
-	"os"
-	"strings"
 )
 
 type fieldLanguage struct {
@@ -32,72 +28,78 @@ type structLanguage struct {
 
 const translateMe = "Translate me ---> "
 
+// @todo, redo
 // syncCustomTranslation is a function for creating and updating custom translation files
 func syncCustomTranslation(path string) map[string]int {
-	var err error
-	var buf []byte
+	//var err error
+	//var buf []byte
 	stat := map[string]int{}
-
-	pathParts := strings.Split(path, "/")
-	if len(pathParts) != 2 {
-		utils.Trail(utils.ERROR, "Custom translation file path is incorrect (%s)", path)
-		return stat
-	}
-	group := pathParts[0]
-	name := pathParts[1]
-
-	os.MkdirAll("./static/i18n/"+group+"/", 0744)
-	fileName := "./static/i18n/" + group + "/" + name + ".en.json"
-	langMap := map[string]string{}
-	if _, err = os.Stat(fileName); os.IsNotExist(err) {
-		ioutil.WriteFile(fileName, []byte{'{', '}'}, 0644)
-		stat["en"] = 0
-	} else {
-		buf, err = ioutil.ReadFile(fileName)
-		if err != nil {
-			utils.Trail(utils.ERROR, "Unable to read system translation file (%s)", fileName)
-			return stat
-		}
-		err = json.Unmarshal(buf, &langMap)
-		if err != nil {
-			utils.Trail(utils.ERROR, "Invalid format of system translation file (%s). %s", fileName, err)
-		}
-		for _, lang := range langmodel.ActiveLangs {
-			if lang.Code == "en" {
-				stat["en"] = len(langMap)
-				continue
-			}
-			stat[lang.Code] = 0
-			updateRequired := false
-			langFileName := "./static/i18n/" + group + "/" + name + "." + lang.Code + ".json"
-			langSystemMap := map[string]string{}
-			if _, err = os.Stat(langFileName); os.IsNotExist(err) {
-				ioutil.WriteFile(langFileName, []byte{'{', '}'}, 0644)
-			}
-			buf, err = ioutil.ReadFile(langFileName)
-			if err != nil {
-				utils.Trail(utils.ERROR, "Unable to read system translation file (%s)", langFileName)
-				return stat
-			}
-			err = json.Unmarshal(buf, &langSystemMap)
-			if err != nil {
-				utils.Trail(utils.ERROR, "Invalid format of system translation file (%s). %s", langFileName, err)
-			}
-			for k, v := range langMap {
-				if val, ok := langSystemMap[k]; !ok {
-					updateRequired = true
-					langSystemMap[k] = translateMe + v
-				} else {
-					if !strings.HasPrefix(val, translateMe) {
-						stat[lang.Code]++
-					}
-				}
-			}
-			if updateRequired {
-				saveLangFile(langSystemMap, langFileName)
-			}
-		}
-	}
+	//
+	//pathParts := strings.Split(path, "/")
+	//if len(pathParts) != 2 {
+	//	// @todo, back error
+	//	// utils.Trail(utils.ERROR, "Custom translation file path is incorrect (%s)", path)
+	//	return stat
+	//}
+	//group := pathParts[0]
+	//name := pathParts[1]
+	//
+	//os.MkdirAll("./static/i18n/"+group+"/", 0744)
+	//fileName := "./static/i18n/" + group + "/" + name + ".en.json"
+	//langMap := map[string]string{}
+	//if _, err = os.Stat(fileName); os.IsNotExist(err) {
+	//	ioutil.WriteFile(fileName, []byte{'{', '}'}, 0644)
+	//	stat["en"] = 0
+	//} else {
+	//	buf, err = ioutil.ReadFile(fileName)
+	//	if err != nil {
+	//		// @todo, back error
+	//		// utils.Trail(utils.ERROR, "Unable to read system translation file (%s)", fileName)
+	//		return stat
+	//	}
+	//	err = json.Unmarshal(buf, &langMap)
+	//	if err != nil {
+	//		// @todo, back error
+	//		// utils.Trail(utils.ERROR, "Invalid format of system translation file (%s). %s", fileName, err)
+	//	}
+	//	for _, lang := range langmodel.ActiveLangs {
+	//		if lang.Code == "en" {
+	//			stat["en"] = len(langMap)
+	//			continue
+	//		}
+	//		stat[lang.Code] = 0
+	//		updateRequired := false
+	//		langFileName := "./static/i18n/" + group + "/" + name + "." + lang.Code + ".json"
+	//		langSystemMap := map[string]string{}
+	//		if _, err = os.Stat(langFileName); os.IsNotExist(err) {
+	//			ioutil.WriteFile(langFileName, []byte{'{', '}'}, 0644)
+	//		}
+	//		buf, err = ioutil.ReadFile(langFileName)
+	//		if err != nil {
+	//			// @todo, back error
+	//			// utils.Trail(utils.ERROR, "Unable to read system translation file (%s)", langFileName)
+	//			return stat
+	//		}
+	//		err = json.Unmarshal(buf, &langSystemMap)
+	//		if err != nil {
+	//			// @todo, back error
+	//			// utils.Trail(utils.ERROR, "Invalid format of system translation file (%s). %s", langFileName, err)
+	//		}
+	//		for k, v := range langMap {
+	//			if val, ok := langSystemMap[k]; !ok {
+	//				updateRequired = true
+	//				langSystemMap[k] = translateMe + v
+	//			} else {
+	//				if !strings.HasPrefix(val, translateMe) {
+	//					stat[lang.Code]++
+	//				}
+	//			}
+	//		}
+	//		if updateRequired {
+	//			saveLangFile(langSystemMap, langFileName)
+	//		}
+	//	}
+	//}
 	return stat
 }
 

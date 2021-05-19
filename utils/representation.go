@@ -2,10 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/model"
 	"reflect"
-	"strings"
 )
 
 // GetString returns string representation on an instance of
@@ -53,25 +50,26 @@ func GetString(a interface{}) string {
 	return fmt.Sprint(a)
 }
 
-// getChoices return a list of choices
-func GetChoices(ModelName string) []model.Choice {
-	choices := []model.Choice{
-		{" - ", 0, false},
-	}
-
-	m, ok := model.NewModelArray(strings.ToLower(ModelName), false)
-
-	// If no model exists, return an empty choices list
-	if !ok {
-		return choices
-	}
-	//TODO: implement limit choices to
-	// Get all choices
-	database.All(m.Addr().Interface())
-	for i := 0; i < m.Len(); i++ {
-		id := database.GetID(m.Index(i))
-		choices = append(choices, model.Choice{GetString(m.Index(i).Interface()), uint(id), false})
-	}
-	return choices
-}
+// @todo, redo
+//// getChoices return a list of choices
+//func GetChoices(ModelName string) []model.Choice {
+//	choices := []model.Choice{
+//		{" - ", 0, false},
+//	}
+//
+//	m, ok := model.NewModelArray(strings.ToLower(ModelName), false)
+//
+//	// If no model exists, return an empty choices list
+//	if !ok {
+//		return choices
+//	}
+//	//TODO: implement limit choices to
+//	// Get all choices
+//	database.All(m.Addr().Interface())
+//	for i := 0; i < m.Len(); i++ {
+//		id := database.GetID(m.Index(i))
+//		choices = append(choices, model.Choice{GetString(m.Index(i).Interface()), uint(id), false})
+//	}
+//	return choices
+//}
 

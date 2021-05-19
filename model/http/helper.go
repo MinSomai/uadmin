@@ -7,7 +7,6 @@ import (
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/security"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -283,7 +282,8 @@ func getQueryArg(k, v string) []interface{} {
 	var err error
 	v, err = url.QueryUnescape(v)
 	if err != nil {
-		utils.Trail(utils.WARNING, "getQueryArg url.QueryUnescape unable to unescape value. %s", err)
+		// @todo, redo
+		// utils.Trail(utils.WARNING, "getQueryArg url.QueryUnescape unable to unescape value. %s", err)
 		return []interface{}{v}
 	}
 	if strings.HasSuffix(k, "__in") {

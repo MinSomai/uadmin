@@ -7,7 +7,6 @@ import (
 	model2 "github.com/uadmin/uadmin/model"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
-	uadminhttp "github.com/uadmin/uadmin/http"
 	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
 	userapi "github.com/uadmin/uadmin/blueprint/user/api"
 	"github.com/uadmin/uadmin/preloaded"
@@ -272,7 +271,8 @@ func mediaHandler(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/media/")
 	file, err := os.Open("./media/" + r.URL.Path)
 	if err != nil {
-		uadminhttp.PageErrorHandler(w, r, session)
+		// @todo, redo
+		// uadminhttp.PageErrorHandler(w, r, session)
 		return
 	}
 	io.Copy(w, file)

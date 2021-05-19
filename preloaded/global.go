@@ -1,8 +1,6 @@
 package preloaded
 
 import (
-	"github.com/uadmin/uadmin/model"
-	"github.com/uadmin/uadmin/utils"
 	"os"
 	"regexp"
 )
@@ -100,9 +98,6 @@ var SiteName = "uAdmin"
 
 // DebugDB prints all SQL statements going to DB.
 var DebugDB = false
-
-// Schema is the global schema of the system.
-var Schema map[string]model.ModelSchema
 
 // PageLength is the list view max number of records.
 var PageLength = 100
@@ -309,9 +304,6 @@ var HTTPLogFormat = "%a %>s %B %U %D"
 
 // LogTrail stores Trail logs to syslog
 var LogTrail = false
-
-// TrailLoggingLevel is the minimum level to be logged into syslog
-var TrailLoggingLevel = utils.INFO
 
 // CacheSessions allows uAdmin to store sessions data in memory
 var CacheSessions = true

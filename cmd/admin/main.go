@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/uadmin/uadmin/app"
+	"github.com/uadmin/uadmin"
 	"os"
 )
 
@@ -10,6 +10,6 @@ func main() {
 	if environment == "" {
 		environment = "dev"
 	}
-	app1 := app.NewApp(environment)
+	app1 := uadmin.NewApp(environment)
 	app1.StartAdmin()
 }

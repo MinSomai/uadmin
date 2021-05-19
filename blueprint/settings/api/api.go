@@ -7,10 +7,9 @@ import (
 	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/dialect"
-	uadminhttp "github.com/uadmin/uadmin/http"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/translation"
+	// "github.com/uadmin/uadmin/translation"
 	"net/http"
 	"strings"
 )
@@ -38,14 +37,16 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	}
 
 	if session == nil {
-		uadminhttp.PageErrorHandler(w, r, session)
+		// @todo, redo
+		// uadminhttp.PageErrorHandler(w, r, session)
 		return
 	}
 
 	// Check if the user has permission to settings models
 	perm := session.User.GetAccess("setting")
 	if !perm.Read {
-		uadminhttp.PageErrorHandler(w, r, session)
+		// @todo, redo
+		// uadminhttp.PageErrorHandler(w, r, session)
 		return
 	}
 
@@ -53,7 +54,8 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	database.All(&settings)
 	if r.Method == preloaded.CPOST {
 		if !perm.Edit {
-			uadminhttp.PageErrorHandler(w, r, session)
+			// @todo, redo
+			// uadminhttp.PageErrorHandler(w, r, session)
 			return
 		}
 		//var tempSet Setting
@@ -98,7 +100,8 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	c := Context{}
 
 	c.RootURL = preloaded.RootURL
-	c.Language = translation.GetLanguage(r)
+	// @todo, redo
+	// c.Language = translation.GetLanguage(r)
 	c.SiteName = preloaded.SiteName
 	c.User = session.User.Username
 	c.SCat = []SCat{}
@@ -118,5 +121,6 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 		database.Filter(&c.SCat[len(c.SCat)-1].Settings, "category_id = ?", cat.ID)
 	}
 
-	uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/setting.html", c)
+	// @todo, redo
+	// uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/setting.html", c)
 }

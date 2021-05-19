@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
+	// "github.com/uadmin/uadmin/utils"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
 
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/database"
 
@@ -79,36 +78,37 @@ func (a *ABTest) Save() {
 	AbTestCount = database.Count([]ABTest{}, "active = ?", true)
 }
 
-func loadModels(a interface{}, u *usermodels.User) []model.Choice {
-	c := []model.Choice{}
-	for i, m := range model.ModelList {
-		c = append(c, model.Choice{K: uint(i), V: model.GetModelName(m)})
-	}
-	return c
-}
+// @todo, redo
+//func loadModels(a interface{}, u *usermodels.User) []model.Choice {
+//	c := []model.Choice{}
+//	for i, m := range model.ModelList {
+//		c = append(c, model.Choice{K: uint(i), V: model.GetModelName(m)})
+//	}
+//	return c
+//}
 
-func loadFields(a interface{}, u *usermodels.User) []model.Choice {
-	m, ok := a.(ABTest)
-	if !ok {
-		mp, ok := a.(*ABTest)
-		if !ok {
-			utils.Trail(utils.ERROR, "loadFields Unable to cast a to ABTest")
-			return []model.Choice{}
-		}
-		m = *mp
-	}
-
-	if m.Type != m.Type.Model() {
-		return []model.Choice{}
-	}
-
-	s := model.Schema[model.GetModelName(model.ModelList[int(m.ModelName)])]
-	c := []model.Choice{}
-	for i, f := range s.Fields {
-		c = append(c, model.Choice{K: uint(i), V: f.Name})
-	}
-	return c
-}
+//func loadFields(a interface{}, u *usermodels.User) []model.Choice {
+//	m, ok := a.(ABTest)
+//	if !ok {
+//		mp, ok := a.(*ABTest)
+//		if !ok {
+//			utils.Trail(utils.ERROR, "loadFields Unable to cast a to ABTest")
+//			return []model.Choice{}
+//		}
+//		m = *mp
+//	}
+//
+//	if m.Type != m.Type.Model() {
+//		return []model.Choice{}
+//	}
+//
+//	s := model.Schema[model.GetModelName(model.ModelList[int(m.ModelName)])]
+//	c := []model.Choice{}
+//	for i, f := range s.Fields {
+//		c = append(c, model.Choice{K: uint(i), V: f.Name})
+//	}
+//	return c
+//}
 
 func SyncABTests() {
 	// Check if there are stats to save to the DB

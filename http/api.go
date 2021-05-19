@@ -2,57 +2,58 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
-	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
-	userapi "github.com/uadmin/uadmin/blueprint/user/api"
-	model2 "github.com/uadmin/uadmin/model"
+	// authapi "github.com/uadmin/uadmin/blueprint/auth/api"
+	//userapi "github.com/uadmin/uadmin/blueprint/user/api"
+	//model2 "github.com/uadmin/uadmin/model"
+	//modelhttp "github.com/uadmin/uadmin/model/http"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
-	"html"
-	"html/template"
 	"net/http"
 	"strings"
-	modelhttp "github.com/uadmin/uadmin/model/http"
 )
 
 // apiHandler !
 func apiHandler(w http.ResponseWriter, r *http.Request) {
-	session := authapi.IsAuthenticated(r)
+	// @todo, probably return
+	//session := authapi.IsAuthenticated(r)
 	Path := strings.TrimPrefix(r.URL.Path, preloaded.RootURL+"api")
 	// Handle requests for dAPI
 	if strings.HasPrefix(Path, "/d/") || Path == "/d" {
-		modelhttp.DAPIHandler(w, r, session)
+		// @todo, probably return
+		// modelhttp.DAPIHandler(w, r, session)
 		return
 	}
 
+	// @todo, probably return
 	// For all other APIs, if the user is not authenticated
 	// then send them to login page
-	if session == nil {
-		userapi.LoginHandler(w, r)
-		return
-	}
+	//if session == nil {
+	//	userapi.LoginHandler(w, r)
+	//	return
+	//}
 
 	if strings.HasPrefix(Path, "/upload_image") {
-		UploadImageHandler(w, r, session)
+		// @todo, probably return
+		// UploadImageHandler(w, r, session)
 		return
 	}
 	if strings.HasPrefix(Path, "/search") {
 		// TODO: Move to separate file
-		modelName := r.FormValue("m")
-		model, ok := model2.NewModel(modelName, false)
-		if !ok {
-			PageErrorHandler(w, r, session)
-			return
-		}
-		s, _ := model2.GetSchema(model)
+		// @todo, probably return
+		// modelName := r.FormValue("m")
+		//model, ok := model2.NewModel(modelName, false)
+		//if !ok {
+		//	PageErrorHandler(w, r, session)
+		//	return
+		//}
+		// s, _ := model2.GetSchema(model)
 
-		query := ""
-		args := []interface{}{}
-		if s.ListModifier != nil {
-			query, args = s.ListModifier(&s, &session.User)
-		}
+		//query := ""
+		//args := []interface{}{}
+		//if s.ListModifier != nil {
+		//	query, args = s.ListModifier(&s, &session.User)
+		//}
 
-		ld := model2.GetListData(model.Interface(), preloaded.PageLength, r, session, query, args...)
+		// ld := model2.GetListData(model.Interface(), preloaded.PageLength, r, session, query, args...)
 
 		type Context struct {
 			List      [][]string `json:"list"`
@@ -62,29 +63,32 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			List: [][]string{},
 		}
 
-		for i := range ld.Rows {
-			context.List = append(context.List, []string{})
-			for j := range ld.Rows[i] {
-				switch ld.Rows[i][j].(type) {
-				case template.HTML:
-					context.List[i] = append(context.List[i], fmt.Sprint(ld.Rows[i][j]))
-				default:
-					context.List[i] = append(context.List[i], html.EscapeString(fmt.Sprint(ld.Rows[i][j])))
-				}
-			}
-		}
-		context.PageCount = utils.PaginationHandler(ld.Count, preloaded.PageLength)
+		// @todo, probably return
+		//for i := range ld.Rows {
+		//	context.List = append(context.List, []string{})
+		//	for j := range ld.Rows[i] {
+		//		switch ld.Rows[i][j].(type) {
+		//		case template.HTML:
+		//			context.List[i] = append(context.List[i], fmt.Sprint(ld.Rows[i][j]))
+		//		default:
+		//			context.List[i] = append(context.List[i], html.EscapeString(fmt.Sprint(ld.Rows[i][j])))
+		//		}
+		//	}
+		//}
+		// context.PageCount = utils.PaginationHandler(ld.Count, preloaded.PageLength)
 
 		bytes, _ := json.Marshal(context)
 		w.Write(bytes)
 		return
 	}
 	if strings.HasPrefix(Path, "/get_models") {
-		GetModelsAPI(w, r, session)
+		// @todo, probably return
+		// GetModelsAPI(w, r, session)
 		return
 	}
 	if strings.HasPrefix(Path, "/get_fields") {
-		model2.GetFieldsAPI(w, r, session)
+		// @todo, probably return
+		// model2.GetFieldsAPI(w, r, session)
 		return
 	}
 }

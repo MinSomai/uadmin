@@ -5,7 +5,6 @@ import (
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 )
 
@@ -28,7 +27,8 @@ func dAPIUpload(w http.ResponseWriter, r *http.Request, schema *model.ModelSchem
 			}
 		}
 		if field == nil {
-			utils.Trail(utils.WARNING, "dAPIUpload received a file that has no field: %s", k)
+			// @todo, redo
+			// utils.Trail(utils.WARNING, "dAPIUpload received a file that has no field: %s", k)
 			continue
 		}
 

@@ -87,7 +87,8 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		listHandler(w, r, session)
 		return
 	} else if len(URLParts) == 2 {
-		formHandler(w, r, session)
+		// @todo, redo
+		// formHandler(w, r, session)
 		return
 	}
 	PageErrorHandler(w, r, session)
