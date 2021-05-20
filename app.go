@@ -45,12 +45,18 @@ func NewApp(environment string) *App {
 	return instance
 }
 
+func (a App) Initialize() {
+
+}
+
 func (a App) StartAdmin() {
+	a.Initialize()
 	// useradmin.RegisterAdminPart()
 	http.StartServer(a.Config)
 }
 
 func (a App) StartApi() {
+	a.Initialize()
 	_ = a.Router.Run(":" + strconv.Itoa(a.Config.D.Api.ListenPort))
 }
 
