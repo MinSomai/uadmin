@@ -19,10 +19,9 @@ func (r CommandRegistry) isRegisteredCommand(name string) bool {
 	return !!err
 }
 
-func (r CommandRegistry) runAction(name string) {
-	action, _ := r.actions[name]
-	action.ParseArgs()
-	action.Proceed()
+func (r CommandRegistry) runAction(command string, subaction string, args []string) {
+	action, _ := r.actions[command]
+	action.Proceed(subaction, args)
 }
 
 func (r CommandRegistry) MakeHelpText() string{

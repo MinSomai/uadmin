@@ -7,7 +7,6 @@ import (
 	"github.com/uadmin/uadmin/interfaces"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,29 +18,22 @@ import (
 type MigrateCommand struct {
 
 }
-func (c MigrateCommand) Proceed() {
-	var action string
+func (c MigrateCommand) Proceed(subaction string, args []string) {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
 		actions: make(map[string]interfaces.ICommand),
 	}
 	createCommand := new(CreateMigration)
-	createCommand.opts = &CreateMigrationOptions{}
 
 	commandRegistry.addAction("create", interfaces.ICommand(createCommand))
 	upCommand := new(UpMigration)
-	upCommand.opts = &UpMigrationOptions{}
 
 	commandRegistry.addAction("up", interfaces.ICommand(upCommand))
 	downCommand := new(DownMigration)
-	downCommand.opts = &DownMigrationOptions{}
 
 	commandRegistry.addAction("down", interfaces.ICommand(downCommand))
-	if len(os.Args) > 2 {
-		action = os.Args[2]
-		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
-	}
+	isCorrectActionPassed = commandRegistry.isRegisteredCommand(subaction)
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
 		help = fmt.Sprintf(`
@@ -51,11 +43,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return
 	}
-	commandRegistry.runAction(action)
-}
-
-func (c MigrateCommand) ParseArgs() {
-
+	commandRegistry.runAction(subaction, "", args)
 }
 
 func (c MigrateCommand) GetHelpText() string {
@@ -81,18 +69,23 @@ type CreateMigrationOptions struct {
 }
 
 type CreateMigration struct {
-	opts *CreateMigrationOptions
 }
 
-func (command CreateMigration) ParseArgs() {
-	parser := flags.NewParser(command.opts, flags.Default)
-	_, err := parser.ParseArgs(os.Args[2:])
-	if err != nil {
-		log.Fatal(err)
+func (command CreateMigration) Proceed(subaction string, args []string) {
+	var opts = &CreateMigrationOptions{}
+	parser := flags.NewParser(opts, flags.Default)
+	var err error
+	_, err = parser.ParseArgs(args)
+	if len(args) == 0 {
+		var help string = `
+Please provide flags -b and -m which are blueprint and description of the migration respectively 
+`
+		fmt.Printf(help)
+		return
 	}
-}
-
-func (command CreateMigration) Proceed() {
+	if err != nil {
+		panic(err)
+	}
 	const concreteMigrationTpl = `
 package migrations
 
@@ -114,12 +107,11 @@ func (m {{.MigrationName}}) Down() {
 }
 
 func (m {{.MigrationName}}) Deps() []string {
-{{if .DependencyId}}    return []string{"{{.DependencyId}}"}{{else}}    return make([]string, 0){{end}}
+{{if .DependencyId}}    return []string{"{{.BlueprintName}}.{{.DependencyId}}"}{{else}}    return make([]string, 0){{end}}
 }
 `
 	const initializeMigrationRegistryTpl = `
-    BMigrationRegistry.addMigration({{.MigrationName}}{})
-`
+    BMigrationRegistry.addMigration({{.MigrationName}}{})`
 	const migrationRegistryCreationTpl = `
 package migrations
 
@@ -152,11 +144,11 @@ func init() {
     // placeholder to insert next migration
 }
 `
-	bluePrintPath := "blueprint/" + strings.ToLower(command.opts.Blueprint)
+	bluePrintPath := "blueprint/" + strings.ToLower(opts.Blueprint)
 	if _, err := os.Stat(bluePrintPath); os.IsNotExist(err) {
-		panic(fmt.Sprintf("Blueprint %s doesn't exist", command.opts.Blueprint))
+		panic(fmt.Sprintf("Blueprint %s doesn't exist", opts.Blueprint))
 	}
-	dirPath := "blueprint/" + strings.ToLower(command.opts.Blueprint) + "/migrations"
+	dirPath := "blueprint/" + strings.ToLower(opts.Blueprint) + "/migrations"
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		err = os.Mkdir(dirPath, 0755)
 		if err != nil {
@@ -170,10 +162,9 @@ func init() {
 			panic(err)
 		}
 	}
-	migrationName := prepareMigrationName(command.opts.Message)
+	migrationName := prepareMigrationName(opts.Message)
 	pathToConcreteMigrationsFile := dirPath + "/" + migrationName + ".go"
 	var lastMigrationId int
-	var err error
 	err = filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		var migrationFileRegex = regexp.MustCompile(`.*?_(\d+)\.go`)
 		match := migrationFileRegex.FindStringSubmatch(path)
@@ -186,7 +177,7 @@ func init() {
 		return nil
 	})
 	humanizedMessage := strings.ReplaceAll(
-		re.ReplaceAllLiteralString(command.opts.Message, ""),
+		re.ReplaceAllLiteralString(opts.Message, ""),
 		"\"",
 		"",
 	)
@@ -199,11 +190,13 @@ func init() {
 		ConcreteMigrationName string
 		ConcreteMigrationId string
 		DependencyId string
+		BlueprintName string
 	}{
 		MigrationName: migrationName,
 		ConcreteMigrationName: humanizedMessage,
 		ConcreteMigrationId: strconv.Itoa(int(sec)),
 		DependencyId: "",
+		BlueprintName: opts.Blueprint,
 	}
 	if lastMigrationId > 0 {
 		concreteData.DependencyId = strconv.Itoa(lastMigrationId)
@@ -239,8 +232,8 @@ func init() {
 	}
 	fmt.Printf(
 		"Created migration for blueprint %s with name %s\n",
-		command.opts.Blueprint,
-		command.opts.Message,
+		opts.Blueprint,
+		opts.Message,
 	)
 }
 
@@ -252,18 +245,9 @@ type UpMigrationOptions struct {
 }
 
 type UpMigration struct {
-	opts *UpMigrationOptions
 }
 
-func (command UpMigration) ParseArgs() {
-	parser := flags.NewParser(command.opts, flags.Default)
-	_, err := parser.ParseArgs(os.Args[2:])
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (command UpMigration) Proceed() {
+func (command UpMigration) Proceed(subaction string, args []string) {
 
 }
 
@@ -275,18 +259,9 @@ type DownMigrationOptions struct {
 }
 
 type DownMigration struct {
-	opts *DownMigrationOptions
 }
 
-func (command DownMigration) ParseArgs() {
-	parser := flags.NewParser(command.opts, flags.Default)
-	_, err := parser.ParseArgs(os.Args[2:])
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (command DownMigration) Proceed() {
+func (command DownMigration) Proceed(subaction string, args []string) {
 
 }
 

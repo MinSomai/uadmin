@@ -6,6 +6,7 @@ type IMigrationRegistry interface {
 
 type IBlueprint interface {
 	GetName() string
+	GetDescription() string
 	GetMigrationRegistry() IMigrationRegistry
 }
 
@@ -16,8 +17,7 @@ type IBlueprintRegistry interface {
 }
 
 type ICommand interface {
-	Proceed()
-	ParseArgs()
+	Proceed(subaction string, args []string)
 	GetHelpText() string
 }
 

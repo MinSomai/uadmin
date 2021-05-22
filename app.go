@@ -62,9 +62,15 @@ func (a App) baseInitialization() {
 
 }
 
+func (a App) RegisterCommand(name string, command interfaces.ICommand) {
+	a.commandRegistry.addAction(name, command)
+}
+
 func (a App) registerBaseCommands() {
-	createCommand := new(MigrateCommand)
-	a.commandRegistry.addAction("migrate", interfaces.ICommand(createCommand))
+	migrateCommand := new(MigrateCommand)
+	a.RegisterCommand("migrate", interfaces.ICommand(migrateCommand))
+	blueprintCommand := new(BlueprintCommand)
+	a.RegisterCommand("blueprint", interfaces.ICommand(blueprintCommand))
 }
 
 func (a App) ExecuteCommand() {
@@ -84,7 +90,13 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return
 	}
-	a.commandRegistry.runAction(action)
+	if len(os.Args) > 2 {
+		subaction := os.Args[2]
+		isCorrectActionPassed = a.commandRegistry.isRegisteredCommand(action)
+		a.commandRegistry.runAction(action, subaction, os.Args[3:])
+	} else {
+		a.commandRegistry.runAction(action,"", make([]string, 0))
+	}
 }
 
 func (a App) StartAdmin() {
