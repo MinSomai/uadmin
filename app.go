@@ -1,13 +1,16 @@
 package uadmin
 
 import (
+	"fmt"
+	"github.com/uadmin/uadmin/interfaces"
+	"os"
+
 	// userblueprintapi "github.com/uadmin/uadmin/blueprint/user/api"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/database"
+	"github.com/uadmin/uadmin/http"
 	"strconv"
 	"time"
-
-	"github.com/uadmin/uadmin/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,6 +20,7 @@ type App struct {
 	Config   *config.UadminConfig
 	Database *database.Database
 	Router   *gin.Engine
+	commandRegistry *CommandRegistry
 }
 
 var instance *App
@@ -25,6 +29,9 @@ func NewApp(environment string) *App {
 	if instance == nil {
 		a := new(App)
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
+		a.commandRegistry = &CommandRegistry{
+			actions: make(map[string]interfaces.CommandInterface),
+		}
 		a.Database = database.NewDatabase(a.Config)
 		a.Router = gin.Default()
 		a.Router.Use(cors.New(cors.Config{
@@ -38,7 +45,9 @@ func NewApp(environment string) *App {
 			},
 			MaxAge: 12 * time.Hour,
 		}))
-		a.InitializeRouter()
+		a.baseInitialization()
+		a.registerBaseCommands()
+		// a.InitializeRouter()
 		instance = a
 		return a
 	}
@@ -47,6 +56,35 @@ func NewApp(environment string) *App {
 
 func (a App) Initialize() {
 
+}
+
+func (a App) baseInitialization() {
+
+}
+
+func (a App) registerBaseCommands() {
+	createCommand := new(MigrateCommand)
+	a.commandRegistry.addAction("migrate", interfaces.CommandInterface(createCommand))
+}
+
+func (a App) ExecuteCommand() {
+	var action string
+	var isCorrectActionPassed bool = false
+	var help string
+	if len(os.Args) > 1 {
+		action = os.Args[1]
+		isCorrectActionPassed = a.commandRegistry.isRegisteredCommand(action)
+	}
+	if !isCorrectActionPassed {
+		helpText := a.commandRegistry.MakeHelpText()
+		help = fmt.Sprintf(`
+Please provide what do you want to do ?
+%s
+`, helpText)
+		fmt.Print(help)
+		return
+	}
+	a.commandRegistry.runAction(action)
 }
 
 func (a App) StartAdmin() {

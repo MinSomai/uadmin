@@ -1,0 +1,1 @@
+BMigrationRegistry.addMigration(migrationName{})
