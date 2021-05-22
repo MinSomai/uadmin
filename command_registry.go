@@ -7,10 +7,10 @@ import (
 )
 
 type CommandRegistry struct {
-	actions map[string]interfaces.CommandInterface
+	actions map[string]interfaces.ICommand
 }
 
-func (r CommandRegistry) addAction(name string, command interfaces.CommandInterface) {
+func (r CommandRegistry) addAction(name string, command interfaces.ICommand) {
 	r.actions[name] = command
 }
 

@@ -1,16 +1,27 @@
 package interfaces
 
-type IBlueprintInterface struct {
-	Name string
+type IMigrationRegistry interface {
+	FindMigrations() <-chan IMigration
 }
 
-type CommandInterface interface {
+type IBlueprint interface {
+	GetName() string
+	GetMigrationRegistry() IMigrationRegistry
+}
+
+type IBlueprintRegistry interface {
+	Iterate() <-chan IBlueprint
+	GetByName(name string) IBlueprint
+	Register(blueprint IBlueprint)
+}
+
+type ICommand interface {
 	Proceed()
 	ParseArgs()
 	GetHelpText() string
 }
 
-type MigrationInterface interface {
+type IMigration interface {
 	Up()
 	Down()
 	GetName() string

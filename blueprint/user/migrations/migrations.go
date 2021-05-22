@@ -5,23 +5,28 @@ import (
 )
 
 type MigrationRegistry struct {
-	migrations map[string]interfaces.MigrationInterface
+	migrations map[string]interfaces.IMigration
 }
 
-func (r MigrationRegistry) addMigration(migration interfaces.MigrationInterface) {
+func (r MigrationRegistry) addMigration(migration interfaces.IMigration) {
 	r.migrations[migration.GetName()] = migration
 }
 
-func (r MigrationRegistry) FindMigrations() {
+func (r MigrationRegistry) FindMigrations() <-chan interfaces.IMigration{
+	chnl := make(chan interfaces.IMigration)
+	go func() {
+		close(chnl)
+	}()
+	return chnl
 }
 
 var BMigrationRegistry *MigrationRegistry
 
 func init() {
     BMigrationRegistry = &MigrationRegistry{
-        migrations: make(map[string]interfaces.MigrationInterface),
+        migrations: make(map[string]interfaces.IMigration),
     }
-    BMigrationRegistry.addMigration(initial_1621667246{})
+    BMigrationRegistry.addMigration(initial_1621674497{})
 
     // placeholder to insert next migration
 }

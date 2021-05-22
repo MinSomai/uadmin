@@ -30,7 +30,7 @@ func NewApp(environment string) *App {
 		a := new(App)
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
 		a.commandRegistry = &CommandRegistry{
-			actions: make(map[string]interfaces.CommandInterface),
+			actions: make(map[string]interfaces.ICommand),
 		}
 		a.Database = database.NewDatabase(a.Config)
 		a.Router = gin.Default()
@@ -64,7 +64,7 @@ func (a App) baseInitialization() {
 
 func (a App) registerBaseCommands() {
 	createCommand := new(MigrateCommand)
-	a.commandRegistry.addAction("migrate", interfaces.CommandInterface(createCommand))
+	a.commandRegistry.addAction("migrate", interfaces.ICommand(createCommand))
 }
 
 func (a App) ExecuteCommand() {

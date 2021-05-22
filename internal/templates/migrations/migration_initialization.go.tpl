@@ -1,1 +1,1 @@
-BMigrationRegistry.addMigration(migrationName{})
+BMigrationRegistry.AddMigration(migrationName{})

@@ -23,20 +23,20 @@ func (c MigrateCommand) Proceed() {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		actions: make(map[string]interfaces.CommandInterface),
+		actions: make(map[string]interfaces.ICommand),
 	}
 	createCommand := new(CreateMigration)
 	createCommand.opts = &CreateMigrationOptions{}
 
-	commandRegistry.addAction("create", interfaces.CommandInterface(createCommand))
+	commandRegistry.addAction("create", interfaces.ICommand(createCommand))
 	upCommand := new(UpMigration)
 	upCommand.opts = &UpMigrationOptions{}
 
-	commandRegistry.addAction("up", interfaces.CommandInterface(upCommand))
+	commandRegistry.addAction("up", interfaces.ICommand(upCommand))
 	downCommand := new(DownMigration)
 	downCommand.opts = &DownMigrationOptions{}
 
-	commandRegistry.addAction("down", interfaces.CommandInterface(downCommand))
+	commandRegistry.addAction("down", interfaces.ICommand(downCommand))
 	if len(os.Args) > 2 {
 		action = os.Args[2]
 		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)

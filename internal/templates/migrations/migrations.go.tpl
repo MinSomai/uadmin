@@ -5,10 +5,10 @@ import (
 )
 
 type MigrationRegistry struct {
-	migrations map[string]interfaces.MigrationInterface
+	migrations map[string]interfaces.IMigration
 }
 
-func (r MigrationRegistry) addMigration(migration interfaces.MigrationInterface) {
+func (r MigrationRegistry) AddMigration(migration interfaces.IMigration) {
 	r.migrations[migration.GetName()] = migration
 }
 
@@ -19,7 +19,7 @@ var BMigrationRegistry *MigrationRegistry
 
 func init() {
     BMigrationRegistry = &MigrationRegistry{
-        migrations: make(map[string]interfaces.MigrationInterface),
+        migrations: make(map[string]interfaces.IMigration),
     }
     // placeholder to insert next migration
 }

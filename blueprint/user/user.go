@@ -1,7 +1,18 @@
 package user
 
-import "github.com/uadmin/uadmin/interfaces"
+import (
+	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/blueprint/user/migrations"
+)
 
 type Blueprint struct {
-	interfaces.IBlueprintInterface
+	interfaces.IBlueprint
+}
+
+func (b Blueprint) GetName() string {
+	return "user"
+}
+
+func (b Blueprint) GetMigrationRegistry() interfaces.IMigrationRegistry {
+	return interfaces.IMigrationRegistry(migrations.BMigrationRegistry)
 }
