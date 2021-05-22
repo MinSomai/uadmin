@@ -5,5 +5,4 @@ coverage.out
 test.db
 .idea
 .env
-./migrate
-./main
+main
