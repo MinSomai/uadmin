@@ -1,3 +1,4 @@
+
 package migrations
 
 import (
@@ -26,7 +27,6 @@ func init() {
     BMigrationRegistry = &MigrationRegistry{
         migrations: make(map[string]interfaces.IMigration),
     }
-    BMigrationRegistry.addMigration(initial_1621674497{})
-
+    BMigrationRegistry.addMigration(initial_1621677848{})
     // placeholder to insert next migration
 }

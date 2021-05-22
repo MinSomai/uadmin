@@ -1,1 +1,0 @@
-BMigrationRegistry.AddMigration(migrationName{})

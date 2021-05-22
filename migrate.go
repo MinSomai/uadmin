@@ -1,10 +1,11 @@
 package uadmin
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/otiai10/copy"
 	"github.com/uadmin/uadmin/interfaces"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
@@ -92,6 +93,65 @@ func (command CreateMigration) ParseArgs() {
 }
 
 func (command CreateMigration) Proceed() {
+	const concreteMigrationTpl = `
+package migrations
+
+type {{.MigrationName}} struct {
+}
+
+func (m {{.MigrationName}}) GetName() string {
+    return "{{.ConcreteMigrationName}}"
+}
+
+func (m {{.MigrationName}}) GetId() int64 {
+    return {{.ConcreteMigrationId}}
+}
+
+func (m {{.MigrationName}}) Up() {
+}
+
+func (m {{.MigrationName}}) Down() {
+}
+
+func (m {{.MigrationName}}) Deps() []string {
+{{if .DependencyId}}    return []string{"{{.DependencyId}}"}{{else}}    return make([]string, 0){{end}}
+}
+`
+	const initializeMigrationRegistryTpl = `
+    BMigrationRegistry.addMigration({{.MigrationName}}{})
+`
+	const migrationRegistryCreationTpl = `
+package migrations
+
+import (
+	"github.com/uadmin/uadmin/interfaces"
+)
+
+type MigrationRegistry struct {
+	migrations map[string]interfaces.IMigration
+}
+
+func (r MigrationRegistry) addMigration(migration interfaces.IMigration) {
+	r.migrations[migration.GetName()] = migration
+}
+
+func (r MigrationRegistry) FindMigrations() <-chan interfaces.IMigration{
+	chnl := make(chan interfaces.IMigration)
+	go func() {
+		close(chnl)
+	}()
+	return chnl
+}
+
+var BMigrationRegistry *MigrationRegistry
+
+func init() {
+    BMigrationRegistry = &MigrationRegistry{
+        migrations: make(map[string]interfaces.IMigration),
+    }
+    // placeholder to insert next migration
+}
+`
 	bluePrintPath := "blueprint/" + strings.ToLower(command.opts.Blueprint)
 	if _, err := os.Stat(bluePrintPath); os.IsNotExist(err) {
 		panic(fmt.Sprintf("Blueprint %s doesn't exist", command.opts.Blueprint))
@@ -105,7 +165,7 @@ func (command CreateMigration) Proceed() {
 	}
 	pathToBaseMigrationsFile := dirPath + "/migrations.go"
 	if _, err := os.Stat(pathToBaseMigrationsFile); os.IsNotExist(err) {
-		err := copy.Copy(migrationTplPath+"/migrations.go.tpl", pathToBaseMigrationsFile)
+		err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(migrationRegistryCreationTpl), 0755)
 		if err != nil {
 			panic(err)
 		}
@@ -125,61 +185,46 @@ func (command CreateMigration) Proceed() {
 		}
 		return nil
 	})
-	if _, err = os.Stat(pathToConcreteMigrationsFile); os.IsNotExist(err) {
-		err := copy.Copy(migrationTplPath+"/concrete_migration.go.tpl", pathToConcreteMigrationsFile)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		panic(fmt.Sprintf("migration %s already exists", pathToConcreteMigrationsFile))
-	}
-	migrationConcreteString, err := ioutil.ReadFile(migrationTplPath+"/concrete_migration.go.tpl")
-	if err != nil {
-		panic(err)
-	}
 	humanizedMessage := strings.ReplaceAll(
 		re.ReplaceAllLiteralString(command.opts.Message, ""),
 		"\"",
 		"",
 	)
-	migrationConcreteStringNew := strings.Replace(
-		string(migrationConcreteString),
-		"concreteMigrationName",
-		humanizedMessage, -1)
+	var concreteTplBuffer bytes.Buffer
 	now := time.Now()
 	sec := now.Unix()
-	migrationConcreteStringNew = strings.Replace(
-		string(migrationConcreteStringNew),
-		"concreteMigrationId",
-		strconv.Itoa(int(sec)), -1)
+	concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
+	concreteData := struct{
+		MigrationName string
+		ConcreteMigrationName string
+		ConcreteMigrationId string
+		DependencyId string
+	}{
+		MigrationName: migrationName,
+		ConcreteMigrationName: humanizedMessage,
+		ConcreteMigrationId: strconv.Itoa(int(sec)),
+		DependencyId: "",
+	}
 	if lastMigrationId > 0 {
-		migrationConcreteStringNew = strings.Replace(
-			string(migrationConcreteStringNew),
-			"dependencyId",
-			fmt.Sprintf("[]string{\"%s\"}", strconv.Itoa(lastMigrationId)), -1)
-	} else {
-		migrationConcreteStringNew = strings.Replace(
-			string(migrationConcreteStringNew),
-			"dependencyId",
-			"make([]string, 0)", -1)
+		concreteData.DependencyId = strconv.Itoa(lastMigrationId)
 	}
-	migrationConcreteStringNew = strings.Replace(
-		string(migrationConcreteStringNew),
-		"MigrationName",
-		migrationName, -1)
-	err = ioutil.WriteFile(pathToConcreteMigrationsFile, []byte(migrationConcreteStringNew), 0755)
+	if err = concreteTpl.Execute(&concreteTplBuffer, concreteData); err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile(pathToConcreteMigrationsFile, concreteTplBuffer.Bytes(), 0755)
 	if err != nil {
 		panic(err)
 	}
-	migrationInitializationString, err := ioutil.ReadFile(migrationTplPath+"/migration_initialization.go.tpl")
-	if err != nil {
+	integrateMigrationIntoRegistryTpl := template.Must(template.New("integratemigrationintoregistry").Parse(initializeMigrationRegistryTpl))
+	integrateMigrationIntoRegistryData := struct{
+		MigrationName string
+	}{
+		MigrationName: migrationName,
+	}
+	var integrateMigrationIntoRegistryTplBuffer bytes.Buffer
+	if err = integrateMigrationIntoRegistryTpl.Execute(&integrateMigrationIntoRegistryTplBuffer, integrateMigrationIntoRegistryData); err != nil {
 		panic(err)
 	}
-	migrationInitializationStringNew := strings.Replace(
-		string(migrationInitializationString),
-		"migrationName",
-		migrationName, -1)
-
 	read, err := ioutil.ReadFile(pathToBaseMigrationsFile)
 	if err != nil {
 		panic(err)
@@ -187,7 +232,7 @@ func (command CreateMigration) Proceed() {
 	newContents := strings.Replace(
 		string(read),
 		"// placeholder to insert next migration",
-		migrationInitializationStringNew + "\n    // placeholder to insert next migration", -1)
+		integrateMigrationIntoRegistryTplBuffer.String() + "\n    // placeholder to insert next migration", -1)
 	err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(newContents), 0755)
 	if err != nil {
 		panic(err)
