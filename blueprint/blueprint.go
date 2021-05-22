@@ -7,8 +7,6 @@ import (
 
 type BlueprintRegistry struct {
 	registeredBlueprints map[string]interfaces.IBlueprint
-	//Iterate() <-chan IBlueprint
-	//GetByName(name string) IBlueprint
 }
 
 func (r BlueprintRegistry) Iterate() <-chan interfaces.IBlueprint {
