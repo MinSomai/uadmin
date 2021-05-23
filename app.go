@@ -5,7 +5,7 @@ import (
 	"github.com/uadmin/uadmin/interfaces"
 	"os"
 
-	// userblueprintapi "github.com/uadmin/uadmin/blueprint/user/api"
+	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/http"
@@ -17,10 +17,11 @@ import (
 )
 
 type App struct {
-	Config   *config.UadminConfig
-	Database *database.Database
-	Router   *gin.Engine
-	commandRegistry *CommandRegistry
+	Config            *config.UadminConfig
+	Database          *database.Database
+	Router            *gin.Engine
+	commandRegistry   *CommandRegistry
+	BlueprintRegistry *BlueprintRegistry
 }
 
 var instance *App
@@ -31,6 +32,9 @@ func NewApp(environment string) *App {
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
 		a.commandRegistry = &CommandRegistry{
 			actions: make(map[string]interfaces.ICommand),
+		}
+		a.BlueprintRegistry = &BlueprintRegistry{
+			RegisteredBlueprints: make(map[string]interfaces.IBlueprint),
 		}
 		a.Database = database.NewDatabase(a.Config)
 		a.Router = gin.Default()
@@ -45,7 +49,7 @@ func NewApp(environment string) *App {
 			},
 			MaxAge: 12 * time.Hour,
 		}))
-		a.baseInitialization()
+		a.registerBaseBlueprints()
 		a.registerBaseCommands()
 		// a.InitializeRouter()
 		instance = a
@@ -58,8 +62,12 @@ func (a App) Initialize() {
 
 }
 
-func (a App) baseInitialization() {
+func (a App) registerBaseBlueprints() {
+	a.BlueprintRegistry.Register(userblueprint.Blueprint)
+}
 
+func (a App) RegisterBlueprint(blueprint interfaces.IBlueprint) {
+	a.BlueprintRegistry.Register(blueprint)
 }
 
 func (a App) RegisterCommand(name string, command interfaces.ICommand) {

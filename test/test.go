@@ -11,8 +11,6 @@ type UadminTestSuite struct {
 	suite.Suite
 }
 
-// Make sure that VariableThatShouldStartAtFive is set to five
-// before each test
 func (suite *UadminTestSuite) SetupTest() {
 	db := uadmin.GetDB()
 	db = db.Exec("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")

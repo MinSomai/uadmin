@@ -89,11 +89,15 @@ Please provide flags -b and -m which are blueprint and description of the migrat
 	const concreteMigrationTpl = `
 package migrations
 
+import (
+    "github.com/uadmin/uadmin/utils"
+)
+
 type {{.MigrationName}} struct {
 }
 
 func (m {{.MigrationName}}) GetName() string {
-    return "{{.ConcreteMigrationName}}"
+    return "{{.BlueprintName}}.{{.ConcreteMigrationName}}"
 }
 
 func (m {{.MigrationName}}) GetId() int64 {
@@ -109,9 +113,13 @@ func (m {{.MigrationName}}) Down() {
 func (m {{.MigrationName}}) Deps() []string {
 {{if .DependencyId}}    return []string{"{{.BlueprintName}}.{{.DependencyId}}"}{{else}}    return make([]string, 0){{end}}
 }
+
+func (m {{.MigrationName}}) IsDependentFrom(dep string) bool {
+    return utils.Contains(m.Deps(), dep)
+}
 `
 	const initializeMigrationRegistryTpl = `
-    BMigrationRegistry.addMigration({{.MigrationName}}{})`
+    BMigrationRegistry.AddMigration({{.MigrationName}}{})`
 	const migrationRegistryCreationTpl = `
 package migrations
 
@@ -119,28 +127,10 @@ import (
 	"github.com/uadmin/uadmin/interfaces"
 )
 
-type MigrationRegistry struct {
-	migrations map[string]interfaces.IMigration
-}
-
-func (r MigrationRegistry) addMigration(migration interfaces.IMigration) {
-	r.migrations[migration.GetName()] = migration
-}
-
-func (r MigrationRegistry) FindMigrations() <-chan interfaces.IMigration{
-	chnl := make(chan interfaces.IMigration)
-	go func() {
-		close(chnl)
-	}()
-	return chnl
-}
-
-var BMigrationRegistry *MigrationRegistry
+var BMigrationRegistry *interfaces.MigrationRegistry
 
 func init() {
-    BMigrationRegistry = &MigrationRegistry{
-        migrations: make(map[string]interfaces.IMigration),
-    }
+    BMigrationRegistry = interfaces.NewMigrationRegistry()
     // placeholder to insert next migration
 }
 `

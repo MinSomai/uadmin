@@ -1,4 +1,4 @@
-package tests
+package testsold
 
 import (
 	"github.com/uadmin/uadmin/config"

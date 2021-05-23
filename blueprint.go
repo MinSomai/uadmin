@@ -89,20 +89,10 @@ import (
 	"github.com/uadmin/uadmin/blueprint/{{.Name}}/migrations"
 )
 
-type Blueprint struct {
-	interfaces.IBlueprint
-}
-
-func (b Blueprint) GetName() string {
-	return "{{.Name}}"
-}
-
-func (b Blueprint) GetDescription() string {
-	return "{{.Message}}"
-}
-
-func (b Blueprint) GetMigrationRegistry() interfaces.IMigrationRegistry {
-	return interfaces.IMigrationRegistry(migrations.BMigrationRegistry)
+var Blueprint = interfaces.Blueprint{
+	Name: "{{.Name}}",
+	Description: "{{.Message}}",
+	MigrationRegistry: migrations.BMigrationRegistry,
 }
 `
 	var blueprintTplBuffer bytes.Buffer
@@ -121,6 +111,10 @@ func (b Blueprint) GetMigrationRegistry() interfaces.IMigrationRegistry {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf(
+		"Created blueprint with name %s\n",
+		opts.Name,
+	)
 	migrateCommand := new(MigrateCommand)
 	migrateCommand.Proceed("create", []string{"-b", name, "-m", "initial"})
 }

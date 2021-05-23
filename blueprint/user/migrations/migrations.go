@@ -5,29 +5,11 @@ import (
 	"github.com/uadmin/uadmin/interfaces"
 )
 
-type MigrationRegistry struct {
-	migrations map[string]interfaces.IMigration
-}
-
-func (r MigrationRegistry) addMigration(migration interfaces.IMigration) {
-	r.migrations[migration.GetName()] = migration
-}
-
-func (r MigrationRegistry) FindMigrations() <-chan interfaces.IMigration{
-	chnl := make(chan interfaces.IMigration)
-	go func() {
-		close(chnl)
-	}()
-	return chnl
-}
-
-var BMigrationRegistry *MigrationRegistry
+var BMigrationRegistry *interfaces.MigrationRegistry
 
 func init() {
-    BMigrationRegistry = &MigrationRegistry{
-        migrations: make(map[string]interfaces.IMigration),
-    }
+    BMigrationRegistry = interfaces.NewMigrationRegistry()
     
-    BMigrationRegistry.addMigration(initial_1621680132{})
+    BMigrationRegistry.AddMigration(initial_1621680132{})
     // placeholder to insert next migration
 }

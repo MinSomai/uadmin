@@ -1,22 +1,12 @@
 package user
 
 import (
-	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/blueprint/user/migrations"
+	"github.com/uadmin/uadmin/interfaces"
 )
 
-type Blueprint struct {
-	interfaces.IBlueprint
-}
-
-func (b Blueprint) GetName() string {
-	return "user"
-}
-
-func (b Blueprint) GetDescription() string {
-	return "this blueprint is about users letting do usual routine things"
-}
-
-func (b Blueprint) GetMigrationRegistry() interfaces.IMigrationRegistry {
-	return interfaces.IMigrationRegistry(migrations.BMigrationRegistry)
+var Blueprint = interfaces.Blueprint{
+	Name: "user",
+	Description: "this blueprint is about users",
+	MigrationRegistry: migrations.BMigrationRegistry,
 }
