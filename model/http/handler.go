@@ -182,7 +182,8 @@ func DAPIHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Session
 		// check if there is a prequery
 		if preQuery, ok := model.(APIPreQueryAdder); ok && !preQuery.APIPreQueryAdd(w, r) {
 		} else {
-			dAPIAddHandler(w, r, s)
+			// @todo, refactor
+			// dAPIAddHandler(w, r, s)
 		}
 	}
 	if urlParts[1] == "edit" {

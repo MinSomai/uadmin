@@ -2,6 +2,7 @@ package database
 
 import (
 	config2 "github.com/uadmin/uadmin/config"
+	"github.com/uadmin/uadmin/dialect"
 	"text/template"
 
 	"bytes"
@@ -12,9 +13,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type UadminDatabase struct {
+	db *gorm.DB
+	dialect dialect.DbDialect
+}
 type Database struct {
 	config    *config2.UadminConfig
-	databases map[string]*gorm.DB
+	databases map[string]*UadminDatabase
 }
 
 var (
@@ -24,7 +29,7 @@ var (
 func NewDatabase(config *config2.UadminConfig) *Database {
 	database := Database{}
 	database.config = config
-	database.databases = make(map[string]*gorm.DB)
+	database.databases = make(map[string]*UadminDatabase)
 	return &database
 }
 
@@ -40,11 +45,14 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 		if err != nil {
 			panic(err)
 		}
-		database, err = gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
+		databaseOpened, err := gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
 		if err != nil {
 			panic(err)
 		}
-		d.databases[alias] = database
+		d.databases[alias] = &UadminDatabase{
+			db: databaseOpened,
+			dialect: dialect.NewDbDialect(databaseOpened, d.config.D.Db.Default.Type),
+		}
 	}
-	return database
+	return d.databases[alias].db
 }

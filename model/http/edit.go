@@ -271,7 +271,7 @@ func getEditMap(params map[string]string, schema *model2.ModelSchema, model *ref
 		var f *model2.F
 		var isPtr = false
 		for i := range schema.Fields {
-			if k == schema.Fields[i].ColumnName || ((k) == schema.Fields[i].ColumnName+"_id" && schema.Fields[i].Type == cFK) {
+			if k == schema.Fields[i].ColumnName || ((k) == schema.Fields[i].ColumnName+"_id" && schema.Fields[i].Type == preloaded.CFK) {
 				f = &schema.Fields[i]
 				isPtr = model.FieldByName(f.Name).Kind() == reflect.Ptr
 				break
