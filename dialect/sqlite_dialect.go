@@ -11,14 +11,14 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type CommonDialect struct {
+type SqliteDialect struct {
 	Statement *gorm.Statement
 	DbType    string
 }
 
-func NewCommonDialect(db *gorm.DB, db_type string) *CommonDialect {
-	return &CommonDialect{
-		DbType: db_type,
+func NewDbDialect(db *gorm.DB, dbType string) DbDialect {
+	return &SqliteDialect{
+		DbType: dbType,
 		Statement: &gorm.Statement{
 			DB:      db,
 			Context: context.Background(),
@@ -27,26 +27,26 @@ func NewCommonDialect(db *gorm.DB, db_type string) *CommonDialect {
 	}
 }
 
-func (d *CommonDialect) Equals(name interface{}, args ...interface{}) {
+func (d *SqliteDialect) Equals(name interface{}, args ...interface{}) {
 	query := d.Statement.Quote(name) + " = ?"
 	clause.Expr{SQL: query, Vars: args}.Build(d.Statement)
 }
 
-func (d *CommonDialect) Quote(name interface{}) string {
+func (d *SqliteDialect) Quote(name interface{}) string {
 	return d.Statement.Quote(name)
 }
 
-func (d *CommonDialect) LikeOperator() string {
+func (d *SqliteDialect) LikeOperator() string {
 	if d.DbType == "sqlite" {
 		return " LIKE "
 	}
 	return " LIKE BINARY "
 }
-func (d *CommonDialect) ToString() string {
+func (d *SqliteDialect) ToString() string {
 	return d.Statement.SQL.String()
 }
 
-func (d *CommonDialect) GetLastInsertId() {
+func (d *SqliteDialect) GetLastInsertId() {
 	var last_insert_id_func string
 	if d.DbType == "sqlite" {
 		last_insert_id_func = "last_insert_rowid()"
@@ -62,7 +62,7 @@ func (d *CommonDialect) GetLastInsertId() {
 	d.buildClauses(clause_interfaces)
 }
 
-func (d *CommonDialect) buildClauses(clause_interfaces []clause.Interface) {
+func (d *SqliteDialect) buildClauses(clause_interfaces []clause.Interface) {
 	var buildNames []string
 	for _, c := range clause_interfaces {
 		buildNames = append(buildNames, c.Name())
@@ -71,12 +71,12 @@ func (d *CommonDialect) buildClauses(clause_interfaces []clause.Interface) {
 	d.Statement.Build(buildNames...)
 }
 
-func (d *CommonDialect) QuoteTableName(tableName string) string {
+func (d *SqliteDialect) QuoteTableName(tableName string) string {
 	return d.Statement.Quote(tableName)
 }
 
 // @todo analyze
-func (d *CommonDialect) Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB {
+func (d *SqliteDialect) Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB {
 	// if Database.Type == "mysql" {
 	// 	db := GetDB()
 	//
@@ -129,7 +129,7 @@ func (d *CommonDialect) Delete(db *gorm.DB, model reflect.Value, query interface
 }
 
 // @todo analyze
-func (d *CommonDialect) ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error) {
+func (d *SqliteDialect) ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error) {
 	// if Database.Type == "mysql" {
 	// 	db := GetDB()
 	// 	if !customSchema {
@@ -187,7 +187,7 @@ func (d *CommonDialect) ReadRows(db *gorm.DB, customSchema bool, SQL string, m i
 }
 
 // @todo analyze
-func (d *CommonDialect) GetSqlDialectStrings() map[string]string {
+func (d *SqliteDialect) GetSqlDialectStrings() map[string]string {
 	// var sqlDialect = map[string]map[string]string{
 	// 	"mysql": {
 	// 		"createM2MTable": "CREATE TABLE `{TABLE1}_{TABLE2}` (`table1_id` int(10) unsigned NOT NULL, `table2_id` int(10) unsigned NOT NULL, PRIMARY KEY (`table1_id`,`table2_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
@@ -219,7 +219,7 @@ func (d *CommonDialect) GetSqlDialectStrings() map[string]string {
 }
 
 // @todo analyze
-func (d *CommonDialect) GetDb(host string, user string, password string, name string, port int) (*gorm.DB, error) {
+func (d *SqliteDialect) GetDb(host string, user string, password string, name string, port int) (*gorm.DB, error) {
 	// } else if strings.ToLower(Database.Type) == "postgresql" {
 	// 	if Database.Host == "" || Database.Host == "localhost" {
 	// 		Database.Host = "127.0.0.1"
@@ -307,7 +307,7 @@ func (d *CommonDialect) GetDb(host string, user string, password string, name st
 }
 
 // @todo analyze
-func (d *CommonDialect) CreateDb() error {
+func (d *SqliteDialect) CreateDb() error {
 	// if Database.Type == "mysql" {
 	// 	credential := Database.User
 	//

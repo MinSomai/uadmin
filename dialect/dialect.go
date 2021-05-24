@@ -53,6 +53,6 @@ func GetDB() *gorm.DB {
 
 
 
-func GetDialectForDb() *CommonDialect {
-	return NewCommonDialect(Db, CurrentDatabaseSettings.Type)
+func GetDialectForDb() DbDialect {
+	return NewDbDialect(Db, CurrentDatabaseSettings.Type)
 }

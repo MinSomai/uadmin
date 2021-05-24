@@ -51,13 +51,13 @@ func GetDb() *gorm.DB {
 
 func TestSqlite(t *testing.T) {
 	db := GetDb()
-	sql_dialect := NewCommonDialect(db, "sqlite")
+	sql_dialect := NewDbDialect(db, "sqlite")
 	sql_dialect.Equals("admin", true)
 	assert.Equal(t, sql_dialect.ToString(), "`admin` = ?")
-	sql_dialect = NewCommonDialect(db, "sqlite")
+	sql_dialect = NewDbDialect(db, "sqlite")
 	sql_dialect.GetLastInsertId()
 	assert.Equal(t, sql_dialect.ToString(), "SELECT last_insert_rowid() AS lastid")
-	sql_dialect = NewCommonDialect(db, "sqlite")
+	sql_dialect = NewDbDialect(db, "sqlite")
 	quoted_field := sql_dialect.Quote("test")
 	assert.Equal(t, quoted_field, "`test`")
 	quoted_field = sql_dialect.LikeOperator()
@@ -72,7 +72,7 @@ func TestSqliteFunctional(t *testing.T) {
 	db := GetDb().Begin()
 	db = db.Exec("INSERT INTO users (`username`) VALUES (\"test\")")
 	last_ids := []int{}
-	sql_dialect := NewCommonDialect(db, "sqlite")
+	sql_dialect := NewDbDialect(db, "sqlite")
 	sql_dialect.GetLastInsertId()
 	db = db.Raw(sql_dialect.ToString())
 	db = db.Pluck("lastid", &last_ids)
