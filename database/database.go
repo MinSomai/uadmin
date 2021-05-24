@@ -23,7 +23,7 @@ type Database struct {
 }
 
 var (
-	postgresDsnTemplate, _ = template.New("postgresdsn").Parse("host={{.Host}} user={{.User}} password={{.Pwd}} dbname={{.Name}} port=5432 sslmode=disable TimeZone=UTC")
+	postgresDsnTemplate, _ = template.New("postgresdsn").Parse("host={{.Host}} user={{.User}} password={{.Password}} dbname={{.Name}} port=5432 sslmode=disable TimeZone=UTC")
 )
 
 func NewDatabase(config *config2.UadminConfig) *Database {

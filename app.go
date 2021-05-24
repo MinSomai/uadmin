@@ -24,10 +24,10 @@ type App struct {
 	BlueprintRegistry *BlueprintRegistry
 }
 
-var instance *App
+var appInstance *App
 
 func NewApp(environment string) *App {
-	if instance == nil {
+	if appInstance == nil {
 		a := new(App)
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
 		a.commandRegistry = &CommandRegistry{
@@ -52,10 +52,10 @@ func NewApp(environment string) *App {
 		a.registerBaseBlueprints()
 		a.registerBaseCommands()
 		// a.InitializeRouter()
-		instance = a
+		appInstance = a
 		return a
 	}
-	return instance
+	return appInstance
 }
 
 func (a App) Initialize() {

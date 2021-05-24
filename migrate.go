@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/uadmin/uadmin/interfaces"
+	"gorm.io/gorm"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -14,6 +15,12 @@ import (
 	"strings"
 	"time"
 )
+
+type Migration struct {
+	gorm.Model
+	MigrationName string `gorm:"index:migration_migration_name,unique"`
+	AppliedAt  time.Time
+}
 
 type MigrateCommand struct {
 
@@ -231,6 +238,16 @@ func (command CreateMigration) GetHelpText() string {
 	return "Create migration for your blueprint"
 }
 
+func ensureDatabaseIsReadyForMigrationsAndReadAllApplied() []Migration {
+	err := appInstance.Database.ConnectTo("default").AutoMigrate(Migration{})
+	if err != nil {
+		panic(fmt.Errorf("error while preparing database for migrations: %s", err))
+	}
+	var appliedMigrations []Migration
+	appInstance.Database.ConnectTo("default").Find(&appliedMigrations)
+	return appliedMigrations
+}
+
 type UpMigrationOptions struct {
 }
 
@@ -238,7 +255,7 @@ type UpMigration struct {
 }
 
 func (command UpMigration) Proceed(subaction string, args []string) {
-
+	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
 }
 
 func (command UpMigration) GetHelpText() string {
@@ -252,7 +269,7 @@ type DownMigration struct {
 }
 
 func (command DownMigration) Proceed(subaction string, args []string) {
-
+	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
 }
 
 func (command DownMigration) GetHelpText() string {

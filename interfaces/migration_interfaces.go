@@ -42,7 +42,7 @@ type MigrationLeaf struct {
 	Descendants *list.List
 }
 
-func getBluePrintNameFromMigrationName(migrationName string) string {
+func GetBluePrintNameFromMigrationName(migrationName string) string {
 	return strings.Split(migrationName, ".")[0]
 }
 
@@ -150,7 +150,7 @@ func (t MigrationTree) traverse() <-chan IMigrationLeaf {
 func (t MigrationTree) findPotentialConflictsForBlueprint(blueprintName string) []string {
 	var conflicts []string
 	for mLeaf := range t.traverse() {
-		migrationBlueprintName := getBluePrintNameFromMigrationName(mLeaf.GetMigration().GetName())
+		migrationBlueprintName := GetBluePrintNameFromMigrationName(mLeaf.GetMigration().GetName())
 		if migrationBlueprintName != blueprintName {
 			continue
 		}
