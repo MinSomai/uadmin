@@ -839,7 +839,7 @@ func syncSystemSettings() {
 	var s Setting
 	sList := []Setting{}
 	database.Filter(&sList, "category_id = ?", cat.ID)
-	tx := dialect.GetDB().Begin()
+	tx := dialect.GetDB("default").Begin()
 	for i, setting := range settings {
 		utils.Trail(utils.WORKING, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, i+1, len(settings), colors.FGNormal)
 		s = Setting{}

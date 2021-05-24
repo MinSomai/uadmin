@@ -71,19 +71,19 @@ func (a *Approval) Save() {
 		model1, _ := model.NewModel(a.ModelName, false)
 		if a.ApprovalAction == a.ApprovalAction.Approved() {
 			if model1.FieldByName(a.ColumnName).Type().String() == "*time.Time" && a.NewValue == "" {
-				database.Update(m.Interface(), dialect.GetDB().Config.NamingStrategy.ColumnName("", a.ColumnName), nil, "id = ?", a.ModelPK)
+				database.Update(m.Interface(), dialect.GetDB("default").Config.NamingStrategy.ColumnName("", a.ColumnName), nil, "id = ?", a.ModelPK)
 			} else if model.Schema[a.ModelName].FieldByName(a.ColumnName).Type == preloaded.CFK {
-				database.Update(m.Interface(), dialect.GetDB().Config.NamingStrategy.ColumnName("", a.ColumnName)+"_id", a.NewValue, "id = ?", a.ModelPK)
+				database.Update(m.Interface(), dialect.GetDB("default").Config.NamingStrategy.ColumnName("", a.ColumnName)+"_id", a.NewValue, "id = ?", a.ModelPK)
 			} else {
-				database.Update(m.Interface(), dialect.GetDB().Config.NamingStrategy.ColumnName("", a.ColumnName), a.NewValue, "id = ?", a.ModelPK)
+				database.Update(m.Interface(), dialect.GetDB("default").Config.NamingStrategy.ColumnName("", a.ColumnName), a.NewValue, "id = ?", a.ModelPK)
 			}
 		} else {
 			if model1.FieldByName(a.ColumnName).Type().String() == "*time.Time" && a.OldValue == "" {
-				database.Update(m.Interface(), dialect.GetDB().Config.NamingStrategy.ColumnName("", a.ColumnName), nil, "id = ?", a.ModelPK)
+				database.Update(m.Interface(), dialect.GetDB("default").Config.NamingStrategy.ColumnName("", a.ColumnName), nil, "id = ?", a.ModelPK)
 			} else if model.Schema[a.ModelName].FieldByName(a.ColumnName).Type == preloaded.CFK {
-				database.Update(m.Interface(), dialect.GetDB().Config.NamingStrategy.ColumnName("", a.ColumnName)+"_id", a.OldValue, "id = ?", a.ModelPK)
+				database.Update(m.Interface(), dialect.GetDB("default").Config.NamingStrategy.ColumnName("", a.ColumnName)+"_id", a.OldValue, "id = ?", a.ModelPK)
 			} else {
-				database.Update(m.Interface(), dialect.GetDB().Config.NamingStrategy.ColumnName("", a.ColumnName), a.OldValue, "id = ?", a.ModelPK)
+				database.Update(m.Interface(), dialect.GetDB("default").Config.NamingStrategy.ColumnName("", a.ColumnName), a.OldValue, "id = ?", a.ModelPK)
 			}
 		}
 	}

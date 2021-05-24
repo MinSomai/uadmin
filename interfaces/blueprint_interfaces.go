@@ -1,5 +1,10 @@
 package interfaces
 
+type TraverseMigrationResult struct {
+	MigrationLeaf IMigrationLeaf
+	Error error
+}
+
 type IBlueprint interface {
 	GetName() string
 	GetDescription() string

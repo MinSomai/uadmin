@@ -31,7 +31,7 @@ func IsAuthenticated(r *http.Request) *sessionmodel.Session {
 	if preloaded.CacheSessions {
 		s = authservices.CachedSessions[key]
 	} else {
-		dialect1 := dialect.GetDialectForDb()
+		dialect1 := dialect.GetDialectForDb("default")
 		dialect1.Equals("key", key)
 		database.Get(&s, dialect1.ToString(), key)
 	}
@@ -108,7 +108,7 @@ func GetSessionFromRequest(r *http.Request) *sessionmodel.Session {
 	if preloaded.CacheSessions {
 		s = authservices.CachedSessions[key]
 	} else {
-		dialect1 := dialect.GetDialectForDb()
+		dialect1 := dialect.GetDialectForDb("default")
 		dialect1.Equals("key", key)
 		database.Get(&s, dialect1.ToString(), key)
 	}

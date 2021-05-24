@@ -25,7 +25,7 @@ type Migration struct {
 type MigrateCommand struct {
 
 }
-func (c MigrateCommand) Proceed(subaction string, args []string) {
+func (c MigrateCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
@@ -48,9 +48,9 @@ Please provide what do you want to do ?
 %s
 `, helpText)
 		fmt.Print(help)
-		return
+		return nil
 	}
-	commandRegistry.runAction(subaction, "", args)
+	return commandRegistry.runAction(subaction, "", args)
 }
 
 func (c MigrateCommand) GetHelpText() string {
@@ -78,7 +78,7 @@ type CreateMigrationOptions struct {
 type CreateMigration struct {
 }
 
-func (command CreateMigration) Proceed(subaction string, args []string) {
+func (command CreateMigration) Proceed(subaction string, args []string) error {
 	var opts = &CreateMigrationOptions{}
 	parser := flags.NewParser(opts, flags.Default)
 	var err error
@@ -88,7 +88,7 @@ func (command CreateMigration) Proceed(subaction string, args []string) {
 Please provide flags -b and -m which are blueprint and description of the migration respectively 
 `
 		fmt.Printf(help)
-		return
+		return nil
 	}
 	if err != nil {
 		panic(err)
@@ -232,6 +232,7 @@ func init() {
 		opts.Blueprint,
 		opts.Message,
 	)
+	return nil
 }
 
 func (command CreateMigration) GetHelpText() string {
@@ -254,8 +255,13 @@ type UpMigrationOptions struct {
 type UpMigration struct {
 }
 
-func (command UpMigration) Proceed(subaction string, args []string) {
-	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
+func (command UpMigration) Proceed(subaction string, args []string) error {
+	for traverseMigrationResult := range appInstance.BlueprintRegistry.traverseMigrations() {
+		if traverseMigrationResult.Error != nil {
+			return traverseMigrationResult.Error
+		}
+	}
+	return nil
 }
 
 func (command UpMigration) GetHelpText() string {
@@ -268,8 +274,9 @@ type DownMigrationOptions struct {
 type DownMigration struct {
 }
 
-func (command DownMigration) Proceed(subaction string, args []string) {
+func (command DownMigration) Proceed(subaction string, args []string) error {
 	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
+	return nil
 }
 
 func (command DownMigration) GetHelpText() string {

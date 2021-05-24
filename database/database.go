@@ -5,11 +5,6 @@ import (
 	"github.com/uadmin/uadmin/dialect"
 	"text/template"
 
-	"bytes"
-	"strings"
-
-	"github.com/oleiade/reflections"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -39,16 +34,17 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 	}
 	database := d.databases[alias]
 	if database == nil {
-		var tplBytes bytes.Buffer
-		databaseConfig, _ := reflections.GetField(d.config.D.Db, strings.Title(alias))
-		err := postgresDsnTemplate.Execute(&tplBytes, databaseConfig)
-		if err != nil {
-			panic(err)
-		}
-		databaseOpened, err := gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
-		if err != nil {
-			panic(err)
-		}
+		//var tplBytes bytes.Buffer
+		//databaseConfig, _ := reflections.GetField(d.config.D.Db, strings.Title(alias))
+		//err := postgresDsnTemplate.Execute(&tplBytes, databaseConfig)
+		//if err != nil {
+		//	panic(err)
+		//}
+		//databaseOpened, err := gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
+		//if err != nil {
+		//	panic(err)
+		//}
+		databaseOpened := dialect.GetDB(alias)
 		d.databases[alias] = &UadminDatabase{
 			db: databaseOpened,
 			dialect: dialect.NewDbDialect(databaseOpened, d.config.D.Db.Default.Type),

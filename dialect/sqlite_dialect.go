@@ -3,12 +3,13 @@ package dialect
 import (
 	"context"
 	"database/sql"
+	config2 "github.com/uadmin/uadmin/config"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm/logger"
 	"reflect"
 
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
 )
 
 type SqliteDialect struct {
@@ -219,7 +220,7 @@ func (d *SqliteDialect) GetSqlDialectStrings() map[string]string {
 }
 
 // @todo analyze
-func (d *SqliteDialect) GetDb(host string, user string, password string, name string, port int) (*gorm.DB, error) {
+func (d *SqliteDialect) GetDb(alias string) (*gorm.DB, error) {
 	// } else if strings.ToLower(Database.Type) == "postgresql" {
 	// 	if Database.Host == "" || Database.Host == "localhost" {
 	// 		Database.Host = "127.0.0.1"
@@ -291,18 +292,22 @@ func (d *SqliteDialect) GetDb(host string, user string, password string, name st
 	// 		}
 	// 	}
 	// }
-	var db *gorm.DB
-	var err error
-
-	if d.DbType == "sqlite" {
-		if name == "" {
-			name = "uadmin.db"
-		}
-		db, err = gorm.Open(sqlite.Open(name), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-		})
-
+	var aliasDatabaseSettings *config2.DBSettings
+	if alias == "default" {
+		aliasDatabaseSettings = CurrentDatabaseSettings.Default
 	}
+	db, err := gorm.Open(sqlite.Open(aliasDatabaseSettings.Name), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	//var db *gorm.DB
+	//var err error
+	//
+	//if d.DbType == "sqlite" {
+	//	if name == "" {
+	//		name = "uadmin.db"
+	//	}
+	//
+	//}
 	return db, err
 }
 

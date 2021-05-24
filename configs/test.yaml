@@ -1,5 +1,6 @@
 db:
   default:
     type: "sqlite"
+    name: "test.db"
 api:
   listen_port: 5000

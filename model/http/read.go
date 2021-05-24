@@ -138,8 +138,8 @@ func dAPIReadHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		} else {
 			m = []map[string]interface{}{}
 		}
-		dialect1 := dialect.GetDialectForDb()
-		db := dialect.GetDB().Begin()
+		dialect1 := dialect.GetDialectForDb("default")
+		db := dialect.GetDB("default").Begin()
 		rows, err = dialect1.ReadRows(db, customSchema, SQL, m, args...)
 		if customSchema {
 			if err != nil {

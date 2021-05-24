@@ -59,7 +59,7 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 			return
 		}
 		//var tempSet Setting
-		tx := dialect.GetDB().Begin()
+		tx := dialect.GetDB("default").Begin()
 
 		for _, s := range settings {
 			v, ok := r.Form[s.Code]

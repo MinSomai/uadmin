@@ -13,7 +13,7 @@ import (
 
 type BlueprintCommand struct {
 }
-func (c BlueprintCommand) Proceed(subaction string, args []string) {
+func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
 	var isCorrectActionPassed bool = false
@@ -34,9 +34,10 @@ Please provide what do you want to do ?
 %s
 `, helpText)
 		fmt.Print(help)
-		return
+		return nil
 	}
 	commandRegistry.runAction(subaction, "", args)
+	return nil
 }
 
 func (c BlueprintCommand) GetHelpText() string {
@@ -54,7 +55,7 @@ type CreateBlueprint struct {
 func (command CreateBlueprint) ParseArgs() {
 }
 
-func (command CreateBlueprint) Proceed(subaction string, args []string) {
+func (command CreateBlueprint) Proceed(subaction string, args []string) error {
 	var opts = &CreateBlueprintOptions{}
 	parser := flags.NewParser(opts, flags.Default)
 	var err error
@@ -64,7 +65,7 @@ func (command CreateBlueprint) Proceed(subaction string, args []string) {
 Please provide flags -n and -m which is name of blueprint and description of blueprint respectively 
 `
 		fmt.Printf(help)
-		return
+		return nil
 	}
 	if err != nil {
 		panic(err)
@@ -117,6 +118,7 @@ var Blueprint = interfaces.Blueprint{
 	)
 	migrateCommand := new(MigrateCommand)
 	migrateCommand.Proceed("create", []string{"-b", name, "-m", "initial"})
+	return nil
 }
 
 func (command CreateBlueprint) GetHelpText() string {

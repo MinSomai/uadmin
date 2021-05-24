@@ -3,7 +3,7 @@ package http
 import (
 	"database/sql"
 	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/dialect"
+	dialect1 "github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/security"
@@ -200,7 +200,7 @@ func getQueryOperator(r *http.Request, v string, tableName string) string {
 		nTerm = " NOT"
 		v = v[1:]
 	}
-	dialect := dialect.GetDialectForDb()
+	dialect := dialect1.GetDialectForDb("default")
 	// add table name
 	if security.SQLInjection(r, v, "") {
 		return ""
@@ -333,7 +333,7 @@ func getQueryFields(r *http.Request, params map[string]string, tableName string)
 
 	fieldParts := strings.Split(fieldRaw, ",")
 	fieldArray := []string{}
-	dialect := dialect.GetDialectForDb()
+	dialect := dialect1.GetDialectForDb("default")
 	for _, field := range fieldParts {
 		// Check for SQL injection
 		if security.SQLInjection(r, field, "") {
@@ -567,7 +567,7 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 	// Create a list of M2M
 	// SELECT `cards`.*  FROM `cards` INNER JOIN `customer_card` ON `customer_card`.`table2_id`=`cards`.`id` WHERE `customer_card`.`table1_id` = 1
 	// SELECT `cards`.id FROM `cards` INNER JOIN `customer_card` ON `customer_card`.`table2_id`=`cards`.`id` WHERE `customer_card`.`table1_id` = 1
-	dialect1 := dialect.GetDialectForDb()
+	dialect := dialect1.GetDialectForDb("default")
 	m2mTmpl := "SELECT {TABLE_NAME}.{FIELDS} FROM {TABLE_NAME} INNER JOIN {M2M_TABLE_NAME} ON {M2M_TABLE_NAME}.table2_id={TABLE_NAME}.id WHERE {M2M_TABLE_NAME}.table1_id=? AND {TABLE_NAME}.deleted_at IS NULL"
 	m2mStmt := map[string]string{}
 	m2mModelName := map[string]string{}
@@ -584,8 +584,8 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 				table2 = model.Schema[strings.ToLower(f.TypeName)].TableName
 				m2mTable := s.ModelName + "_" + model.Schema[strings.ToLower(f.TypeName)].ModelName
 				m2mStmt[f.Name] = m2mTmpl
-				table_name = dialect1.QuoteTableName(table2)
-				m2m_table_name = dialect1.Quote(m2mTable)
+				table_name = dialect.QuoteTableName(table2)
+				m2m_table_name = dialect.Quote(m2mTable)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{TABLE_NAME}", table_name, -1)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{FIELDS}", fillType, -1)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{M2M_TABLE_NAME}", m2m_table_name, -1)
@@ -622,7 +622,7 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 	for i := 0; i < mValue.Elem().Len(); i++ {
 		for k, v := range m2mStmt {
 			tempList, _ := model.NewModelArray(m2mModelName[k], true)
-			dialect.GetDB().Raw(v, database.GetID(mValue.Elem().Index(i))).Scan(tempList.Interface())
+			dialect1.GetDB("default").Raw(v, database.GetID(mValue.Elem().Index(i))).Scan(tempList.Interface())
 			mValue.Elem().Index(i).FieldByName(k).Set(tempList.Elem())
 		}
 	}

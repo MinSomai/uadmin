@@ -29,7 +29,7 @@ func RegisterInlines(model interface{}, fk map[string]string) {
 	for k, v := range fk {
 		kmodel, _ := NewModel(strings.ToLower(k), false)
 		t := reflect.TypeOf(kmodel.Interface())
-		fkMap[strings.ToLower(t.Name())] = dialect.GetDB().Config.NamingStrategy.ColumnName("", v)
+		fkMap[strings.ToLower(t.Name())] = dialect.GetDB("default").Config.NamingStrategy.ColumnName("", v)
 		// Check if the field name is in the struct
 		if t.Kind() != reflect.Struct {
 			// @todo, redo
@@ -77,7 +77,7 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 	s.ModelName = strings.ToLower(t.Name())
 	// @todo, redo
 	// s.DisplayName = utils.GetDisplayName(t.Name())
-	s.TableName = dialect.GetDB().Config.NamingStrategy.TableName(t.Name())
+	s.TableName = dialect.GetDB("default").Config.NamingStrategy.TableName(t.Name())
 
 	// Analize the fields of the model and add them to the fields list
 	s.Fields = []F{}
@@ -124,7 +124,7 @@ func GetSchema(a interface{}) (s ModelSchema, ok bool) {
 		f.Name = t.Field(index).Name
 		// @todo, redo
 		// f.DisplayName = utils.GetDisplayName(t.Field(index).Name)
-		f.ColumnName = dialect.GetDB().Config.NamingStrategy.ColumnName("", t.Field(index).Name)
+		f.ColumnName = dialect.GetDB("default").Config.NamingStrategy.ColumnName("", t.Field(index).Name)
 
 		// Get uadmin tag from the field
 		tagList := strings.Split(t.Field(index).Tag.Get("uadmin"), ";")

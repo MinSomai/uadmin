@@ -117,9 +117,9 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 
 	writeMap, m2mMap := getEditMap(params, &schema, &model)
 
-	db := dialect.GetDB()
+	db := dialect.GetDB("default")
 
-	dialect1 := dialect.GetDialectForDb()
+	dialect1 := dialect.GetDialectForDb("default")
 	sqlDialectStrings := dialect1.GetSqlDialectStrings()
 	if len(urlParts) == 2 {
 		// Edit multiple
@@ -140,7 +140,7 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		}
 
 		// Process M2M
-		db = dialect.GetDB().Begin()
+		db = dialect.GetDB("default").Begin()
 		table1 := schema.ModelName
 		for i := 0; i < modelArray.Elem().Len(); i++ {
 			for k, v := range m2mMap {
@@ -197,7 +197,7 @@ func dAPIEditHandler(w http.ResponseWriter, r *http.Request, s *sessionmodel.Ses
 		}
 
 		// Process M2M
-		db = dialect.GetDB().Begin()
+		db = dialect.GetDB("default").Begin()
 		table1 := schema.ModelName
 		for k, v := range m2mMap {
 			model, _ := model2.NewModel(k, false)
@@ -292,7 +292,7 @@ func getEditMap(params map[string]string, schema *model2.ModelSchema, model *ref
 
 func getWriteQueryFields(v string) string {
 	if strings.HasPrefix(v, "_") {
-		return dialect.GetDialectForDb().Quote(strings.TrimPrefix(v, "_"))
+		return dialect.GetDialectForDb("default").Quote(strings.TrimPrefix(v, "_"))
 	}
 	return ""
 }

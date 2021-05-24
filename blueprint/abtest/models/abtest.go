@@ -114,7 +114,7 @@ func SyncABTests() {
 	// Check if there are stats to save to the DB
 	AbTestsMutex.Lock()
 	if StaticABTests != nil {
-		tx := dialect.GetDB().Begin()
+		tx := dialect.GetDB("default").Begin()
 		for _, v := range StaticABTests {
 			for i := range v {
 				if v[i].imp != 0 || v[i].click != 0 {

@@ -35,7 +35,7 @@ type migration2_1621667393 struct {
 }
 
 func (m migration2_1621667393) GetName() string {
-	return "migration2"
+	return "migration2.1621667393"
 }
 
 func (m migration2_1621667393) GetId() int64 {
@@ -85,7 +85,7 @@ type migration2test_1621667393 struct {
 }
 
 func (m migration2test_1621667393) GetName() string {
-	return "migration2"
+	return "migration2.1621667393"
 }
 
 func (m migration2test_1621667393) GetId() int64 {
@@ -182,7 +182,7 @@ func init() {
 	Test1BlueprintMigrationRegistry.AddMigration(migration2test_1621667393{})
 
 	TestBlueprint = interfaces.Blueprint{
-		Name: "test",
+		Name: "user",
 		Description: "this blueprint for testing",
 		MigrationRegistry: TestBlueprintMigrationRegistry,
 	}

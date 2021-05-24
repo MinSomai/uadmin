@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"container/list"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -32,7 +33,9 @@ type IMigrationTree interface {
 	GetRoot() IMigrationLeaf
 	SetRoot(root *MigrationLeaf)
 	Traverse() <-chan MigrationLeaf
+	BuildTree() error
 	AddLeaf(IMigrationLeaf)
+	TraverseInOrder() <-chan MigrationLeaf
 }
 
 type MigrationLeaf struct {
@@ -127,7 +130,7 @@ func (r MigrationRegistry) AddMigration(migration IMigration) {
 	r.Migrations[migration.GetName()] = migration
 }
 
-func (t MigrationTree) traverse() <-chan IMigrationLeaf {
+func (t MigrationTree) Traverse() <-chan IMigrationLeaf {
 	chnl := make(chan IMigrationLeaf)
 	go func() {
 		if t.Leafs.Len() == 0 {
@@ -149,7 +152,7 @@ func (t MigrationTree) traverse() <-chan IMigrationLeaf {
 
 func (t MigrationTree) findPotentialConflictsForBlueprint(blueprintName string) []string {
 	var conflicts []string
-	for mLeaf := range t.traverse() {
+	for mLeaf := range t.Traverse() {
 		migrationBlueprintName := GetBluePrintNameFromMigrationName(mLeaf.GetMigration().GetName())
 		if migrationBlueprintName != blueprintName {
 			continue
@@ -164,7 +167,7 @@ func (t MigrationTree) findPotentialConflictsForBlueprint(blueprintName string) 
 	return make([]string, 0)
 }
 
-func (r MigrationRegistry) BuildTree() error {
+func (r MigrationRegistry) BuildTree(blueprintName string) error {
 	if len(r.Migrations) == 0 {
 		return nil
 	}
@@ -182,6 +185,10 @@ func (r MigrationRegistry) BuildTree() error {
 			currentLeaf.AddAncestor(migrationLeaf)
 		}
 		currentLeaf = migrationLeaf
+	}
+	potentialConflicts := r.FindPotentialConflictsForBlueprint(blueprintName)
+	if len(potentialConflicts) > 1 {
+		return fmt.Errorf("found potential conflict in migrations in blueprint %s: %v", blueprintName, potentialConflicts)
 	}
 	return nil
 }

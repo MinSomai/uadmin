@@ -11,10 +11,13 @@ import (
 
 var Db *gorm.DB
 
-var CurrentDatabaseSettings *config2.DBSettings
+type DatabaseSettings struct {
+	Default *config2.DBSettings
+}
+var CurrentDatabaseSettings *DatabaseSettings
 
 // GetDB returns a pointer to the DB
-func GetDB() *gorm.DB {
+func GetDB(alias string) *gorm.DB {
 	if Db != nil{
 		return Db
 	}
@@ -24,25 +27,16 @@ func GetDB() *gorm.DB {
 	if CurrentDatabaseSettings == nil {
 		buf, err := ioutil.ReadFile(".database")
 		if err == nil {
-			err = json.Unmarshal(buf, &CurrentDatabaseSettings)
+			err = json.Unmarshal(buf, CurrentDatabaseSettings)
 			if err != nil {
 				utils.Trail(utils.WARNING, ".database file is not a valid json file. %s", err)
 			}
 		}
 	}
 
-	if CurrentDatabaseSettings == nil {
-		CurrentDatabaseSettings = &config2.DBSettings{
-			Type: "sqlite",
-		}
-	}
-	dialect := GetDialectForDb()
+	dialect := GetDialectForDb(alias)
 	Db, err = dialect.GetDb(
-		CurrentDatabaseSettings.Host,
-		CurrentDatabaseSettings.User,
-		CurrentDatabaseSettings.Password,
-		CurrentDatabaseSettings.Name,
-		CurrentDatabaseSettings.Port,
+		alias,
 	)
 	if err != nil {
 		utils.Trail(utils.ERROR, "unable to connect to DB. %s", err)
@@ -53,6 +47,10 @@ func GetDB() *gorm.DB {
 
 
 
-func GetDialectForDb() DbDialect {
-	return NewDbDialect(Db, CurrentDatabaseSettings.Type)
+func GetDialectForDb(alias string) DbDialect {
+	var databaseConfig *config2.DBSettings
+	if alias == "default" {
+		databaseConfig = CurrentDatabaseSettings.Default
+	}
+	return NewDbDialect(Db, databaseConfig.Type)
 }

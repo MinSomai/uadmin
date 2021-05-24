@@ -21,10 +21,10 @@ import (
 func Save(a interface{}) (err error) {
 	encryptRecord(a)
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Save(a).Error
+		err = dialect.GetDB("default").Save(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Save(a).Error
+			err = dialect.GetDB("default").Save(a).Error
 		}
 	})
 	if err != nil {
@@ -109,7 +109,7 @@ func customSave(m interface{}) (err error) {
 		t = reflect.TypeOf(a)
 	}
 	value := reflect.ValueOf(a)
-	dialect1 := dialect.GetDialectForDb()
+	dialect1 := dialect.GetDialectForDb("default")
 	sqlDialectStrings := dialect1.GetSqlDialectStrings()
 	for i := 0; i < t.NumField(); i++ {
 		// Check if there is any m2m fields
@@ -124,10 +124,10 @@ func customSave(m interface{}) (err error) {
 			sql = strings.Replace(sql, "{TABLE1_ID}", fmt.Sprint(GetID(value)), -1)
 
 			metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-				err = dialect.GetDB().Exec(sql).Error
+				err = dialect.GetDB("default").Exec(sql).Error
 				for fmt.Sprint(err) == "database is locked" {
 					time.Sleep(time.Millisecond * 100)
-					err = dialect.GetDB().Exec(sql).Error
+					err = dialect.GetDB("default").Exec(sql).Error
 				}
 			})
 			if err != nil {
@@ -144,10 +144,10 @@ func customSave(m interface{}) (err error) {
 				sql = strings.Replace(sql, "{TABLE2_ID}", fmt.Sprint(GetID(value.Field(i).Index(index))), -1)
 
 				metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-					err = dialect.GetDB().Exec(sql).Error
+					err = dialect.GetDB("default").Exec(sql).Error
 					for fmt.Sprint(err) == "database is locked" {
 						time.Sleep(time.Millisecond * 100)
-						err = dialect.GetDB().Exec(sql).Error
+						err = dialect.GetDB("default").Exec(sql).Error
 					}
 				})
 				if err != nil {
@@ -178,7 +178,7 @@ var DbOK = false
 // initializeDB opens the connection the DB
 func initializeDB(a ...interface{}) {
 	// Open the connection the the DB
-	db := dialect.GetDB()
+	db := dialect.GetDB("default")
 
 	// Migrate schema
 	for i, model := range a {
@@ -191,7 +191,7 @@ func initializeDB(a ...interface{}) {
 
 func customMigration(a interface{}) (err error) {
 	t := reflect.TypeOf(a)
-	currentdialect := dialect.GetDialectForDb()
+	currentdialect := dialect.GetDialectForDb("default")
 	sqlDialectStrings := currentdialect.GetSqlDialectStrings()
 	for i := 0; i < t.NumField(); i++ {
 		// Check if there is any m2m fields
@@ -200,11 +200,11 @@ func customMigration(a interface{}) (err error) {
 			table2 := strings.ToLower(t.Field(i).Type.Elem().Name())
 
 			//Check if the table is created for the m2m field
-			if !dialect.GetDB().Migrator().HasTable(table1 + "_" + table2) {
+			if !dialect.GetDB("default").Migrator().HasTable(table1 + "_" + table2) {
 				sql1 := sqlDialectStrings["createM2MTable"]
 				sql1 = strings.Replace(sql1, "{TABLE1}", table1, -1)
 				sql1 = strings.Replace(sql1, "{TABLE2}", table2, -1)
-				err = dialect.GetDB().Exec(sql1).Error
+				err = dialect.GetDB("default").Exec(sql1).Error
 				if err != nil {
 					utils.Trail(utils.ERROR, "Unable to create M2M table. %s", err)
 					utils.Trail(utils.ERROR, sql1)
@@ -217,11 +217,11 @@ func customMigration(a interface{}) (err error) {
 }
 
 func InitializeDbSettingsFromConfig(config *config.UadminConfig) {
-	dialect.CurrentDatabaseSettings = config.D.Db.Default
+//	dialect.CurrentDatabaseSettings = config.D.Db.(dialect.DatabaseSettings)
 }
 
 func createDB() error {
-	return fmt.Errorf("CreateDB: Unknown database type " + dialect.CurrentDatabaseSettings.Type)
+	return fmt.Errorf("CreateDB: Unknown database type " + dialect.CurrentDatabaseSettings.Default.Type)
 }
 
 // ClearDB clears the db object
@@ -232,10 +232,10 @@ func ClearDB() {
 // All fetches all object in the database
 func All(a interface{}) (err error) {
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Find(a).Error
+		err = dialect.GetDB("default").Find(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Find(a).Error
+			err = dialect.GetDB("default").Find(a).Error
 		}
 	})
 	if err != nil {
@@ -249,10 +249,10 @@ func All(a interface{}) (err error) {
 // Get fetches the first record from the database matching query and args
 func Get(a interface{}, query interface{}, args ...interface{}) (err error) {
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Where(query, args...).First(a).Error
+		err = dialect.GetDB("default").Where(query, args...).First(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Where(query, args...).First(a).Error
+			err = dialect.GetDB("default").Where(query, args...).First(a).Error
 		}
 	})
 
@@ -315,21 +315,21 @@ func GetStringer(a interface{}, query interface{}, args ...interface{}) (err err
 	modelName := model.GetModelName(a)
 	for _, f := range model.Schema[modelName].Fields {
 		if f.Stringer {
-			stringers = append(stringers, dialect.GetDB().Config.NamingStrategy.ColumnName("", f.Name))
+			stringers = append(stringers, dialect.GetDB("default").Config.NamingStrategy.ColumnName("", f.Name))
 		}
 	}
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
 		if len(stringers) == 0 {
-			err = dialect.GetDB().Where(query, args...).First(a).Error
+			err = dialect.GetDB("default").Where(query, args...).First(a).Error
 			for fmt.Sprint(err) == "database is locked" {
 				time.Sleep(time.Millisecond * 100)
-				err = dialect.GetDB().Where(query, args...).First(a).Error
+				err = dialect.GetDB("default").Where(query, args...).First(a).Error
 			}
 		} else {
-			err = dialect.GetDB().Select(stringers).Where(query, args...).First(a).Error
+			err = dialect.GetDB("default").Select(stringers).Where(query, args...).First(a).Error
 			for fmt.Sprint(err) == "database is locked" {
 				time.Sleep(time.Millisecond * 100)
-				err = dialect.GetDB().Select(stringers).Where(query, args...).First(a).Error
+				err = dialect.GetDB("default").Select(stringers).Where(query, args...).First(a).Error
 			}
 		}
 	})
@@ -354,7 +354,7 @@ func GetStringer(a interface{}, query interface{}, args ...interface{}) (err err
 func GetForm(a interface{}, s *model.ModelSchema, query interface{}, args ...interface{}) (err error) {
 	// get a list of visible fields
 	columnList := []string{}
-	dialect1 := dialect.GetDialectForDb()
+	dialect1 := dialect.GetDialectForDb("default")
 	m2mList := []string{}
 	for _, f := range s.Fields {
 		if !f.Hidden {
@@ -370,10 +370,10 @@ func GetForm(a interface{}, s *model.ModelSchema, query interface{}, args ...int
 	}
 
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Select(columnList).Where(query, args...).First(a).Error
+		err = dialect.GetDB("default").Select(columnList).Where(query, args...).First(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Select(columnList).Where(query, args...).First(a).Error
+			err = dialect.GetDB("default").Select(columnList).Where(query, args...).First(a).Error
 		}
 	})
 
@@ -397,7 +397,7 @@ func customGet(m interface{}, m2m ...string) (err error) {
 	a := m
 	t := reflect.TypeOf(a)
 	var ignore bool
-	dialect1 := dialect.GetDialectForDb()
+	dialect1 := dialect.GetDialectForDb("default")
 	sqlDialectStrings := dialect1.GetSqlDialectStrings()
 	if t.Kind() == reflect.Ptr {
 		a = reflect.ValueOf(m).Elem().Interface()
@@ -435,7 +435,7 @@ func customGet(m interface{}, m2m ...string) (err error) {
 			sqlSelect = strings.Replace(sqlSelect, "{TABLE1_ID}", fmt.Sprint(GetID(value)), -1)
 
 			var rows *sql.Rows
-			rows, err = dialect.GetDB().Raw(sqlSelect).Rows()
+			rows, err = dialect.GetDB("default").Raw(sqlSelect).Rows()
 			if err != nil {
 				utils.Trail(utils.ERROR, "Unable to get m2m records. %s", err)
 				utils.Trail(utils.ERROR, sqlSelect)
@@ -459,10 +459,10 @@ func customGet(m interface{}, m2m ...string) (err error) {
 // Filter fetches records from the database
 func Filter(a interface{}, query interface{}, args ...interface{}) (err error) {
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Where(query, args...).Find(a).Error
+		err = dialect.GetDB("default").Where(query, args...).Find(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Where(query, args...).Find(a).Error
+			err = dialect.GetDB("default").Where(query, args...).Find(a).Error
 		}
 	})
 
@@ -499,10 +499,10 @@ func Preload(a interface{}, preload ...string) (err error) {
 		}
 		fieldStruct, _ := model.NewModel(strings.ToLower(fkType), true)
 		metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-			err = dialect.GetDB().Where("id = ?", value.FieldByName(p+"ID").Interface()).First(fieldStruct.Interface()).Error
+			err = dialect.GetDB("default").Where("id = ?", value.FieldByName(p+"ID").Interface()).First(fieldStruct.Interface()).Error
 			for fmt.Sprint(err) == "database is locked" {
 				time.Sleep(time.Millisecond * 100)
-				err = dialect.GetDB().Where("id = ?", value.FieldByName(p+"ID").Interface()).First(fieldStruct.Interface()).Error
+				err = dialect.GetDB("default").Where("id = ?", value.FieldByName(p+"ID").Interface()).First(fieldStruct.Interface()).Error
 			}
 		})
 
@@ -529,10 +529,10 @@ func Delete(a interface{}) (err error) {
 		return nil
 	}
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Delete(a).Error
+		err = dialect.GetDB("default").Delete(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Delete(a).Error
+			err = dialect.GetDB("default").Delete(a).Error
 		}
 	})
 
@@ -546,10 +546,10 @@ func Delete(a interface{}) (err error) {
 // DeleteList deletes multiple records from database
 func DeleteList(a interface{}, query interface{}, args ...interface{}) (err error) {
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Where(query, args...).Delete(a).Error
+		err = dialect.GetDB("default").Where(query, args...).Delete(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Where(query, args...).Delete(a).Error
+			err = dialect.GetDB("default").Where(query, args...).Delete(a).Error
 		}
 	})
 
@@ -573,7 +573,7 @@ func FilterBuilder(params map[string]interface{}) (query string, args []interfac
 
 // AdminPage !
 func AdminPage(order string, asc bool, offset int, limit int, a interface{}, query interface{}, args ...interface{}) (err error) {
-	dialect1 := dialect.GetDialectForDb()
+	dialect1 := dialect.GetDialectForDb("default")
 	if order != "" {
 		orderby := " desc"
 		if asc {
@@ -587,10 +587,10 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 	}
 	if limit > 0 {
 		metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-			err = dialect.GetDB().Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
+			err = dialect.GetDB("default").Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
 			for fmt.Sprint(err) == "database is locked" {
 				time.Sleep(time.Millisecond * 100)
-				err = dialect.GetDB().Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
+				err = dialect.GetDB("default").Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
 			}
 		})
 
@@ -602,10 +602,10 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 		return nil
 	}
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Where(query, args...).Order(order).Find(a).Error
+		err = dialect.GetDB("default").Where(query, args...).Order(order).Find(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Where(query, args...).Order(order).Find(a).Error
+			err = dialect.GetDB("default").Where(query, args...).Order(order).Find(a).Error
 		}
 	})
 
@@ -620,17 +620,17 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 // FilterList fetches the all record from the database matching query and args
 // where it selects only visible fields in the form based on given schema
 func FilterList(s *model.ModelSchema, order string, asc bool, offset int, limit int, a interface{}, query interface{}, args ...interface{}) (err error) {
-	dialect1 := dialect.GetDialectForDb()
+	dialect1 := dialect.GetDialectForDb("default")
 	// get a list of visible fields
 	columnList := []string{}
 	for _, f := range s.Fields {
 		if f.ListDisplay {
 			if f.Type == preloaded.CFK {
-				columnList = append(columnList, dialect1.Quote(dialect.GetDB().Config.NamingStrategy.ColumnName("", f.Name)+"_id"))
+				columnList = append(columnList, dialect1.Quote(dialect.GetDB("default").Config.NamingStrategy.ColumnName("", f.Name)+"_id"))
 			} else if f.Type == preloaded.CM2M {
 			} else if f.IsMethod {
 			} else {
-				columnList = append(columnList, dialect1.Quote(dialect.GetDB().Config.NamingStrategy.ColumnName("", f.Name)))
+				columnList = append(columnList, dialect1.Quote(dialect.GetDB("default").Config.NamingStrategy.ColumnName("", f.Name)))
 			}
 		}
 	}
@@ -647,10 +647,10 @@ func FilterList(s *model.ModelSchema, order string, asc bool, offset int, limit 
 	}
 	if limit > 0 {
 		metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-			err = dialect.GetDB().Select(columnList).Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
+			err = dialect.GetDB("default").Select(columnList).Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
 			for fmt.Sprint(err) == "database is locked" {
 				time.Sleep(time.Millisecond * 100)
-				err = dialect.GetDB().Select(columnList).Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
+				err = dialect.GetDB("default").Select(columnList).Where(query, args...).Order(order).Offset(offset).Limit(limit).Find(a).Error
 			}
 		})
 
@@ -662,10 +662,10 @@ func FilterList(s *model.ModelSchema, order string, asc bool, offset int, limit 
 		return nil
 	}
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Select(columnList).Where(query, args...).Order(order).Find(a).Error
+		err = dialect.GetDB("default").Select(columnList).Where(query, args...).Order(order).Find(a).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Select(columnList).Where(query, args...).Order(order).Find(a).Error
+			err = dialect.GetDB("default").Select(columnList).Where(query, args...).Order(order).Find(a).Error
 		}
 	})
 
@@ -682,10 +682,10 @@ func Count(a interface{}, query interface{}, args ...interface{}) int {
 	var count int64
 	var err error
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Model(a).Where(query, args...).Count(&count).Error
+		err = dialect.GetDB("default").Model(a).Where(query, args...).Count(&count).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Model(a).Where(query, args...).Count(&count).Error
+			err = dialect.GetDB("default").Model(a).Where(query, args...).Count(&count).Error
 		}
 	})
 
@@ -698,10 +698,10 @@ func Count(a interface{}, query interface{}, args ...interface{}) int {
 // Update !
 func Update(a interface{}, fieldName string, value interface{}, query string, args ...interface{}) (err error) {
 	metrics.TimeMetric("uadmin/db/duration", 1000, func() {
-		err = dialect.GetDB().Model(a).Where(query, args...).Update(fieldName, value).Error
+		err = dialect.GetDB("default").Model(a).Where(query, args...).Update(fieldName, value).Error
 		for fmt.Sprint(err) == "database is locked" {
 			time.Sleep(time.Millisecond * 100)
-			err = dialect.GetDB().Model(a).Where(query, args...).Update(fieldName, value).Error
+			err = dialect.GetDB("default").Model(a).Where(query, args...).Update(fieldName, value).Error
 		}
 	})
 

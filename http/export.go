@@ -46,7 +46,7 @@ func GetFilter(r *http.Request, session *sessionmodel.Session, schema *model2.Mo
 				f := schema.Fields[i]
 				if f.Searchable {
 					for _, term := range strings.Split(v[0], " ") {
-						searchQuery = append(searchQuery, fmt.Sprintf("%s LIKE ?", dialect.GetDB().Config.NamingStrategy.ColumnName("", schema.Fields[i].Name)))
+						searchQuery = append(searchQuery, fmt.Sprintf("%s LIKE ?", dialect.GetDB("default").Config.NamingStrategy.ColumnName("", schema.Fields[i].Name)))
 						args = append(args, "%"+term+"%")
 					}
 				}
@@ -62,7 +62,7 @@ func GetFilter(r *http.Request, session *sessionmodel.Session, schema *model2.Mo
 		if security.SQLInjection(r, queryParts[0], "") {
 			continue
 		}
-		dialect1 := dialect.GetDialectForDb()
+		dialect1 := dialect.GetDialectForDb("default")
 		query := dialect1.Quote(queryParts[0])
 		if len(queryParts) > 1 {
 			if queryParts[1] == "lt" {
@@ -102,7 +102,7 @@ func GetFilter(r *http.Request, session *sessionmodel.Session, schema *model2.Mo
 			dateType := false
 			var columnName string
 			for i := range schema.Fields {
-				columnName = dialect.GetDB().Config.NamingStrategy.ColumnName("", schema.Fields[i].Name)
+				columnName = dialect.GetDB("default").Config.NamingStrategy.ColumnName("", schema.Fields[i].Name)
 				if columnName == queryParts[0] {
 					if schema.Fields[i].Type == preloaded2.CDATE {
 						dateType = true
