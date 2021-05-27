@@ -3,12 +3,15 @@ package interfaces
 import (
 	"container/list"
 	"fmt"
+	"github.com/uadmin/uadmin/utils"
 	"sort"
 	"strings"
 )
 
 type IMigrationRegistry interface {
-	FindMigrations() <-chan IMigration
+	GetByName(migrationName string) (IMigration, error)
+	AddMigration(migration IMigration)
+	GetSortedMigrations() MigrationList
 }
 
 type IMigration interface {
@@ -17,100 +20,201 @@ type IMigration interface {
 	GetName() string
 	GetId() int64
 	Deps() []string
-	IsDependentFrom(dep string) bool
 }
 
-type IMigrationLeaf interface {
-	GetAncestors() <-chan IMigrationLeaf
-	GetDescendants() <-chan IMigrationLeaf
-	AddAncestor(IMigrationLeaf)
-	AddDescendant(IMigrationLeaf)
+type IMigrationNode interface {
+	IsApplied() bool
 	GetMigration() IMigration
-	DoesLeafHaveDescendants() bool
+	SetItAsRoot()
+	IsRoot() bool
+	AddChild(node IMigrationNode)
+	AddDep(node IMigrationNode)
+	GetChildrenCount() int
+	GetChildren() *list.List
+	GetDeps() *list.List
+	TraverseDeps(migrationList []string, depList MigrationDepList) MigrationDepList
+	TraverseChildren(migrationList []string) []string
+	IsDummy() bool
+	Downgrade()
+	Apply()
 }
 
 type IMigrationTree interface {
-	GetRoot() IMigrationLeaf
-	SetRoot(root *MigrationLeaf)
-	Traverse() <-chan MigrationLeaf
-	BuildTree() error
-	AddLeaf(IMigrationLeaf)
-	TraverseInOrder() <-chan MigrationLeaf
-}
-
-type MigrationLeaf struct {
-	Migration IMigration
-	IsRoot bool
-	Ancestors *list.List
-	Descendants *list.List
+	GetRoot() IMigrationNode
+	SetRoot(root IMigrationNode)
+	GetNodeByMigrationName(migrationName string) (IMigrationNode, error)
+	AddNode(node IMigrationNode) error
+	TreeBuilt()
+	IsTreeBuilt() bool
 }
 
 func GetBluePrintNameFromMigrationName(migrationName string) string {
 	return strings.Split(migrationName, ".")[0]
 }
 
-func (l MigrationLeaf) DoesLeafHaveDescendants() bool {
-	return l.Descendants.Len() != 0
+type MigrationNode struct {
+	Deps *list.List
+	Node IMigration
+	Children *list.List
+	applied bool
+	isRoot bool
+	dummy bool
 }
 
-func (l MigrationLeaf) GetAncestors() <-chan IMigrationLeaf {
-	chnl := make(chan IMigrationLeaf)
-	go func() {
-		for e := l.Ancestors.Front(); e != nil; e = e.Next() {
-			chnl <- e.Value.(IMigrationLeaf)
+func (n MigrationNode) IsDummy() bool {
+	return n.dummy
+}
+
+func (n MigrationNode) Apply() {
+	n.Node.Up()
+	n.applied = true
+}
+
+func (n MigrationNode) Downgrade() {
+	n.Node.Down()
+	n.applied = false
+}
+
+func (n MigrationNode) GetMigration() IMigration {
+	return n.Node
+}
+
+func (n MigrationNode) GetChildren() *list.List {
+	return n.Children
+}
+
+func (n MigrationNode) GetDeps() *list.List {
+	return n.Deps
+}
+
+func (n MigrationNode) GetChildrenCount() int {
+	return n.Children.Len()
+}
+
+func (n MigrationNode) IsApplied() bool {
+	return n.applied
+}
+
+func (n MigrationNode) SetItAsRoot() {
+	n.isRoot = true
+}
+
+func (n MigrationNode) IsRoot() bool {
+	return n.isRoot
+}
+
+func (n MigrationNode) AddChild(node IMigrationNode) {
+	n.Children.PushBack(node)
+}
+
+func (n MigrationNode) AddDep(node IMigrationNode) {
+	n.Deps.PushBack(node)
+}
+
+func (n MigrationNode) TraverseDeps(migrationList []string, depList MigrationDepList) MigrationDepList {
+	for l := n.GetDeps().Front(); l != nil; l = l.Next() {
+		migration := l.Value.(IMigrationNode)
+		if migration.IsDummy() {
+			continue
 		}
-		close(chnl)
-	}()
-	return chnl
-}
-
-func (l MigrationLeaf) GetMigration() IMigration{
-	return l.Migration
-}
-
-func (l MigrationLeaf) GetDescendants() <-chan IMigrationLeaf {
-	chnl := make(chan IMigrationLeaf)
-	go func() {
-		for e := l.Descendants.Front(); e != nil; e = e.Next() {
-			chnl <- e.Value.(IMigrationLeaf)
+		migrationName := l.Value.(IMigrationNode).GetMigration().GetName()
+		if !utils.Contains(migrationList, migrationName) && !utils.Contains(depList, migrationName) {
+			depList = append(depList, l.Value.(IMigrationNode).GetMigration().GetName())
+			depList = l.Value.(IMigrationNode).TraverseDeps(migrationList, depList)
 		}
-		close(chnl)
-	}()
-	return chnl
+	}
+	return depList
 }
 
-func (l MigrationLeaf) AddAncestor(migrationLeaf IMigrationLeaf) {
-	l.Ancestors.PushBack(migrationLeaf)
+func (n MigrationNode) TraverseChildren(migrationList []string) []string {
+	for l := n.GetChildren().Front(); l != nil; l = l.Next() {
+		migration := l.Value.(IMigrationNode)
+		if migration.IsDummy() {
+			continue
+		}
+		migrationName := l.Value.(IMigrationNode).GetMigration().GetName()
+		if !utils.Contains(migrationList, migrationName) {
+			migrationList = append(migrationList, l.Value.(IMigrationNode).GetMigration().GetName())
+			migrationDepList := n.TraverseDeps(migrationList, make(MigrationDepList, 0))
+			sort.Reverse(migrationDepList)
+			for _, m := range migrationDepList {
+				migrationList = append(migrationList, m)
+			}
+			migrationList = n.TraverseChildren(migrationList)
+		}
+	}
+	return migrationList
 }
 
-func (l MigrationLeaf) AddDescendant(migrationLeaf IMigrationLeaf) {
-	l.Descendants.PushBack(migrationLeaf)
+func NewMigrationNode(dep IMigrationNode, node IMigration, child IMigrationNode) IMigrationNode {
+	depsList := list.New()
+	if dep != nil {
+		depsList.PushBack(dep)
+	}
+	childrenList := list.New()
+	if child != nil {
+		childrenList.PushBack(child)
+	}
+	return &MigrationNode{
+		Deps: depsList,
+		Node: node,
+		Children: childrenList,
+		applied: false,
+		dummy: false,
+		isRoot: false,
+	}
 }
 
-func NewMigrationLeaf(migration IMigration) *MigrationLeaf {
-	return &MigrationLeaf{
-		Migration: migration,
-		Ancestors: list.New(),
-		Descendants: list.New(),
+func NewMigrationRootNode() IMigrationNode {
+	return &MigrationNode{
+		Deps:     list.New(),
+		Node:     nil,
+		Children: list.New(),
+		applied:  false,
+		dummy: true,
+		isRoot: true,
 	}
 }
 
 type MigrationTree struct {
-	Root *MigrationLeaf
-	Leafs *list.List
+	Root  IMigrationNode
+	nodes map[string]IMigrationNode
+	treeBuilt bool
 }
 
-func (t MigrationTree) AddLeaf(leaf IMigrationLeaf) {
-	t.Leafs.PushBack(leaf)
+func (t MigrationTree) TreeBuilt() {
+	t.treeBuilt = true
 }
 
-func (t MigrationTree) GetRoot() IMigrationLeaf {
+func (t MigrationTree) IsTreeBuilt() bool {
+	return t.treeBuilt
+}
+
+func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationNode, error){
+	node, ok := t.nodes[migrationName]
+	if ok {
+		return node, nil
+	} else {
+		return nil, fmt.Errorf("No node with name %s has been found", migrationName)
+	}
+}
+
+func (t MigrationTree) AddNode(node IMigrationNode) error {
+	_, ok := t.nodes[node.GetMigration().GetName()]
+	if ok {
+		return fmt.Errorf("Migration with name %s has been added to tree before", node.GetMigration().GetName())
+	}
+	t.nodes[node.GetMigration().GetName()] = node
+	return nil
+}
+
+func (t MigrationTree) GetRoot() IMigrationNode {
 	return t.Root
 }
 
-func (t MigrationTree) SetRoot(root *MigrationLeaf) {
-	root.IsRoot = true
-	*t.Root = *root
+func (t MigrationTree) SetRoot(root IMigrationNode) {
+	root.SetItAsRoot()
+	t.Root = root
 }
 
 type MigrationList []IMigration
@@ -121,87 +225,35 @@ func (m MigrationList) Less(i, j int) bool {
 }
 func (m MigrationList) Swap(i, j int){ m[i], m[j] = m[j], m[i] }
 
+type MigrationDepList []string
+
+func (m MigrationDepList) Len() int { return len(m) }
+func (m MigrationDepList) Less(i, j int) bool {
+	return i < j
+}
+func (m MigrationDepList) Swap(i, j int){ m[i], m[j] = m[j], m[i] }
+
 type MigrationRegistry struct {
-	Migrations map[string]IMigration
-	MigrationTree MigrationTree
+	migrations map[string]IMigration
 }
 
 func (r MigrationRegistry) AddMigration(migration IMigration) {
-	r.Migrations[migration.GetName()] = migration
+	r.migrations[migration.GetName()] = migration
 }
 
-func (t MigrationTree) Traverse() <-chan IMigrationLeaf {
-	chnl := make(chan IMigrationLeaf)
-	go func() {
-		if t.Leafs.Len() == 0 {
-			close(chnl)
-			return
-		}
-		var currentLeaf = t.Leafs.Front()
-		for true {
-			if currentLeaf == nil {
-				break
-			}
-			chnl <- currentLeaf.Value.(IMigrationLeaf)
-			currentLeaf = currentLeaf.Next()
-		}
-		close(chnl)
-	}()
-	return chnl
+func (r MigrationRegistry) GetByName(migrationName string) (IMigration, error) {
+	migration, ok := r.migrations[migrationName]
+	if ok {
+		return migration, nil
+	} else {
+		return nil, fmt.Errorf("No migration with name %s exists", migrationName)
+	}
 }
-
-func (t MigrationTree) findPotentialConflictsForBlueprint(blueprintName string) []string {
-	var conflicts []string
-	for mLeaf := range t.Traverse() {
-		migrationBlueprintName := GetBluePrintNameFromMigrationName(mLeaf.GetMigration().GetName())
-		if migrationBlueprintName != blueprintName {
-			continue
-		}
-		if !mLeaf.DoesLeafHaveDescendants() {
-			conflicts = append(conflicts, mLeaf.GetMigration().GetName())
-		}
-	}
-	if len(conflicts) > 1 {
-		return conflicts
-	}
-	return make([]string, 0)
-}
-
-func (r MigrationRegistry) BuildTree(blueprintName string) error {
-	if len(r.Migrations) == 0 {
-		return nil
-	}
-	sortedMigrations := r.GetSortedMigrations()
-	r.MigrationTree.SetRoot(NewMigrationLeaf(sortedMigrations[0]))
-	currentLeaf := r.MigrationTree.GetRoot()
-	r.MigrationTree.AddLeaf(currentLeaf)
-	for _, migration := range sortedMigrations[1:] {
-		migrationLeaf := NewMigrationLeaf(migration)
-		r.MigrationTree.AddLeaf(migrationLeaf)
-		if migration.IsDependentFrom(currentLeaf.GetMigration().GetName()) {
-			currentLeaf.AddDescendant(migrationLeaf)
-		}
-		if currentLeaf.GetMigration().IsDependentFrom(migration.GetName()) {
-			currentLeaf.AddAncestor(migrationLeaf)
-		}
-		currentLeaf = migrationLeaf
-	}
-	potentialConflicts := r.FindPotentialConflictsForBlueprint(blueprintName)
-	if len(potentialConflicts) > 1 {
-		return fmt.Errorf("found potential conflict in migrations in blueprint %s: %v", blueprintName, potentialConflicts)
-	}
-	return nil
-}
-
-func (r MigrationRegistry) FindPotentialConflictsForBlueprint(blueprintName string) []string {
-	return r.MigrationTree.findPotentialConflictsForBlueprint(blueprintName)
-}
-
 
 func (r MigrationRegistry) GetSortedMigrations() MigrationList {
-	sortedMigrations := make(MigrationList, len(r.Migrations))
+	sortedMigrations := make(MigrationList, len(r.migrations))
 	i := 0
-	for _, migration := range r.Migrations {
+	for _, migration := range r.migrations {
 		sortedMigrations[i] = migration
 		i += 1
 	}
@@ -209,23 +261,16 @@ func (r MigrationRegistry) GetSortedMigrations() MigrationList {
 	return sortedMigrations
 }
 
-func (r MigrationRegistry) FindMigrations() <-chan *IMigration{
-	chnl := make(chan *IMigration)
-	go func() {
-		close(chnl)
-	}()
-	return chnl
-}
-
 func NewMigrationRegistry() *MigrationRegistry {
 	return &MigrationRegistry{
-		Migrations: make(map[string]IMigration),
-		MigrationTree: MigrationTree{
-			Root: &MigrationLeaf{
-				Ancestors: list.New(),
-				Descendants: list.New(),
-			},
-			Leafs: list.New(),
-		},
+		migrations: make(map[string]IMigration),
+	}
+}
+
+func NewMigrationTree() IMigrationTree {
+	return &MigrationTree{
+		Root:  NewMigrationRootNode(),
+		nodes: make(map[string]IMigrationNode),
+		treeBuilt: false,
 	}
 }

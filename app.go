@@ -21,7 +21,7 @@ type App struct {
 	Database          *database.Database
 	Router            *gin.Engine
 	commandRegistry   *CommandRegistry
-	BlueprintRegistry *BlueprintRegistry
+	BlueprintRegistry interfaces.IBlueprintRegistry
 }
 
 var appInstance *App
@@ -33,9 +33,7 @@ func NewApp(environment string) *App {
 		a.commandRegistry = &CommandRegistry{
 			actions: make(map[string]interfaces.ICommand),
 		}
-		a.BlueprintRegistry = &BlueprintRegistry{
-			RegisteredBlueprints: make(map[string]interfaces.IBlueprint),
-		}
+		a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 		a.Database = database.NewDatabase(a.Config)
 		a.Router = gin.Default()
 		a.Router.Use(cors.New(cors.Config{
@@ -105,6 +103,10 @@ Please provide what do you want to do ?
 	} else {
 		a.commandRegistry.runAction(action,"", make([]string, 0))
 	}
+}
+
+func (a App) TriggerCommandExecution(action string, subaction string, params []string) {
+	a.commandRegistry.runAction(action, subaction, params)
 }
 
 func (a App) StartAdmin() {

@@ -57,7 +57,6 @@ func (c MigrateCommand) GetHelpText() string {
 	return "Migrate your database"
 }
 
-var migrationTplPath = "internal/templates/migrations"
 var re = regexp.MustCompile("[[:^ascii:]]")
 
 func prepareMigrationName(message string) string {
@@ -119,10 +118,6 @@ func (m {{.MigrationName}}) Down() {
 
 func (m {{.MigrationName}}) Deps() []string {
 {{if .DependencyId}}    return []string{"{{.BlueprintName}}.{{.DependencyId}}"}{{else}}    return make([]string, 0){{end}}
-}
-
-func (m {{.MigrationName}}) IsDependentFrom(dep string) bool {
-    return utils.Contains(m.Deps(), dep)
 }
 `
 	const initializeMigrationRegistryTpl = `
@@ -256,10 +251,21 @@ type UpMigration struct {
 }
 
 func (command UpMigration) Proceed(subaction string, args []string) error {
-	for traverseMigrationResult := range appInstance.BlueprintRegistry.traverseMigrations() {
+	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
+	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
 		if traverseMigrationResult.Error != nil {
-			return traverseMigrationResult.Error
+			panic(traverseMigrationResult.Error)
 		}
+		if traverseMigrationResult.Node.IsApplied() {
+			continue
+		}
+		appInstance.Database.ConnectTo("default").Create(
+			&Migration{
+				MigrationName: traverseMigrationResult.Node.GetMigration().GetName(),
+				AppliedAt: time.Now(),
+			},
+		)
+		traverseMigrationResult.Node.Apply()
 	}
 	return nil
 }
@@ -269,13 +275,40 @@ func (command UpMigration) GetHelpText() string {
 }
 
 type DownMigrationOptions struct {
+	MigrationName string `short:"m" required:"false" default:"" description:"Migration downgrade your database to"`
 }
 
 type DownMigration struct {
 }
 
 func (command DownMigration) Proceed(subaction string, args []string) error {
+	var opts = &DownMigrationOptions{}
+	parser := flags.NewParser(opts, flags.Default)
+	var err error
+	_, err = parser.ParseArgs(args)
+	if err != nil {
+		panic(err)
+	}
 	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
+	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrationsDownTo(opts.MigrationName) {
+		if traverseMigrationResult.Error != nil {
+			panic(traverseMigrationResult.Error)
+		}
+		migrationName := traverseMigrationResult.Node.GetMigration().GetName()
+		appliedMigration := Migration{}
+		result := appInstance.Database.ConnectTo("default").Where(
+			"migration_name = ?", migrationName,
+		).First(&appliedMigration)
+		if result.RowsAffected == 0 {
+			panic(
+				fmt.Sprintf(
+					"Migration with name %s was not applied, so we can't downgrade database", migrationName,
+				),
+			)
+		}
+		traverseMigrationResult.Node.Downgrade()
+		appInstance.Database.ConnectTo("default").Delete(&appliedMigration)
+	}
 	return nil
 }
 
