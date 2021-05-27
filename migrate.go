@@ -103,7 +103,7 @@ type {{.MigrationName}} struct {
 }
 
 func (m {{.MigrationName}}) GetName() string {
-    return "{{.BlueprintName}}.{{.ConcreteMigrationName}}"
+    return "{{.BlueprintName}}.{{.ConcreteMigrationId}}"
 }
 
 func (m {{.MigrationName}}) GetId() int64 {
@@ -168,24 +168,17 @@ func init() {
 		}
 		return nil
 	})
-	humanizedMessage := strings.ReplaceAll(
-		re.ReplaceAllLiteralString(opts.Message, ""),
-		"\"",
-		"",
-	)
 	var concreteTplBuffer bytes.Buffer
 	now := time.Now()
 	sec := now.Unix()
 	concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
 	concreteData := struct{
 		MigrationName string
-		ConcreteMigrationName string
 		ConcreteMigrationId string
 		DependencyId string
 		BlueprintName string
 	}{
 		MigrationName: migrationName,
-		ConcreteMigrationName: humanizedMessage,
 		ConcreteMigrationId: strconv.Itoa(int(sec)),
 		DependencyId: "",
 		BlueprintName: opts.Blueprint,
