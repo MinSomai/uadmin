@@ -3,6 +3,7 @@ package interfaces
 import (
 	"fmt"
 	mapset "github.com/deckarep/golang-set"
+	"github.com/gin-gonic/gin"
 	"sort"
 )
 
@@ -15,6 +16,7 @@ type IBlueprint interface {
 	GetName() string
 	GetDescription() string
 	GetMigrationRegistry() IMigrationRegistry
+	InitRouter(group *gin.RouterGroup)
 }
 
 type IBlueprintRegistry interface {
@@ -24,6 +26,7 @@ type IBlueprintRegistry interface {
 	GetMigrationTree() IMigrationTree
 	TraverseMigrations() <- chan *TraverseMigrationResult
 	TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult
+	InitializeRouting(router *gin.Engine)
 }
 
 type Blueprint struct {
@@ -34,6 +37,10 @@ type Blueprint struct {
 
 func (b Blueprint) GetName() string {
 	return b.Name
+}
+
+func (b Blueprint) InitRouter(group *gin.RouterGroup) {
+	panic(fmt.Errorf("has to be redefined in concrete blueprint"))
 }
 
 func (b Blueprint) GetDescription() string {
@@ -257,6 +264,13 @@ func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult
 		close(chnl)
 	}()
 	return chnl
+}
+
+func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
+	for blueprint := range r.Iterate() {
+		routergroup := router.Group("/" + blueprint.GetName())
+		blueprint.InitRouter(routergroup)
+	}
 }
 
 func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult {

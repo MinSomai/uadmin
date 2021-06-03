@@ -340,13 +340,13 @@ func init() {
 	Test1BlueprintMigrationRegistry.AddMigration(migration2test_1621667393{})
 
 	TestBlueprint = interfaces.Blueprint{
-		Name: "user",
-		Description: "this blueprint for testing",
+		Name:              "user",
+		Description:       "this blueprint for testing",
 		MigrationRegistry: TestBlueprintMigrationRegistry,
 	}
 	Test1Blueprint = interfaces.Blueprint{
-		Name: "test1",
-		Description: "this test1 blueprint for testing",
+		Name:              "test1",
+		Description:       "this test1 blueprint for testing",
 		MigrationRegistry: Test1BlueprintMigrationRegistry,
 	}
 
@@ -364,15 +364,15 @@ func init() {
 	BlueprintWithConflictsMigrationRegistry.AddMigration(migration3blueprintconflicts_1621667392{})
 	BlueprintWithConflictsMigrationRegistry.AddMigration(migration4blueprintconflicts_1621667392{})
 	BlueprintWithConflicts = interfaces.Blueprint{
-		Name: "user",
-		Description: "blueprint with conflicts",
+		Name:              "user",
+		Description:       "blueprint with conflicts",
 		MigrationRegistry: BlueprintWithConflictsMigrationRegistry,
 	}
 
 	BlueprintWithNoMigrationsRegistry = interfaces.NewMigrationRegistry()
 	BlueprintWithNoMigrations = interfaces.Blueprint{
-		Name: "user",
-		Description: "blueprint with no migrations",
+		Name:              "user",
+		Description:       "blueprint with no migrations",
 		MigrationRegistry: BlueprintWithNoMigrationsRegistry,
 	}
 

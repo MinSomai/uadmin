@@ -18,7 +18,7 @@ func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]interfaces.ICommand),
 	}
 	createCommand := new(CreateBlueprint)
 

@@ -2,25 +2,24 @@ package uadmin
 
 import (
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/uadmin/uadmin/interfaces"
 	"os"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/http"
 	"strconv"
-	"time"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 )
 
 type App struct {
 	Config            *config.UadminConfig
 	Database          *database.Database
 	Router            *gin.Engine
-	commandRegistry   *CommandRegistry
+	CommandRegistry   *CommandRegistry
 	BlueprintRegistry interfaces.IBlueprintRegistry
 }
 
@@ -30,8 +29,8 @@ func NewApp(environment string) *App {
 	if appInstance == nil {
 		a := new(App)
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
-		a.commandRegistry = &CommandRegistry{
-			actions: make(map[string]interfaces.ICommand),
+		a.CommandRegistry = &CommandRegistry{
+			Actions: make(map[string]interfaces.ICommand),
 		}
 		a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 		a.Database = database.NewDatabase(a.Config)
@@ -47,21 +46,29 @@ func NewApp(environment string) *App {
 			},
 			MaxAge: 12 * time.Hour,
 		}))
-		a.registerBaseBlueprints()
-		a.registerBaseCommands()
-		// a.InitializeRouter()
+		a.RegisterBaseBlueprints()
+		a.RegisterBaseCommands()
+		a.InitializeRouter()
 		appInstance = a
 		return a
 	}
 	return appInstance
 }
 
+func ClearApp() {
+	appInstance = nil
+}
+
+func StoreCurrentApp(app *App) {
+	appInstance = app
+}
+
 func (a App) Initialize() {
 
 }
 
-func (a App) registerBaseBlueprints() {
-	a.BlueprintRegistry.Register(userblueprint.Blueprint)
+func (a App) RegisterBaseBlueprints() {
+	a.BlueprintRegistry.Register(userblueprint.ConcreteBlueprint)
 }
 
 func (a App) RegisterBlueprint(blueprint interfaces.IBlueprint) {
@@ -69,10 +76,10 @@ func (a App) RegisterBlueprint(blueprint interfaces.IBlueprint) {
 }
 
 func (a App) RegisterCommand(name string, command interfaces.ICommand) {
-	a.commandRegistry.addAction(name, command)
+	a.CommandRegistry.addAction(name, command)
 }
 
-func (a App) registerBaseCommands() {
+func (a App) RegisterBaseCommands() {
 	migrateCommand := new(MigrateCommand)
 	a.RegisterCommand("migrate", interfaces.ICommand(migrateCommand))
 	blueprintCommand := new(BlueprintCommand)
@@ -85,10 +92,10 @@ func (a App) ExecuteCommand() {
 	var help string
 	if len(os.Args) > 1 {
 		action = os.Args[1]
-		isCorrectActionPassed = a.commandRegistry.isRegisteredCommand(action)
+		isCorrectActionPassed = a.CommandRegistry.isRegisteredCommand(action)
 	}
 	if !isCorrectActionPassed {
-		helpText := a.commandRegistry.MakeHelpText()
+		helpText := a.CommandRegistry.MakeHelpText()
 		help = fmt.Sprintf(`
 Please provide what do you want to do ?
 %s
@@ -98,15 +105,15 @@ Please provide what do you want to do ?
 	}
 	if len(os.Args) > 2 {
 		subaction := os.Args[2]
-		isCorrectActionPassed = a.commandRegistry.isRegisteredCommand(action)
-		a.commandRegistry.runAction(action, subaction, os.Args[3:])
+		isCorrectActionPassed = a.CommandRegistry.isRegisteredCommand(action)
+		a.CommandRegistry.runAction(action, subaction, os.Args[3:])
 	} else {
-		a.commandRegistry.runAction(action,"", make([]string, 0))
+		a.CommandRegistry.runAction(action,"", make([]string, 0))
 	}
 }
 
 func (a App) TriggerCommandExecution(action string, subaction string, params []string) {
-	a.commandRegistry.runAction(action, subaction, params)
+	a.CommandRegistry.runAction(action, subaction, params)
 }
 
 func (a App) StartAdmin() {
@@ -117,10 +124,12 @@ func (a App) StartAdmin() {
 
 func (a App) StartApi() {
 	a.Initialize()
-	_ = a.Router.Run(":" + strconv.Itoa(a.Config.D.Api.ListenPort))
+	// _ = a.Router.Run(":" + strconv.Itoa(a.Config.D.Api.ListenPort))
 }
 
 func (a App) InitializeRouter() {
+	a.BlueprintRegistry.InitializeRouting(a.Router)
+
 	// userblueprintapi.InitializeRouter(a.Router)
 }
 
