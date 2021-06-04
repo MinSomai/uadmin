@@ -9,8 +9,12 @@ type BlueprintRouting struct {
 	interfaces.Blueprint
 }
 var ConcreteBlueprint BlueprintRouting
+var visited = false
 
 func (b BlueprintRouting) InitRouter(group *gin.RouterGroup) {
+	group.GET("/visit", func(c *gin.Context) {
+		visited = true
+	})
 }
 
 func init() {

@@ -10,6 +10,9 @@ import (
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 	"time"
 )
 
@@ -47,4 +50,18 @@ func NewTestApp() (*uadmin.App, *gorm.DB) {
 	}
 	uadmin.StoreCurrentApp(a)
 	return a, db
+}
+
+// Helper function to process a request and test its response
+func TestHTTPResponse(t *testing.T, app *uadmin.App, req *http.Request, f func(w *httptest.ResponseRecorder) bool) {
+
+	// Create a response recorder
+	w := httptest.NewRecorder()
+
+	// Create the service and process the above request.
+	app.Router.ServeHTTP(w, req)
+
+	if !f(w) {
+		t.Fail()
+	}
 }

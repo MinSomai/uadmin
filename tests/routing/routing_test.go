@@ -7,6 +7,8 @@ import (
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/tests"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -31,7 +33,11 @@ func (suite *ConcreteTestSuite) TearDownSuite() {
 }
 
 func (suite *ConcreteTestSuite) TestRouterInitialization() {
-	assert.True(suite.T(), false)
+	suite.app.InitializeRouter()
+	req, _ := http.NewRequest("GET", "/user/visit", nil)
+	tests.TestHTTPResponse(suite.T(), suite.app, req, func(w *httptest.ResponseRecorder) bool {
+		return visited
+	})
 }
 
 
