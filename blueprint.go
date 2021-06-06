@@ -52,9 +52,6 @@ type CreateBlueprintOptions struct {
 type CreateBlueprint struct {
 }
 
-func (command CreateBlueprint) ParseArgs() {
-}
-
 func (command CreateBlueprint) Proceed(subaction string, args []string) error {
 	var opts = &CreateBlueprintOptions{}
 	parser := flags.NewParser(opts, flags.Default)

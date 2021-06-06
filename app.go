@@ -84,6 +84,8 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("migrate", interfaces.ICommand(migrateCommand))
 	blueprintCommand := new(BlueprintCommand)
 	a.RegisterCommand("blueprint", interfaces.ICommand(blueprintCommand))
+	swaggerCommand := new(SwaggerCommand)
+	a.RegisterCommand("swagger", interfaces.ICommand(swaggerCommand))
 }
 
 func (a App) ExecuteCommand() {

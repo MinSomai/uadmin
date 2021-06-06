@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/go-openapi/loads"
 	"io/ioutil"
 	"log"
 	"os"
@@ -20,6 +21,7 @@ type DBSettings struct {
 
 // Info from config file
 type UadminConfig struct {
+	ApiSpec *loads.Document
 	D struct {
 		Test string `yaml:"test"`
 		Db   struct {
@@ -40,6 +42,13 @@ type UadminConfig struct {
 				ListenPort int `yaml:"listen_port"`
 			} `yaml:"ssl"`
 		} `yaml:"api"`
+		Swagger struct {
+			ListenPort int `yaml:"listen_port"`
+			SSL        struct {
+				ListenPort int `yaml:"listen_port"`
+			} `yaml:"ssl"`
+			PathToSpec string `yaml:"path_to_spec"`
+		} `yaml:"swagger"`
 	}
 }
 
@@ -59,4 +68,18 @@ func NewConfig(file string) *UadminConfig {
 		log.Fatalf("error: %v", err)
 	}
 	return c
+}
+
+// Reads info from config file
+func NewSwaggerSpec(file string) *loads.Document {
+	_, err := os.Stat(file)
+	if err != nil {
+		log.Fatal("Config file is missing: ", file)
+	}
+	doc, err := loads.Spec(file)
+	if err != nil {
+		log.Fatal(err)
+		panic(err)
+	}
+	return doc
 }

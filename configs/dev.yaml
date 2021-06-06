@@ -13,3 +13,6 @@ admin:
   listen_port: 8080
 api:
   listen_port: 8081
+swagger:
+  path_to_spec: configs/api-spec.yaml
+  listen_port: 8082
