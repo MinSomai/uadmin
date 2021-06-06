@@ -129,8 +129,6 @@ func (a App) StartApi() {
 
 func (a App) InitializeRouter() {
 	a.BlueprintRegistry.InitializeRouting(a.Router)
-
-	// userblueprintapi.InitializeRouter(a.Router)
 }
 
 func (a App) BaseApiUrl() string {

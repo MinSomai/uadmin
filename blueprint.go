@@ -86,14 +86,24 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 package {{.Name}}
 
 import (
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/{{.Name}}/migrations"
+	"github.com/uadmin/uadmin/interfaces"
 )
 
-var Blueprint = interfaces.Blueprint{
-	Name: "{{.Name}}",
-	Description: "{{.Message}}",
-	MigrationRegistry: migrations.BMigrationRegistry,
+type Blueprint struct {
+	interfaces.Blueprint
+}
+
+func (b Blueprint) InitRouter(group *gin.RouterGroup) {
+}
+
+var ConcreteBlueprint = Blueprint{
+	interfaces.Blueprint{
+		Name:              "{{.Name}}",
+		Description:       "{{.Message}}",
+		MigrationRegistry: migrations.BMigrationRegistry,
+	},
 }
 `
 	var blueprintTplBuffer bytes.Buffer
