@@ -48,6 +48,7 @@ type UadminConfig struct {
 				ListenPort int `yaml:"listen_port"`
 			} `yaml:"ssl"`
 			PathToSpec string `yaml:"path_to_spec"`
+			ApiEditorListenPort int `yaml:"api_editor_listen_port"`
 		} `yaml:"swagger"`
 	}
 }

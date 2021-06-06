@@ -86,6 +86,8 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("blueprint", interfaces.ICommand(blueprintCommand))
 	swaggerCommand := new(SwaggerCommand)
 	a.RegisterCommand("swagger", interfaces.ICommand(swaggerCommand))
+	openApiCommand := new(OpenApiCommand)
+	a.RegisterCommand("openapi", interfaces.ICommand(openApiCommand))
 }
 
 func (a App) ExecuteCommand() {
