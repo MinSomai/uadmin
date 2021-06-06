@@ -2,10 +2,12 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
+	"io"
+	"log"
 	"os"
+	"os/exec"
 )
 
 type SwaggerCommand struct {
@@ -49,7 +51,25 @@ type ServeSwaggerServer struct {
 
 func (command ServeSwaggerServer) Proceed(subaction string, args []string) error {
 	appInstance.Config.ApiSpec = config.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
-	spew.Dump("dsadas")
+	commandToExecute := exec.Command(
+		"swagger", "serve", "--flavor=swagger",
+		fmt.Sprintf("--port=%d", appInstance.Config.D.Swagger.ListenPort), appInstance.Config.D.Swagger.PathToSpec,
+	)
+	stderr, err := commandToExecute.StderrPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := commandToExecute.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	slurp, _ := io.ReadAll(stderr)
+	fmt.Printf("%s\n", slurp)
+
+	if err := commandToExecute.Wait(); err != nil {
+		log.Fatal(err)
+	}
 	return nil
 }
 
