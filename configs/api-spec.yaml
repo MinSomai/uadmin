@@ -9,27 +9,27 @@ info:
     <!--OAIE.viz--><div
     style='height:500px;background-color:#eee;overflow:auto;position:relative;white-space:nowrap;border-radius:10px;'><span
     style='border-bottom:1px solid
-    black;position:absolute;left:43.501px;top:48px;width:33px;transform:matrix(0.999885,
-    -0.0151498, 0.0151498, 0.999885, 0, 0);transform-origin:0 0;'><span
+    black;position:absolute;left:392.311px;top:242.996px;width:132px;transform:matrix(0.432868,
+    -0.901457, 0.901457, 0.432868, 0, 0);transform-origin:0 0;'><span
     style='border:1px solid
     black;width:5px;height:5px;position:absolute;right:0;transform:rotate(45deg);transform-origin:100%
     0;border-left:0;border-bottom:0;'></span></span><span
     style='border-bottom:1px solid
-    black;position:absolute;left:43.501px;top:48px;width:33px;transform:matrix(0.999885,
-    -0.0151498, 0.0151498, 0.999885, 0, 0);transform-origin:0 0;'><span
+    black;position:absolute;left:675.997px;top:194.101px;width:184.984px;transform:matrix(-0.864897,
+    -0.501949, 0.501949, -0.864897, 0, 0);transform-origin:0 0;'><span
     style='border:1px solid
     black;width:5px;height:5px;position:absolute;right:0;transform:rotate(45deg);transform-origin:100%
     0;border-left:0;border-bottom:0;'></span></span><div
     oaie-key='operation.get./sample/{sampleId}' style='border:1px solid rgb(97,
     175, 254);background:rgb(240, 247,
-    255);position:absolute;left:0px;top:0px;width:153px;height:95px;padding:5px;border-radius:5px;'><div><b>get/sample/{sampleId}</b></div><div
+    255);position:absolute;left:293px;top:243px;width:153px;height:95px;padding:5px;border-radius:5px;'><div><b>get/sample/{sampleId}</b></div><div
     style='white-space:normal'>getSample </div><div>sampleId
     (string)</div></div><div oaie-key='operation.put./sample/{sampleId}'
     style='border:1px solid rgb(252, 161, 48);background:rgb(255, 246,
-    236);position:absolute;left:0px;top:0px;width:153px;height:95px;padding:5px;border-radius:5px;'><div><b>put/sample/{sampleId}</b></div><div
+    236);position:absolute;left:676px;top:191px;width:153px;height:95px;padding:5px;border-radius:5px;'><div><b>put/sample/{sampleId}</b></div><div
     style='white-space:normal'>putSample </div><div>sampleId
     (string)</div></div><div oaie-key='schema.Sample'
-    style='position:absolute;left:0px;top:0px;width:87px;height:96px;border:1px
+    style='position:absolute;left:429px;top:28px;width:87px;height:96px;border:1px
     solid
     silver;background:white;padding:5px;border-radius:5px;'><div><b>Sample</b></div><div>one
     (string)</div><div>two (string)</div></div></div><div
