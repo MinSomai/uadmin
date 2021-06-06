@@ -85,5 +85,5 @@ func (command ServeOpenApiEditorCommand) Proceed(subaction string, args []string
 }
 
 func (command ServeOpenApiEditorCommand) GetHelpText() string {
-	return "Serve your swagger api spec"
+	return "Provide a way to edit your project openapi spec"
 }
