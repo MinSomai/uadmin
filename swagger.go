@@ -52,16 +52,18 @@ type ServeSwaggerServer struct {
 func (command ServeSwaggerServer) Proceed(subaction string, args []string) error {
 	appInstance.Config.ApiSpec = config.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
 	commandToExecute := exec.Command(
-		"swagger", "serve", "--flavor=swagger",
+		"swagger", "serve", "--flavor=swagger", "--no-open",
 		fmt.Sprintf("--port=%d", appInstance.Config.D.Swagger.ListenPort), appInstance.Config.D.Swagger.PathToSpec,
 	)
 	stderr, err := commandToExecute.StderrPipe()
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	if err := commandToExecute.Start(); err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	slurp, _ := io.ReadAll(stderr)
@@ -69,6 +71,7 @@ func (command ServeSwaggerServer) Proceed(subaction string, args []string) error
 
 	if err := commandToExecute.Wait(); err != nil {
 		log.Fatal(err)
+		return err
 	}
 	return nil
 }
