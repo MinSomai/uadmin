@@ -8,7 +8,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	logblueprint "github.com/uadmin/uadmin/blueprint/logging"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
+	menublueprint "github.com/uadmin/uadmin/blueprint/menu"
+	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
+	settingsblueprint "github.com/uadmin/uadmin/blueprint/settings"
+	languageblueprint "github.com/uadmin/uadmin/blueprint/language"
+	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
+	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/http"
@@ -69,6 +76,13 @@ func (a App) Initialize() {
 
 func (a App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(userblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(menublueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(sessionsblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(settingsblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(logblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(languageblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(approvalblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(abtestblueprint.ConcreteBlueprint)
 }
 
 func (a App) RegisterBlueprint(blueprint interfaces.IBlueprint) {
