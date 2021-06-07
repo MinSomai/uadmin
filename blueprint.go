@@ -79,8 +79,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 			panic(err)
 		}
 	}
-	const blueprint = `
-package {{.Name}}
+	const blueprint = `package {{.Name}}
 
 import (
 	"github.com/gin-gonic/gin"

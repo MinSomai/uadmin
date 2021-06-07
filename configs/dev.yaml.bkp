@@ -1,8 +1,12 @@
 test: "aaa"
 db:
   default:
-    type: "sqlite"
-    name: "uadmin.db"
+    host: "127.0.0.1"
+    port: 5432
+    user: "freelife"
+    password: "123456"
+    name: "freelife"
+    type: "postgresql"
 auth:
   jwt_secret_token: "jdnfksdmfksd"
 admin:

@@ -3,6 +3,7 @@ package uadmin
 import (
 	"fmt"
 	"github.com/gin-contrib/cors"
+	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"os"
 	"time"
@@ -38,6 +39,9 @@ func NewApp(environment string) *App {
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
 		a.CommandRegistry = &CommandRegistry{
 			Actions: make(map[string]interfaces.ICommand),
+		}
+		dialect.CurrentDatabaseSettings = &dialect.DatabaseSettings{
+			Default: a.Config.D.Db.Default,
 		}
 		a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 		a.Database = database.NewDatabase(a.Config)

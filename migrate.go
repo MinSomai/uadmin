@@ -92,8 +92,7 @@ Please provide flags -b and -m which are blueprint and description of the migrat
 	if err != nil {
 		panic(err)
 	}
-	const concreteMigrationTpl = `
-package migrations
+	const concreteMigrationTpl = `package migrations
 
 import (
     "github.com/uadmin/uadmin/utils"
@@ -122,8 +121,7 @@ func (m {{.MigrationName}}) Deps() []string {
 `
 	const initializeMigrationRegistryTpl = `
     BMigrationRegistry.AddMigration({{.MigrationName}}{})`
-	const migrationRegistryCreationTpl = `
-package migrations
+	const migrationRegistryCreationTpl = `package migrations
 
 import (
 	"github.com/uadmin/uadmin/interfaces"
@@ -252,6 +250,15 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 		if traverseMigrationResult.Node.IsApplied() {
 			continue
 		}
+		appliedMigration := Migration{}
+		appInstance.Database.ConnectTo(
+			"default",
+		).Where(
+			&Migration{MigrationName: traverseMigrationResult.Node.GetMigration().GetName()},
+		).First(&appliedMigration)
+		if appliedMigration.ID != 0 {
+			continue
+		}
 		appInstance.Database.ConnectTo("default").Create(
 			&Migration{
 				MigrationName: traverseMigrationResult.Node.GetMigration().GetName(),
@@ -293,14 +300,15 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 			"migration_name = ?", migrationName,
 		).First(&appliedMigration)
 		if result.RowsAffected == 0 {
-			panic(
-				fmt.Sprintf(
-					"Migration with name %s was not applied, so we can't downgrade database", migrationName,
-				),
-			)
+			continue
+			//panic(
+			//	fmt.Sprintf(
+			//		"Migration with name %s was not applied, so we can't downgrade database", migrationName,
+			//	),
+			//)
 		}
 		traverseMigrationResult.Node.Downgrade()
-		appInstance.Database.ConnectTo("default").Delete(&appliedMigration)
+		appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
 	}
 	return nil
 }
