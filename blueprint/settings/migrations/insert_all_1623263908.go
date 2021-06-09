@@ -520,6 +520,8 @@ func (m insert_all_1623263908) Up() {
 }
 
 func (m insert_all_1623263908) Down() {
+    db := dialect.GetDB()
+    db.Unscoped().Where("1 = 1").Delete(&settingmodel.Setting{})
 }
 
 func (m insert_all_1623263908) Deps() []string {
