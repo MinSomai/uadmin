@@ -89,4 +89,3 @@ func setRRDValue(name string, value float64, tmpl string) error {
 	}
 	return err
 }
-

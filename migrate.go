@@ -66,6 +66,7 @@ func prepareMigrationName(message string) string {
 	if len(message) > 10 {
 		message = message[:10]
 	}
+	message = strings.Replace(strings.ToLower(message), " ", "_", -1)
 	return fmt.Sprintf("%s_%d", message, sec)
 }
 
@@ -93,10 +94,6 @@ Please provide flags -b and -m which are blueprint and description of the migrat
 		panic(err)
 	}
 	const concreteMigrationTpl = `package migrations
-
-import (
-    "github.com/uadmin/uadmin/utils"
-)
 
 type {{.MigrationName}} struct {
 }
