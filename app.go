@@ -76,7 +76,7 @@ func StoreCurrentApp(app *App) {
 }
 
 func (a App) Initialize() {
-	a.BlueprintRegistry.Initialize()
+	a.BlueprintRegistry.Initialize(a.Config)
 }
 
 func (a App) RegisterBaseBlueprints() {

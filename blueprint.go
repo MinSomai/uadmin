@@ -83,6 +83,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/{{.Name}}/migrations"
+	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
 )
 
@@ -93,7 +94,7 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(group *gin.RouterGroup) {
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) Init(config *config.UadminConfig) {
 }
 
 var ConcreteBlueprint = Blueprint{
