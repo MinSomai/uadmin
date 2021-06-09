@@ -17,6 +17,7 @@ type IBlueprint interface {
 	GetDescription() string
 	GetMigrationRegistry() IMigrationRegistry
 	InitRouter(group *gin.RouterGroup)
+	Init()
 }
 
 type IBlueprintRegistry interface {
@@ -27,6 +28,7 @@ type IBlueprintRegistry interface {
 	TraverseMigrations() <- chan *TraverseMigrationResult
 	TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult
 	InitializeRouting(router *gin.Engine)
+	Initialize()
 }
 
 type Blueprint struct {
@@ -45,6 +47,10 @@ func (b Blueprint) InitRouter(group *gin.RouterGroup) {
 
 func (b Blueprint) GetDescription() string {
 	return b.Description
+}
+
+func (b Blueprint) Init() {
+
 }
 
 func (b Blueprint) GetMigrationRegistry() IMigrationRegistry {
@@ -270,6 +276,12 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 	for blueprint := range r.Iterate() {
 		routergroup := router.Group("/" + blueprint.GetName())
 		blueprint.InitRouter(routergroup)
+	}
+}
+
+func (r BlueprintRegistry) Initialize() {
+	for blueprint := range r.Iterate() {
+		blueprint.Init()
 	}
 }
 

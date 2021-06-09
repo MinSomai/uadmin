@@ -4,6 +4,9 @@ db:
     name: "test.db"
 api:
   listen_port: 5000
+auth:
+  max_username_length: 40
+  min_username_length: 8
 swagger:
   path_to_spec: configs/api-spec.yaml
   listen_port: 8082

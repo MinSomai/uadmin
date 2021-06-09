@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/360EntSecGroup-Skylar/excelize/v2 v2.4.0
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.7.1

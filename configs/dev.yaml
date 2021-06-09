@@ -5,6 +5,8 @@ db:
     name: "uadmin.db"
 auth:
   jwt_secret_token: "jdnfksdmfksd"
+  max_username_length: 40
+  min_username_length: 8
 admin:
   listen_port: 8080
 api:

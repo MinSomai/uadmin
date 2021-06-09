@@ -60,6 +60,7 @@ func NewApp(environment string) *App {
 		a.RegisterBaseBlueprints()
 		a.RegisterBaseCommands()
 		a.InitializeRouter()
+		a.Initialize()
 		appInstance = &a
 		return &a
 	}
@@ -75,7 +76,7 @@ func StoreCurrentApp(app *App) {
 }
 
 func (a App) Initialize() {
-
+	a.BlueprintRegistry.Initialize()
 }
 
 func (a App) RegisterBaseBlueprints() {

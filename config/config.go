@@ -29,6 +29,8 @@ type UadminConfig struct {
 		} `yaml: "db"`
 		Auth struct {
 			JWT_SECRET_TOKEN string `yaml:"jwt_secret_token"`
+			MinUsernameLength int `yaml:"min_username_length"`
+			MaxUsernameLength int `yaml:"max_username_length"`
 		} `yaml: "auth"`
 		Admin struct {
 			ListenPort int `yaml:"listen_port"`

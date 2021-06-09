@@ -13,6 +13,9 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(group *gin.RouterGroup) {
 }
 
+func (b Blueprint) Init() {
+}
+
 var ConcreteBlueprint = Blueprint{
 	interfaces.Blueprint{
 		Name:              "user",

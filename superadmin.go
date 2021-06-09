@@ -39,8 +39,8 @@ func (c SuperadminCommand) GetHelpText() string {
 }
 
 type SuperadminCommandOptions struct {
-	Username string `short:"n" required:"true" description:"Username"`
-	Email string `short:"e" required:"true" description:"Email'"`
+	Username string `short:"n" required:"true" description:"Username" valid:"username-uadmin,username-unique"`
+	Email string `short:"e" required:"true" description:"Email'" valid:"email,email-unique"`
 	FirstName string `short:"f" required:"false" description:"First name'"`
 	LastName string `short:"l" required:"false" description:"Last name'"`
 }
