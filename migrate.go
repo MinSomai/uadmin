@@ -3,6 +3,7 @@ package uadmin
 import (
 	"bytes"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
@@ -259,6 +260,7 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 				AppliedAt: time.Now(),
 			},
 		)
+		color.Blue("Applying migration %s", traverseMigrationResult.Node.GetMigration().GetName())
 		traverseMigrationResult.Node.Apply()
 	}
 	return nil
@@ -301,6 +303,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 			//	),
 			//)
 		}
+		color.Blue("Downgrading migration %s", traverseMigrationResult.Node.GetMigration().GetName())
 		traverseMigrationResult.Node.Downgrade()
 		appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
 	}

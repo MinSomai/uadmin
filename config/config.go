@@ -31,6 +31,8 @@ type UadminConfig struct {
 			JWT_SECRET_TOKEN string `yaml:"jwt_secret_token"`
 			MinUsernameLength int `yaml:"min_username_length"`
 			MaxUsernameLength int `yaml:"max_username_length"`
+			MinPasswordLength int `yaml:"min_password_length"`
+			SaltLength int `yaml:"salt_length"`
 		} `yaml: "auth"`
 		Admin struct {
 			ListenPort int `yaml:"listen_port"`
@@ -70,6 +72,9 @@ func NewConfig(file string) *UadminConfig {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+	if c.D.Auth.SaltLength == 0 {
+		c.D.Auth.SaltLength = 16
+	}
 	return &c
 }
 
@@ -81,7 +86,6 @@ func NewSwaggerSpec(file string) *loads.Document {
 	}
 	doc, err := loads.Spec(file)
 	if err != nil {
-		log.Fatal(err)
 		panic(err)
 	}
 	return doc

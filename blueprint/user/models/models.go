@@ -32,6 +32,7 @@ type User struct {
 	ExpiresOn   *time.Time
 	OTPRequired bool
 	OTPSeed     string `uadmin:"list_exclude;hidden;read_only"`
+	Salt        string
 }
 
 // String return string

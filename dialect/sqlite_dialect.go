@@ -220,7 +220,7 @@ func (d *SqliteDialect) GetSqlDialectStrings() map[string]string {
 }
 
 // @todo analyze
-func (d *SqliteDialect) GetDb(alias string) (*gorm.DB, error) {
+func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 	// } else if strings.ToLower(Database.Type) == "postgresql" {
 	// 	if Database.Host == "" || Database.Host == "localhost" {
 	// 		Database.Host = "127.0.0.1"
@@ -292,6 +292,12 @@ func (d *SqliteDialect) GetDb(alias string) (*gorm.DB, error) {
 	// 		}
 	// 	}
 	// }
+	var alias string
+	if len(alias_) == 0 {
+		alias = "default"
+	} else {
+		alias = alias_[0]
+	}
 	var aliasDatabaseSettings *config2.DBSettings
 	if alias == "default" {
 		aliasDatabaseSettings = CurrentDatabaseSettings.Default

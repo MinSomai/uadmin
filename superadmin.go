@@ -2,8 +2,16 @@ package uadmin
 
 import (
 	"fmt"
+	"github.com/asaskevich/govalidator"
+	"github.com/c-bata/go-prompt"
 	"github.com/jessevdk/go-flags"
+	"github.com/miquella/ask"
+	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
+	userblueprint "github.com/uadmin/uadmin/blueprint/user"
+	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/utils"
 	"os"
 )
 
@@ -63,7 +71,76 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
+	_, err = govalidator.ValidateStruct(opts)
+	if err != nil {
+		return err
+	}
+	db := dialect.GetDB()
+	var superuserGroup usermodels.UserGroup
+	db.Model(&usermodels.UserGroup{}).Where(&usermodels.UserGroup{GroupName: "Superusers"}).First(&superuserGroup)
+	if superuserGroup.ID == 0 {
+		superuserGroup = usermodels.UserGroup{
+			GroupName: "Superusers",
+		}
+		db.Create(&superuserGroup)
+	}
+	if opts.FirstName == "" {
+		opts.FirstName = "System"
+	}
+	if opts.LastName == "" {
+		opts.LastName = "Admin"
+	}
+	err = ask.Print("Warning! I am about to ask you for a password!\n")
+	if err != nil {
+		return err
+	}
+	var password string
+	for true {
+		password, err = ask.HiddenAsk("Password: ")
+		if err != nil {
+			return err
+		}
+		confirmpassword, err := ask.HiddenAsk("Confirm Password: ")
+		if err != nil {
+			return err
+		}
+		passwordValidationStruct := &userblueprint.PasswordValidationStruct{
+			Password: password,
+			ConfirmedPassword: confirmpassword,
+		}
+		_, err = govalidator.ValidateStruct(passwordValidationStruct)
+		if err != nil {
+			return err
+		}
+		break
+	}
+	salt := utils.RandStringRunes(appInstance.Config.D.Auth.SaltLength)
+	// hashedPassword, err := utils2.HashPass(password, salt)
+	hashedPassword, err := utils2.HashPass(password, salt)
+	if err != nil {
+		return err
+	}
+	admin := usermodels.User{
+		FirstName:    opts.FirstName,
+		LastName:     opts.LastName,
+		Username:     opts.Username,
+		Password:     hashedPassword,
+		Admin:        true,
+		RemoteAccess: true,
+		Active:       true,
+		UserGroup:    superuserGroup,
+	}
+	db.Create(&admin)
 	return nil
+}
+
+func passwordCompleter(d prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "users", Description: "Store the username and age"},
+		{Text: "articles", Description: "Store the article text posted by user"},
+		{Text: "comments", Description: "Store the text commented to articles"},
+	}
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 }
 
 func (command CreateSuperadmin) GetHelpText() string {

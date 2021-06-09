@@ -17,7 +17,7 @@ func (m Adddashbo_1623217408) GetId() int64 {
 }
 
 func (m Adddashbo_1623217408) Up() {
-    db := dialect.GetDB("dialect")
+    db := dialect.GetDB()
     dashboardmenu := menumodel.DashboardMenu{
         MenuName: "Dashboard Menus",
         URL:      "dashboardmenu",
@@ -151,7 +151,7 @@ func (m Adddashbo_1623217408) Up() {
 }
 
 func (m Adddashbo_1623217408) Down() {
-    db := dialect.GetDB("dialect")
+    db := dialect.GetDB()
     db.Unscoped().Where("1 = 1").Delete(&menumodel.DashboardMenu{})
 }
 

@@ -17,7 +17,13 @@ type DatabaseSettings struct {
 var CurrentDatabaseSettings *DatabaseSettings
 
 // GetDB returns a pointer to the DB
-func GetDB(alias string) *gorm.DB {
+func GetDB(alias_ ...string) *gorm.DB {
+	var alias string
+	if len(alias_) == 0 {
+		alias = "default"
+	} else {
+		alias = alias_[0]
+	}
 	if Db != nil{
 		return Db
 	}
@@ -33,7 +39,6 @@ func GetDB(alias string) *gorm.DB {
 			}
 		}
 	}
-
 	dialect := GetDialectForDb(alias)
 	Db, err = dialect.GetDb(
 		alias,

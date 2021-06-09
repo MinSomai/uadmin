@@ -17,7 +17,7 @@ func (m initial_1623082009) GetId() int64 {
 }
 
 func (m initial_1623082009) Up() {
-    db := dialect.GetDB("default")
+    db := dialect.GetDB()
     err := db.AutoMigrate(models.Session{})
     if err != nil {
         panic(err)
@@ -25,7 +25,7 @@ func (m initial_1623082009) Up() {
 }
 
 func (m initial_1623082009) Down() {
-    db := dialect.GetDB("default")
+    db := dialect.GetDB()
     err := db.Migrator().DropTable(models.Session{})
     if err != nil {
         panic(err)
@@ -33,5 +33,5 @@ func (m initial_1623082009) Down() {
 }
 
 func (m initial_1623082009) Deps() []string {
-    return []string{"user.initial"}
+    return []string{"user.1621680132"}
 }

@@ -42,9 +42,7 @@ func NewTestApp() (*uadmin.App, *gorm.DB) {
 		Default: a.Config.D.Db.Default,
 	}
 	dialectdb := dialect.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
-	db, err := dialectdb.GetDb(
-		"default",
-	)
+	db, err := dialectdb.GetDb()
 	if err != nil {
 		panic(fmt.Errorf("Couldn't initialize db %s", err))
 	}

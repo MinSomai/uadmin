@@ -9,7 +9,7 @@ type initial_1621680132 struct {
 }
 
 func (m initial_1621680132) GetName() string {
-    return "user.initial"
+    return "user.1621680132"
 }
 
 func (m initial_1621680132) GetId() int64 {
@@ -17,7 +17,7 @@ func (m initial_1621680132) GetId() int64 {
 }
 
 func (m initial_1621680132) Up() {
-    db := dialect.GetDB("dialect")
+    db := dialect.GetDB()
     err := db.AutoMigrate(models2.UserGroup{})
     if err != nil {
         panic(err)
@@ -37,7 +37,7 @@ func (m initial_1621680132) Up() {
 }
 
 func (m initial_1621680132) Down() {
-    db := dialect.GetDB("default")
+    db := dialect.GetDB()
     err := db.Migrator().DropTable(models2.UserPermission{})
     if err != nil {
         panic(err)

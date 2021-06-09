@@ -18,6 +18,6 @@ type DbDialect interface {
 	Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB
 	ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error)
 	GetSqlDialectStrings() map[string]string
-	GetDb(alias string) (*gorm.DB, error)
+	GetDb(alias_ ...string) (*gorm.DB, error)
 	CreateDb() error
 }

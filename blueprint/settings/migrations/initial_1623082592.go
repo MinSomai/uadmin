@@ -17,13 +17,13 @@ func (m initial_1623082592) GetId() int64 {
 }
 
 func (m initial_1623082592) Up() {
-    db := dialect.GetDB("default")
+    db := dialect.GetDB()
     db.AutoMigrate(models.SettingCategory{})
     db.AutoMigrate(models.Setting{})
 }
 
 func (m initial_1623082592) Down() {
-    db := dialect.GetDB("default")
+    db := dialect.GetDB()
     err := db.Migrator().DropTable(models.Setting{})
     if err != nil {
         panic(err)

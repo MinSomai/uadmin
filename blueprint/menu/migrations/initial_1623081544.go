@@ -17,7 +17,7 @@ func (m initial_1623081544) GetId() int64 {
 }
 
 func (m initial_1623081544) Up() {
-    db := dialect.GetDB("dialect")
+    db := dialect.GetDB()
     err := db.AutoMigrate(models.DashboardMenu{})
     if err != nil {
         panic(err)
@@ -25,7 +25,7 @@ func (m initial_1623081544) Up() {
 }
 
 func (m initial_1623081544) Down() {
-    db := dialect.GetDB("default")
+    db := dialect.GetDB()
     err := db.Migrator().DropTable(models.DashboardMenu{})
     if err != nil {
         panic(err)
