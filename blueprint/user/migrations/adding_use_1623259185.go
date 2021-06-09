@@ -29,6 +29,10 @@ func (m adding_use_1623259185) Up() {
 }
 
 func (m adding_use_1623259185) Down() {
+    db := dialect.GetDB()
+    var superuserGroup usermodels.UserGroup
+    db.Model(&usermodels.UserGroup{}).Where(&usermodels.UserGroup{GroupName: "Superusers"}).First(&superuserGroup)
+    db.Delete(&superuserGroup)
 }
 
 func (m adding_use_1623259185) Deps() []string {
