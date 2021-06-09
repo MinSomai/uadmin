@@ -3,7 +3,6 @@ package uadmin
 import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
-	"github.com/c-bata/go-prompt"
 	"github.com/jessevdk/go-flags"
 	"github.com/miquella/ask"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
@@ -132,15 +131,6 @@ Please provide flags -n and -e which are username and email of the user respecti
 	}
 	db.Create(&admin)
 	return nil
-}
-
-func passwordCompleter(d prompt.Document) []prompt.Suggest {
-	s := []prompt.Suggest{
-		{Text: "users", Description: "Store the username and age"},
-		{Text: "articles", Description: "Store the article text posted by user"},
-		{Text: "comments", Description: "Store the text commented to articles"},
-	}
-	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 }
 
 func (command CreateSuperadmin) GetHelpText() string {
