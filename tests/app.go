@@ -17,7 +17,7 @@ import (
 )
 
 func NewTestApp() (*uadmin.App, *gorm.DB) {
-	a := new(uadmin.App)
+	a := uadmin.App{}
 	a.Config = config.NewConfig("configs/" + "test" + ".yaml")
 	a.CommandRegistry = &uadmin.CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
@@ -48,8 +48,8 @@ func NewTestApp() (*uadmin.App, *gorm.DB) {
 	if err != nil {
 		panic(fmt.Errorf("Couldn't initialize db %s", err))
 	}
-	uadmin.StoreCurrentApp(a)
-	return a, db
+	uadmin.StoreCurrentApp(&a)
+	return &a, db
 }
 
 // Helper function to process a request and test its response

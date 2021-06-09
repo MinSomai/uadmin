@@ -20,9 +20,8 @@ func (c OpenApiCommand) Proceed(subaction string, args []string) error {
 	commandRegistry := &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
 	}
-	serveOpenApiEditor := new(ServeOpenApiEditorCommand)
 
-	commandRegistry.addAction("editor", interfaces.ICommand(serveOpenApiEditor))
+	commandRegistry.addAction("editor", &ServeOpenApiEditorCommand{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
 		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)

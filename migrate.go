@@ -31,15 +31,12 @@ func (c MigrateCommand) Proceed(subaction string, args []string) error {
 	commandRegistry := &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
 	}
-	createCommand := new(CreateMigration)
 
-	commandRegistry.addAction("create", interfaces.ICommand(createCommand))
-	upCommand := new(UpMigration)
+	commandRegistry.addAction("create", &CreateMigration{})
 
-	commandRegistry.addAction("up", interfaces.ICommand(upCommand))
-	downCommand := new(DownMigration)
+	commandRegistry.addAction("up", &UpMigration{})
 
-	commandRegistry.addAction("down", interfaces.ICommand(downCommand))
+	commandRegistry.addAction("down", &DownMigration{})
 	isCorrectActionPassed = commandRegistry.isRegisteredCommand(subaction)
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
@@ -91,7 +88,7 @@ Please provide flags -b and -m which are blueprint and description of the migrat
 		return nil
 	}
 	if err != nil {
-		panic(err)
+		return err
 	}
 	const concreteMigrationTpl = `package migrations
 

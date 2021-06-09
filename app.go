@@ -35,7 +35,7 @@ var appInstance *App
 
 func NewApp(environment string) *App {
 	if appInstance == nil {
-		a := new(App)
+		a := App{}
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
 		a.CommandRegistry = &CommandRegistry{
 			Actions: make(map[string]interfaces.ICommand),
@@ -60,8 +60,8 @@ func NewApp(environment string) *App {
 		a.RegisterBaseBlueprints()
 		a.RegisterBaseCommands()
 		a.InitializeRouter()
-		appInstance = a
-		return a
+		appInstance = &a
+		return &a
 	}
 	return appInstance
 }
@@ -98,14 +98,11 @@ func (a App) RegisterCommand(name string, command interfaces.ICommand) {
 }
 
 func (a App) RegisterBaseCommands() {
-	migrateCommand := new(MigrateCommand)
-	a.RegisterCommand("migrate", interfaces.ICommand(migrateCommand))
-	blueprintCommand := new(BlueprintCommand)
-	a.RegisterCommand("blueprint", interfaces.ICommand(blueprintCommand))
-	swaggerCommand := new(SwaggerCommand)
-	a.RegisterCommand("swagger", interfaces.ICommand(swaggerCommand))
-	openApiCommand := new(OpenApiCommand)
-	a.RegisterCommand("openapi", interfaces.ICommand(openApiCommand))
+	a.RegisterCommand("migrate", &MigrateCommand{})
+	a.RegisterCommand("blueprint", &BlueprintCommand{})
+	a.RegisterCommand("swagger", &SwaggerCommand{})
+	a.RegisterCommand("openapi", &OpenApiCommand{})
+	a.RegisterCommand("superuser", &SuperadminCommand{})
 }
 
 func (a App) ExecuteCommand() {

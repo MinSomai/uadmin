@@ -63,12 +63,12 @@ func NewConfig(file string) *UadminConfig {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := new(UadminConfig)
+	c := UadminConfig{}
 	err = yaml.Unmarshal([]byte(content), &c.D)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	return c
+	return &c
 }
 
 // Reads info from config file

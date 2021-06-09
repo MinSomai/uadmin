@@ -20,9 +20,8 @@ func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 	commandRegistry := &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
 	}
-	createCommand := new(CreateBlueprint)
 
-	commandRegistry.addAction("create", interfaces.ICommand(createCommand))
+	commandRegistry.addAction("create", &CreateBlueprint{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
 		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
@@ -65,7 +64,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 		return nil
 	}
 	if err != nil {
-		panic(err)
+		return err
 	}
 	name := re.ReplaceAllLiteralString(opts.Name, "")
 	bluePrintPath := "blueprint/" + strings.ToLower(name)
@@ -122,7 +121,7 @@ var ConcreteBlueprint = Blueprint{
 		"Created blueprint with name %s\n",
 		opts.Name,
 	)
-	migrateCommand := new(MigrateCommand)
+	migrateCommand := MigrateCommand{}
 	migrateCommand.Proceed("create", []string{"-b", name, "-m", "initial"})
 	return nil
 }

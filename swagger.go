@@ -19,9 +19,8 @@ func (c SwaggerCommand) Proceed(subaction string, args []string) error {
 	commandRegistry := &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
 	}
-	serveCommand := new(ServeSwaggerServer)
 
-	commandRegistry.addAction("serve", interfaces.ICommand(serveCommand))
+	commandRegistry.addAction("serve", &ServeSwaggerServer{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
 		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
