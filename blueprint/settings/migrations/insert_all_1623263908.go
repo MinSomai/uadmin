@@ -470,14 +470,14 @@ func (m insert_all_1623263908) Up() {
         {
             Name:         "Logo",
             Value:        config.CurrentConfig.D.Uadmin.Logo,
-            DefaultValue: "/static/uadmin/logo.png",
+            DefaultValue: "/static-inbuilt/uadmin/logo.png",
             DataType:     t.Image(),
             Help:         "the main logo that shows on uAdmin UI",
         },
         {
             Name:         "Fav Icon",
             Value:        config.CurrentConfig.D.Uadmin.FavIcon,
-            DefaultValue: "/static/uadmin/favicon.ico",
+            DefaultValue: "/static-inbuilt/uadmin/favicon.ico",
             DataType:     t.File(),
             Help:         "the fav icon that shows on uAdmin UI",
         },
