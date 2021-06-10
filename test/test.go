@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/uadmin/uadmin"
+	"github.com/uadmin/uadmin/dialect"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -12,7 +12,7 @@ type UadminTestSuite struct {
 }
 
 func (suite *UadminTestSuite) SetupTest() {
-	db := uadmin.GetDB()
+	db := dialect.GetDB()
 	db = db.Exec("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
 	if db.Error != nil {
 		assert.Equal(suite.T(), true, false, "Couldnt setup isolation level for db")
@@ -24,7 +24,7 @@ func (suite *UadminTestSuite) SetupTest() {
 }
 
 func (suite *UadminTestSuite) TearDownSuite() {
-	db := uadmin.GetDB()
+	db := dialect.GetDB()
 	db = db.Exec("ROLLBACK")
 	if db.Error != nil {
 		assert.Equal(suite.T(), true, false, "Couldnt rollback transaction")
