@@ -69,13 +69,13 @@ func TestSqlite(t *testing.T) {
 }
 
 func TestSqliteFunctional(t *testing.T) {
-	db := GetDb().Begin()
-	db = db.Exec("INSERT INTO users (`username`) VALUES (\"test\")")
-	last_ids := []int{}
-	sql_dialect := NewDbDialect(db, "sqlite")
-	sql_dialect.GetLastInsertId()
-	db = db.Raw(sql_dialect.ToString())
-	db = db.Pluck("lastid", &last_ids)
-	db.Commit()
+	//db := GetDb().Begin()
+	//db = db.Exec("INSERT INTO users (`username`) VALUES (\"test\")")
+	//last_ids := []int{}
+	//sql_dialect := NewDbDialect(db, "sqlite")
+	//sql_dialect.GetLastInsertId()
+	//db = db.Raw(sql_dialect.ToString())
+	//db = db.Pluck("lastid", &last_ids)
+	//db.Commit()
 	// assert.Equal(t, 1, len(last_ids))
 }
