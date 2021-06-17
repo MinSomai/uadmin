@@ -20,4 +20,5 @@ type DbDialect interface {
 	GetSqlDialectStrings() map[string]string
 	GetDb(alias_ ...string) (*gorm.DB, error)
 	CreateDb() error
+	Transaction(handler func()) error
 }

@@ -3,15 +3,12 @@ package http
 import (
 	"context"
 	"fmt"
-	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
 	userapi "github.com/uadmin/uadmin/blueprint/user/api"
-	settingsapi "github.com/uadmin/uadmin/blueprint/settings/api"
 	"github.com/uadmin/uadmin/metrics"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
 	"net"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -23,15 +20,15 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Slow down. You are going too fast!"))
 		return
 	}
-	if !authapi.ValidateIP(r, preloaded.AllowedIPs, preloaded.BlockedIPs) {
-		if r.Form == nil {
-			r.Form = url.Values{}
-		}
-		r.Form.Set("err_msg", "Your IP Address ("+r.RemoteAddr+") is not Allowed to Access this Page")
-		r.Form.Set("err_code", "403")
-		PageErrorHandler(w, r, nil)
-		return
-	}
+	//if !authapi.ValidateIP(r, preloaded.AllowedIPs, preloaded.BlockedIPs) {
+	//	if r.Form == nil {
+	//		r.Form = url.Values{}
+	//	}
+	//	r.Form.Set("err_msg", "Your IP Address ("+r.RemoteAddr+") is not Allowed to Access this Page")
+	//	r.Form.Set("err_code", "403")
+	//	PageErrorHandler(w, r, nil)
+	//	return
+	//}
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, preloaded.RootURL)
 	r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
 	URLParts := strings.Split(r.URL.Path, "/")
@@ -43,55 +40,55 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Authentecation
 	// This session is preloaded with a user
-	session := authapi.IsAuthenticated(r)
-	if session == nil {
-		userapi.LoginHandler(w, r)
-		return
-	}
+	//session := authapi.IsAuthenticated(r)
+	//if session == nil {
+	//	userapi.LoginHandler(w, r)
+	//	return
+	//}
 
-	// Check remote access
-	if !(utils.IsLocal(r.RemoteAddr) || session.User.RemoteAccess) {
-		if r.Form == nil {
-			r.Form = url.Values{}
-		}
-		r.Form.Set("err_msg", "Remote Access Denied")
-		PageErrorHandler(w, r, nil)
-		return
-	}
-
-	if r.URL.Path == "" {
-		homeHandler(w, r, session)
-		return
-	}
-	if len(URLParts) == 1 {
-		if URLParts[0] == "logout" {
-			userapi.LogoutHandler(w, r, session)
-			return
-		}
-		if URLParts[0] == "export" {
-			exportHandler(w, r, session)
-			return
-		}
-		if URLParts[0] == "cropper" {
-			cropImageHandler(w, r, session)
-			return
-		}
-		if URLParts[0] == "profile" {
-			userapi.ProfileHandler(w, r, session)
-			return
-		}
-		if URLParts[0] == "settings" {
-			settingsapi.SettingsHandler(w, r, session)
-			return
-		}
-		listHandler(w, r, session)
-		return
-	} else if len(URLParts) == 2 {
-		// @todo, redo
-		// formHandler(w, r, session)
-		return
-	}
-	PageErrorHandler(w, r, session)
+	//// Check remote access
+	//if !(utils.IsLocal(r.RemoteAddr) || session.User.RemoteAccess) {
+	//	if r.Form == nil {
+	//		r.Form = url.Values{}
+	//	}
+	//	r.Form.Set("err_msg", "Remote Access Denied")
+	//	PageErrorHandler(w, r, nil)
+	//	return
+	//}
+	//
+	//if r.URL.Path == "" {
+	//	homeHandler(w, r, session)
+	//	return
+	//}
+	//if len(URLParts) == 1 {
+	//	if URLParts[0] == "logout" {
+	//		userapi.LogoutHandler(w, r, session)
+	//		return
+	//	}
+	//	if URLParts[0] == "export" {
+	//		exportHandler(w, r, session)
+	//		return
+	//	}
+	//	if URLParts[0] == "cropper" {
+	//		cropImageHandler(w, r, session)
+	//		return
+	//	}
+	//	if URLParts[0] == "profile" {
+	//		userapi.ProfileHandler(w, r, session)
+	//		return
+	//	}
+	//	if URLParts[0] == "settings" {
+	//		settingsapi.SettingsHandler(w, r, session)
+	//		return
+	//	}
+	//	listHandler(w, r, session)
+	//	return
+	//} else if len(URLParts) == 2 {
+	//	// @todo, redo
+	//	// formHandler(w, r, session)
+	//	return
+	//}
+	//PageErrorHandler(w, r, session)
 }
 
 // Handler is a function that takes an http handler function and returns an http handler function

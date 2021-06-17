@@ -2,10 +2,9 @@ package http
 
 import (
 	"fmt"
-	"html/template"
-	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
 	"github.com/uadmin/uadmin/translation"
 	"github.com/uadmin/uadmin/utils"
+	"html/template"
 	"net/http"
 	"path/filepath"
 	"reflect"
@@ -27,7 +26,8 @@ func RenderHTML(w http.ResponseWriter, r *http.Request, path string, data interf
 	funcMap := template.FuncMap{
 		"Tf": translation.Tf,
 		"CSRF": func() string {
-			return authapi.GetSession(r)
+			return "dfsafsa"
+			// return authapi.GetSession(r)
 		},
 	}
 
@@ -92,7 +92,8 @@ func RenderMultiHTML(w http.ResponseWriter, r *http.Request, path []string, data
 	funcMap := template.FuncMap{
 		"Tf": translation.Tf,
 		"CSRF": func() string {
-			return authapi.GetSession(r)
+			return "dsdas"
+			// return authapi.GetSession(r)
 		},
 	}
 

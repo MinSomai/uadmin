@@ -179,15 +179,15 @@ func NewMigrationRootNode() IMigrationNode {
 type MigrationTree struct {
 	Root  IMigrationNode
 	nodes map[string]IMigrationNode
-	treeBuilt bool
+	treeBuilt *bool
 }
 
 func (t MigrationTree) TreeBuilt() {
-	t.treeBuilt = true
+	*t.treeBuilt = true
 }
 
 func (t MigrationTree) IsTreeBuilt() bool {
-	return t.treeBuilt
+	return *t.treeBuilt
 }
 
 func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationNode, error){
@@ -268,9 +268,10 @@ func NewMigrationRegistry() *MigrationRegistry {
 }
 
 func NewMigrationTree() IMigrationTree {
+	var builtTree bool
 	return &MigrationTree{
 		Root:  NewMigrationRootNode(),
 		nodes: make(map[string]IMigrationNode),
-		treeBuilt: false,
+		treeBuilt: &builtTree,
 	}
 }

@@ -4,11 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/nfnt/resize"
-	model2 "github.com/uadmin/uadmin/model"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
-	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
-	userapi "github.com/uadmin/uadmin/blueprint/user/api"
+	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
+	model2 "github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
 	"image"
@@ -262,11 +260,11 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 }
 
 func mediaHandler(w http.ResponseWriter, r *http.Request) {
-	session := authapi.IsAuthenticated(r)
-	if session == nil && !preloaded.PublicMedia {
-		userapi.LoginHandler(w, r)
-		return
-	}
+	//session := authapi.IsAuthenticated(r)
+	//if session == nil && !preloaded.PublicMedia {
+	//	userapi.LoginHandler(w, r)
+	//	return
+	//}
 
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/media/")
 	file, err := os.Open("./media/" + r.URL.Path)

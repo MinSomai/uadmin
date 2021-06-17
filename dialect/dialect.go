@@ -52,8 +52,14 @@ func GetDB(alias_ ...string) *gorm.DB {
 
 
 
-func GetDialectForDb(alias string) DbDialect {
+func GetDialectForDb(alias_ ...string) DbDialect {
 	var databaseConfig *config2.DBSettings
+	var alias string
+	if len(alias_) == 0 {
+		alias = "default"
+	} else {
+		alias = alias_[0]
+	}
 	if alias == "default" {
 		databaseConfig = CurrentDatabaseSettings.Default
 	}

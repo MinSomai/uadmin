@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/tests"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -19,7 +18,7 @@ type ConcreteTestSuite struct {
 }
 
 func (suite *ConcreteTestSuite) SetupTest() {
-	app, _ := tests.NewTestApp()
+	app, _ := uadmin.NewTestApp()
 	suite.app = app
 	suite.app.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 	suite.app.BlueprintRegistry.Register(ConcreteBlueprint)
@@ -33,10 +32,20 @@ func (suite *ConcreteTestSuite) TearDownSuite() {
 }
 
 func (suite *ConcreteTestSuite) TestRouterInitialization() {
+	// suite.app.Router = gin.Default()
 	suite.app.InitializeRouter()
 	req, _ := http.NewRequest("GET", "/user/visit", nil)
-	tests.TestHTTPResponse(suite.T(), suite.app, req, func(w *httptest.ResponseRecorder) bool {
+	uadmin.TestHTTPResponse(suite.T(), suite.app, req, func(w *httptest.ResponseRecorder) bool {
 		return visited
+	})
+}
+
+func (suite *ConcreteTestSuite) TestPingEndpoint() {
+	// suite.app.Router = gin.Default()
+	suite.app.InitializeRouter()
+	req, _ := http.NewRequest("GET", "/ping", nil)
+	uadmin.TestHTTPResponse(suite.T(), suite.app, req, func(w *httptest.ResponseRecorder) bool {
+		return w.Body.String() == "{\"message\":\"pong\"}"
 	})
 }
 

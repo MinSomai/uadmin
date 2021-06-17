@@ -318,6 +318,11 @@ func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 }
 
 // @todo analyze
+func (d *SqliteDialect) Transaction(handler func()) error {
+	return nil
+}
+
+// @todo analyze
 func (d *SqliteDialect) CreateDb() error {
 	// if Database.Type == "mysql" {
 	// 	credential := Database.User

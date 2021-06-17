@@ -66,6 +66,12 @@ type UadminConfigOptions struct {
 	AllowedHosts string `yaml:"allowed_hosts"`
 	Logo string `yaml:"logo"`
 	FavIcon string `yaml:"fav_icon"`
+	AdminCookieName string `yaml:"admin_cookie_name"`
+	ApiCookieName string `yaml:"api_cookie_name"`
+	SessionDuration int64 `yaml:"session_duration"`
+	SecureCookie bool `yaml:"secure_cookie"`
+	HttpOnlyCookie bool `yaml:"http_only_cookie"`
+	DirectApiSigninByField string `yaml:"direct_api_signin_by_field"`
 }
 
 type UadminDbOptions struct {
@@ -78,6 +84,7 @@ type UadminAuthOptions struct {
 	MaxUsernameLength int `yaml:"max_username_length"`
 	MinPasswordLength int `yaml:"min_password_length"`
 	SaltLength int `yaml:"salt_length"`
+	Twofactor_auth_required_for_signin_adapters []string `yaml:"twofactor_auth_required_for_signin_adapters"`
 }
 
 type UadminAdminOptions struct {
@@ -122,7 +129,7 @@ type UadminConfig struct {
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type rawStuff UadminConfigurableConfig
 	raw := rawStuff{
-		Auth: &UadminAuthOptions{SaltLength: 16},
+		Auth: &UadminAuthOptions{SaltLength: 16, Twofactor_auth_required_for_signin_adapters: []string{}},
 		Uadmin: &UadminConfigOptions{
 			Theme: "default",
 			SiteName: "uadmin",
@@ -165,6 +172,12 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			AllowedHosts: "0.0.0.0,127.0.0.1,localhost,::1",
 			Logo: "/static-inbuilt/uadmin/logo.png",
 			FavIcon: "/static-inbuilt/uadmin/favicon.ico",
+			AdminCookieName: "uadmin-admin",
+			ApiCookieName: "uadmin-api",
+			SessionDuration: 3600,
+			SecureCookie: true,
+			HttpOnlyCookie: true,
+			DirectApiSigninByField: "username",
 		},
 	}
 	// Put your defaults here
@@ -181,6 +194,7 @@ var CurrentConfig *UadminConfig
 
 // Reads info from config file
 func NewConfig(file string) *UadminConfig {
+	file = os.Getenv("UADMIN_PATH")+"/"+file
 	_, err := os.Stat(file)
 	if err != nil {
 		log.Fatal("Config file is missing: ", file)

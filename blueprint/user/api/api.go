@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	authapi "github.com/uadmin/uadmin/blueprint/auth/api"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
@@ -65,23 +64,23 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 	user := session.User
 	c.User = user.Username
 	c.ProfilePhoto = session.User.Photo
-	c.OTPImage = "/media/otp/" + session.User.OTPSeed + ".png"
+	// c.OTPImage = "/media/otp/" + session.User.OTPSeed + ".png"
 	c.Logo = preloaded.Logo
 	c.FavIcon = preloaded.FavIcon
 
 	// Check if OTP Required has been changed
 	if r.URL.Query().Get("otp_required") != "" {
-		if r.URL.Query().Get("otp_required") == "1" {
-			user.OTPRequired = true
-		} else if r.URL.Query().Get("otp_required") == "0" {
-			user.OTPRequired = false
-		}
+		//if r.URL.Query().Get("otp_required") == "1" {
+		//	user.OTPRequired = true
+		//} else if r.URL.Query().Get("otp_required") == "0" {
+		//	user.OTPRequired = false
+		//}
 		r.URL.RawQuery = ""
 		(&user).Save()
-		c.OTPImage = "/media/otp/" + user.OTPSeed + ".png"
+		// c.OTPImage = "/media/otp/" + user.OTPSeed + ".png"
 	}
 
-	c.OTPRequired = user.OTPRequired
+	// c.OTPRequired = user.OTPRequired
 
 	c.Schema, _ = model.GetSchema(user)
 	r.Form.Set("ModelID", fmt.Sprint(user.ID))
@@ -205,7 +204,7 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 
 // logoutHandler !
 func LogoutHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
-	authapi.Logout(r)
+	// authapi.Logout(r)
 
 	// Expire all cookies on logout
 	for _, cookie := range r.Cookies() {
@@ -260,52 +259,52 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			// This is a login request
 			username := r.PostFormValue("username")
 			username = strings.TrimSpace(strings.ToLower(username))
-			password := r.PostFormValue("password")
-			otp := r.PostFormValue("otp")
-			lang := r.PostFormValue("language")
+			//password := r.PostFormValue("password")
+			//otp := r.PostFormValue("otp")
+			//lang := r.PostFormValue("language")
 
-			session := authapi.Login2FA(r, username, password, otp)
-			if session == nil || !session.User.Active {
-				c.ErrExists = true
-				c.Err = "Invalid username/password or inactive user"
-			} else {
-				if session.PendingOTP {
-					utils.Trail(utils.INFO, "User: %s OTP: %s", session.User.Username, session.User.GetOTP())
-				}
-				cookie, _ := r.Cookie("session")
-				if cookie == nil {
-					cookie = &http.Cookie{}
-				}
-				cookie.Name = "session"
-				cookie.Value = session.Key
-				cookie.Path = "/"
-				cookie.SameSite = http.SameSiteStrictMode
-				http.SetCookie(w, cookie)
-
-				// set language cookie
-				cookie, _ = r.Cookie("language")
-				if cookie == nil {
-					cookie = &http.Cookie{}
-				}
-				cookie.Name = "language"
-				cookie.Value = lang
-				cookie.Path = "/"
-				http.SetCookie(w, cookie)
-
-				// Check for OTP
-				if session.PendingOTP {
-					c.Username = username
-					c.Password = password
-					c.OTPRequired = true
-				} else {
-					if r.URL.Query().Get("next") == "" {
-						http.Redirect(w, r, strings.TrimSuffix(r.RequestURI, "logout"), http.StatusSeeOther)
-						return
-					}
-					http.Redirect(w, r, r.URL.Query().Get("next"), http.StatusSeeOther)
-					return
-				}
-			}
+			//session := authapi.Login2FA(r, username, password, otp)
+			//if session == nil || !session.User.Active {
+			//	c.ErrExists = true
+			//	c.Err = "Invalid username/password or inactive user"
+			//} else {
+			//	if session.PendingOTP {
+			//		utils.Trail(utils.INFO, "User: %s OTP: %s", session.User.Username, session.User.GetOTP())
+			//	}
+			//	cookie, _ := r.Cookie("session")
+			//	if cookie == nil {
+			//		cookie = &http.Cookie{}
+			//	}
+			//	cookie.Name = "session"
+			//	cookie.Value = session.Key
+			//	cookie.Path = "/"
+			//	cookie.SameSite = http.SameSiteStrictMode
+			//	http.SetCookie(w, cookie)
+			//
+			//	// set language cookie
+			//	cookie, _ = r.Cookie("language")
+			//	if cookie == nil {
+			//		cookie = &http.Cookie{}
+			//	}
+			//	cookie.Name = "language"
+			//	cookie.Value = lang
+			//	cookie.Path = "/"
+			//	http.SetCookie(w, cookie)
+			//
+			//	// Check for OTP
+			//	if session.PendingOTP {
+			//		c.Username = username
+			//		c.Password = password
+			//		c.OTPRequired = true
+			//	} else {
+			//		if r.URL.Query().Get("next") == "" {
+			//			http.Redirect(w, r, strings.TrimSuffix(r.RequestURI, "logout"), http.StatusSeeOther)
+			//			return
+			//		}
+			//		http.Redirect(w, r, r.URL.Query().Get("next"), http.StatusSeeOther)
+			//		return
+			//	}
+			//}
 		}
 	}
 	c.Languages = langmodel.ActiveLangs

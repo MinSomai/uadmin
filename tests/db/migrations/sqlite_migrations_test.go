@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/tests"
 	"gorm.io/gorm"
 	"os"
 	"strings"
@@ -23,7 +22,7 @@ type MigrationTestSuite struct {
 
 func (suite *MigrationTestSuite) SetupTest() {
 	appliedMigrations = make([]string, 0)
-	app, db := tests.NewTestApp()
+	app, db := uadmin.NewTestApp()
 	suite.app = app
 	suite.db = db
 	suite.db.Exec("DROP TABLE migrations")

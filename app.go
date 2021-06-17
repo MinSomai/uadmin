@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	authblueprint "github.com/uadmin/uadmin/blueprint/auth"
 	logblueprint "github.com/uadmin/uadmin/blueprint/logging"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	menublueprint "github.com/uadmin/uadmin/blueprint/menu"
@@ -59,8 +60,8 @@ func NewApp(environment string) *App {
 		}))
 		a.RegisterBaseBlueprints()
 		a.RegisterBaseCommands()
-		a.InitializeRouter()
 		a.Initialize()
+		a.InitializeRouter()
 		appInstance = &a
 		return &a
 	}
@@ -88,6 +89,7 @@ func (a App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(languageblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(approvalblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(abtestblueprint.ConcreteBlueprint)
+	a.BlueprintRegistry.Register(authblueprint.ConcreteBlueprint)
 }
 
 func (a App) RegisterBlueprint(blueprint interfaces.IBlueprint) {

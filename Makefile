@@ -23,7 +23,7 @@ VERSION?=$(shell $(VERSION_CMD))
 GO?=go
 BUILD_ID:=$(shell echo 0x$$(head -c20 /dev/urandom|od -An -tx1|tr -d ' \n'))
 VERBOSE_FLAGS?=
-VERBOSE?=true
+VERBOSE?=false
 ifeq ($(VERBOSE), true)
   VERBOSE_FLAGS+=-v
 endif

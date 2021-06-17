@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/utils"
+	"image/png"
+	"os"
+
 	//"image/png"
 	//"os"
 	"strings"
@@ -54,37 +59,35 @@ func VerifyOTP(pass, seed string, digits int, algorithm string, skew uint, perio
 	return valid
 }
 
-// @todo, redo
-//func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *usermodel.User) (secret string, imagePath string) {
-//	algo := getOTPAlgorithm(strings.ToLower(algorithm))
-//
-//	opts := totp.GenerateOpts{
-//		AccountName: user.Username,
-//		Issuer:      SiteName,
-//		Algorithm:   algo,
-//		Digits:      otp.Digits(digits),
-//		Period:      period,
-//		SecretSize:  64,
-//	}
-//
-//	key, _ := totp.Generate(opts)
-//	img, _ := key.Image(250, 250)
-//
-//	os.MkdirAll("./media/otp/", 0744)
-//
-//	fName := "./media/otp/" + key.Secret() + ".png"
-//	for _, err := os.Stat(fName); os.IsExist(err); {
-//		key, _ = totp.Generate(opts)
-//		img, _ = key.Image(450, 450)
-//		fName = "./media/otp/" + key.Secret() + ".png"
-//	}
-//	qrImg, _ := os.OpenFile(fName, os.O_WRONLY|os.O_CREATE, 0644)
-//	defer qrImg.Close()
-//
-//	png.Encode(qrImg, img)
-//
-//	return key.Secret(), fName
-//}
+func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *usermodel.User) (secret string, imagePath string) {
+	algo := getOTPAlgorithm(strings.ToLower(algorithm))
+
+	opts := totp.GenerateOpts{
+		AccountName: user.Username,
+		Issuer:      config.CurrentConfig.D.Uadmin.SiteName,
+		Algorithm:   algo,
+		Digits:      otp.Digits(digits),
+		Period:      period,
+		SecretSize:  64,
+	}
+
+	key, _ := totp.Generate(opts)
+	img, _ := key.Image(250, 250)
+
+	os.MkdirAll("./media/otp/", 0744)
+
+	fName := "./media/otp/" + key.Secret() + ".png"
+	for _, err := os.Stat(fName); os.IsExist(err); {
+		key, _ = totp.Generate(opts)
+		img, _ = key.Image(450, 450)
+	}
+	qrImg, _ := os.OpenFile(fName, os.O_WRONLY|os.O_CREATE, 0644)
+	defer qrImg.Close()
+
+	png.Encode(qrImg, img)
+
+	return key.Secret(), fName
+}
 
 func getOTPAlgorithm(algorithm string) otp.Algorithm {
 	var algo otp.Algorithm

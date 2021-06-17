@@ -2,11 +2,9 @@ package services
 
 import (
 	"crypto/rand"
-	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/utils"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/uadmin/uadmin/preloaded"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
+	// sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"math/big"
 )
 
@@ -22,7 +20,7 @@ var Salt = ""
 var bcryptDiff = 12
 
 // cachedSessions is variable for keeping active sessions
-var CachedSessions map[string]sessionmodel.Session
+// var CachedSessions map[string]sessionmodel.Session
 
 // invalidAttemps keeps track of invalid password attempts
 // per IP address
@@ -67,15 +65,15 @@ func HashPass(pass string) string {
 	return string(hash)
 }
 
-func getSessionByKey(key string) *sessionmodel.Session {
-	s := sessionmodel.Session{}
-	if preloaded.CacheSessions {
-		s = CachedSessions[key]
-	} else {
-		database.Get(&s, "`key` = ?", key)
-	}
-	if s.ID == 0 {
-		return nil
-	}
-	return &s
-}
+//func getSessionByKey(key string) *sessionmodel.Session {
+//	s := sessionmodel.Session{}
+//	if preloaded.CacheSessions {
+//		s = CachedSessions[key]
+//	} else {
+//		database.Get(&s, "`key` = ?", key)
+//	}
+//	if s.ID == 0 {
+//		return nil
+//	}
+//	return &s
+//}

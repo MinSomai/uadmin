@@ -240,6 +240,7 @@ func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult
 			close(chnl)
 			return
 		}
+		r.MigrationTree.TreeBuilt()
 		applyMigrationsInOrder := make([]string, 0)
 		allBlueprintRoots := r.MigrationTree.GetRoot().GetChildren()
 		for l := allBlueprintRoots.Front(); l != nil; l = l.Next() {
@@ -278,6 +279,11 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 		routergroup := router.Group("/" + blueprint.GetName())
 		blueprint.InitRouter(routergroup)
 	}
+	router.GET( "/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 }
 
 func (r BlueprintRegistry) Initialize(config *config.UadminConfig) {

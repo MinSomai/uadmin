@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	otpservices "github.com/uadmin/uadmin/blueprint/otp/services"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
 	"github.com/uadmin/uadmin/database"
 	// "github.com/uadmin/uadmin/dialect"
@@ -16,11 +15,11 @@ import (
 
 type User struct {
 	model.Model
-	Username     string    `uadmin:"required;filter;search"`
+	Username     string    `uadmin:"required;filter;search" gorm:"uniqueIndex"`
 	FirstName    string    `uadmin:"filter;search"`
 	LastName     string    `uadmin:"filter;search"`
 	Password     string    `uadmin:"required;password;help:To reset password, clear the field and type a new password.;list_exclude"`
-	Email        string    `uadmin:"email;search"`
+	Email        string    `uadmin:"email;search" gorm:"uniqueIndex"`
 	Active       bool      `uadmin:"filter"`
 	Admin        bool      `uadmin:"filter"`
 	RemoteAccess bool      `uadmin:"filter"`
@@ -30,7 +29,7 @@ type User struct {
 	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
 	LastLogin   *time.Time `uadmin:"read_only"`
 	ExpiresOn   *time.Time
-	OTPRequired bool
+	GeneratedOTPToVerify     string `uadmin:"list_exclude;hidden;read_only"`
 	OTPSeed     string `uadmin:"list_exclude;hidden;read_only"`
 	Salt        string
 }
@@ -46,17 +45,17 @@ func (u *User) Save() {
 	//if !strings.HasPrefix(u.Password, "$2a$") && len(u.Password) != 60 {
 	//	u.Password = authservices.HashPass(u.Password)
 	//}
-	if u.OTPSeed == "" {
-		// @todo, redo
-		// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
-	} else if u.ID != 0 {
-		oldUser := User{}
-		database.Get(&oldUser, "id = ?", u.ID)
-		if !oldUser.OTPRequired && u.OTPRequired {
-			// @todo, redo
-			// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
-		}
-	}
+	//if u.OTPSeed == "" {
+	//	// @todo, redo
+	//	// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
+	//} else if u.ID != 0 {
+	//	oldUser := User{}
+	//	database.Get(&oldUser, "id = ?", u.ID)
+	//	if !oldUser.OTPRequired && u.OTPRequired {
+	//		// @todo, redo
+	//		// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
+	//	}
+	//}
 	u.Username = strings.ToLower(u.Username)
 	database.Save(u)
 }
@@ -251,12 +250,14 @@ func (u User) Validate() (ret map[string]string) {
 
 // GetOTP !
 func (u *User) GetOTP() string {
-	return otpservices.GetOTP(u.OTPSeed, preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod)
+	return ""
+	// return otpservices.GetOTP(u.OTPSeed, preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod)
 }
 
 // VerifyOTP !
 func (u *User) VerifyOTP(pass string) bool {
-	return otpservices.VerifyOTP(pass, u.OTPSeed, preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod)
+	return false
+	// return otpservices.VerifyOTP(pass, u.OTPSeed, preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod)
 }
 
 // UserGroup !
