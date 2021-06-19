@@ -37,11 +37,10 @@ func (r *AuthProviderRegistry) GetAdapter(name string) (IAuthProvider, error) {
 func (r *AuthProviderRegistry) Iterate() <-chan IAuthProvider {
 	chnl := make(chan IAuthProvider)
 	go func() {
+		defer close(chnl)
 		for _, authProvider := range r.registeredAdapters {
 			chnl <- authProvider
 		}
-		// Ensure that at the end of the loop we close the channel!
-		close(chnl)
 	}()
 	return chnl
 }

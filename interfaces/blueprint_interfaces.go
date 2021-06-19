@@ -66,11 +66,10 @@ type BlueprintRegistry struct {
 func (r BlueprintRegistry) Iterate() <-chan IBlueprint {
 	chnl := make(chan IBlueprint)
 	go func() {
+		defer close(chnl)
 		for _, blueprint := range r.RegisteredBlueprints {
 			chnl <- blueprint
 		}
-		// Ensure that at the end of the loop we close the channel!
-		close(chnl)
 	}()
 	return chnl
 }
@@ -235,9 +234,9 @@ func (r BlueprintRegistry) buildMigrationTree(chnl chan *TraverseMigrationResult
 func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult {
 	chnl := make(chan *TraverseMigrationResult)
 	go func() {
+		defer close(chnl)
 		wasTreeBuilt := r.buildMigrationTree(chnl)
 		if !wasTreeBuilt {
-			close(chnl)
 			return
 		}
 		r.MigrationTree.TreeBuilt()
@@ -260,7 +259,6 @@ func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult
 					Error: fmt.Errorf("Not found migration node with name : %s", migrationName),
 				}
 				chnl <- res
-				close(chnl)
 				return
 			}
 			res := &TraverseMigrationResult{
@@ -269,7 +267,6 @@ func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult
 			}
 			chnl <- res
 		}
-		close(chnl)
 	}()
 	return chnl
 }
@@ -301,9 +298,9 @@ func (r BlueprintRegistry) Initialize(config *config.UadminConfig) {
 func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult {
 	chnl := make(chan *TraverseMigrationResult)
 	go func() {
+		defer close(chnl)
 		wasTreeBuilt := r.buildMigrationTree(chnl)
 		if !wasTreeBuilt {
-			close(chnl)
 			return
 		}
 		applyMigrationsInOrder := make([]string, 0)
@@ -337,7 +334,6 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- c
 					Error: fmt.Errorf("Not found migration node with name : %s", migrationName),
 				}
 				chnl <- res
-				close(chnl)
 				return
 			}
 			res := &TraverseMigrationResult{
@@ -346,7 +342,6 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- c
 			}
 			chnl <- res
 		}
-		close(chnl)
 	}()
 	return chnl
 }
