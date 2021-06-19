@@ -47,6 +47,10 @@ func (suite *ConcreteTestSuite) TestPingEndpoint() {
 	uadmin.TestHTTPResponse(suite.T(), suite.app, req, func(w *httptest.ResponseRecorder) bool {
 		return w.Body.String() == "{\"message\":\"pong\"}"
 	})
+	req1, _ := http.NewRequest("GET", "/static-inbuilt/uadmin/assets/moment.js", nil)
+	uadmin.TestHTTPResponse(suite.T(), suite.app, req1, func(w *httptest.ResponseRecorder) bool {
+		return w.Code == 200
+	})
 }
 
 

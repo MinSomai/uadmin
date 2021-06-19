@@ -17,7 +17,7 @@ type IBlueprint interface {
 	GetName() string
 	GetDescription() string
 	GetMigrationRegistry() IMigrationRegistry
-	InitRouter(group *gin.RouterGroup)
+	InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup)
 	Init(config *config.UadminConfig)
 }
 
@@ -42,7 +42,7 @@ func (b Blueprint) GetName() string {
 	return b.Name
 }
 
-func (b Blueprint) InitRouter(group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	panic(fmt.Errorf("has to be redefined in concrete blueprint"))
 }
 
@@ -277,12 +277,18 @@ func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult
 func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 	for blueprint := range r.Iterate() {
 		routergroup := router.Group("/" + blueprint.GetName())
-		blueprint.InitRouter(routergroup)
+		blueprint.InitRouter(router, routergroup)
 	}
 	router.GET( "/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
+	})
+	router.POST( "/testcsrf", func(c *gin.Context) {
+		c.String(200, "csrf token test passed")
+	})
+	router.POST( "/ignorecsrfcheck", func(c *gin.Context) {
+		c.String(200, "csrf token test passed")
 	})
 }
 

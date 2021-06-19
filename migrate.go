@@ -7,13 +7,13 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -61,16 +61,18 @@ func prepareMigrationName(message string) string {
 	now := time.Now()
 	sec := now.Unix()
 	message = re.ReplaceAllLiteralString(message, "")
-	if len(message) > 10 {
-		message = message[:10]
+	if len(message) > 30 {
+		message = message[:30]
 	}
 	message = strings.Replace(strings.ToLower(message), " ", "_", -1)
+	message = strings.Replace(strings.ToLower(message), ".", "_", -1)
 	return fmt.Sprintf("%s_%d", message, sec)
 }
 
 type CreateMigrationOptions struct {
-	Message string `short:"m" required:"true" description:"Describe what is this migration for"`
-	Blueprint string `short:"b" required:"true" description:"Blueprint you'd like to create migration for'"`
+	Message string `short:"m" description:"Describe what is this migration for"`
+	Blueprint string `short:"b" description:"Blueprint you'd like to create migration for"`
+	MergeMode bool `long:"merge" description:"Merge conflicted migrations"`
 }
 
 type CreateMigration struct {
@@ -83,11 +85,22 @@ func (command CreateMigration) Proceed(subaction string, args []string) error {
 	_, err = parser.ParseArgs(args)
 	if len(args) == 0 {
 		var help string = `
-Please provide flags -b and -m which are blueprint and description of the migration respectively 
+Please provide flags -b and -m which are blueprint and description of the migration respectively
+or --merge if you want to merge conflicted migrations
 `
 		fmt.Printf(help)
 		return nil
 	}
+
+	if !opts.MergeMode && (opts.Blueprint == "" || opts.Message == "") {
+		var help string = `
+Please provide flags -b and -m which are blueprint and description of the migration respectively or --merge
+if you want to merge conflicted migrations 
+`
+		fmt.Printf(help)
+		return nil
+	}
+
 	if err != nil {
 		return err
 	}
@@ -111,7 +124,7 @@ func (m {{.MigrationName}}) Down() {
 }
 
 func (m {{.MigrationName}}) Deps() []string {
-{{if .DependencyId}}    return []string{"{{.BlueprintName}}.{{.DependencyId}}"}{{else}}    return make([]string, 0){{end}}
+{{if .Dependencies}}    return []string{{.Dependencies}}{{else}}    return make([]string, 0){{end}}
 }
 `
 	const initializeMigrationRegistryTpl = `
@@ -129,90 +142,162 @@ func init() {
     // placeholder to insert next migration
 }
 `
-	bluePrintPath := "blueprint/" + strings.ToLower(opts.Blueprint)
-	if _, err := os.Stat(bluePrintPath); os.IsNotExist(err) {
-		panic(fmt.Sprintf("Blueprint %s doesn't exist", opts.Blueprint))
-	}
-	dirPath := "blueprint/" + strings.ToLower(opts.Blueprint) + "/migrations"
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.Mkdir(dirPath, 0755)
-		if err != nil {
-			panic(err)
+	if opts.MergeMode {
+		for true {
+			for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
+				if traverseMigrationResult.Error != nil && strings.Contains(traverseMigrationResult.Error.Error(), "Found two or more migrations with no children from the same blueprint"){
+					r := regexp.MustCompile(`Set\{(.*?)\}`)
+					conflictedMigrations := r.FindStringSubmatch(traverseMigrationResult.Error.Error())[1]
+					listOfConflictedMigrations := strings.Split(conflictedMigrations, ",")
+					dependenciesString := make([]string, len(listOfConflictedMigrations))
+					for i, conflictedMigration := range listOfConflictedMigrations {
+						listOfConflictedMigrations[i] = strings.TrimSpace(conflictedMigration)
+						dependenciesString[i] = fmt.Sprintf(`"%s"`, listOfConflictedMigrations[i])
+					}
+					migrationName := prepareMigrationName(strings.Join(listOfConflictedMigrations, "_"))
+					blueprintName := interfaces.GetBluePrintNameFromMigrationName(listOfConflictedMigrations[0])
+					dirPath := "blueprint/" + strings.ToLower(blueprintName) + "/migrations"
+					pathToBaseMigrationsFile := dirPath + "/migrations.go"
+					pathToConcreteMigrationsFile := dirPath + "/" + migrationName + ".go"
+					var concreteTplBuffer bytes.Buffer
+					now := time.Now()
+					sec := now.Unix()
+					concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
+					concreteData := struct{
+						MigrationName string
+						ConcreteMigrationId string
+						Dependencies string
+						BlueprintName string
+					}{
+						MigrationName: migrationName,
+						ConcreteMigrationId: strconv.Itoa(int(sec)),
+						Dependencies: "{" + strings.Join(dependenciesString, ",") + "}",
+						BlueprintName: blueprintName,
+					}
+					if err = concreteTpl.Execute(&concreteTplBuffer, concreteData); err != nil {
+						panic(err)
+					}
+					err = ioutil.WriteFile(pathToConcreteMigrationsFile, concreteTplBuffer.Bytes(), 0755)
+					if err != nil {
+						panic(err)
+					}
+					integrateMigrationIntoRegistryTpl := template.Must(template.New("integratemigrationintoregistry").Parse(initializeMigrationRegistryTpl))
+					integrateMigrationIntoRegistryData := struct{
+						MigrationName string
+					}{
+						MigrationName: migrationName,
+					}
+					var integrateMigrationIntoRegistryTplBuffer bytes.Buffer
+					if err = integrateMigrationIntoRegistryTpl.Execute(&integrateMigrationIntoRegistryTplBuffer, integrateMigrationIntoRegistryData); err != nil {
+						panic(err)
+					}
+					read, err := ioutil.ReadFile(pathToBaseMigrationsFile)
+					if err != nil {
+						panic(err)
+					}
+					newContents := strings.Replace(
+						string(read),
+						"// placeholder to insert next migration",
+						integrateMigrationIntoRegistryTplBuffer.String() + "\n    // placeholder to insert next migration", -1)
+					err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(newContents), 0755)
+					if err != nil {
+						panic(err)
+					}
+					fmt.Printf(
+						"Created migration for blueprint %s with name %s\n",
+						blueprintName,
+						traverseMigrationResult.Error.Error(),
+					)
+				}
+			}
+			break
 		}
-	}
-	pathToBaseMigrationsFile := dirPath + "/migrations.go"
-	if _, err := os.Stat(pathToBaseMigrationsFile); os.IsNotExist(err) {
-		err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(migrationRegistryCreationTpl), 0755)
-		if err != nil {
-			panic(err)
+	} else {
+		bluePrintPath := "blueprint/" + strings.ToLower(opts.Blueprint)
+		if _, err := os.Stat(bluePrintPath); os.IsNotExist(err) {
+			panic(fmt.Sprintf("Blueprint %s doesn't exist", opts.Blueprint))
 		}
-	}
-	migrationName := prepareMigrationName(opts.Message)
-	pathToConcreteMigrationsFile := dirPath + "/" + migrationName + ".go"
-	var lastMigrationId int
-	err = filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		var migrationFileRegex = regexp.MustCompile(`.*?_(\d+)\.go`)
-		match := migrationFileRegex.FindStringSubmatch(path)
-		if len(match) > 0 {
-			migrationId, _ := strconv.Atoi(match[1])
-			if migrationId > lastMigrationId {
-				lastMigrationId = migrationId
+		dirPath := "blueprint/" + strings.ToLower(opts.Blueprint) + "/migrations"
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			err = os.Mkdir(dirPath, 0755)
+			if err != nil {
+				panic(err)
 			}
 		}
-		return nil
-	})
-	var concreteTplBuffer bytes.Buffer
-	now := time.Now()
-	sec := now.Unix()
-	concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
-	concreteData := struct{
-		MigrationName string
-		ConcreteMigrationId string
-		DependencyId string
-		BlueprintName string
-	}{
-		MigrationName: migrationName,
-		ConcreteMigrationId: strconv.Itoa(int(sec)),
-		DependencyId: "",
-		BlueprintName: opts.Blueprint,
+		pathToBaseMigrationsFile := dirPath + "/migrations.go"
+		if _, err := os.Stat(pathToBaseMigrationsFile); os.IsNotExist(err) {
+			err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(migrationRegistryCreationTpl), 0755)
+			if err != nil {
+				panic(err)
+			}
+		}
+		migrationName := prepareMigrationName(opts.Message)
+		pathToConcreteMigrationsFile := dirPath + "/" + migrationName + ".go"
+		var lastMigrationId int
+		err = filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+			var migrationFileRegex = regexp.MustCompile(`.*?_(\d+)\.go`)
+			match := migrationFileRegex.FindStringSubmatch(path)
+			if len(match) > 0 {
+				migrationId, _ := strconv.Atoi(match[1])
+				if migrationId > lastMigrationId {
+					lastMigrationId = migrationId
+				}
+			}
+			return nil
+		})
+		var concreteTplBuffer bytes.Buffer
+		now := time.Now()
+		sec := now.Unix()
+		concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
+		concreteData := struct{
+			MigrationName string
+			ConcreteMigrationId string
+			Dependencies string
+			BlueprintName string
+		}{
+			MigrationName: migrationName,
+			ConcreteMigrationId: strconv.Itoa(int(sec)),
+			Dependencies: "",
+			BlueprintName: opts.Blueprint,
+		}
+		if lastMigrationId > 0 {
+			concreteData.Dependencies = "{" + fmt.Sprintf(`"%s.%s"`, opts.Blueprint, strconv.Itoa(lastMigrationId)) + "}"
+		}
+		if err = concreteTpl.Execute(&concreteTplBuffer, concreteData); err != nil {
+			panic(err)
+		}
+		err = ioutil.WriteFile(pathToConcreteMigrationsFile, concreteTplBuffer.Bytes(), 0755)
+		if err != nil {
+			panic(err)
+		}
+		integrateMigrationIntoRegistryTpl := template.Must(template.New("integratemigrationintoregistry").Parse(initializeMigrationRegistryTpl))
+		integrateMigrationIntoRegistryData := struct{
+			MigrationName string
+		}{
+			MigrationName: migrationName,
+		}
+		var integrateMigrationIntoRegistryTplBuffer bytes.Buffer
+		if err = integrateMigrationIntoRegistryTpl.Execute(&integrateMigrationIntoRegistryTplBuffer, integrateMigrationIntoRegistryData); err != nil {
+			panic(err)
+		}
+		read, err := ioutil.ReadFile(pathToBaseMigrationsFile)
+		if err != nil {
+			panic(err)
+		}
+		newContents := strings.Replace(
+			string(read),
+			"// placeholder to insert next migration",
+			integrateMigrationIntoRegistryTplBuffer.String() + "\n    // placeholder to insert next migration", -1)
+		err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(newContents), 0755)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf(
+			"Created migration for blueprint %s with name %s\n",
+			opts.Blueprint,
+			opts.Message,
+		)
 	}
-	if lastMigrationId > 0 {
-		concreteData.DependencyId = strconv.Itoa(lastMigrationId)
-	}
-	if err = concreteTpl.Execute(&concreteTplBuffer, concreteData); err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(pathToConcreteMigrationsFile, concreteTplBuffer.Bytes(), 0755)
-	if err != nil {
-		panic(err)
-	}
-	integrateMigrationIntoRegistryTpl := template.Must(template.New("integratemigrationintoregistry").Parse(initializeMigrationRegistryTpl))
-	integrateMigrationIntoRegistryData := struct{
-		MigrationName string
-	}{
-		MigrationName: migrationName,
-	}
-	var integrateMigrationIntoRegistryTplBuffer bytes.Buffer
-	if err = integrateMigrationIntoRegistryTpl.Execute(&integrateMigrationIntoRegistryTplBuffer, integrateMigrationIntoRegistryData); err != nil {
-		panic(err)
-	}
-	read, err := ioutil.ReadFile(pathToBaseMigrationsFile)
-	if err != nil {
-		panic(err)
-	}
-	newContents := strings.Replace(
-		string(read),
-		"// placeholder to insert next migration",
-		integrateMigrationIntoRegistryTplBuffer.String() + "\n    // placeholder to insert next migration", -1)
-	err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(newContents), 0755)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf(
-		"Created migration for blueprint %s with name %s\n",
-		opts.Blueprint,
-		opts.Message,
-	)
 	return nil
 }
 

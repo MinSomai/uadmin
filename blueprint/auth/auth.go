@@ -13,7 +13,7 @@ type Blueprint struct {
 	AuthAdapterRegistry *interfaces3.AuthProviderRegistry
 }
 
-func (b Blueprint) InitRouter(group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	for adapter := range b.AuthAdapterRegistry.Iterate() {
 		adapterGroup := group.Group("/" + adapter.GetName())
 		adapterGroup.POST("/signin/", adapter.Signin)

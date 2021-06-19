@@ -1,23 +1,27 @@
 package uadmin
 
 import (
+	"embed"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
+	"io/fs"
+	nethttp "net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
+	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
 	authblueprint "github.com/uadmin/uadmin/blueprint/auth"
+	languageblueprint "github.com/uadmin/uadmin/blueprint/language"
 	logblueprint "github.com/uadmin/uadmin/blueprint/logging"
-	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	menublueprint "github.com/uadmin/uadmin/blueprint/menu"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	settingsblueprint "github.com/uadmin/uadmin/blueprint/settings"
-	languageblueprint "github.com/uadmin/uadmin/blueprint/language"
-	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
-	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
+	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/http"
@@ -38,6 +42,7 @@ func NewApp(environment string) *App {
 	if appInstance == nil {
 		a := App{}
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
+		a.Config.TemplatesFS = templatesRoot
 		a.CommandRegistry = &CommandRegistry{
 			Actions: make(map[string]interfaces.ICommand),
 		}
@@ -149,7 +154,27 @@ func (a App) StartApi() {
 	// _ = a.Router.Run(":" + strconv.Itoa(a.Config.D.Api.ListenPort))
 }
 
+//go:embed templates
+var templatesRoot embed.FS
+
+//go:embed static/*
+var staticRoot embed.FS
+
+// myFS implements fs.FS
+type uadminStaticFS struct {
+	content embed.FS
+}
+
+func (c uadminStaticFS) Open(name string) (fs.File, error) {
+	return c.content.Open(path.Join("static", name))
+}
+
 func (a App) InitializeRouter() {
+	// http.FS can be used to create a http Filesystem
+	staticFiles := uadminStaticFS{staticRoot}
+	fs1 := nethttp.FS(staticFiles)
+	// Serve static files
+	a.Router.StaticFS("/static-inbuilt/", fs1)
 	a.BlueprintRegistry.InitializeRouting(a.Router)
 }
 

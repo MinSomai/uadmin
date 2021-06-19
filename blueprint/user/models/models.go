@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
 	"github.com/uadmin/uadmin/database"
@@ -8,30 +9,29 @@ import (
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
-	// "golang.org/x/crypto/bcrypt"
-	"strings"
+
 	"time"
 )
 
 type User struct {
 	model.Model
-	Username     string    `uadmin:"required;filter;search" gorm:"uniqueIndex"`
-	FirstName    string    `uadmin:"filter;search"`
-	LastName     string    `uadmin:"filter;search"`
-	Password     string    `uadmin:"required;password;help:To reset password, clear the field and type a new password.;list_exclude"`
-	Email        string    `uadmin:"email;search" gorm:"uniqueIndex"`
-	Active       bool      `uadmin:"filter"`
-	Admin        bool      `uadmin:"filter"`
-	RemoteAccess bool      `uadmin:"filter"`
+	Username     string    `uadmin:"required;filter;search" gorm:"uniqueIndex" json:"username"`
+	FirstName    string    `uadmin:"filter;search" json:"first_name"`
+	LastName     string    `uadmin:"filter;search" json:"last_name"`
+	Password     string    `uadmin:"required;password;help:To reset password, clear the field and type a new password.;list_exclude" json:"password"`
+	Email        string    `uadmin:"email;search" gorm:"uniqueIndex" json:"email"`
+	Active       bool      `uadmin:"filter" json:"active"`
+	Admin        bool      `uadmin:"filter" json:"admin"`
+	RemoteAccess bool      `uadmin:"filter" json:"remote_access"`
 	UserGroup    UserGroup `uadmin:"filter"`
-	UserGroupID  uint
-	Photo        string `uadmin:"image"`
+	UserGroupID  uint `json:"user_group_id"`
+	Photo        string `uadmin:"image" json:"photo"`
 	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
-	LastLogin   *time.Time `uadmin:"read_only"`
-	ExpiresOn   *time.Time
-	GeneratedOTPToVerify     string `uadmin:"list_exclude;hidden;read_only"`
-	OTPSeed     string `uadmin:"list_exclude;hidden;read_only"`
-	Salt        string
+	LastLogin   *time.Time `uadmin:"read_only" json:"read_only"`
+	ExpiresOn   *time.Time `json:"expires_on"`
+	GeneratedOTPToVerify     string `uadmin:"list_exclude;hidden;read_only" json:"generated_otp_to_verify"`
+	OTPSeed     string `uadmin:"list_exclude;hidden;read_only" json:"otp_seed"`
+	Salt        string `json:"salt"`
 }
 
 // String return string
@@ -56,8 +56,8 @@ func (u *User) Save() {
 	//		// u.OTPSeed, _ = otpservices.GenerateOTPSeed(preloaded.OTPDigits, preloaded.OTPAlgorithm, preloaded.OTPSkew, preloaded.OTPPeriod, u)
 	//	}
 	//}
-	u.Username = strings.ToLower(u.Username)
-	database.Save(u)
+	// u.Username = strings.ToLower(u.Username)
+	// database.Save(u)
 }
 
 // @todo, redo
@@ -363,4 +363,14 @@ func (g GroupPermission) String() string {
 // HideInDashboard to return false and auto hide this from dashboard
 func (GroupPermission) HideInDashboard() bool {
 	return true
+}
+
+func NewUserModelFromJson(jsonForUser ...[]byte) (*User, error) {
+	if len(jsonForUser) == 0 {
+		return &User{}, nil
+	} else {
+		u := &User{}
+		err := json.Unmarshal(jsonForUser[0], u)
+		return u, err
+	}
 }

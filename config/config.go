@@ -1,6 +1,9 @@
 package config
 
 import (
+	"container/list"
+	"embed"
+	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/loads"
 	"io/ioutil"
 	"log"
@@ -124,6 +127,9 @@ type UadminConfigurableConfig struct {
 type UadminConfig struct {
 	ApiSpec *loads.Document
 	D *UadminConfigurableConfig
+	TemplatesFS embed.FS
+	RequiresCsrfCheck func(c *gin.Context) bool
+	PatternsToIgnoreCsrfCheck *list.List
 }
 
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -207,6 +213,17 @@ func NewConfig(file string) *UadminConfig {
 	err = yaml.Unmarshal([]byte(content), &c.D)
 	if err != nil {
 		log.Fatalf("error: %v", err)
+	}
+	c.PatternsToIgnoreCsrfCheck = list.New()
+	c.PatternsToIgnoreCsrfCheck.PushBack("/ignorecsrfcheck")
+	c.RequiresCsrfCheck = func(c *gin.Context) bool {
+		for e := CurrentConfig.PatternsToIgnoreCsrfCheck.Front(); e != nil; e = e.Next() {
+			pathToIgnore := e.Value.(string)
+			if c.Request.URL.Path == pathToIgnore {
+				return false
+			}
+		}
+		return true
 	}
 	CurrentConfig = &c
 	return &c

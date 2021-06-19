@@ -3,7 +3,6 @@ package auth
 import (
 	"bytes"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
@@ -143,7 +142,6 @@ func (s *AuthProviderTestSuite) TestSignupForApi() {
 	req, _ := http.NewRequest("POST", "/auth/direct/signup/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
-		spew.Dump("CCCCCCCCCCCCCCCCCC", w.Body)
 		assert.Equal(s.T(), w.Code, 200)
 		return w.Code == 200
 	})
@@ -243,6 +241,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 			return strings.Contains(w.Body.String(), "\"id\":0")
 		})
 		req2, _ := http.NewRequest("POST", "/auth/direct/logout/", bytes.NewBuffer([]byte("")))
+		req2.Header.Set("Content-Type", "application/json")
 		req2.Header.Set(
 			"Cookie",
 			fmt.Sprintf("%s=%s", config.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
