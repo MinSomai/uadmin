@@ -11,15 +11,17 @@ require (
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-gonic/gin v1.7.1
+	github.com/gin-gonic/gin v1.5.0
 	github.com/go-openapi/errors v0.19.9 // indirect
 	github.com/go-openapi/loads v0.20.2
 	github.com/go-openapi/runtime v0.19.24 // indirect
 	github.com/go-openapi/spec v0.20.1 // indirect
 	github.com/go-openapi/strfmt v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.13 // indirect
-	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/go-playground/validator/v10 v10.4.1 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.8.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
@@ -37,7 +39,8 @@ require (
 	golang.org/x/net v0.0.0-20210508051633-16afe75a6701
 	golang.org/x/tools v0.1.2 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	google.golang.org/grpc v1.38.0 // indirect
+	google.golang.org/protobuf v1.26.0-rc.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.0.8

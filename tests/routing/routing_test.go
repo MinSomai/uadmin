@@ -45,7 +45,7 @@ func (suite *ConcreteTestSuite) TestPingEndpoint() {
 	suite.app.InitializeRouter()
 	req, _ := http.NewRequest("GET", "/ping", nil)
 	uadmin.TestHTTPResponse(suite.T(), suite.app, req, func(w *httptest.ResponseRecorder) bool {
-		return w.Body.String() == "{\"message\":\"pong\"}"
+		return w.Body.String() == "{\"message\":\"pong\"}\n"
 	})
 	req1, _ := http.NewRequest("GET", "/static-inbuilt/uadmin/assets/moment.js", nil)
 	uadmin.TestHTTPResponse(suite.T(), suite.app, req1, func(w *httptest.ResponseRecorder) bool {
@@ -56,7 +56,7 @@ func (suite *ConcreteTestSuite) TestPingEndpoint() {
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
-func TestMigrations(t *testing.T) {
+func TestRouting(t *testing.T) {
 	uadmin.ClearApp()
 	suite.Run(t, new(ConcreteTestSuite))
 }

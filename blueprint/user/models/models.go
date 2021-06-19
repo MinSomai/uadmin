@@ -10,34 +10,34 @@ import (
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
 
-	"time"
+	// "time"
 )
 
-type User struct {
-	model.Model
-	Username     string    `uadmin:"required;filter;search" gorm:"uniqueIndex" json:"username"`
-	FirstName    string    `uadmin:"filter;search" json:"first_name"`
-	LastName     string    `uadmin:"filter;search" json:"last_name"`
-	Password     string    `uadmin:"required;password;help:To reset password, clear the field and type a new password.;list_exclude" json:"password"`
-	Email        string    `uadmin:"email;search" gorm:"uniqueIndex" json:"email"`
-	Active       bool      `uadmin:"filter" json:"active"`
-	Admin        bool      `uadmin:"filter" json:"admin"`
-	RemoteAccess bool      `uadmin:"filter" json:"remote_access"`
-	UserGroup    UserGroup `uadmin:"filter"`
-	UserGroupID  uint `json:"user_group_id"`
-	Photo        string `uadmin:"image" json:"photo"`
-	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
-	LastLogin   *time.Time `uadmin:"read_only" json:"read_only"`
-	ExpiresOn   *time.Time `json:"expires_on"`
-	GeneratedOTPToVerify     string `uadmin:"list_exclude;hidden;read_only" json:"generated_otp_to_verify"`
-	OTPSeed     string `uadmin:"list_exclude;hidden;read_only" json:"otp_seed"`
-	Salt        string `json:"salt"`
-}
+//type User struct {
+//	model.Model
+//	Username     string    `uadmin:"required;filter;search" gorm:"uniqueIndex" json:"username"`
+//	FirstName    string    `uadmin:"filter;search" json:"first_name"`
+//	LastName     string    `uadmin:"filter;search" json:"last_name"`
+//	Password     string    `uadmin:"required;password;help:To reset password, clear the field and type a new password.;list_exclude" json:"password"`
+//	Email        string    `uadmin:"email;search" gorm:"uniqueIndex" json:"email"`
+//	Active       bool      `uadmin:"filter" json:"active"`
+//	Admin        bool      `uadmin:"filter" json:"admin"`
+//	RemoteAccess bool      `uadmin:"filter" json:"remote_access"`
+//	UserGroup    UserGroup `uadmin:"filter"`
+//	UserGroupID  uint `json:"user_group_id"`
+//	Photo        string `uadmin:"image" json:"photo"`
+//	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
+//	LastLogin   *time.Time `uadmin:"read_only" json:"read_only"`
+//	ExpiresOn   *time.Time `json:"expires_on"`
+//	GeneratedOTPToVerify     string `uadmin:"list_exclude;hidden;read_only" json:"generated_otp_to_verify"`
+//	OTPSeed     string `uadmin:"list_exclude;hidden;read_only" json:"otp_seed"`
+//	Salt        string `json:"salt"`
+//}
 
 // String return string
-func (u User) String() string {
-	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
-}
+//func (u User) String() string {
+//	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
+//}
 
 // Save !
 func (u *User) Save() {

@@ -31,6 +31,7 @@ UADMIN_GITHUB:=github.com/uadmin/uadmin
 UADMIN_GITHUB_VERSION:=$(UADMIN_GITHUB)/version.Version=${VERSION}
 BUILD_TAGS?=$(TAGS)
 
+include .mk/proto.mk
 include .mk/tests.mk
 
 define GOCOMPILE
@@ -51,6 +52,10 @@ build: gopath moddownload genlocalfiles .build
 .install:
 	$(call GOCOMPILE,install)
 
+.PHONY: uadmin.clean
+uadmin.clean:
+	go clean -i $(UADMIN_GITHUB)
+
 .PHONY: moddownload
 moddownload:
 ifneq ($(OFFLINE), true)
@@ -59,6 +64,11 @@ endif
 
 .PHONY: genlocalfiles
 genlocalfiles: $(EXTRA_BUILD_TARGET)
+# .proto
+
+.PHONY: touchlocalfiles
+touchlocalfiles: .proto.touch
 
 .PHONY: clean
-clean: go clean -i >/dev/null 2>&1 || true
+clean: uadmin.clean .proto.clean \
+       go clean -i >/dev/null 2>&1 || true

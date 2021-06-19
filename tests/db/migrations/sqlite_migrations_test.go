@@ -184,7 +184,7 @@ func (suite *MigrationTestSuite) TestBuildTreeWithTwoSameMigrationNames() {
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
-func TestMigrations(t *testing.T) {
+func TestSqliteMigrations(t *testing.T) {
 	uadmin.ClearApp()
 	suite.Run(t, new(MigrationTestSuite))
 }
