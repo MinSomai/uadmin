@@ -113,59 +113,56 @@ func (u *User) Save() {
 func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
 	allItems := []menumodel.DashboardMenu{}
 	dialect.GetDB().Model(menumodel.DashboardMenu{}).Find(&allItems)
-	return allItems
-	//database.All(&allItems)
-	//
-	//userItems := []UserPermission{}
-	//database.Filter(&userItems, "user_id = ?", u.ID)
-	//
-	//groupItems := []GroupPermission{}
-	//database.Filter(&groupItems, "user_group_id = ?", u.UserGroupID)
-	//
-	//var groupItemIndex int
-	//var userItemIndex int
-	//dashboardItems := []menumodel.DashboardMenu{}
-	//for _, item := range allItems {
-	//	groupItemIndex = -1
-	//	userItemIndex = -1
-	//	for i, groupItem := range groupItems {
-	//		if groupItem.DashboardMenuID == item.ID {
-	//			groupItemIndex = i
-	//			break
-	//		}
-	//	}
-	//	for i, userItem := range userItems {
-	//		if userItem.DashboardMenuID == item.ID {
-	//			userItemIndex = i
-	//			break
-	//		}
-	//	}
-	//	// Permission exists for group and user: overide group with user
-	//	if groupItemIndex != -1 && userItemIndex != -1 {
-	//		groupItems[groupItemIndex].Read = userItems[userItemIndex].Read
-	//		groupItems[groupItemIndex].Add = userItems[userItemIndex].Add
-	//		groupItems[groupItemIndex].Edit = userItems[userItemIndex].Edit
-	//		groupItems[groupItemIndex].Delete = userItems[userItemIndex].Delete
-	//	}
-	//	// User permission exists but no group, add it to permessions
-	//	if groupItemIndex == -1 && userItemIndex != -1 {
-	//		groupItems = append(groupItems, GroupPermission{
-	//			DashboardMenuID: userItems[userItemIndex].DashboardMenuID,
-	//			Read:            userItems[userItemIndex].Read,
-	//			Add:             userItems[userItemIndex].Add,
-	//			Edit:            userItems[userItemIndex].Edit,
-	//			Delete:          userItems[userItemIndex].Delete,
-	//		})
-	//		groupItemIndex = len(groupItems) - 1
-	//	}
-	//	// Reconstruct the dashboard list
-	//	if u.Admin || groupItemIndex != -1 || userItemIndex != -1 {
-	//		if u.Admin || groupItems[groupItemIndex].Read {
-	//			dashboardItems = append(dashboardItems, item)
-	//		}
-	//	}
-	//}
-	// return make([]menumodel.DashboardMenu, 0)
+	userItems := []UserPermission{}
+	dialect.GetDB().Model(UserPermission{}).Where(&UserPermission{UserID: u.ID}).Find(&userItems)
+
+	groupItems := []GroupPermission{}
+	dialect.GetDB().Model(GroupPermission{}).Where(&GroupPermission{UserGroupID: u.UserGroupID}).Find(&groupItems)
+
+	var groupItemIndex int
+	var userItemIndex int
+	dashboardItems := []menumodel.DashboardMenu{}
+	for _, item := range allItems {
+		groupItemIndex = -1
+		userItemIndex = -1
+		for i, groupItem := range groupItems {
+			if groupItem.DashboardMenuID == item.ID {
+				groupItemIndex = i
+				break
+			}
+		}
+		for i, userItem := range userItems {
+			if userItem.DashboardMenuID == item.ID {
+				userItemIndex = i
+				break
+			}
+		}
+		// Permission exists for group and user: overide group with user
+		if groupItemIndex != -1 && userItemIndex != -1 {
+			groupItems[groupItemIndex].Read = userItems[userItemIndex].Read
+			groupItems[groupItemIndex].Add = userItems[userItemIndex].Add
+			groupItems[groupItemIndex].Edit = userItems[userItemIndex].Edit
+			groupItems[groupItemIndex].Delete = userItems[userItemIndex].Delete
+		}
+		// User permission exists but no group, add it to permessions
+		if groupItemIndex == -1 && userItemIndex != -1 {
+			groupItems = append(groupItems, GroupPermission{
+				DashboardMenuID: userItems[userItemIndex].DashboardMenuID,
+				Read:            userItems[userItemIndex].Read,
+				Add:             userItems[userItemIndex].Add,
+				Edit:            userItems[userItemIndex].Edit,
+				Delete:          userItems[userItemIndex].Delete,
+			})
+			groupItemIndex = len(groupItems) - 1
+		}
+		// Reconstruct the dashboard list
+		if u.Admin || groupItemIndex != -1 || userItemIndex != -1 {
+			if u.Admin || groupItems[groupItemIndex].Read {
+				dashboardItems = append(dashboardItems, item)
+			}
+		}
+	}
+	return dashboardItems
 }
 
 // HasAccess returns the user level permission to a model. The modelName
