@@ -195,7 +195,7 @@
             beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
             success: function() {
                 $('.error-cont').toggleClass('hidden', true);
-                // location.href = '/admin';
+                location.href = '/admin';
             },
             error: function(xhr) {
                 $('.error-cont').toggleClass('hidden', false);

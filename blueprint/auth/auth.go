@@ -45,7 +45,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				SessionKey string
 			}
 			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
-			session := sessionAdapter.Create()
+			var cookieName string
+			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
+			cookie, _ := ctx.Cookie(cookieName)
+			session, _ := sessionAdapter.GetByKey(cookie)
+			if session == nil {
+				session = sessionAdapter.Create()
+			}
 			token := utils.GenerateCSRFToken()
 			session.Set("csrf_token", token)
 			session.Save()
