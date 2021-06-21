@@ -77,6 +77,7 @@ type UadminConfigOptions struct {
 	SecureCookie bool `yaml:"secure_cookie"`
 	HttpOnlyCookie bool `yaml:"http_only_cookie"`
 	DirectApiSigninByField string `yaml:"direct_api_signin_by_field"`
+	DebugTests bool `yaml:"debug_tests"`
 }
 
 type UadminDbOptions struct {
@@ -195,6 +196,7 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			SecureCookie: false,
 			HttpOnlyCookie: true,
 			DirectApiSigninByField: "username",
+			DebugTests: false,
 		},
 	}
 	// Put your defaults here

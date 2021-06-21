@@ -33,6 +33,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		if userSession == nil {
 			type Context struct {
 				Err         string
+				PageTitle string
 				ErrExists   bool
 				SiteName    string
 				Languages   []langmodel.Language
@@ -67,9 +68,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Logo = config.CurrentConfig.D.Uadmin.Logo
 			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
 			c.Languages = utils.GetActiveLanguages()
-			utils.RenderHTML(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("login"), c)
+			tr := utils.NewTemplateRenderer("Admin Login")
+			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("login"), c)
 		} else {
 			type Context struct {
+				PageTitle string
 				User     string
 				Demo     bool
 				Menu     string
@@ -105,7 +108,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				allMenus[i] = string(tmpMenu)
 			}
 			c.Menu = strings.Join(allMenus, ",")
-			utils.RenderHTML(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("home"), c)
+			tr := utils.NewTemplateRenderer("Dashboard")
+			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("home"), c)
 		}
 	})
 }

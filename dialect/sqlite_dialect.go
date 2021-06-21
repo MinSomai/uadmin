@@ -302,9 +302,15 @@ func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 	if alias == "default" {
 		aliasDatabaseSettings = CurrentDatabaseSettings.Default
 	}
-	db, err := gorm.Open(sqlite.Open(aliasDatabaseSettings.Name), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	var db *gorm.DB
+	var err error
+	if config2.CurrentConfig.D.Uadmin.DebugTests {
+		db, err = gorm.Open(sqlite.Open(aliasDatabaseSettings.Name), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+	} else {
+		db, err = gorm.Open(sqlite.Open(aliasDatabaseSettings.Name))
+	}
 	//var db *gorm.DB
 	//var err error
 	//

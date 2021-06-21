@@ -2,7 +2,6 @@ package interfaces
 
 import (
 	"github.com/asaskevich/govalidator"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
@@ -39,7 +38,6 @@ type DirectAuthForAdminProvider struct {
 func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) *usermodels.User {
 	session := ap.GetSession(c)
 	if session != nil {
-		spew.Dump(session)
 		return session.GetUser()
 	}
 	return nil

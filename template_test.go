@@ -10,7 +10,6 @@ import (
 func TestEmbeddingTemplates(t *testing.T) {
 	app := NewApp("test")
 	t1, _ := template.ParseFS(app.Config.TemplatesFS, "templates/test.html")
-	// spew.Dump(templatesRoot)
 	templateBuffer := &bytes.Buffer{}
 	t1.Execute(templateBuffer, struct {
 		Title    string

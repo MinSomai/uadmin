@@ -17,3 +17,4 @@ swagger:
 uadmin:
   secure_cookie: false
   http_only_cookie: false
+  debug_tests: false

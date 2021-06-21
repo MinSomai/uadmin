@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>{{.SiteName}} - Dashboard
-    </title>
-    <link rel="shortcut icon" href="{{.FavIcon}}"/>
-
-    <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/bootstrap/3.3.7/css/bootstrap.css" >
-    <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/fa/css/all.min.css">
-
-    <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/bootstrap/3.3.7/css/bootstrap-theme.css" >
-    <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/datepicker/css/bootstrap-datetimepicker.min.css">
-    <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/admin/main.css">
-    <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/css/hover.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  </head>
-  <body{{if .Language.RTL}} dir="rtl"{{end}}>
+{{Include "header"}}
     <div class="z-index9 fixed-top bg-black3 default-padding">
       <div class="">
         <div class="pull-right" style="display: block-inline;">
@@ -87,16 +71,7 @@
       var RootURL = '{{.RootURL}}';
     </script>
 
-    <script src="/static-inbuilt/uadmin/assets/js/jquery.min.js" type="text/javascript"></script>
-    <script src="/static-inbuilt/uadmin/js/notify.min.js"></script>
-		<script src="/static-inbuilt/uadmin/assets/js/tether.min.js" ></script>
-    <script src="/static-inbuilt/uadmin/assets/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
-    <script src="/static-inbuilt/uadmin/assets/moment.js"></script>
-    <script src="/static-inbuilt/uadmin/assets/datepicker/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="/static-inbuilt/uadmin/assets/admin/main.js"></script>
-    <script src="/static-inbuilt/uadmin/assets/js/wow.js"></script>
-    <script src="/static-inbuilt/uadmin/assets/js/staticdata.js"></script>
-
+    {{Include "uadminjs"}}
     <script type="text/javascript">
 
     arrayVariable = [{{ .Menu }}];
