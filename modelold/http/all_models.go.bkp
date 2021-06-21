@@ -8,8 +8,8 @@ import (
 
 func dAPIAllModelsHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
 	response := []interface{}{}
-	for _, v := range model.ModelList {
-		response = append(response, model.Schema[model.GetModelName(v)])
+	for _, v := range modelold.ModelList {
+		response = append(response, modelold.Schema[modelold.GetModelName(v)])
 	}
 	// @todo, redo
 	//utils.ReturnJSON(w, r, map[string]interface{}{

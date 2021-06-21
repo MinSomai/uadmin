@@ -12,7 +12,7 @@ type IAuthProvider interface {
 	Signin(c *gin.Context)
 	Logout(c *gin.Context)
 	IsAuthenticated(c *gin.Context)
-	GetSession(c *gin.Context) *sessioninterfaces.ISessionProvider
+	GetSession(c *gin.Context) sessioninterfaces.ISessionProvider
 	GetName() string
 	Signup(c *gin.Context)
 }

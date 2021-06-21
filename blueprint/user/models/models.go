@@ -4,11 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
-	"github.com/uadmin/uadmin/database"
-	// "github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/model"
-	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 
 	// "time"
 )
@@ -113,65 +110,65 @@ func (u *User) Save() {
 
 // GetDashboardMenu !
 func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
-	allItems := []menumodel.DashboardMenu{}
-	database.All(&allItems)
-
-	userItems := []UserPermission{}
-	database.Filter(&userItems, "user_id = ?", u.ID)
-
-	groupItems := []GroupPermission{}
-	database.Filter(&groupItems, "user_group_id = ?", u.UserGroupID)
-
-	var groupItemIndex int
-	var userItemIndex int
-	dashboardItems := []menumodel.DashboardMenu{}
-	for _, item := range allItems {
-		groupItemIndex = -1
-		userItemIndex = -1
-		for i, groupItem := range groupItems {
-			if groupItem.DashboardMenuID == item.ID {
-				groupItemIndex = i
-				break
-			}
-		}
-		for i, userItem := range userItems {
-			if userItem.DashboardMenuID == item.ID {
-				userItemIndex = i
-				break
-			}
-		}
-		// Permission exists for group and user: overide group with user
-		if groupItemIndex != -1 && userItemIndex != -1 {
-			groupItems[groupItemIndex].Read = userItems[userItemIndex].Read
-			groupItems[groupItemIndex].Add = userItems[userItemIndex].Add
-			groupItems[groupItemIndex].Edit = userItems[userItemIndex].Edit
-			groupItems[groupItemIndex].Delete = userItems[userItemIndex].Delete
-		}
-		// User permission exists but no group, add it to permessions
-		if groupItemIndex == -1 && userItemIndex != -1 {
-			groupItems = append(groupItems, GroupPermission{
-				DashboardMenuID: userItems[userItemIndex].DashboardMenuID,
-				Read:            userItems[userItemIndex].Read,
-				Add:             userItems[userItemIndex].Add,
-				Edit:            userItems[userItemIndex].Edit,
-				Delete:          userItems[userItemIndex].Delete,
-			})
-			groupItemIndex = len(groupItems) - 1
-		}
-		// Reconstruct the dashboard list
-		if u.Admin || groupItemIndex != -1 || userItemIndex != -1 {
-			if u.Admin || groupItems[groupItemIndex].Read {
-				dashboardItems = append(dashboardItems, item)
-			}
-		}
-	}
-	return dashboardItems
+	//allItems := []menumodel.DashboardMenu{}
+	//database.All(&allItems)
+	//
+	//userItems := []UserPermission{}
+	//database.Filter(&userItems, "user_id = ?", u.ID)
+	//
+	//groupItems := []GroupPermission{}
+	//database.Filter(&groupItems, "user_group_id = ?", u.UserGroupID)
+	//
+	//var groupItemIndex int
+	//var userItemIndex int
+	//dashboardItems := []menumodel.DashboardMenu{}
+	//for _, item := range allItems {
+	//	groupItemIndex = -1
+	//	userItemIndex = -1
+	//	for i, groupItem := range groupItems {
+	//		if groupItem.DashboardMenuID == item.ID {
+	//			groupItemIndex = i
+	//			break
+	//		}
+	//	}
+	//	for i, userItem := range userItems {
+	//		if userItem.DashboardMenuID == item.ID {
+	//			userItemIndex = i
+	//			break
+	//		}
+	//	}
+	//	// Permission exists for group and user: overide group with user
+	//	if groupItemIndex != -1 && userItemIndex != -1 {
+	//		groupItems[groupItemIndex].Read = userItems[userItemIndex].Read
+	//		groupItems[groupItemIndex].Add = userItems[userItemIndex].Add
+	//		groupItems[groupItemIndex].Edit = userItems[userItemIndex].Edit
+	//		groupItems[groupItemIndex].Delete = userItems[userItemIndex].Delete
+	//	}
+	//	// User permission exists but no group, add it to permessions
+	//	if groupItemIndex == -1 && userItemIndex != -1 {
+	//		groupItems = append(groupItems, GroupPermission{
+	//			DashboardMenuID: userItems[userItemIndex].DashboardMenuID,
+	//			Read:            userItems[userItemIndex].Read,
+	//			Add:             userItems[userItemIndex].Add,
+	//			Edit:            userItems[userItemIndex].Edit,
+	//			Delete:          userItems[userItemIndex].Delete,
+	//		})
+	//		groupItemIndex = len(groupItems) - 1
+	//	}
+	//	// Reconstruct the dashboard list
+	//	if u.Admin || groupItemIndex != -1 || userItemIndex != -1 {
+	//		if u.Admin || groupItems[groupItemIndex].Read {
+	//			dashboardItems = append(dashboardItems, item)
+	//		}
+	//	}
+	//}
+	return make([]menumodel.DashboardMenu, 0)
 }
 
 // HasAccess returns the user level permission to a model. The modelName
 // the the URL of the model
 func (u *User) HasAccess(modelName string) UserPermission {
-	utils.Trail(utils.WARNING, "User.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
+	debug.Trail(debug.WARNING, "User.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
 	return u.hasAccess(modelName)
 }
 
@@ -179,25 +176,25 @@ func (u *User) HasAccess(modelName string) UserPermission {
 // the the URL of the model
 func (u *User) hasAccess(modelName string) UserPermission {
 	up := UserPermission{}
-	dm := menumodel.DashboardMenu{}
-	if preloaded.CachePermissions {
-		modelID := uint(0)
-		for _, m := range cachedModels {
-			if m.URL == modelName {
-				modelID = m.ID
-				break
-			}
-		}
-		for _, p := range cacheUserPerms {
-			if p.UserID == u.ID && p.DashboardMenuID == modelID {
-				up = p
-				break
-			}
-		}
-	} else {
-		database.Get(&dm, "url = ?", modelName)
-		database.Get(&up, "user_id = ? and dashboard_menu_id = ?", u.ID, dm.ID)
-	}
+	//dm := menumodel.DashboardMenu{}
+	//if preloaded.CachePermissions {
+	//	modelID := uint(0)
+	//	for _, m := range cachedModels {
+	//		if m.URL == modelName {
+	//			modelID = m.ID
+	//			break
+	//		}
+	//	}
+	//	for _, p := range cacheUserPerms {
+	//		if p.UserID == u.ID && p.DashboardMenuID == modelID {
+	//			up = p
+	//			break
+	//		}
+	//	}
+	//} else {
+	//	database.Get(&dm, "url = ?", modelName)
+	//	database.Get(&up, "user_id = ? and dashboard_menu_id = ?", u.ID, dm.ID)
+	//}
 	return up
 }
 
@@ -205,9 +202,9 @@ func (u *User) hasAccess(modelName string) UserPermission {
 // their admin status, group and user permissions
 func (u *User) GetAccess(modelName string) UserPermission {
 	// Check if the user has permission to a model
-	if u.UserGroup.ID != u.UserGroupID {
-		database.Preload(u)
-	}
+	//if u.UserGroup.ID != u.UserGroupID {
+	//	database.Preload(u)
+	//}
 	uPerm := u.hasAccess(modelName)
 	gPerm := u.UserGroup.hasAccess(modelName)
 	perm := UserPermission{}
@@ -238,13 +235,13 @@ func (u *User) GetAccess(modelName string) UserPermission {
 
 // Validate user when saving from uadmin
 func (u User) Validate() (ret map[string]string) {
-	ret = map[string]string{}
-	if u.ID == 0 {
-		database.Get(&u, "username=?", u.Username)
-		if u.ID > 0 {
-			ret["Username"] = "Username is already Taken."
-		}
-	}
+	//ret = map[string]string{}
+	//if u.ID == 0 {
+	//	database.Get(&u, "username=?", u.Username)
+	//	if u.ID > 0 {
+	//		ret["Username"] = "Username is already Taken."
+	//	}
+	//}
 	return
 }
 
@@ -272,37 +269,37 @@ func (u UserGroup) String() string {
 
 // Save !
 func (u *UserGroup) Save() {
-	database.Save(u)
+	// database.Save(u)
 }
 
 // HasAccess !
 func (u *UserGroup) HasAccess(modelName string) GroupPermission {
-	utils.Trail(utils.WARNING, "UserGroup.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
+	// utils.Trail(utils.WARNING, "UserGroup.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
 	return u.hasAccess(modelName)
 }
 
 // hasAccess !
 func (u *UserGroup) hasAccess(modelName string) GroupPermission {
 	up := GroupPermission{}
-	dm := menumodel.DashboardMenu{}
-	if preloaded.CachePermissions {
-		modelID := uint(0)
-		for _, m := range cachedModels {
-			if m.URL == modelName {
-				modelID = m.ID
-				break
-			}
-		}
-		for _, g := range cacheGroupPerms {
-			if g.UserGroupID == u.ID && g.DashboardMenuID == modelID {
-				up = g
-				break
-			}
-		}
-	} else {
-		database.Get(&dm, "url = ?", modelName)
-		database.Get(&up, "user_group_id = ? AND dashboard_menu_id = ?", u.ID, dm.ID)
-	}
+	//dm := menumodel.DashboardMenu{}
+	//if preloaded.CachePermissions {
+	//	modelID := uint(0)
+	//	for _, m := range cachedModels {
+	//		if m.URL == modelName {
+	//			modelID = m.ID
+	//			break
+	//		}
+	//	}
+	//	for _, g := range cacheGroupPerms {
+	//		if g.UserGroupID == u.ID && g.DashboardMenuID == modelID {
+	//			up = g
+	//			break
+	//		}
+	//	}
+	//} else {
+	//	database.Get(&dm, "url = ?", modelName)
+	//	database.Get(&up, "user_group_id = ? AND dashboard_menu_id = ?", u.ID, dm.ID)
+	//}
 	return up
 }
 
@@ -337,9 +334,9 @@ func LoadPermissions() {
 	cacheUserPerms = []UserPermission{}
 	cacheGroupPerms = []GroupPermission{}
 	cachedModels = []menumodel.DashboardMenu{}
-	database.All(&cacheUserPerms)
-	database.All(&cacheGroupPerms)
-	database.All(&cachedModels)
+	//database.All(&cacheUserPerms)
+	//database.All(&cacheGroupPerms)
+	//database.All(&cachedModels)
 }
 
 // GroupPermission !

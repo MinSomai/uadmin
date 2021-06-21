@@ -3,7 +3,7 @@ package metrics
 import (
 	"encoding/json"
 	"github.com/uadmin/rrd"
-	"github.com/uadmin/uadmin/utils"
+	"github.com/uadmin/uadmin/debug"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -40,13 +40,13 @@ func NewMetric(name string, template string) error {
 	}
 	tmpl, err := getRRDTemplate(template)
 	if err != nil {
-		utils.Trail(utils.ERROR, "NewMetric.getRRDTemplate. %s", err.Error())
+		debug.Trail(debug.ERROR, "NewMetric.getRRDTemplate. %s", err.Error())
 		return err
 	}
 	fName := "rrd/" + name + ".rrd"
 	err = rrd.CreateRRD(fName, *tmpl)
 	if err != nil {
-		utils.Trail(utils.ERROR, "NetMetric.rrd.CreateRRD. %s", err.Error())
+		debug.Trail(debug.ERROR, "NetMetric.rrd.CreateRRD. %s", err.Error())
 	}
 	return err
 }
@@ -85,7 +85,7 @@ func setRRDValue(name string, value float64, tmpl string) error {
 	}
 	err = rrd.UpdateRRD(fName, 1, value)
 	if err != nil {
-		utils.Trail(utils.ERROR, "setRRDValue.rrd.UpdateRRD. %s", err.Error())
+		debug.Trail(debug.ERROR, "setRRDValue.rrd.UpdateRRD. %s", err.Error())
 	}
 	return err
 }

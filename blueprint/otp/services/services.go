@@ -6,7 +6,7 @@ import (
 	"github.com/pquerna/otp/totp"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/utils"
+	"github.com/uadmin/uadmin/debug"
 	"image/png"
 	"os"
 
@@ -34,7 +34,7 @@ func GetOTP(seed string, digits int, algorithm string, skew uint, period uint) s
 
 	pass, err := totp.GenerateCodeCustom(seed, time.Now().UTC(), opts)
 	if err != nil {
-		utils.Trail(utils.ERROR, "Unable to generate OTP. %s", err)
+		debug.Trail(debug.ERROR, "Unable to generate OTP. %s", err)
 		return ""
 	}
 	return pass
@@ -53,7 +53,7 @@ func VerifyOTP(pass, seed string, digits int, algorithm string, skew uint, perio
 
 	valid, err := totp.ValidateCustom(pass, seed, time.Now().UTC(), opts)
 	if err != nil {
-		utils.Trail(utils.ERROR, "Unable to verify OTP. %s", err)
+		debug.Trail(debug.ERROR, "Unable to verify OTP. %s", err)
 		return false
 	}
 	return valid
@@ -99,7 +99,7 @@ func getOTPAlgorithm(algorithm string) otp.Algorithm {
 	case "sha512":
 		algo = otp.AlgorithmSHA512
 	default:
-		utils.Trail(utils.WARNING, "getOTPAlgorithm: Unknown hash algorithm (%s). Defaulting to sha1", algorithm)
+		debug.Trail(debug.WARNING, "getOTPAlgorithm: Unknown hash algorithm (%s). Defaulting to sha1", algorithm)
 		return otp.AlgorithmSHA1
 	}
 	return algo

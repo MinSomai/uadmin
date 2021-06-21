@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/translation"
 	"github.com/uadmin/uadmin/utils"
 	"html/template"
@@ -34,7 +35,7 @@ func RenderHTML(w http.ResponseWriter, r *http.Request, path string, data interf
 	for i := range funcs {
 		funcVal = reflect.ValueOf(funcs[i])
 		if funcVal.Type().Kind() != reflect.Func {
-			utils.Trail(utils.WARNING, "Interface passed to RenderHTML in funcs parameter should only be a function. Got (%s) in position %d", funcVal.Type().Kind(), i)
+			debug.Trail(debug.WARNING, "Interface passed to RenderHTML in funcs parameter should only be a function. Got (%s) in position %d", funcVal.Type().Kind(), i)
 			continue
 		}
 
@@ -60,7 +61,7 @@ func RenderHTML(w http.ResponseWriter, r *http.Request, path string, data interf
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprint(w, err.Error())
-		utils.Trail(utils.ERROR, "RenderHTML unable to parse %s. %s", path, err)
+		debug.Trail(debug.ERROR, "RenderHTML unable to parse %s. %s", path, err)
 		return
 	}
 
@@ -75,7 +76,7 @@ func RenderHTML(w http.ResponseWriter, r *http.Request, path string, data interf
 				return
 			}
 		}
-		utils.Trail(utils.ERROR, "Unable to render html template file (%s). %s", path, err)
+		debug.Trail(debug.ERROR, "Unable to render html template file (%s). %s", path, err)
 	}
 }
 
@@ -100,7 +101,7 @@ func RenderMultiHTML(w http.ResponseWriter, r *http.Request, path []string, data
 	for i := range funcs {
 		funcVal = reflect.ValueOf(funcs[i])
 		if funcVal.Type().Kind() != reflect.Func {
-			utils.Trail(utils.WARNING, "Interface passed to RenderHTML in funcs parameter should only be a function. Got (%s) in position %d", funcVal.Type().Kind(), i)
+			debug.Trail(debug.WARNING, "Interface passed to RenderHTML in funcs parameter should only be a function. Got (%s) in position %d", funcVal.Type().Kind(), i)
 			continue
 		}
 
@@ -126,7 +127,7 @@ func RenderMultiHTML(w http.ResponseWriter, r *http.Request, path []string, data
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprint(w, err.Error())
-		utils.Trail(utils.ERROR, "RenderMultiHTML unable to parse %v. %s", path, err)
+		debug.Trail(debug.ERROR, "RenderMultiHTML unable to parse %v. %s", path, err)
 		return
 	}
 
@@ -141,7 +142,7 @@ func RenderMultiHTML(w http.ResponseWriter, r *http.Request, path []string, data
 				return
 			}
 		}
-		utils.Trail(utils.ERROR, "Unable to render html template file (%v). %s", path, err)
+		debug.Trail(debug.ERROR, "Unable to render html template file (%v). %s", path, err)
 	}
 }
 

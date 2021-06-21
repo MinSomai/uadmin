@@ -112,7 +112,7 @@ func makeResultReceiver(length int) []interface{} {
 	return result
 }
 
-func getFilters(r *http.Request, params map[string]string, tableName string, schema *model.ModelSchema) (query string, args []interface{}) {
+func getFilters(r *http.Request, params map[string]string, tableName string, schema *modelold.ModelSchema) (query string, args []interface{}) {
 	qParts := []string{}
 	args = []interface{}{}
 	for k, v := range params {
@@ -572,7 +572,7 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 	m2mStmt := map[string]string{}
 	m2mModelName := map[string]string{}
 
-	s := model.Schema[modelName]
+	s := modelold.Schema[modelName]
 
 	//table1 := s.TableName
 	table2 := ""
@@ -581,15 +581,15 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 	if m2m == "1" {
 		for _, f := range s.Fields {
 			if f.Type == preloaded.CM2M {
-				table2 = model.Schema[strings.ToLower(f.TypeName)].TableName
-				m2mTable := s.ModelName + "_" + model.Schema[strings.ToLower(f.TypeName)].ModelName
+				table2 = modelold.Schema[strings.ToLower(f.TypeName)].TableName
+				m2mTable := s.ModelName + "_" + modelold.Schema[strings.ToLower(f.TypeName)].ModelName
 				m2mStmt[f.Name] = m2mTmpl
 				table_name = dialect.QuoteTableName(table2)
 				m2m_table_name = dialect.Quote(m2mTable)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{TABLE_NAME}", table_name, -1)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{FIELDS}", fillType, -1)
 				m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{M2M_TABLE_NAME}", m2m_table_name, -1)
-				m2mModelName[f.Name] = model.Schema[strings.ToLower(f.TypeName)].ModelName
+				m2mModelName[f.Name] = modelold.Schema[strings.ToLower(f.TypeName)].ModelName
 			}
 		}
 	} else {
@@ -606,22 +606,22 @@ func getQueryM2M(params map[string]string, m interface{}, customSchema bool, mod
 				m2mParts[1] = "*"
 			}
 
-			f := model.Schema[modelName].FieldByName(m2mParts[0])
-			table2Schema := model.Schema[strings.ToLower(f.TypeName)]
+			f := modelold.Schema[modelName].FieldByName(m2mParts[0])
+			table2Schema := modelold.Schema[strings.ToLower(f.TypeName)]
 			table2 = table2Schema.TableName
 			m2mTable := s.ModelName + "_" + table2Schema.ModelName
 			m2mStmt[f.Name] = m2mTmpl
 			m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{TABLE_NAME}", table2, -1)
 			m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{FIELDS}", m2mParts[1], -1)
 			m2mStmt[f.Name] = strings.Replace(m2mStmt[f.Name], "{M2M_TABLE_NAME}", m2mTable, -1)
-			m2mModelName[f.Name] = model.Schema[strings.ToLower(f.TypeName)].ModelName
+			m2mModelName[f.Name] = modelold.Schema[strings.ToLower(f.TypeName)].ModelName
 		}
 	}
 
 	mValue := reflect.ValueOf(m)
 	for i := 0; i < mValue.Elem().Len(); i++ {
 		for k, v := range m2mStmt {
-			tempList, _ := model.NewModelArray(m2mModelName[k], true)
+			tempList, _ := modelold.NewModelArray(m2mModelName[k], true)
 			dialect1.GetDB("default").Raw(v, database.GetID(mValue.Elem().Index(i))).Scan(tempList.Interface())
 			mValue.Elem().Index(i).FieldByName(k).Set(tempList.Elem())
 		}

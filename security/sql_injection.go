@@ -2,7 +2,7 @@ package security
 
 import (
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/utils"
+	"github.com/uadmin/uadmin/debug"
 	"net"
 	"net/http"
 	"strings"
@@ -28,47 +28,47 @@ func SQLInjection(r *http.Request, key, value string) bool {
 	if key != "" {
 		// Case 1 - Comment injection
 		if strings.Contains(key, "--") || strings.Contains(key, "#") {
-			utils.Trail(utils.CRITICAL, errMsg, "comment injection", key)
+			debug.Trail(debug.CRITICAL, errMsg, "comment injection", key)
 			return true
 		}
 		// Case 2 - Comment injection
 		if strings.Contains(key, "/*") || strings.Contains(key, "*/") {
-			utils.Trail(utils.CRITICAL, errMsg, "comment injection", key)
+			debug.Trail(debug.CRITICAL, errMsg, "comment injection", key)
 			return true
 		}
 		// Case 3 - Stacking
 		if strings.Contains(key, ";") {
-			utils.Trail(utils.CRITICAL, errMsg, "stacking", key)
+			debug.Trail(debug.CRITICAL, errMsg, "stacking", key)
 			return true
 		}
 		// Case 4 - HEX Injection
 		if strings.Contains(key, "0x") {
-			utils.Trail(utils.CRITICAL, errMsg, "hex injection", key)
+			debug.Trail(debug.CRITICAL, errMsg, "hex injection", key)
 			return true
 		}
 		// Case 5 - Concatenation
 		if strings.Contains(key, "+") || strings.Contains(key, "||") {
-			utils.Trail(utils.CRITICAL, errMsg, "concatenation", key)
+			debug.Trail(debug.CRITICAL, errMsg, "concatenation", key)
 			return true
 		}
 		// Case 6 - Functions
 		if strings.Contains(key, "(") || strings.Contains(key, ")") {
-			utils.Trail(utils.CRITICAL, errMsg, "functions", key)
+			debug.Trail(debug.CRITICAL, errMsg, "functions", key)
 			return true
 		}
 		// Case 7 - Sapce
 		if strings.Contains(key, " ") {
-			utils.Trail(utils.CRITICAL, errMsg, "space", key)
+			debug.Trail(debug.CRITICAL, errMsg, "space", key)
 			return true
 		}
 		// Case 8 - Escaping
 		if strings.Contains(key, "'") || strings.Contains(key, "`") {
-			utils.Trail(utils.CRITICAL, errMsg, "escaping", key)
+			debug.Trail(debug.CRITICAL, errMsg, "escaping", key)
 			return true
 		}
 		// Case 9 - Escaping
 		if strings.Contains(key, "'") || strings.Contains(key, "`") {
-			utils.Trail(utils.CRITICAL, errMsg, "escaping", key)
+			debug.Trail(debug.CRITICAL, errMsg, "escaping", key)
 			return true
 		}
 	}

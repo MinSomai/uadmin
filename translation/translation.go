@@ -1,9 +1,5 @@
 package translation
 
-import (
-	"github.com/uadmin/uadmin/model"
-)
-
 // Translation is for multilingual fields
 type Translation struct {
 	Name     string
@@ -302,7 +298,7 @@ func Translate(raw string, lang string, args ...bool) string {
 //                  the default language.
 //   term (string): The term to translate.
 //   args (...interface{}): Is a list of args to fill the term with place holders
-func Tf(path string, lang string, term string, args ...interface{}) string {
+//func Tf(path string, lang string, term string, args ...interface{}) string {
 	//var err error
 	//var buf []byte
 	//if lang == "" {
@@ -409,16 +405,15 @@ func Tf(path string, lang string, term string, args ...interface{}) string {
 	//	// TODO: add other parts of the structLang in here
 	//}
 	//return term
-	return ""
-}
-
+	//return ""
+//}
 
 // @todo redo
 // TranslateSchema translate a model schema
-func TranslateSchema(s *model.ModelSchema, lang string) {
-	if lang == "" {
-		lang = "en"
-	}
+//func TranslateSchema(s *modelold.ModelSchema, lang string) {
+//	if lang == "" {
+//		lang = "en"
+//	}
 
 	//pkgName := fmt.Sprint(reflect.TypeOf(models[s.ModelName]))
 	//pkgName = strings.Split(pkgName, ".")[0]
@@ -460,7 +455,7 @@ func TranslateSchema(s *model.ModelSchema, lang string) {
 	//
 	//	s.Fields[i] = f
 	//}
-}
+// }
 
 // @todo, redo
 //func GetLanguage(r *http.Request) langmodel.Language {

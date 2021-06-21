@@ -8,8 +8,9 @@ import (
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/database"
+	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/metrics"
-	"github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
 	// "github.com/uadmin/uadmin/translation"
 	"github.com/uadmin/uadmin/utils"
@@ -41,7 +42,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 	type Context struct {
 		User         string
 		ID           uint
-		Schema       model.ModelSchema
+		Schema       modelold.ModelSchema
 		Status       bool
 		IsUpdated    bool
 		Notif        string
@@ -82,7 +83,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 
 	// c.OTPRequired = user.OTPRequired
 
-	c.Schema, _ = model.GetSchema(user)
+	c.Schema, _ = modelold.GetSchema(user)
 	r.Form.Set("ModelID", fmt.Sprint(user.ID))
 	// @todo probably, return
 	// model.GetFormData(user, r, session, &c.Schema, &user)
@@ -307,7 +308,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			//}
 		}
 	}
-	c.Languages = langmodel.ActiveLangs
+	// c.Languages = langmodel.ActiveLangs
 	// @todo, redo
 	// uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/login.html", c)
 }
@@ -346,7 +347,7 @@ Regards,
 		}
 	}
 	if !allowed {
-		utils.Trail(utils.CRITICAL, "Reset password request for host: (%s) which is not in AllowedHosts settings", host)
+		debug.Trail(debug.CRITICAL, "Reset password request for host: (%s) which is not in AllowedHosts settings", host)
 		return nil
 	}
 

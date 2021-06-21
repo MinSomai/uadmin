@@ -2,7 +2,7 @@ package services
 
 import (
 	"crypto/rand"
-	"github.com/uadmin/uadmin/utils"
+	"github.com/uadmin/uadmin/debug"
 	"golang.org/x/crypto/bcrypt"
 	// sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"math/big"
@@ -59,7 +59,7 @@ func HashPass(pass string) string {
 	password := []byte(pass + Salt)
 	hash, err := bcrypt.GenerateFromPassword(password, bcryptDiff)
 	if err != nil {
-		utils.Trail(utils.ERROR, "uadmin.auth.hashPass.GenerateFromPassword: %s", err)
+		debug.Trail(debug.ERROR, "uadmin.auth.hashPass.GenerateFromPassword: %s", err)
 		return ""
 	}
 	return string(hash)

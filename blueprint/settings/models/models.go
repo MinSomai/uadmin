@@ -6,6 +6,7 @@ import (
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/colors"
 	"github.com/uadmin/uadmin/database"
+	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/metrics"
 	"github.com/uadmin/uadmin/model"
@@ -267,7 +268,7 @@ func (s *Setting) ApplyValue() {
 	case "uAdmin.LogTrail":
 		preloaded.LogTrail = v.(bool)
 	case "uAdmin.TrailLoggingLevel":
-		utils.TrailLoggingLevel = v.(int)
+		debug.TrailLoggingLevel = v.(int)
 	case "uAdmin.SystemMetrics":
 		metrics.SystemMetrics = v.(bool)
 	case "uAdmin.UserMetrics":
@@ -735,7 +736,7 @@ func syncSystemSettings() {
 		},
 		{
 			Name:         "Trail Logging Level",
-			Value:        fmt.Sprint(utils.TrailLoggingLevel),
+			Value:        fmt.Sprint(debug.TrailLoggingLevel),
 			DefaultValue: "2",
 			DataType:     t.Integer(),
 			Help:         "Is the minimum level to be logged into syslog.",
@@ -841,7 +842,7 @@ func syncSystemSettings() {
 	database.Filter(&sList, "category_id = ?", cat.ID)
 	tx := dialect.GetDB("default").Begin()
 	for i, setting := range settings {
-		utils.Trail(utils.WORKING, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, i+1, len(settings), colors.FGNormal)
+		debug.Trail(debug.WORKING, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, i+1, len(settings), colors.FGNormal)
 		s = Setting{}
 		for c := range sList {
 			if sList[c].Code == setting.Code {
@@ -866,7 +867,7 @@ func syncSystemSettings() {
 		}
 	}
 	tx.Commit()
-	utils.Trail(utils.OK, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, len(settings), len(settings), colors.FGNormal)
+	debug.Trail(debug.OK, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, len(settings), len(settings), colors.FGNormal)
 	applySystemSettings()
 	preloaded.SettingsSynched = true
 }

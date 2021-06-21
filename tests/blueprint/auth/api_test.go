@@ -25,7 +25,7 @@ type AuthProviderTestSuite struct {
 }
 
 func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
-	req, _ := http.NewRequest("GET", "/auth/direct/status/?for-uadmin-panel=1", nil)
+	req, _ := http.NewRequest("GET", "/auth/direct-for-admin/status/", nil)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "http: named cookie not present")
 		return strings.Contains(w.Body.String(), "http: named cookie not present")
@@ -67,15 +67,14 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	defaultAdapter.ExpiresOn(&expiresOn)
 	defaultAdapter.Save()
 	req.URL = &url.URL{
-		Path:"/auth/direct/status/",
-		RawQuery: "for-uadmin-panel=1",
+		Path:"/auth/direct-for-admin/status/",
 	}
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "for-uadmin-panel")
 		return strings.Contains(w.Body.String(), "for-uadmin-panel")
 	})
 	var jsonStr = []byte(`{"username":"test", "password": "123456"}`)
-	req, _ = http.NewRequest("POST", "/auth/direct/signin/?for-uadmin-panel=1", bytes.NewBuffer(jsonStr))
+	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "login credentials are incorrect")
@@ -94,7 +93,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	}
 	db := dialect.GetDB()
 	db.Create(&user)
-	req, _ = http.NewRequest("POST", "/auth/direct/signin/?for-uadmin-panel=1", bytes.NewBuffer(jsonStr))
+	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "this user is inactive")
@@ -107,12 +106,12 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	user.GeneratedOTPToVerify = otpPassword
 	var jsonStrForSignup = []byte(fmt.Sprintf(`{"username":"test", "password": "123456", "otp": "%s"}`, otpPassword))
 	db.Save(&user)
-	req, _ = http.NewRequest("POST", "/auth/direct/signin/?for-uadmin-panel=1", bytes.NewBuffer(jsonStrForSignup))
+	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStrForSignup))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
 		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
-		req1, _ := http.NewRequest("GET", "/auth/direct/status/?for-uadmin-panel=1", nil)
+		req1, _ := http.NewRequest("GET", "/auth/direct-for-admin/status/", nil)
 		req1.Header.Set(
 			"Cookie",
 			fmt.Sprintf("%s=%s", config.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
@@ -128,7 +127,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 func (s *AuthProviderTestSuite) TestSignupForUadminAdmin() {
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
-	req, _ := http.NewRequest("POST", "/auth/direct/signup/?for-uadmin-panel=1", bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", "/auth/direct-for-admin/signup/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
@@ -257,6 +256,34 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		return w.Code == 200
 	})
 }
+
+func (s *AuthProviderTestSuite) TestOpenAdminPage() {
+	req, _ := http.NewRequest("GET", config.CurrentConfig.D.Uadmin.RootAdminURL, nil)
+	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
+		assert.Contains(s.T(), w.Body.String(), "uadmin - Admin Login")
+		assert.Equal(s.T(), w.Code, 200)
+		return strings.Contains(w.Body.String(), "uadmin - Admin Login")
+	})
+	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
+	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signup/", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
+		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
+		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
+		req1, _ := http.NewRequest("GET", config.CurrentConfig.D.Uadmin.RootAdminURL, nil)
+		req1.Header.Set(
+			"Cookie",
+			fmt.Sprintf("%s=%s", config.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+		)
+		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
+			assert.Contains(s.T(), w.Body.String(), "uadmin - Dashboard")
+			assert.Equal(s.T(), w.Code, 200)
+			return strings.Contains(w.Body.String(), "uadmin - Dashboard")
+		})
+		return strings.Contains(w.Header().Get("Set-Cookie"), "uadmin-admin=")
+	})
+}
+
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run

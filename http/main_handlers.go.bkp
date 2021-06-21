@@ -21,7 +21,7 @@ func listHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 		User           string
 		Pagination     int
 		Data           *preloaded.ListData
-		Schema         model.ModelSchema
+		Schema         modelold.ModelSchema
 		IsUpdated      bool
 		CanAdd         bool
 		CanDelete      bool
@@ -62,7 +62,7 @@ func listHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 	c.CanDelete = perm.Delete
 
 	// Initialize the schema
-	m, ok := model.NewModel(ModelName, false)
+	m, ok := modelold.NewModel(ModelName, false)
 
 	// Return 404 if it is an unknown model
 	if !ok {
@@ -80,7 +80,7 @@ func listHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 	}
 
 	// Get the schema for the model
-	c.Schema, _ = model.GetSchema(m.Interface())
+	c.Schema, _ = modelold.GetSchema(m.Interface())
 	for i := range c.Schema.Fields {
 		if c.Schema.Fields[i].CategoricalFilter {
 			c.HasCategorical = true
@@ -143,8 +143,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.S
 // GetModelsAPI returns a list of models
 func GetModelsAPI(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
 	response := []string{}
-	for _, v := range model.ModelList {
-		response = append(response, model.GetModelName(v))
+	for _, v := range modelold.ModelList {
+		response = append(response, modelold.GetModelName(v))
 	}
 	utils.ReturnJSON(w, r, response)
 }

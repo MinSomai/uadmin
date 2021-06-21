@@ -25,7 +25,7 @@ func (ap *TokenWithExpirationAuthProvider) Logout(c *gin.Context){
 func (ap *TokenWithExpirationAuthProvider) IsAuthenticated(c *gin.Context) {
 }
 
-func (ap *TokenWithExpirationAuthProvider) GetSession(c *gin.Context) *sessioninterfaces.ISessionProvider {
+func (ap *TokenWithExpirationAuthProvider) GetSession(c *gin.Context) sessioninterfaces.ISessionProvider {
 	return nil
 }
 

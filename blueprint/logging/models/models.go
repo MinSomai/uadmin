@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
-	model2 "github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/database"
+	model2 "github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
-	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"reflect"
 	"strings"
@@ -103,55 +102,55 @@ func (l *Log) Save() {
 
 // ParseRecord !
 func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *usermodel.User, action Action, r *http.Request) (err error) {
-	modelName = strings.ToLower(modelName)
-	model, _ := model2.NewModel(modelName, false)
-	s, ok := model2.GetSchema(model.Interface())
-	if !ok {
-		errMsg := fmt.Sprintf("Unable to find schema (%s)", modelName)
-		utils.Trail(utils.ERROR, errMsg)
-		return fmt.Errorf(errMsg)
-	}
-	l.Username = user.Username
-	l.TableName = modelName
-	l.TableID = int(ID)
-	l.Action = action
-
-	// Check if the value passed is a pointer
-	if a.Kind() == reflect.Ptr {
-		a = a.Elem()
-	}
-
-	jsonifyValue := map[string]string{
-		"_IP": r.RemoteAddr,
-	}
-	for _, f := range s.Fields {
-		if !f.IsMethod {
-			if f.Type == preloaded.CFK {
-				jsonifyValue[f.Name+"ID"] = fmt.Sprint(a.FieldByName(f.Name + "ID").Interface())
-			} else if f.Type == preloaded.CDATE {
-				val := time.Time{}
-				if a.FieldByName(f.Name).Type().Kind() == reflect.Ptr {
-					if a.FieldByName(f.Name).IsNil() {
-						jsonifyValue[f.Name] = ""
-					} else {
-						val, _ = a.FieldByName(f.Name).Elem().Interface().(time.Time)
-						jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
-					}
-
-				} else {
-					val, _ = a.FieldByName(f.Name).Interface().(time.Time)
-					jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
-				}
-
-			} else {
-				jsonifyValue[f.Name] = fmt.Sprint(a.FieldByName(f.Name).Interface())
-			}
-
-		}
-	}
-	json1, _ := json.Marshal(jsonifyValue)
-	l.Activity = string(json1)
-
+	//modelName = strings.ToLower(modelName)
+	//model, _ := model2.NewModel(modelName, false)
+	//s, ok := model2.GetSchema(model.Interface())
+	//if !ok {
+	//	errMsg := fmt.Sprintf("Unable to find schema (%s)", modelName)
+	//	debug.Trail(debug.ERROR, errMsg)
+	//	return fmt.Errorf(errMsg)
+	//}
+	//l.Username = user.Username
+	//l.TableName = modelName
+	//l.TableID = int(ID)
+	//l.Action = action
+	//
+	//// Check if the value passed is a pointer
+	//if a.Kind() == reflect.Ptr {
+	//	a = a.Elem()
+	//}
+	//
+	//jsonifyValue := map[string]string{
+	//	"_IP": r.RemoteAddr,
+	//}
+	//for _, f := range s.Fields {
+	//	if !f.IsMethod {
+	//		if f.Type == preloaded.CFK {
+	//			jsonifyValue[f.Name+"ID"] = fmt.Sprint(a.FieldByName(f.Name + "ID").Interface())
+	//		} else if f.Type == preloaded.CDATE {
+	//			val := time.Time{}
+	//			if a.FieldByName(f.Name).Type().Kind() == reflect.Ptr {
+	//				if a.FieldByName(f.Name).IsNil() {
+	//					jsonifyValue[f.Name] = ""
+	//				} else {
+	//					val, _ = a.FieldByName(f.Name).Elem().Interface().(time.Time)
+	//					jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
+	//				}
+	//
+	//			} else {
+	//				val, _ = a.FieldByName(f.Name).Interface().(time.Time)
+	//				jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
+	//			}
+	//
+	//		} else {
+	//			jsonifyValue[f.Name] = fmt.Sprint(a.FieldByName(f.Name).Interface())
+	//		}
+	//
+	//	}
+	//}
+	//json1, _ := json.Marshal(jsonifyValue)
+	//l.Activity = string(json1)
+	//
 	return nil
 }
 

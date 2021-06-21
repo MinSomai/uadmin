@@ -3,6 +3,7 @@ package config
 import (
 	"container/list"
 	"embed"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/loads"
 	"io/ioutil"
@@ -38,6 +39,7 @@ type UadminConfigOptions struct {
 	EmailSmtpServer string `yaml:"email_smtp_server"`
 	EmailSmtpServerPort int `yaml:"email_smtp_server_port"`
 	RootURL string `yaml:"root_url"`
+	RootAdminURL string `yaml:"root_admin_url"`
 	OTPAlgorithm string `yaml:"otp_algorithm"`
 	OTPDigits int `yaml:"otp_digits"`
 	OTPPeriod uint `yaml:"otp_period"`
@@ -128,8 +130,14 @@ type UadminConfig struct {
 	ApiSpec *loads.Document
 	D *UadminConfigurableConfig
 	TemplatesFS embed.FS
+	LocalizationFS embed.FS
 	RequiresCsrfCheck func(c *gin.Context) bool
 	PatternsToIgnoreCsrfCheck *list.List
+	ErrorHandleFunc func(int, string, string)
+}
+
+func (c *UadminConfig) GetPathToTemplate(templateName string) string {
+	return fmt.Sprintf("templates/uadmin/%s/%s.html", c.D.Uadmin.Theme, templateName)
 }
 
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -147,6 +155,7 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			MaxImageWidth: 800,
 			MaxUploadFileSize: int64(25 * 1024 * 1024),
 			RootURL: "/",
+			RootAdminURL: "/admin",
 			OTPAlgorithm: "sha1",
 			OTPDigits: 6,
 			OTPPeriod: uint(30),

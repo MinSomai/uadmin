@@ -1,13 +1,13 @@
 package api
 
 import (
+	imageapi "github.com/uadmin/uadmin/blueprint/image/api"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
-	imageapi "github.com/uadmin/uadmin/blueprint/image/api"
 	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/dialect"
-	"github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
 	// "github.com/uadmin/uadmin/translation"
 	"net/http"
@@ -72,10 +72,10 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 					continue
 				}
 
-				schema, _ := model.GetSchema(s)
+				schema, _ := modelold.GetSchema(s)
 				schema.FieldByName(sParts[1])
 
-				f := model.F{Name: s.Code, Type: tMap[s.DataType], UploadTo: "/static/settings/"}
+				f := modelold.F{Name: s.Code, Type: tMap[s.DataType], UploadTo: "/static/settings/"}
 
 				val := imageapi.ProcessUpload(r, &f, "setting", session, &schema)
 				if val == "" {

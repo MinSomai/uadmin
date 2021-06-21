@@ -1,8 +1,10 @@
-package model
+package modelold
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/uadmin/uadmin/model"
+
 	// usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/preloaded"
 	"strings"
@@ -114,19 +116,6 @@ func (s ModelSchema) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// ApprovalAction is a selection of approval actions
-type ApprovalAction int
-
-// Approved is an accepted change
-func (ApprovalAction) Approved() ApprovalAction {
-	return 1
-}
-
-// Rejected is a rejected change
-func (ApprovalAction) Rejected() ApprovalAction {
-	return 2
-}
-
 // F is a field
 type F struct {
 	Name              string
@@ -164,7 +153,7 @@ type F struct {
 	OldValue          interface{}
 	ChangedBy         string
 	ChangeDate        *time.Time
-	ApprovalAction    ApprovalAction
+	ApprovalAction    model.ApprovalAction
 	ApprovalDate      *time.Time
 	ApprovalBy        string
 	ApprovalID        uint
@@ -210,7 +199,7 @@ func (f F) MarshalJSON() ([]byte, error) {
 		OldValue          interface{}
 		ChangedBy         string
 		ChangeDate        *time.Time
-		ApprovalAction    ApprovalAction
+		ApprovalAction    model.ApprovalAction
 		ApprovalDate      *time.Time
 		ApprovalBy        string
 		ApprovalID        uint

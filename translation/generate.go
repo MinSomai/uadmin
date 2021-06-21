@@ -3,7 +3,6 @@ package translation
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"io/ioutil"
 )
@@ -25,8 +24,6 @@ type structLanguage struct {
 	updateDisplayName bool
 	Fields            map[string]fieldLanguage `json:"fields"`
 }
-
-const translateMe = "Translate me ---> "
 
 // @todo, redo
 // syncCustomTranslation is a function for creating and updating custom translation files
@@ -104,10 +101,10 @@ func syncCustomTranslation(path string) map[string]int {
 }
 
 // @todo redo
-func syncModelTranslation(m model.ModelSchema) map[string]int {
-	stat := map[string]int{
-		"en": 1,
-	}
+//func syncModelTranslation(m modelold.ModelSchema) map[string]int {
+//	stat := map[string]int{
+//		"en": 1,
+//	}
 	//var err error
 	//var buf []byte
 	//
@@ -351,8 +348,8 @@ func syncModelTranslation(m model.ModelSchema) map[string]int {
 	//		}
 	//	}
 	//}
-	return stat
-}
+//	return stat
+//}
 
 func saveLangFile(v interface{}, fileName string) {
 	buf, _ := json.MarshalIndent(v, "", "  ")

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func dAPIUpload(w http.ResponseWriter, r *http.Request, schema *model.ModelSchema) (map[string]string, error) {
+func dAPIUpload(w http.ResponseWriter, r *http.Request, schema *modelold.ModelSchema) (map[string]string, error) {
 	fileList := map[string]string{}
 
 	if r.MultipartForm == nil {
@@ -18,7 +18,7 @@ func dAPIUpload(w http.ResponseWriter, r *http.Request, schema *model.ModelSchem
 	for k := range r.MultipartForm.File {
 		// Process File
 		// Check if the file is type file or image
-		var field *model.F
+		var field *modelold.F
 		for i := range schema.Fields {
 			if schema.Fields[i].ColumnName == k[1:] {
 				field = &schema.Fields[i]

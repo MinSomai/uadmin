@@ -2,10 +2,9 @@ package models
 
 import (
 	"fmt"
+	"github.com/uadmin/uadmin/model"
 	"io/ioutil"
 	"strings"
-
-	"github.com/uadmin/uadmin/model"
 )
 
 // ABTestValue is a model to represent a possible value of an AB test

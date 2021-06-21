@@ -1,4 +1,4 @@
-package model
+package modelold
 
 // @todo redo
 // GetListSchema returns a schema for list view

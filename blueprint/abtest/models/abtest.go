@@ -10,9 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/database"
-
+	"github.com/uadmin/uadmin/model"
 )
 
 // ABTestType is the type of the AB testing: model or static
@@ -169,15 +168,15 @@ func SyncABTests() {
 			click uint
 			group string
 		}{}
-		for _, v := range values {
-			tempList = append(tempList, struct {
-				v     string
-				vid   uint
-				imp   uint
-				click uint
-				group string
-			}{v: v.Value, vid: v.ID, group: t.Group})
-		}
+		//for _, v := range values {
+		//	tempList = append(tempList, struct {
+		//		v     string
+		//		vid   uint
+		//		imp   uint
+		//		click uint
+		//		group string
+		//	}{v: v.Value, vid: v.ID, group: t.Group})
+		//}
 		StaticABTests[t.StaticPath] = tempList
 	}
 
@@ -186,31 +185,31 @@ func SyncABTests() {
 		if t.Type != t.Type.Model() {
 			continue
 		}
-		schema := model.Schema[model.GetModelName(model.ModelList[int(t.ModelName)])]
-		fName := schema.Fields[int(t.Field)].Name
-		values := []ABTestValue{}
-		database.Filter(&values, "ab_test_id = ? AND active = ?", t.ID, true)
-		tempList := []struct {
-			v     string
-			vid   uint
-			fname int
-			pk    uint
-			imp   uint
-			click uint
-			group string
-		}{}
-		for _, v := range values {
-			tempList = append(tempList, struct {
-				v     string
-				vid   uint
-				fname int
-				pk    uint
-				imp   uint
-				click uint
-				group string
-			}{v: v.Value, vid: v.ID, group: t.Group, pk: uint(t.PrimaryKey), fname: int(t.Field)})
-		}
-		ModelABTests[schema.ModelName+"__"+fName+"__"+fmt.Sprint(t.PrimaryKey)] = tempList
+		//schema := modelold.Schema[modelold.GetModelName(modelold.ModelList[int(t.ModelName)])]
+		//fName := schema.Fields[int(t.Field)].Name
+		//values := []ABTestValue{}
+		//database.Filter(&values, "ab_test_id = ? AND active = ?", t.ID, true)
+		//tempList := []struct {
+		//	v     string
+		//	vid   uint
+		//	fname int
+		//	pk    uint
+		//	imp   uint
+		//	click uint
+		//	group string
+		//}{}
+		//for _, v := range values {
+		//	tempList = append(tempList, struct {
+		//		v     string
+		//		vid   uint
+		//		fname int
+		//		pk    uint
+		//		imp   uint
+		//		click uint
+		//		group string
+		//	}{v: v.Value, vid: v.ID, group: t.Group, pk: uint(t.PrimaryKey), fname: int(t.Field)})
+		//}
+		// ModelABTests[schema.ModelName+"__"+fName+"__"+fmt.Sprint(t.PrimaryKey)] = tempList
 	}
 	AbTestsMutex.Unlock()
 }

@@ -1,4 +1,4 @@
-package model
+package modelold
 
 // FieldType for field type in builder field
 type FieldType int

@@ -3,12 +3,14 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"github.com/uadmin/uadmin/debug"
+	"github.com/uadmin/uadmin/modelold"
+
 	// models2 "github.com/uadmin/uadmin/blueprint/abtest/models"
 	"github.com/uadmin/uadmin/colors"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/metrics"
-	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
@@ -28,12 +30,12 @@ func Save(a interface{}) (err error) {
 		}
 	})
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in Save(%v). %s", model.GetModelName(a), err.Error())
+		debug.Trail(debug.ERROR, "DB error in Save(%v). %s", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	err = customSave(a)
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in customSave(%v). %s", model.GetModelName(a), err.Error())
+		debug.Trail(debug.ERROR, "DB error in customSave(%v). %s", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	return nil
@@ -41,8 +43,8 @@ func Save(a interface{}) (err error) {
 
 
 func decryptArray(a interface{}) {
-	model1, _ := model.NewModel(model.GetModelName(a), false)
-	if schema, ok := model.GetSchema(model1); ok {
+	model1, _ := modelold.NewModel(modelold.GetModelName(a), false)
+	if schema, ok := modelold.GetSchema(model1); ok {
 		for _, f := range schema.Fields {
 			if f.Encrypt {
 				// TODO: Decrypt
@@ -58,8 +60,8 @@ func decryptArray(a interface{}) {
 }
 
 func encryptArray(a interface{}) {
-	model1, _ := model.NewModel(model.GetModelName(a), false)
-	if schema, ok := model.GetSchema(model1); ok {
+	model1, _ := modelold.NewModel(modelold.GetModelName(a), false)
+	if schema, ok := modelold.GetSchema(model1); ok {
 		for _, f := range schema.Fields {
 			if f.Encrypt {
 				allArray := reflect.ValueOf(a)
@@ -74,8 +76,8 @@ func encryptArray(a interface{}) {
 }
 
 func decryptRecord(a interface{}) {
-	model1, _ := model.NewModel(model.GetModelName(a), false)
-	if schema, ok := model.GetSchema(model1); ok {
+	model1, _ := modelold.NewModel(modelold.GetModelName(a), false)
+	if schema, ok := modelold.GetSchema(model1); ok {
 		for _, f := range schema.Fields {
 			if f.Encrypt {
 				recordValue := reflect.ValueOf(a)
@@ -88,8 +90,8 @@ func decryptRecord(a interface{}) {
 }
 
 func encryptRecord(a interface{}) {
-	model1, _ := model.NewModel(model.GetModelName(a), false)
-	if schema, ok := model.GetSchema(model1); ok {
+	model1, _ := modelold.NewModel(modelold.GetModelName(a), false)
+	if schema, ok := modelold.GetSchema(model1); ok {
 		for _, f := range schema.Fields {
 			if f.Encrypt {
 				recordValue := reflect.ValueOf(a)
@@ -131,8 +133,8 @@ func customSave(m interface{}) (err error) {
 				}
 			})
 			if err != nil {
-				utils.Trail(utils.ERROR, "Unable to delete m2m records. %s", err)
-				utils.Trail(utils.ERROR, sql)
+				debug.Trail(debug.ERROR, "Unable to delete m2m records. %s", err)
+				debug.Trail(debug.ERROR, sql)
 				return err
 			}
 			// Insert records
@@ -151,8 +153,8 @@ func customSave(m interface{}) (err error) {
 					}
 				})
 				if err != nil {
-					utils.Trail(utils.ERROR, "Unable to insert m2m records. %s", err)
-					utils.Trail(utils.ERROR, sql)
+					debug.Trail(debug.ERROR, "Unable to insert m2m records. %s", err)
+					debug.Trail(debug.ERROR, sql)
 					return err
 				}
 			}
@@ -182,11 +184,11 @@ func initializeDB(a ...interface{}) {
 
 	// Migrate schema
 	for i, model := range a {
-		utils.Trail(utils.WORKING, "Initializing DB: [%s%d/%d%s]", colors.FGGreenB, i+1, len(a), colors.FGNormal)
+		debug.Trail(debug.WORKING, "Initializing DB: [%s%d/%d%s]", colors.FGGreenB, i+1, len(a), colors.FGNormal)
 		db.AutoMigrate(model)
 		customMigration(model)
 	}
-	utils.Trail(utils.OK, "Initializing DB: [%s%d/%d%s]", colors.FGGreenB, len(a), len(a), colors.FGNormal)
+	debug.Trail(debug.OK, "Initializing DB: [%s%d/%d%s]", colors.FGGreenB, len(a), len(a), colors.FGNormal)
 }
 
 func customMigration(a interface{}) (err error) {
@@ -206,8 +208,8 @@ func customMigration(a interface{}) (err error) {
 				sql1 = strings.Replace(sql1, "{TABLE2}", table2, -1)
 				err = dialect.GetDB("default").Exec(sql1).Error
 				if err != nil {
-					utils.Trail(utils.ERROR, "Unable to create M2M table. %s", err)
-					utils.Trail(utils.ERROR, sql1)
+					debug.Trail(debug.ERROR, "Unable to create M2M table. %s", err)
+					debug.Trail(debug.ERROR, sql1)
 					return err
 				}
 			}
@@ -239,7 +241,7 @@ func All(a interface{}) (err error) {
 		}
 	})
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in All(%v). %s", model.GetModelName(a), err.Error())
+		debug.Trail(debug.ERROR, "DB error in All(%v). %s", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	decryptArray(a)
@@ -258,14 +260,14 @@ func Get(a interface{}, query interface{}, args ...interface{}) (err error) {
 
 	if err != nil {
 		if err.Error() != "record not found" {
-			utils.Trail(utils.ERROR, "DB error in Get(%s)-(%v). %s", model.GetModelName(a), a, err.Error())
+			debug.Trail(debug.ERROR, "DB error in Get(%s)-(%v). %s", modelold.GetModelName(a), a, err.Error())
 		}
 		return err
 	}
 
 	err = customGet(a)
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in customGet(%v). %s", model.GetModelName(a), err.Error())
+		debug.Trail(debug.ERROR, "DB error in customGet(%v). %s", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	decryptRecord(a)
@@ -312,8 +314,8 @@ func GetABTest(r *http.Request, a interface{}, query interface{}, args ...interf
 // then it gets all the fields
 func GetStringer(a interface{}, query interface{}, args ...interface{}) (err error) {
 	stringers := []string{}
-	modelName := model.GetModelName(a)
-	for _, f := range model.Schema[modelName].Fields {
+	modelName := modelold.GetModelName(a)
+	for _, f := range modelold.Schema[modelName].Fields {
 		if f.Stringer {
 			stringers = append(stringers, dialect.GetDB("default").Config.NamingStrategy.ColumnName("", f.Name))
 		}
@@ -335,14 +337,14 @@ func GetStringer(a interface{}, query interface{}, args ...interface{}) (err err
 	})
 	if err != nil {
 		if err.Error() != "record not found" {
-			utils.Trail(utils.ERROR, "DB error in Get(%s)-(%v). %s", model.GetModelName(a), a, err.Error())
+			debug.Trail(utils.ERROR, "DB error in Get(%s)-(%v). %s", modelold.GetModelName(a), a, err.Error())
 		}
 		return err
 	}
 
 	//err = customGet(a)
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in customGet(%v). %s", model.GetModelName(a), err.Error())
+		debug.Trail(utils.ERROR, "DB error in customGet(%v). %s", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	decryptRecord(a)
@@ -351,7 +353,7 @@ func GetStringer(a interface{}, query interface{}, args ...interface{}) (err err
 
 // GetForm fetches the first record from the database matching query and args
 // where it selects only visible fields in the form based on given schema
-func GetForm(a interface{}, s *model.ModelSchema, query interface{}, args ...interface{}) (err error) {
+func GetForm(a interface{}, s *modelold.ModelSchema, query interface{}, args ...interface{}) (err error) {
 	// get a list of visible fields
 	columnList := []string{}
 	dialect1 := dialect.GetDialectForDb("default")
@@ -379,14 +381,14 @@ func GetForm(a interface{}, s *model.ModelSchema, query interface{}, args ...int
 
 	if err != nil {
 		if err.Error() != "record not found" {
-			utils.Trail(utils.ERROR, "DB error in Get(%s)-(%v). %s", model.GetModelName(a), a, err.Error())
+			debug.Trail(debug.ERROR, "DB error in Get(%s)-(%v). %s", modelold.GetModelName(a), a, err.Error())
 		}
 		return err
 	}
 
 	err = customGet(a, m2mList...)
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in customGet(%v). %s", model.GetModelName(a), err.Error())
+		debug.Trail(debug.ERROR, "DB error in customGet(%v). %s", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	decryptRecord(a)
@@ -437,8 +439,8 @@ func customGet(m interface{}, m2m ...string) (err error) {
 			var rows *sql.Rows
 			rows, err = dialect.GetDB("default").Raw(sqlSelect).Rows()
 			if err != nil {
-				utils.Trail(utils.ERROR, "Unable to get m2m records. %s", err)
-				utils.Trail(utils.ERROR, sqlSelect)
+				debug.Trail(debug.ERROR, "Unable to get m2m records. %s", err)
+				debug.Trail(debug.ERROR, sqlSelect)
 				return err
 			}
 			defer rows.Close()
@@ -467,7 +469,7 @@ func Filter(a interface{}, query interface{}, args ...interface{}) (err error) {
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in Filter(%v). %s\n", model.GetModelName(a), err.Error())
+		debug.Trail(debug.ERROR, "DB error in Filter(%v). %s\n", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	decryptArray(a)
@@ -478,16 +480,16 @@ func Filter(a interface{}, query interface{}, args ...interface{}) (err error) {
 // to be preloaded. If nothing is passed, every foreign key is preloaded
 func Preload(a interface{}, preload ...string) (err error) {
 	modelName := strings.ToLower(reflect.TypeOf(a).Elem().Name())
-	model1, _ := model.NewModel(modelName, false)
+	model1, _ := modelold.NewModel(modelName, false)
 	if len(preload) == 0 {
-		if schema, ok := model.GetSchema(model1); ok {
+		if schema, ok := modelold.GetSchema(model1); ok {
 			for _, f := range schema.Fields {
 				if f.Type == "fk" {
 					preload = append(preload, f.Name)
 				}
 			}
 		} else {
-			utils.Trail(utils.ERROR, "DB.Preload No model named %s", modelName)
+			debug.Trail(debug.ERROR, "DB.Preload No model named %s", modelName)
 			return fmt.Errorf("DB.Preload No model named %s", modelName)
 		}
 	}
@@ -497,7 +499,7 @@ func Preload(a interface{}, preload ...string) (err error) {
 		if value.FieldByName(p).Type().Kind() == reflect.Ptr {
 			fkType = value.FieldByName(p).Type().Elem().Name()
 		}
-		fieldStruct, _ := model.NewModel(strings.ToLower(fkType), true)
+		fieldStruct, _ := modelold.NewModel(strings.ToLower(fkType), true)
 		metrics.TimeMetric("uadmin/db/duration", 1000, func() {
 			err = dialect.GetDB("default").Where("id = ?", value.FieldByName(p+"ID").Interface()).First(fieldStruct.Interface()).Error
 			for fmt.Sprint(err) == "database is locked" {
@@ -508,7 +510,7 @@ func Preload(a interface{}, preload ...string) (err error) {
 
 		//		err = Get(fieldStruct.Interface(), "id = ?", value.FieldByName(p+"ID").Interface())
 		if err != nil && err.Error() != "record not found" {
-			utils.Trail(utils.ERROR, "DB error in Preload(%s).%s %s\n", modelName, p, err.Error())
+			debug.Trail(debug.ERROR, "DB error in Preload(%s).%s %s\n", modelName, p, err.Error())
 			return err
 		}
 		if GetID(fieldStruct) != 0 {
@@ -537,7 +539,7 @@ func Delete(a interface{}) (err error) {
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in Delete(%v). %s\n", model.GetModelName(a), err.Error())
+		utils.Trail(utils.ERROR, "DB error in Delete(%v). %s\n", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	return nil
@@ -554,7 +556,7 @@ func DeleteList(a interface{}, query interface{}, args ...interface{}) (err erro
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in DeleteList(%v). %s\n", model.GetModelName(a), err.Error())
+		utils.Trail(utils.ERROR, "DB error in DeleteList(%v). %s\n", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	return nil
@@ -595,7 +597,7 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 		})
 
 		if err != nil {
-			utils.Trail(utils.ERROR, "DB error in AdminPage(%v). %s\n", model.GetModelName(a), err.Error())
+			utils.Trail(utils.ERROR, "DB error in AdminPage(%v). %s\n", modelold.GetModelName(a), err.Error())
 			return err
 		}
 		decryptArray(a)
@@ -610,7 +612,7 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in AdminPage(%v). %s\n", model.GetModelName(a), err.Error())
+		utils.Trail(utils.ERROR, "DB error in AdminPage(%v). %s\n", modelold.GetModelName(a), err.Error())
 		return err
 	}
 	decryptArray(a)
@@ -619,7 +621,7 @@ func AdminPage(order string, asc bool, offset int, limit int, a interface{}, que
 
 // FilterList fetches the all record from the database matching query and args
 // where it selects only visible fields in the form based on given schema
-func FilterList(s *model.ModelSchema, order string, asc bool, offset int, limit int, a interface{}, query interface{}, args ...interface{}) (err error) {
+func FilterList(s *modelold.ModelSchema, order string, asc bool, offset int, limit int, a interface{}, query interface{}, args ...interface{}) (err error) {
 	dialect1 := dialect.GetDialectForDb("default")
 	// get a list of visible fields
 	columnList := []string{}
@@ -655,7 +657,7 @@ func FilterList(s *model.ModelSchema, order string, asc bool, offset int, limit 
 		})
 
 		if err != nil {
-			utils.Trail(utils.ERROR, "DB error in FilterList(%v) query:%s, args(%#v). %s\n", model.GetModelName(a), query, args, err.Error())
+			utils.Trail(utils.ERROR, "DB error in FilterList(%v) query:%s, args(%#v). %s\n", modelold.GetModelName(a), query, args, err.Error())
 			return err
 		}
 		decryptArray(a)
@@ -670,7 +672,7 @@ func FilterList(s *model.ModelSchema, order string, asc bool, offset int, limit 
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in FilterList(%v) query:%s, args(%#v). %s\n", model.GetModelName(a), query, args, err.Error())
+		utils.Trail(utils.ERROR, "DB error in FilterList(%v) query:%s, args(%#v). %s\n", modelold.GetModelName(a), query, args, err.Error())
 		return err
 	}
 	decryptArray(a)
@@ -690,7 +692,7 @@ func Count(a interface{}, query interface{}, args ...interface{}) int {
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in Count(%v). %s\n", model.GetModelName(a), err.Error())
+		utils.Trail(utils.ERROR, "DB error in Count(%v). %s\n", modelold.GetModelName(a), err.Error())
 	}
 	return int(count)
 }
@@ -706,7 +708,7 @@ func Update(a interface{}, fieldName string, value interface{}, query string, ar
 	})
 
 	if err != nil {
-		utils.Trail(utils.ERROR, "DB error in Update(%v). %s\n", model.GetModelName(a), err.Error())
+		utils.Trail(utils.ERROR, "DB error in Update(%v). %s\n", modelold.GetModelName(a), err.Error())
 	}
 	return nil
 }

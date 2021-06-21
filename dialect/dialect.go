@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	config2 "github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/utils"
+	"github.com/uadmin/uadmin/debug"
 	"gorm.io/gorm"
 	"io/ioutil"
 )
@@ -35,7 +35,7 @@ func GetDB(alias_ ...string) *gorm.DB {
 		if err == nil {
 			err = json.Unmarshal(buf, CurrentDatabaseSettings)
 			if err != nil {
-				utils.Trail(utils.WARNING, ".database file is not a valid json file. %s", err)
+				debug.Trail(debug.WARNING, ".database file is not a valid json file. %s", err)
 			}
 		}
 	}
@@ -44,7 +44,7 @@ func GetDB(alias_ ...string) *gorm.DB {
 		alias,
 	)
 	if err != nil {
-		utils.Trail(utils.ERROR, "unable to connect to DB. %s", err)
+		debug.Trail(debug.ERROR, "unable to connect to DB. %s", err)
 		Db.Error = fmt.Errorf("unable to connect to DB. %s", err)
 	}
 	return Db

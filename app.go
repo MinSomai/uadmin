@@ -43,6 +43,7 @@ func NewApp(environment string) *App {
 		a := App{}
 		a.Config = config.NewConfig("configs/" + environment + ".yaml")
 		a.Config.TemplatesFS = templatesRoot
+		a.Config.LocalizationFS = localizationRoot
 		a.CommandRegistry = &CommandRegistry{
 			Actions: make(map[string]interfaces.ICommand),
 		}
@@ -156,6 +157,9 @@ func (a App) StartApi() {
 
 //go:embed templates
 var templatesRoot embed.FS
+
+//go:embed localization
+var localizationRoot embed.FS
 
 //go:embed static/*
 var staticRoot embed.FS
