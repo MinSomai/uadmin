@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
 	"github.com/uadmin/uadmin/debug"
@@ -360,14 +359,4 @@ func (g GroupPermission) String() string {
 // HideInDashboard to return false and auto hide this from dashboard
 func (GroupPermission) HideInDashboard() bool {
 	return true
-}
-
-func NewUserModelFromJson(jsonForUser ...[]byte) (*User, error) {
-	if len(jsonForUser) == 0 {
-		return &User{}, nil
-	} else {
-		u := &User{}
-		err := json.Unmarshal(jsonForUser[0], u)
-		return u, err
-	}
 }
