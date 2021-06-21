@@ -33,8 +33,8 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 	req.Header.Set("X-UADMIN-API", session.Key)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		body := w.Body.String()
-		assert.Equal(s.T(), body, "Incorrect csrf-token")
-		return strings.EqualFold(body, "Incorrect csrf-token")
+		assert.Equal(s.T(), body, "Incorrect length of csrf-token")
+		return strings.EqualFold(body, "Incorrect length of csrf-token")
 	})
 }
 

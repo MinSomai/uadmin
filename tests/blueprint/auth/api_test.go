@@ -236,8 +236,8 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 			fmt.Sprintf("%s=%s", config.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
-			assert.Contains(s.T(), w.Body.String(), "\"id\":0")
-			return strings.Contains(w.Body.String(), "\"id\":0")
+			assert.Contains(s.T(), w.Body.String(), "\"id\":")
+			return strings.Contains(w.Body.String(), "\"id\":")
 		})
 		req2, _ := http.NewRequest("POST", "/auth/direct/logout/", bytes.NewBuffer([]byte("")))
 		req2.Header.Set("Content-Type", "application/json")
