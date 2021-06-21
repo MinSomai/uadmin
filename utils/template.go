@@ -10,6 +10,13 @@ import (
 	"text/template"
 )
 
+var FuncMap = template.FuncMap{
+	"Tf": Tf,
+	//"CSRF": func() string {
+	//	return "dfsafsa"
+	//	// return authapi.GetSession(r)
+	//},
+}
 // RenderHTML creates a new template and applies a parsed template to the specified
 // data object. For function, Tf is available by default and if you want to add functions
 //to your template, just add them to funcs which will add them to the template with their
@@ -20,14 +27,10 @@ func RenderHTML(ctx *gin.Context, fsys fs.FS, path string, data interface{}, fun
 	var funcVal reflect.Value
 	var funcName string
 
-	funcMap := template.FuncMap{
-		"Tf": Tf,
-		//"CSRF": func() string {
-		//	return "dfsafsa"
-		//	// return authapi.GetSession(r)
-		//},
+	funcMap := template.FuncMap{}
+	for k,v := range FuncMap {
+		funcMap[k] = v
 	}
-
 	for i := range funcs {
 		funcVal = reflect.ValueOf(funcs[i])
 		if funcVal.Type().Kind() != reflect.Func {

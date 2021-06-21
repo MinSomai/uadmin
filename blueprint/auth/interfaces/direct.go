@@ -20,7 +20,8 @@ import (
 
 // Binding from JSON
 type LoginParams struct {
-	SigninByField     string `form:"username" json:"username" xml:"username"  binding:"required"`
+	// SigninByField     string `form:"username" json:"username" xml:"username"  binding:"required"`
+	SigninField     string `form:"signinfield" json:"signinfield" xml:"signinfield"  binding:"required"`
 	Password string `form:"password" json:"password" xml:"password" binding:"required"`
 	OTP string `form:"otp" json:"otp" xml:"otp" binding:"omitempty"`
 }
@@ -53,7 +54,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	var user usermodels.User
 	// @todo, complete
 	directApiSigninByField := config.CurrentConfig.D.Uadmin.DirectApiSigninByField
-	db.Model(usermodels.User{}).Where(fmt.Sprintf("%s = ?", directApiSigninByField), json.SigninByField).First(&user)
+	db.Model(usermodels.User{}).Where(fmt.Sprintf("%s = ?", directApiSigninByField), json.SigninField).First(&user)
 	if user.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
 		return

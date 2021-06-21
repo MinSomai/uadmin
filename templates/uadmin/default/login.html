@@ -54,7 +54,8 @@
             <i class="fa fa-lock fa-stack-1x"></i>
           </span>
         </center>
-        <form method="POST">
+        <form method="POST" id="signin-form">
+            <input type="hidden" name="csrf_token" value="{{CSRF .SessionKey}}" />
             <div class="form-group">
                 <label for="username">{{Tf "uadmin/system" .Language.Code "Username"}}</label>
                 <div class="input-group">
@@ -96,16 +97,12 @@
             <a class="pointer" id="forgotpassword_trigger"  style="margin-left:25px; vertical-align:bottom;">Forgot Password</a>
         </form>
         <hr>
-        {{if .ErrExists}}
-        <div class="alert alert-warning">
-            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;{{.Err}}
+        <div class="hidden error-cont alert alert-warning">
+            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span></span>
         </div>
         <script>
             err = "1";
         </script>
-        {{else}}
-
-        {{end}} {{/* if .ErrExists */}}
         <div id="info_content">
         </div>
     </div>
@@ -183,7 +180,29 @@
     });
     loading();
     hide_loading(300);
-
+    $('#signin-form').submit(function(ev) {
+        ev.preventDefault();
+        var form = $(ev.currentTarget);
+        $.ajax({
+            url: "/auth/direct-for-admin/signin/?for-uadmin-panel=1",
+            method: "POST",
+            processData: false,
+            contentType:"application/json; charset=utf-8",
+            data: JSON.stringify({
+                signinfield: form.find('input[name="username"]').val(),
+                password: form.find('input[name="password"]').val()
+            }),
+            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
+            success: function() {
+                $('.error-cont').toggleClass('hidden', true);
+                // location.href = '/admin';
+            },
+            error: function(xhr) {
+                $('.error-cont').toggleClass('hidden', false);
+                $('.error-cont span').html(JSON.parse(xhr.responseText).error);
+            }
+        });
+    });
     $('#save_trigger').click(function(){
         show_loading();
     });

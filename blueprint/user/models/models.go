@@ -5,6 +5,7 @@ import (
 	"fmt"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
 	"github.com/uadmin/uadmin/debug"
+	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/model"
 
 	// "time"
@@ -110,7 +111,9 @@ func (u *User) Save() {
 
 // GetDashboardMenu !
 func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
-	//allItems := []menumodel.DashboardMenu{}
+	allItems := []menumodel.DashboardMenu{}
+	dialect.GetDB().Model(menumodel.DashboardMenu{}).Find(&allItems)
+	return allItems
 	//database.All(&allItems)
 	//
 	//userItems := []UserPermission{}
@@ -162,7 +165,7 @@ func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
 	//		}
 	//	}
 	//}
-	return make([]menumodel.DashboardMenu, 0)
+	// return make([]menumodel.DashboardMenu, 0)
 }
 
 // HasAccess returns the user level permission to a model. The modelName

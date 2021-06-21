@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/blueprint/sessions/migrations"
@@ -63,11 +64,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 
 			if len(csrfTokenFromRequest) != 64 {
-				c.String(400, "Incorrect csrf-token")
+				c.String(400, "Incorrect length of csrf-token")
 				c.Abort()
 				return
 			}
 			tokenUnmasked := utils.UnmaskCSRFToken(csrfTokenFromRequest)
+			spew.Dump(csrfTokenFromRequest, csrfToken, tokenUnmasked)
 			if tokenUnmasked != csrfToken {
 				c.String(400, "Incorrect csrf-token")
 				c.Abort()
@@ -76,6 +78,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Next()
 		}
 	}())
+	utils.FuncMap["CSRF"] = func(Key string) string {
+		sessionAdapter, _ := ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
+		session, _ := sessionAdapter.GetByKey(Key)
+		csrfToken, _ := session.Get("csrf_token")
+		return utils.MaskCSRFToken(csrfToken)
+	}
 }
 
 func (b Blueprint) Init(config *config.UadminConfig) {

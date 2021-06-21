@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"github.com/asaskevich/govalidator"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
@@ -19,7 +20,8 @@ import (
 
 // Binding from JSON
 type LoginParamsForUadminAdmin struct {
-	SigninByField     string `form:"username" json:"username" xml:"username"  binding:"required"`
+	// SigninByField     string `form:"signinbyfield" json:"signinbyfield" xml:"signinbyfield"  binding:"required"`
+	SigninField     string `form:"signinfield" json:"signinfield" xml:"signinfield"  binding:"required"`
 	Password string `form:"password" json:"password" xml:"password" binding:"required"`
 	OTP string `form:"otp" json:"otp" xml:"otp" binding:"omitempty"`
 }
@@ -37,6 +39,7 @@ type DirectAuthForAdminProvider struct {
 func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) *usermodels.User {
 	session := ap.GetSession(c)
 	if session != nil {
+		spew.Dump(session)
 		return session.GetUser()
 	}
 	return nil
@@ -50,9 +53,9 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	}
 	db := dialect.GetDB()
 	var user usermodels.User
-	db.Model(usermodels.User{}).Where(&usermodels.User{Username: json.SigninByField}).First(&user)
+	db.Model(usermodels.User{}).Where(&usermodels.User{Username: json.SigninField}).First(&user)
 	if user.ID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
 		return
 	}
 	if !user.Active {
@@ -61,20 +64,8 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password + user.Salt))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
 		return
-	}
-	if utils.Contains(config.CurrentConfig.D.Auth.Twofactor_auth_required_for_signin_adapters, ap.GetName()) {
-		if json.OTP == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "otp is required"})
-			return
-		}
-		if user.GeneratedOTPToVerify != json.OTP {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "otp provided by user is wrong"})
-			return
-		}
-		user.GeneratedOTPToVerify = ""
-		db.Save(&user)
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()

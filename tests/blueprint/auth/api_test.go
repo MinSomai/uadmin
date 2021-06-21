@@ -73,7 +73,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		assert.Contains(s.T(), w.Body.String(), "for-uadmin-panel")
 		return strings.Contains(w.Body.String(), "for-uadmin-panel")
 	})
-	var jsonStr = []byte(`{"username":"test", "password": "123456"}`)
+	var jsonStr = []byte(`{"signinfield":"test", "password": "123456"}`)
 	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -104,7 +104,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	user.OTPSeed = secretString
 	otpPassword := services.GetOTP(user.OTPSeed, config.CurrentConfig.D.Uadmin.OTPDigits, config.CurrentConfig.D.Uadmin.OTPAlgorithm, config.CurrentConfig.D.Uadmin.OTPSkew, config.CurrentConfig.D.Uadmin.OTPPeriod)
 	user.GeneratedOTPToVerify = otpPassword
-	var jsonStrForSignup = []byte(fmt.Sprintf(`{"username":"test", "password": "123456", "otp": "%s"}`, otpPassword))
+	var jsonStrForSignup = []byte(fmt.Sprintf(`{"signinfield":"test", "password": "123456", "otp": "%s"}`, otpPassword))
 	db.Save(&user)
 	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStrForSignup))
 	req.Header.Set("Content-Type", "application/json")
@@ -192,7 +192,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		assert.Contains(s.T(), w.Body.String(), "\"id\":0")
 		return strings.Contains(w.Body.String(), "\"id\":0")
 	})
-	var jsonStr = []byte(`{"username":"test", "password": "123456"}`)
+	var jsonStr = []byte(`{"signinfield":"test", "password": "123456"}`)
 	req, _ = http.NewRequest("POST", "/auth/direct/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -223,7 +223,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	user.OTPSeed = secretString
 	otpPassword := services.GetOTP(user.OTPSeed, config.CurrentConfig.D.Uadmin.OTPDigits, config.CurrentConfig.D.Uadmin.OTPAlgorithm, config.CurrentConfig.D.Uadmin.OTPSkew, config.CurrentConfig.D.Uadmin.OTPPeriod)
 	user.GeneratedOTPToVerify = otpPassword
-	var jsonStrForSignup = []byte(fmt.Sprintf(`{"username":"test", "password": "123456", "otp": "%s"}`, otpPassword))
+	var jsonStrForSignup = []byte(fmt.Sprintf(`{"signinfield":"test", "password": "123456", "otp": "%s"}`, otpPassword))
 	db.Save(&user)
 	req, _ = http.NewRequest("POST", "/auth/direct/signin/", bytes.NewBuffer(jsonStrForSignup))
 	req.Header.Set("Content-Type", "application/json")

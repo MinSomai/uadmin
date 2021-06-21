@@ -97,6 +97,7 @@ type UadminAdminOptions struct {
 	SSL        struct {
 		ListenPort int `yaml:"listen_port"`
 	} `yaml:"ssl"`
+	BindIP string `yaml:"bind_ip"`
 }
 
 type UadminApiOptions struct {
@@ -143,6 +144,7 @@ func (c *UadminConfig) GetPathToTemplate(templateName string) string {
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type rawStuff UadminConfigurableConfig
 	raw := rawStuff{
+		Admin: &UadminAdminOptions{BindIP: "0.0.0.0"},
 		Auth: &UadminAuthOptions{SaltLength: 16, Twofactor_auth_required_for_signin_adapters: []string{}},
 		Uadmin: &UadminConfigOptions{
 			Theme: "default",
@@ -190,7 +192,7 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			AdminCookieName: "uadmin-admin",
 			ApiCookieName: "uadmin-api",
 			SessionDuration: 3600,
-			SecureCookie: true,
+			SecureCookie: false,
 			HttpOnlyCookie: true,
 			DirectApiSigninByField: "username",
 		},

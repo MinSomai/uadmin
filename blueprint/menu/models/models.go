@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/uadmin/uadmin/model"
-	"github.com/uadmin/uadmin/translation"
 )
 
 // DashboardMenu !
@@ -22,5 +21,5 @@ func (m DashboardMenu) GetImageSize() (int, int) {
 }
 
 func (m DashboardMenu) String() string {
-	return translation.Translate(m.MenuName, "", true)
+	return m.MenuName
 }

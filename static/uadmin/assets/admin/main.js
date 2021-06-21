@@ -78,9 +78,8 @@ function setHomeTabs(me, container, extclass){
       url = RootURL+lowercase_name+'/';
     }
     if (icon == '') {
-      icon = '/static/uadmin/assets/admin/images/icons/'+lowercase_name+'.png';
+      icon = '/static-inbuilt/uadmin/assets/admin/images/icons/'+lowercase_name+'.png';
     }
-
     if (cat!=""){
       withribbon = '<div class="ribbon-wrapper"><div class="ribbon roboto-regular">'+cat+'</div></div>';
     }else{
@@ -98,7 +97,7 @@ function setHomeTabs(me, container, extclass){
     content += '    <div class="pop_itemHV defaultmargin container-fluid hvr-grow col-md-12" style="width:100%;" >';
     content += withribbon;
     content += '      <center><br>';
-    content += '        <img onerror="this.src=\'/static/uadmin/assets/admin/images/icons/model.png\';" src="'+icon+'"';
+    content += '        <img onerror="this.src=\'/static-inbuilt/uadmin/assets/admin/images/icons/model.png\';" src="'+icon+'"';
     if (tooltip != ""){
       content += '           data-toggle="tooltip" data-placement="top" title="'+tooltip+'" >';
     } else {
@@ -688,4 +687,4 @@ function notifyDemo() {
   }, 2000);
 }
 
-$("body").append('<script src="/static/uadmin/js/notify.min.js"></script>');
+$("body").append('<script src="/static-inbuilt/uadmin/js/notify.min.js"></script>');

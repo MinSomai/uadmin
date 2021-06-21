@@ -35,8 +35,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	commandRegistry.runAction(subaction, "", args)
-	return nil
+	return commandRegistry.runAction(subaction, "", args)
 }
 
 func (c OpenApiCommand) GetHelpText() string {

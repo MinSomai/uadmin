@@ -21,6 +21,7 @@ func (s *DbSession) Set(name string, value string) {
 }
 
 func (s *DbSession) SetUser(user *usermodels.User) {
+	s.session.UserID = user.ID
 	s.session.User = *user
 }
 
@@ -50,7 +51,7 @@ func (s *DbSession) GetUser() *usermodels.User {
 func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
 	db := dialect.GetDB()
 	var session sessionmodel.Session
-	db.Model(&sessionmodel.Session{}).Where(&sessionmodel.Session{Key: sessionKey}).First(&session)
+	db.Model(&sessionmodel.Session{}).Where(&sessionmodel.Session{Key: sessionKey}).Preload("User").First(&session)
 	if session.ID == 0 {
 		return nil, fmt.Errorf("no session with key %s found", sessionKey)
 	}

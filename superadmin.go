@@ -37,8 +37,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	commandRegistry.runAction(subaction, "", args)
-	return nil
+	return commandRegistry.runAction(subaction, "", args)
 }
 
 func (c SuperadminCommand) GetHelpText() string {
@@ -128,6 +127,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		RemoteAccess: true,
 		Active:       true,
 		UserGroup:    superuserGroup,
+		Salt: salt,
 	}
 	db.Create(&admin)
 	return nil

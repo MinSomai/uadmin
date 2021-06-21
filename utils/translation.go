@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/uadmin/uadmin/config"
-
 	// "encoding/json"
 	"github.com/gin-gonic/gin"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
@@ -113,3 +112,25 @@ func Tf(path string, lang string, term string, args ...interface{}) string {
 	return term
 }
 
+func Translate(c *gin.Context, raw string, lang string, args ...bool) string {
+	var langParser map[string]json.RawMessage
+	err := json.Unmarshal([]byte(raw), &langParser)
+	if err != nil {
+		return raw
+	}
+	transtedStr := string(langParser[lang])
+
+	if len(transtedStr) > 2 {
+		return transtedStr[1 : len(transtedStr)-1]
+	}
+	if len(args) > 0 && !args[0] {
+		return ""
+	}
+	language := GetLanguage(c)
+	transtedStr = string(langParser[language.Code])
+
+	if len(transtedStr) > 2 {
+		return transtedStr[1 : len(transtedStr)-1]
+	}
+	return ""
+}

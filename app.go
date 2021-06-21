@@ -3,15 +3,6 @@ package uadmin
 import (
 	"embed"
 	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/uadmin/uadmin/dialect"
-	"github.com/uadmin/uadmin/interfaces"
-	"io/fs"
-	nethttp "net/http"
-	"os"
-	"path"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
 	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
@@ -24,7 +15,13 @@ import (
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/database"
+	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/http"
+	"github.com/uadmin/uadmin/interfaces"
+	"io/fs"
+	nethttp "net/http"
+	"os"
+	"path"
 	"strconv"
 )
 
@@ -53,17 +50,17 @@ func NewApp(environment string) *App {
 		a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 		a.Database = database.NewDatabase(a.Config)
 		a.Router = gin.Default()
-		a.Router.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"https://foo.com"},
-			AllowMethods:     []string{"PUT", "PATCH"},
-			AllowHeaders:     []string{"Origin"},
-			ExposeHeaders:    []string{"Content-Length"},
-			AllowCredentials: true,
-			AllowOriginFunc: func(origin string) bool {
-				return origin == "https://github.com"
-			},
-			MaxAge: 12 * time.Hour,
-		}))
+		//a.Router.Use(cors.New(cors.Config{
+		//	AllowOrigins:     []string{"https://foo.com"},
+		//	AllowMethods:     []string{"PUT", "PATCH"},
+		//	AllowHeaders:     []string{"Origin"},
+		//	ExposeHeaders:    []string{"Content-Length"},
+		//	AllowCredentials: true,
+		//	AllowOriginFunc: func(origin string) bool {
+		//		return origin == "https://github.com"
+		//	},
+		//	MaxAge: 12 * time.Hour,
+		//}))
 		a.RegisterBaseBlueprints()
 		a.RegisterBaseCommands()
 		a.Initialize()
@@ -112,6 +109,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("swagger", &SwaggerCommand{})
 	a.RegisterCommand("openapi", &OpenApiCommand{})
 	a.RegisterCommand("superuser", &SuperadminCommand{})
+	a.RegisterCommand("admin", &AdminCommand{})
 }
 
 func (a App) ExecuteCommand() {
@@ -134,9 +132,15 @@ Please provide what do you want to do ?
 	if len(os.Args) > 2 {
 		subaction := os.Args[2]
 		isCorrectActionPassed = a.CommandRegistry.isRegisteredCommand(action)
-		a.CommandRegistry.runAction(action, subaction, os.Args[3:])
+		err := a.CommandRegistry.runAction(action, subaction, os.Args[3:])
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else {
-		a.CommandRegistry.runAction(action,"", make([]string, 0))
+		err := a.CommandRegistry.runAction(action,"", make([]string, 0))
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -145,7 +149,6 @@ func (a App) TriggerCommandExecution(action string, subaction string, params []s
 }
 
 func (a App) StartAdmin() {
-	a.Initialize()
 	// useradmin.RegisterAdminPart()
 	http.StartServer(a.Config)
 }

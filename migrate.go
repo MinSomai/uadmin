@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
+	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -34,10 +35,9 @@ func (c MigrateCommand) Proceed(subaction string, args []string) error {
 	}
 
 	commandRegistry.addAction("create", &CreateMigration{})
-
 	commandRegistry.addAction("up", &UpMigration{})
-
 	commandRegistry.addAction("down", &DownMigration{})
+	commandRegistry.addAction("determine-conflicts", &DetermineConflictsMigration{})
 	isCorrectActionPassed = commandRegistry.isRegisteredCommand(subaction)
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
@@ -397,4 +397,37 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 
 func (command DownMigration) GetHelpText() string {
 	return "Downgrade your database"
+}
+
+type DetermineConflictsMigration struct {
+}
+
+func (command DetermineConflictsMigration) Proceed(subaction string, args []string) error {
+	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
+	isEverythingOk := true
+	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
+		if traverseMigrationResult.Error != nil {
+			isEverythingOk = false
+			debug.Trail(debug.WARNING, "Potential problems with migrations %s", traverseMigrationResult.Error.Error())
+		}
+		appliedMigration := Migration{}
+		appInstance.Database.ConnectTo(
+			"default",
+		).Where(
+			&Migration{MigrationName: traverseMigrationResult.Node.GetMigration().GetName()},
+		).First(&appliedMigration)
+		if appliedMigration.ID != 0 {
+			continue
+		}
+		isEverythingOk = false
+		debug.Trail(debug.WARNING, "Not applied migration: %s", traverseMigrationResult.Node.GetMigration().GetName())
+	}
+	if !isEverythingOk {
+		return fmt.Errorf("determined some problems with migrations")
+	}
+	return nil
+}
+
+func (command DetermineConflictsMigration) GetHelpText() string {
+	return "Determine if there any conflicts in migrations"
 }

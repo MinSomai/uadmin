@@ -1,14 +1,16 @@
 package auth
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
-	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
+	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
+	"strings"
 )
 
 type Blueprint struct {
@@ -40,10 +42,17 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				Password    string
 				Logo        string
 				FavIcon     string
+				SessionKey string
 			}
+			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
+			session := sessionAdapter.Create()
+			token := utils.GenerateCSRFToken()
+			session.Set("csrf_token", token)
+			session.Save()
 			c := Context{}
 			c.SiteName = config.CurrentConfig.D.Uadmin.SiteName
-			c.RootURL = config.CurrentConfig.D.Uadmin.RootURL
+			c.SessionKey = session.GetKey()
+			c.RootURL = config.CurrentConfig.D.Uadmin.RootAdminURL
 			c.Language = utils.GetLanguage(ctx)
 			c.Logo = config.CurrentConfig.D.Uadmin.Logo
 			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
@@ -53,17 +62,24 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			type Context struct {
 				User     string
 				Demo     bool
-				Menu     []menumodel.DashboardMenu
+				Menu     string
 				SiteName string
 				Language *langmodel.Language
 				RootURL  string
 				Logo     string
 				FavIcon  string
+				SessionKey string
 			}
 
 			c := Context{}
+			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
+			var cookieName string
+			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
+			cookie, _ := ctx.Cookie(cookieName)
+			session, _ := sessionAdapter.GetByKey(cookie)
 
-			c.RootURL = config.CurrentConfig.D.Uadmin.RootURL
+			c.RootURL = config.CurrentConfig.D.Uadmin.RootAdminURL
+			c.SessionKey = session.GetKey()
 			c.Language = utils.GetLanguage(ctx)
 			c.Logo = config.CurrentConfig.D.Uadmin.Logo
 			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
@@ -71,13 +87,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.User = defaultAdapter.GetUserFromRequest(ctx).Username
 			c.Logo = config.CurrentConfig.D.Uadmin.Logo
 			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
-
-			c.Menu = make([]menumodel.DashboardMenu, 0)
-			// @todo, fix
-			// session.User.GetDashboardMenu()
-			//for i := range c.Menu {
-			//	c.Menu[i].MenuName = translation.Translate(c.Menu[i].MenuName, c.Language.Code, true)
-			//}
+			allMenu := session.GetUser().GetDashboardMenu()
+			allMenus := make([]string, len(allMenu))
+			for i := range allMenu {
+				allMenu[i].MenuName = utils.Translate(ctx, allMenu[i].MenuName, c.Language.Code, true)
+				tmpMenu, _ := json.Marshal(allMenu[i])
+				allMenus[i] = string(tmpMenu)
+			}
+			c.Menu = strings.Join(allMenus, ",")
 			utils.RenderHTML(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("home"), c)
 		}
 	})
