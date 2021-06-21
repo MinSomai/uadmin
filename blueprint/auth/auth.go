@@ -7,6 +7,7 @@ import (
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
+	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
@@ -48,7 +49,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			var cookieName string
 			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
 			cookie, _ := ctx.Cookie(cookieName)
-			session, _ := sessionAdapter.GetByKey(cookie)
+			var session interfaces2.ISessionProvider
+			if cookie != "" {
+				session, _ = sessionAdapter.GetByKey(cookie)
+			}
 			if session == nil {
 				session = sessionAdapter.Create()
 			}
