@@ -122,6 +122,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		FirstName:    opts.FirstName,
 		LastName:     opts.LastName,
 		Username:     opts.Username,
+		Email: opts.Email,
 		Password:     hashedPassword,
 		Admin:        true,
 		RemoteAccess: true,

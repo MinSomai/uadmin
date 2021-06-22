@@ -284,6 +284,54 @@ func (s *AuthProviderTestSuite) TestOpenAdminPage() {
 	})
 }
 
+func (s *AuthProviderTestSuite) TestForgotFunctionality() {
+	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
+	req, _ := http.NewRequest("POST", "/auth/direct-for-admin/signup/", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
+		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
+		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
+		session, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
+		session, _ = session.GetByKey(sessionKey)
+		token := utils.GenerateCSRFToken()
+		session.Set("csrf_token", token)
+		session.Save()
+		var jsonStr1 = []byte(`{"email": "uadmin@example.com"}`)
+		req1, _ := http.NewRequest("POST", "/user/api/forgot", bytes.NewBuffer(jsonStr1))
+		req1.Header.Set(
+			"Cookie",
+			fmt.Sprintf("%s=%s", config.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+		)
+		tokenmasked := utils.MaskCSRFToken(token)
+		req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
+		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
+			isSentEmail := utils.SentEmailsDuringTests.IsAnyEmailSentWithStringInBodyOrSubject(&utils.SentEmail{
+				Subject: "Password reset for admin panel",
+			})
+			var oneTimeAction usermodels.OneTimeAction
+			dialect.GetDB().Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
+			var jsonStr1 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
+			req1, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr1))
+			req1.Header.Set(
+				"Cookie",
+				fmt.Sprintf("%s=%s", config.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+			)
+			tokenmasked := utils.MaskCSRFToken(token)
+			req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
+			uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
+				var oneTimeAction usermodels.OneTimeAction
+				dialect.GetDB().Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
+				assert.True(s.T(), oneTimeAction.IsUsed)
+				assert.Equal(s.T(), w.Code, 200)
+				return w.Code == 200
+			})
+			assert.True(s.T(), isSentEmail)
+			return isSentEmail
+		})
+		return strings.Contains(w.Header().Get("Set-Cookie"), "uadmin-admin=")
+	})
+}
+
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run

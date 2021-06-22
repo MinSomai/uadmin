@@ -34,6 +34,10 @@ func (m initial_1621680132) Up() {
     if err != nil {
         panic(err)
     }
+    err = db.AutoMigrate(models2.OneTimeAction{})
+    if err != nil {
+        panic(err)
+    }
 }
 
 func (m initial_1621680132) Down() {
@@ -51,6 +55,10 @@ func (m initial_1621680132) Down() {
         panic(err)
     }
     err = db.Migrator().DropTable(models2.UserGroup{})
+    if err != nil {
+        panic(err)
+    }
+    err = db.Migrator().DropTable(models2.OneTimeAction{})
     if err != nil {
         panic(err)
     }

@@ -6,6 +6,7 @@ import (
 	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/model"
+	"time"
 
 	// "time"
 )
@@ -359,4 +360,21 @@ func (g GroupPermission) String() string {
 // HideInDashboard to return false and auto hide this from dashboard
 func (GroupPermission) HideInDashboard() bool {
 	return true
+}
+
+// Action !
+type OneTimeActionType int
+
+func (a OneTimeActionType) ResetPassword() OneTimeActionType {
+	return 1
+}
+
+type OneTimeAction struct {
+	model.Model
+	User       User
+	UserID     uint
+	ExpiresOn *time.Time `gorm:"index"`
+	Code string `gorm:"uniqueIndex"`
+	ActionType OneTimeActionType
+	IsUsed bool
 }

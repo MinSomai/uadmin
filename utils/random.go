@@ -21,6 +21,14 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
+func RandStringRunesForOneTimeAction(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = csrfAlphabet[rand.Intn(len(csrfAlphabet))]
+	}
+	return string(b)
+}
+
 func GenerateRandomStringForCSRFToken() string {
 	n := 32
 	b := make([]byte, n)

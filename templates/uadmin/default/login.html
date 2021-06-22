@@ -97,7 +97,8 @@
             <h1 class="admin_font bold">
                 {{Tf "uadmin/system" .Language.Code "forgot password"}}
             </h1>
-            <form method="POST">
+            <form method="POST" id="forgot-password-form">
+                <input type="hidden" name="csrf_token" value="{{CSRF .SessionKey}}" />
                 <div class="form-group">
                     <label for="username" class="pull-left">{{Tf "uadmin/system" .Language.Code "Email Address"}}</label>
                     <br /><br />
@@ -108,6 +109,10 @@
                 </div>
                 <br /><br />
                 <input id="save_trigger" name="save" value="Send Request" type="button" class="btn btn-primary pull-left" />
+                <hr />
+                <div class="hidden error-cont-for-forgot-password alert alert-warning">
+                    <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span></span>
+                </div>
             </form>
         </center>
     </div>
@@ -128,12 +133,6 @@
         $('#info_content').html(content);
         window.location.hash="";
     }
-    if (err == 1){
-        $('#logo-top').fadeOut();
-        $('#logo-top').fadeIn();
-        $('#logo-top').attr('style','color:red;');
-    }
-
     $(function () {
         $('.date').datetimepicker({
             format: "YYYY-MM-DD HH:mm"
@@ -154,8 +153,9 @@
     $('#signin-form').submit(function(ev) {
         ev.preventDefault();
         var form = $(ev.currentTarget);
+        show_loading();
         $.ajax({
-            url: "/auth/direct-for-admin/signin/?for-uadmin-panel=1",
+            url: "/auth/direct-for-admin/signin?for-uadmin-panel=1",
             method: "POST",
             processData: false,
             contentType:"application/json; charset=utf-8",
@@ -166,16 +166,38 @@
             beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
             success: function() {
                 $('.error-cont').toggleClass('hidden', true);
+                hide_loading(300);
                 location.href = '/admin';
             },
             error: function(xhr) {
                 $('.error-cont').toggleClass('hidden', false);
                 $('.error-cont span').html(JSON.parse(xhr.responseText).error);
+                hide_loading(300);
             }
         });
     });
     $('#save_trigger').click(function(){
         show_loading();
+        var form = $("#forgot-password-form");
+        $.ajax({
+            url: "/user/api/forgot?for-uadmin-panel=1",
+            method: "POST",
+            processData: false,
+            contentType:"application/json; charset=utf-8",
+            data: JSON.stringify({
+                email: form.find('input[name="email"]').val()
+            }),
+            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
+            success: function() {
+                $('.error-cont-for-forgot-password').toggleClass('hidden', true);
+                hide_loading(300);
+            },
+            error: function(xhr) {
+                $('.error-cont-for-forgot-password').toggleClass('hidden', false);
+                $('.error-cont-for-forgot-password span').html(JSON.parse(xhr.responseText).error);
+                hide_loading(300);
+            }
+        });
     });
 </script>
 </body>

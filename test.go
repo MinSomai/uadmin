@@ -9,6 +9,7 @@ import (
 	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm"
 	"net/http"
 	"net/http/httptest"
@@ -146,6 +147,8 @@ func Run(t *testing.T, currentsuite suite.TestingSuite) {
 				if stats != nil {
 					startStats(stats, method.Name)
 				}
+				appForTests.Config.InTests = true
+				utils.SentEmailsDuringTests.ClearTestEmails()
 				if appForTests.Config.D.Db.Default.Type == "sqlite" {
 					upCommand := MigrateCommand{}
 					upCommand.Proceed("up", make([]string, 0))

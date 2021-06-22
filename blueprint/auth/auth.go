@@ -12,6 +12,7 @@ import (
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"strings"
+	"time"
 )
 
 type Blueprint struct {
@@ -30,7 +31,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.GET(config.CurrentConfig.D.Uadmin.RootAdminURL, func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
-		if userSession == nil {
+		if userSession == nil || userSession.GetUser().ID == 0 {
 			type Context struct {
 				Err         string
 				PageTitle string
@@ -56,6 +57,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 			if session == nil {
 				session = sessionAdapter.Create()
+				expiresOn := time.Now().Add(time.Duration(config.CurrentConfig.D.Uadmin.SessionDuration)*time.Second)
+				session.ExpiresOn(&expiresOn)
 			}
 			token := utils.GenerateCSRFToken()
 			session.Set("csrf_token", token)

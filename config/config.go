@@ -78,6 +78,8 @@ type UadminConfigOptions struct {
 	HttpOnlyCookie bool `yaml:"http_only_cookie"`
 	DirectApiSigninByField string `yaml:"direct_api_signin_by_field"`
 	DebugTests bool `yaml:"debug_tests"`
+	PoweredOnSite string `yaml:"powered_on_site"`
+	ForgotCodeExpiration int `yaml:"forgot_code_expiration"`
 }
 
 type UadminDbOptions struct {
@@ -136,6 +138,7 @@ type UadminConfig struct {
 	RequiresCsrfCheck func(c *gin.Context) bool
 	PatternsToIgnoreCsrfCheck *list.List
 	ErrorHandleFunc func(int, string, string)
+	InTests bool
 }
 
 func (c *UadminConfig) GetPathToTemplate(templateName string) string {
@@ -197,6 +200,7 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			HttpOnlyCookie: true,
 			DirectApiSigninByField: "username",
 			DebugTests: false,
+			ForgotCodeExpiration: 10,
 		},
 	}
 	// Put your defaults here

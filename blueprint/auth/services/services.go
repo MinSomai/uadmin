@@ -40,20 +40,20 @@ func GenerateBase64(length int) string {
 	return tempKey
 }
 
-// GenerateBase32 generates a base64 string of length length
-func GenerateBase32(length int) string {
-	base := new(big.Int)
-	base.SetString("32", 10)
-
-	base32 := "234567abcdefghijklmnopqrstuvwxyz"
-	tempKey := ""
-	for i := 0; i < length; i++ {
-		index, _ := rand.Int(rand.Reader, base)
-		tempKey += string(base32[int(index.Int64())])
-	}
-	return tempKey
-}
-
+//// GenerateBase32 generates a base64 string of length length
+//func GenerateBase32(length int) string {
+//	base := new(big.Int)
+//	base.SetString("32", 10)
+//
+//	base32 := "234567abcdefghijklmnopqrstuvwxyz"
+//	tempKey := ""
+//	for i := 0; i < length; i++ {
+//		index, _ := rand.Int(rand.Reader, base)
+//		tempKey += string(base32[int(index.Int64())])
+//	}
+//	return tempKey
+//}
+//
 // hashPass Generates a hash from a password and salt
 func HashPass(pass string) string {
 	password := []byte(pass + Salt)
