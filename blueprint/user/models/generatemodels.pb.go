@@ -29,11 +29,11 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type User struct {
 	model.Model
 
-	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" json:"Username,omitempty"`
+	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" gorm:"uniqueIndex" json:"Username,omitempty"`
 	FirstName            string     `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
 	LastName             string     `protobuf:"bytes,3,opt,name=LastName,proto3" json:"LastName,omitempty"`
 	Password             string     `protobuf:"bytes,4,opt,name=Password,proto3" json:"Password,omitempty"`
-	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" json:"Email,omitempty"`
+	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" gorm:"uniqueIndex" json:"Email,omitempty"`
 	Active               bool       `protobuf:"varint,6,opt,name=Active,proto3" json:"Active,omitempty"`
 	Admin                bool       `protobuf:"varint,7,opt,name=Admin,proto3" json:"Admin,omitempty"`
 	RemoteAccess         bool       `protobuf:"varint,8,opt,name=RemoteAccess,proto3" json:"RemoteAccess,omitempty"`
