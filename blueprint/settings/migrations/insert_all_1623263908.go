@@ -183,71 +183,71 @@ func (m insert_all_1623263908) Up() {
             DataType:     t.Boolean(),
             Help:         "allows public access to media handler without authentication",
         },
-        {
-            Name: "Log Delete",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.LogDelete),
-            DefaultValue: "1",
-            DataType:     t.Boolean(),
-            Help:         "adds a log when a record is deleted",
-        },
-        {
-            Name: "Log Add",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.LogAdd),
-            DefaultValue: "1",
-            DataType:     t.Boolean(),
-            Help:         "adds a log when a record is added",
-        },
-        {
-            Name: "Log Edit",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.LogEdit),
-            DefaultValue: "1",
-            DataType:     t.Boolean(),
-            Help:         "adds a log when a record is edited",
-        },
-        {
-            Name: "Log Read",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.LogRead),
-            DefaultValue: "0",
-            DataType:     t.Boolean(),
-            Help:         "adds a log when a record is read",
-        },
-        {
-            Name: "Cache Translation",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.CacheTranslation),
-            DefaultValue: "0",
-            DataType:     t.Boolean(),
-            Help:         "allows a translation to store data in a cache memory",
-        },
+        //{
+        //    Name: "Log Delete",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.LogDelete),
+        //    DefaultValue: "1",
+        //    DataType:     t.Boolean(),
+        //    Help:         "adds a log when a record is deleted",
+        //},
+        //{
+        //    Name: "Log Add",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.LogAdd),
+        //    DefaultValue: "1",
+        //    DataType:     t.Boolean(),
+        //    Help:         "adds a log when a record is added",
+        //},
+        //{
+        //    Name: "Log Edit",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.LogEdit),
+        //    DefaultValue: "1",
+        //    DataType:     t.Boolean(),
+        //    Help:         "adds a log when a record is edited",
+        //},
+        //{
+        //    Name: "Log Read",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.LogRead),
+        //    DefaultValue: "0",
+        //    DataType:     t.Boolean(),
+        //    Help:         "adds a log when a record is read",
+        //},
+        //{
+        //    Name: "Cache Translation",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.CacheTranslation),
+        //    DefaultValue: "0",
+        //    DataType:     t.Boolean(),
+        //    Help:         "allows a translation to store data in a cache memory",
+        //},
         {
             Name:         "Allowed IPs",
             Value:        config.CurrentConfig.D.Uadmin.AllowedIPs,
@@ -314,58 +314,58 @@ func (m insert_all_1623263908) Up() {
             DataType:     t.Integer(),
             Help:         "is the maximum number of requests for an idle user",
         },
-        {
-            Name: "API Log Read",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.APILogRead),
-            DefaultValue: "0",
-            DataType:     t.Boolean(),
-            Help:         "APILogRead controls the data API's logging for read commands.",
-        },
-        {
-            Name: "API Log Edit",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.APILogEdit),
-            DefaultValue: "1",
-            DataType:     t.Boolean(),
-            Help:         "APILogEdit controls the data API's logging for edit commands.",
-        },
-        {
-            Name: "API Log Add",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.APILogAdd),
-            DefaultValue: "1",
-            DataType:     t.Boolean(),
-            Help:         "APILogAdd controls the data API's logging for add commands.",
-        },
-        {
-            Name: "API Log Delete",
-            Value: func(v bool) string {
-                n := 0
-                if v {
-                    n = 1
-                }
-                return fmt.Sprint(n)
-            }(config.CurrentConfig.D.Uadmin.APILogDelete),
-            DefaultValue: "1",
-            DataType:     t.Boolean(),
-            Help:         "APILogDelete controls the data API's logging for delete commands.",
-        },
+        //{
+        //    Name: "API Log Read",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.APILogRead),
+        //    DefaultValue: "0",
+        //    DataType:     t.Boolean(),
+        //    Help:         "APILogRead controls the data API's logging for read commands.",
+        //},
+        //{
+        //    Name: "API Log Edit",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.APILogEdit),
+        //    DefaultValue: "1",
+        //    DataType:     t.Boolean(),
+        //    Help:         "APILogEdit controls the data API's logging for edit commands.",
+        //},
+        //{
+        //    Name: "API Log Add",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.APILogAdd),
+        //    DefaultValue: "1",
+        //    DataType:     t.Boolean(),
+        //    Help:         "APILogAdd controls the data API's logging for add commands.",
+        //},
+        //{
+        //    Name: "API Log Delete",
+        //    Value: func(v bool) string {
+        //        n := 0
+        //        if v {
+        //            n = 1
+        //        }
+        //        return fmt.Sprint(n)
+        //    }(config.CurrentConfig.D.Uadmin.APILogDelete),
+        //    DefaultValue: "1",
+        //    DataType:     t.Boolean(),
+        //    Help:         "APILogDelete controls the data API's logging for delete commands.",
+        //},
         {
             Name: "Log HTTP Requests",
             Value: func(v bool) string {

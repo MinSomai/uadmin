@@ -45,21 +45,21 @@ type UadminConfigOptions struct {
 	OTPPeriod uint `yaml:"otp_period"`
 	OTPSkew uint `yaml:"otp_skew"`
 	PublicMedia bool `yaml:"public_media"`
-	LogDelete bool `yaml:"log_delete"`
-	LogAdd bool `yaml:"log_add"`
-	LogEdit bool `yaml:"log_edit"`
-	LogRead bool `yaml:"log_read"`
-	CacheTranslation bool `yaml:"cache_translation"`
+	//LogDelete bool `yaml:"log_delete"`
+	//LogAdd bool `yaml:"log_add"`
+	//LogEdit bool `yaml:"log_edit"`
+	//LogRead bool `yaml:"log_read"`
+	//CacheTranslation bool `yaml:"cache_translation"`
 	AllowedIPs string `yaml:"allowed_ips"`
 	BlockedIPs string `yaml:"blocked_ips"`
 	RestrictSessionIP bool `yaml:"restrict_session_ip"`
 	RetainMediaVersions bool `yaml:"retain_media_versions"`
 	RateLimit uint `yaml:"rate_limit"`
 	RateLimitBurst uint `yaml:"rate_limit_burst"`
-	APILogRead bool `yaml:"api_log_read"`
-	APILogDelete bool `yaml:"api_log_delete"`
-	APILogAdd bool `yaml:"api_log_add"`
-	APILogEdit bool `yaml:"api_log_edit"`
+	//APILogRead bool `yaml:"api_log_read"`
+	//APILogDelete bool `yaml:"api_log_delete"`
+	//APILogAdd bool `yaml:"api_log_add"`
+	//APILogEdit bool `yaml:"api_log_edit"`
 	LogHTTPRequests bool `yaml:"log_http_requests"`
 	HTTPLogFormat string `yaml:"http_log_format"`
 	LogTrail bool `yaml:"log_trail"`
@@ -167,21 +167,21 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			OTPPeriod: uint(30),
 			OTPSkew: uint(5),
 			PublicMedia: false,
-			LogDelete: true,
-			LogAdd: true,
-			LogEdit: true,
-			LogRead: false,
-			CacheTranslation: false,
+			//LogDelete: true,
+			//LogAdd: true,
+			//LogEdit: true,
+			//LogRead: false,
+			//CacheTranslation: false,
 			AllowedIPs: "*",
 			BlockedIPs: "",
 			RestrictSessionIP: false,
 			RetainMediaVersions: true,
 			RateLimit: uint(3),
 			RateLimitBurst: uint(3),
-			APILogRead: false,
-			APILogEdit: true,
-			APILogAdd: true,
-			APILogDelete: true,
+			//APILogRead: false,
+			//APILogEdit: true,
+			//APILogAdd: true,
+			//APILogDelete: true,
 			LogHTTPRequests: true,
 			HTTPLogFormat: "%a %>s %B %U %D",
 			LogTrail: false,
