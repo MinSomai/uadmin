@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
 	"github.com/uadmin/uadmin/debug"
+	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -346,7 +347,15 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 			},
 		)
 		color.Blue("Applying migration %s", traverseMigrationResult.Node.GetMigration().GetName())
-		traverseMigrationResult.Node.Apply()
+		if appInstance.Config.D.Db.Default.Type == "sqlite" {
+			traverseMigrationResult.Node.Apply()
+		} else {
+			dialect.GetDB().Transaction(func(tx *gorm.DB) error {
+				traverseMigrationResult.Node.Apply()
+				return nil
+			})
+		}
+
 	}
 	return nil
 }
@@ -389,8 +398,16 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 			//)
 		}
 		color.Blue("Downgrading migration %s", traverseMigrationResult.Node.GetMigration().GetName())
-		traverseMigrationResult.Node.Downgrade()
-		appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
+		if appInstance.Config.D.Db.Default.Type == "sqlite" {
+			traverseMigrationResult.Node.Downgrade()
+			appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
+		} else {
+			dialect.GetDB().Transaction(func(tx *gorm.DB) error {
+				traverseMigrationResult.Node.Downgrade()
+				appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
+				return nil
+			})
+		}
 	}
 	return nil
 }
