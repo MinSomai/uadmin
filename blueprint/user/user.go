@@ -43,9 +43,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			templatecontext.AdminContext
 		}
 		c := &Context{}
-		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
-			CreateSession: true, GenerateCSRFToken: true,
-		})
+		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
 		tr := utils.NewTemplateRenderer("Reset Password")
 		tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("resetpassword"), c)
 	})
@@ -160,9 +158,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 
 		c := &Context{}
-		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
-			CreateSession: true, GenerateCSRFToken: true,
-		})
+		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
 		//
 		//if r.Form.Get("err_msg") != "" {
 		//	c.ErrMsg = r.Form.Get("err_msg")

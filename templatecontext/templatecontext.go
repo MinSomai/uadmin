@@ -30,6 +30,14 @@ type AdminRequestParams struct {
 	NeedAllLanguages bool
 }
 
+func NewAdminRequestParams() *AdminRequestParams {
+	return &AdminRequestParams{
+		CreateSession: true,
+		GenerateCSRFToken: true,
+		NeedAllLanguages: false,
+	}
+}
+
 type AdminContext struct {
 	Err         string
 	PageTitle string

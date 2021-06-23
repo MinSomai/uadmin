@@ -34,9 +34,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				templatecontext.AdminContext
 			}
 			c := &Context{}
-			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
-				CreateSession: true, GenerateCSRFToken: true, NeedAllLanguages: true,
-			})
+			adminRequestParams := templatecontext.NewAdminRequestParams()
+			adminRequestParams.NeedAllLanguages = true
+			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
 			tr := utils.NewTemplateRenderer("Admin Login")
 			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("login"), c)
@@ -48,9 +48,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 
 			c := &Context{}
-			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
-				CreateSession: true, GenerateCSRFToken: true,
-			})
+			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
 			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 			var cookieName string
 			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
