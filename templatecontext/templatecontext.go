@@ -113,8 +113,11 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	}
 	if adminRequestParams.GenerateCSRFToken {
 		token := utils.GenerateCSRFToken()
-		session.Set("csrf_token", token)
-		session.Save()
+		currentCsrfToken, _ := session.Get("csrf_token")
+		if currentCsrfToken == "" {
+			session.Set("csrf_token", token)
+			session.Save()
+		}
 	}
 	context.SetSiteName(config.CurrentConfig.D.Uadmin.SiteName)
 	context.SetRootAdminURL(config.CurrentConfig.D.Uadmin.RootAdminURL)
