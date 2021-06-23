@@ -647,3 +647,16 @@ div.toptabs >div.col-sm-4 {
   padding: 5px;
   margin: 2px;
 }
+.header-container {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  width: 10%;
+}
+
+.header-menu {
+  text-align: right;
+  width: 90%;
+}

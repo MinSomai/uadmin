@@ -538,5 +538,7 @@
   "moviesetupwizard":"MOVIE SETUP WIZARD",
   "royaltyfreemovies":"Royalty Free Movies",
   "seriessetupwizard":"SERIES SETUP WIZARD",
-  "royaltyfreeseries":"Royalty Free series"
+  "royaltyfreeseries":"Royalty Free series",
+  "pagenotfound": "Page not found",
+  "signin": "Sign in"
 }

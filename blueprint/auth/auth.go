@@ -5,14 +5,12 @@ import (
 	"github.com/gin-gonic/gin"
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/templatecontext"
 	"github.com/uadmin/uadmin/utils"
 	"strings"
-	"time"
 )
 
 type Blueprint struct {
@@ -33,76 +31,34 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
 			type Context struct {
-				Err         string
-				PageTitle string
-				ErrExists   bool
-				SiteName    string
-				Languages   []langmodel.Language
-				RootURL     string
-				OTPRequired bool
-				Language    *langmodel.Language
-				Username    string
-				Password    string
-				Logo        string
-				FavIcon     string
-				SessionKey string
+				templatecontext.AdminContext
 			}
-			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
-			var cookieName string
-			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
-			cookie, _ := ctx.Cookie(cookieName)
-			var session interfaces2.ISessionProvider
-			if cookie != "" {
-				session, _ = sessionAdapter.GetByKey(cookie)
-			}
-			if session == nil {
-				session = sessionAdapter.Create()
-				expiresOn := time.Now().Add(time.Duration(config.CurrentConfig.D.Uadmin.SessionDuration)*time.Second)
-				session.ExpiresOn(&expiresOn)
-			}
-			token := utils.GenerateCSRFToken()
-			session.Set("csrf_token", token)
-			session.Save()
-			c := Context{}
-			c.SiteName = config.CurrentConfig.D.Uadmin.SiteName
-			c.SessionKey = session.GetKey()
-			c.RootURL = config.CurrentConfig.D.Uadmin.RootAdminURL
-			c.Language = utils.GetLanguage(ctx)
-			c.Logo = config.CurrentConfig.D.Uadmin.Logo
-			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
-			c.Languages = utils.GetActiveLanguages()
+			c := &Context{}
+			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
+				CreateSession: true, GenerateCSRFToken: true, NeedAllLanguages: true,
+			})
+
 			tr := utils.NewTemplateRenderer("Admin Login")
 			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("login"), c)
 		} else {
 			type Context struct {
-				PageTitle string
-				User     string
+				templatecontext.AdminContext
 				Demo     bool
 				Menu     string
-				SiteName string
-				Language *langmodel.Language
-				RootURL  string
-				Logo     string
-				FavIcon  string
-				SessionKey string
 			}
 
-			c := Context{}
+			c := &Context{}
+			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
+				CreateSession: true, GenerateCSRFToken: true,
+			})
 			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 			var cookieName string
 			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
 			cookie, _ := ctx.Cookie(cookieName)
 			session, _ := sessionAdapter.GetByKey(cookie)
 
-			c.RootURL = config.CurrentConfig.D.Uadmin.RootAdminURL
-			c.SessionKey = session.GetKey()
-			c.Language = utils.GetLanguage(ctx)
-			c.Logo = config.CurrentConfig.D.Uadmin.Logo
-			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
-			c.SiteName = config.CurrentConfig.D.Uadmin.SiteName
-			c.User = defaultAdapter.GetUserFromRequest(ctx).Username
-			c.Logo = config.CurrentConfig.D.Uadmin.Logo
-			c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
+			c.SetUser(defaultAdapter.GetUserFromRequest(ctx).Username)
+			c.SetUserExists(defaultAdapter.GetUserFromRequest(ctx).ID != 0)
 			allMenu := session.GetUser().GetDashboardMenu()
 			allMenus := make([]string, len(allMenu))
 			for i := range allMenu {
@@ -111,6 +67,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				allMenus[i] = string(tmpMenu)
 			}
 			c.Menu = strings.Join(allMenus, ",")
+			c.Demo = false
 			tr := utils.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("home"), c)
 		}

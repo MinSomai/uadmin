@@ -5,15 +5,13 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
-	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/blueprint/user/migrations"
 	"github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/templatecontext"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"text/template"
@@ -42,42 +40,12 @@ type ResetPasswordHandlerParams struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.GET("/reset-password", func(ctx *gin.Context) {
 		type Context struct {
-			Err       string
-			ErrExists bool
-			SiteName  string
-			RootURL   string
-			Language    *langmodel.Language
-			Logo      string
-			FavIcon   string
-			SessionKey string
+			templatecontext.AdminContext
 		}
-
-		c := Context{}
-		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
-		var cookieName string
-		cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
-		cookie, _ := ctx.Cookie(cookieName)
-		var session interfaces2.ISessionProvider
-		if cookie != "" {
-			session, _ = sessionAdapter.GetByKey(cookie)
-		}
-		if session == nil {
-			session = sessionAdapter.Create()
-			expiresOn := time.Now().Add(time.Duration(config.CurrentConfig.D.Uadmin.SessionDuration)*time.Second)
-			session.ExpiresOn(&expiresOn)
-		}
-		token := utils.GenerateCSRFToken()
-		session.Set("csrf_token", token)
-		if cookie == "" {
-			ctx.SetCookie(config.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(config.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, config.CurrentConfig.D.Uadmin.SecureCookie, config.CurrentConfig.D.Uadmin.HttpOnlyCookie)
-		}
-		session.Save()
-		c.SessionKey = session.GetKey()
-		c.SiteName = config.CurrentConfig.D.Uadmin.SiteName
-		c.RootURL = config.CurrentConfig.D.Uadmin.RootAdminURL
-		c.Logo = config.CurrentConfig.D.Uadmin.Logo
-		c.FavIcon = config.CurrentConfig.D.Uadmin.FavIcon
-		c.Language = utils.GetLanguage(ctx)
+		c := &Context{}
+		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
+			CreateSession: true, GenerateCSRFToken: true,
+		})
 		tr := utils.NewTemplateRenderer("Reset Password")
 		tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("resetpassword"), c)
 	})
@@ -182,6 +150,29 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		oneTimeAction.IsUsed = true
 		db.Save(&oneTimeAction.User)
 		db.Save(&oneTimeAction)
+	})
+	mainRouter.NoRoute(func(ctx *gin.Context) {
+		// ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+		type Context struct {
+			templatecontext.AdminContext
+			Demo     bool
+			Menu     string
+		}
+
+		c := &Context{}
+		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, &templatecontext.AdminRequestParams{
+			CreateSession: true, GenerateCSRFToken: true,
+		})
+		//
+		//if r.Form.Get("err_msg") != "" {
+		//	c.ErrMsg = r.Form.Get("err_msg")
+		//}
+		//if code, err := strconv.ParseUint(r.Form.Get("err_code"), 10, 16); err == nil {
+		//	c.ErrCode = int(code)
+		//}
+		ctx.Status(404)
+		tr := utils.NewTemplateRenderer("Page not found")
+		tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("404"), c)
 	})
 }
 

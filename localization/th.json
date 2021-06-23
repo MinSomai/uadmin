@@ -536,5 +536,7 @@
   "moviesetupwizard":"วิซาร์ดการตั้งค่าภาพยนตร์",
   "royaltyfreemovies":"ภาพยนตร์ฟรี Royalty",
   "seriessetupwizard":"ชุดตัวช่วยสร้างการตั้งค่า",
-  "royaltyfreeseries":"ชุดของขวัญ Royalty Free"
+  "royaltyfreeseries":"ชุดของขวัญ Royalty Free",
+  "pagenotfound": "Page not found",
+  "signin": "Sign in"
 }
