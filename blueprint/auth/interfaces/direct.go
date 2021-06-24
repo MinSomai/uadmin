@@ -82,13 +82,20 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
-	sessionAdapter = sessionAdapter.Create()
-	sessionAdapter.SetUser(&user)
+	cookieName := config.CurrentConfig.D.Uadmin.ApiCookieName
+	cookie, err := c.Cookie(cookieName)
 	sessionDuration := time.Duration(config.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
 	sessionExpirationTime := time.Now().Add(sessionDuration)
-	sessionAdapter.ExpiresOn(&sessionExpirationTime)
+	if cookie != "" {
+		sessionAdapter, _ = sessionAdapter.GetByKey(cookie)
+		sessionAdapter.ExpiresOn(&sessionExpirationTime)
+	} else {
+		sessionAdapter = sessionAdapter.Create()
+		sessionAdapter.ExpiresOn(&sessionExpirationTime)
+		c.SetCookie(config.CurrentConfig.D.Uadmin.ApiCookieName, sessionAdapter.GetKey(), int(config.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, config.CurrentConfig.D.Uadmin.SecureCookie, config.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+	}
+	sessionAdapter.SetUser(&user)
 	sessionAdapter.Save()
-	c.SetCookie(config.CurrentConfig.D.Uadmin.ApiCookieName, sessionAdapter.GetKey(), int(config.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, config.CurrentConfig.D.Uadmin.SecureCookie, config.CurrentConfig.D.Uadmin.HttpOnlyCookie)
 	c.JSON(http.StatusOK, GetUserForApi(sessionAdapter.GetUser()))
 }
 

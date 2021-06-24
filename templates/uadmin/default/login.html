@@ -155,7 +155,7 @@
         var form = $(ev.currentTarget);
         show_loading();
         $.ajax({
-            url: "/auth/direct-for-admin/signin?for-uadmin-panel=1",
+            url: "/auth/direct-for-admin/signin/?for-uadmin-panel=1",
             method: "POST",
             processData: false,
             contentType:"application/json; charset=utf-8",
@@ -200,5 +200,4 @@
         });
     });
 </script>
-</body>
-</html>
+{{Include "footer"}}

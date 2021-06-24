@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
@@ -55,8 +56,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			cookie, _ := ctx.Cookie(cookieName)
 			session, _ := sessionAdapter.GetByKey(cookie)
 
-			c.SetUser(defaultAdapter.GetUserFromRequest(ctx).Username)
-			c.SetUserExists(defaultAdapter.GetUserFromRequest(ctx).ID != 0)
 			allMenu := session.GetUser().GetDashboardMenu()
 			allMenus := make([]string, len(allMenu))
 			for i := range allMenu {
@@ -69,6 +68,31 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			tr := utils.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("home"), c)
 		}
+	})
+	mainRouter.GET(config.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
+		type Context struct {
+			templatecontext.AdminContext
+			ID           uint
+			Status       bool
+			IsUpdated    bool
+			Notif        string
+			ProfilePhoto string
+			OTPImage     string
+			OTPRequired  bool
+		}
+
+		c := &Context{}
+		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
+		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
+		var cookieName string
+		cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
+		cookie, _ := ctx.Cookie(cookieName)
+		session, _ := sessionAdapter.GetByKey(cookie)
+		c.ProfilePhoto = session.GetUser().Photo
+		c.OTPRequired = session.GetUser().OTPRequired
+
+		tr := utils.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
+		tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("profile"), c)
 	})
 }
 

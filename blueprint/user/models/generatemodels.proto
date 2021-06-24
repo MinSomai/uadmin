@@ -26,4 +26,5 @@ message User {
   string GeneratedOTPToVerify = 14;
   string OTPSeed = 15;
   string Salt = 16;
+  bool OTPRequired = 17;
 }

@@ -22,6 +22,9 @@ type IAdminContext interface {
 	SetPageTitle(pageTitle string)
 	SetUser(user string)
 	SetUserExists(userExists bool)
+	SetDemo()
+	SetError(err string)
+	SetErrorExists()
 }
 
 type AdminRequestParams struct {
@@ -55,6 +58,7 @@ type AdminContext struct {
 	RootAdminURL string
 	User string
 	UserExists bool
+	Demo bool
 }
 
 func (c *AdminContext) SetSiteName(siteName string) {
@@ -101,6 +105,17 @@ func (c *AdminContext) SetUserExists(userExists bool) {
 	c.UserExists = userExists
 }
 
+func (c *AdminContext) SetDemo() {
+	c.Demo = true
+}
+
+func (c *AdminContext) SetError(err string) {
+	c.Err = err
+}
+
+func (c *AdminContext) SetErrorExists() {
+	c.ErrExists = true
+}
 
 func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContext, adminRequestParams *AdminRequestParams) {
 	sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
@@ -111,13 +126,12 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	if cookie != "" {
 		session, _ = sessionAdapter.GetByKey(cookie)
 	}
-	if adminRequestParams.CreateSession {
+	if adminRequestParams.CreateSession && session == nil {
 		session = sessionAdapter.Create()
 		expiresOn := time.Now().Add(time.Duration(config.CurrentConfig.D.Uadmin.SessionDuration)*time.Second)
 		session.ExpiresOn(&expiresOn)
-		if cookie == "" {
-			ctx.SetCookie(config.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(config.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, config.CurrentConfig.D.Uadmin.SecureCookie, config.CurrentConfig.D.Uadmin.HttpOnlyCookie)
-		}
+		ctx.SetCookie(config.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(config.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, config.CurrentConfig.D.Uadmin.SecureCookie, config.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+		session.Save()
 	}
 	if adminRequestParams.GenerateCSRFToken {
 		token := utils.GenerateCSRFToken()
@@ -126,6 +140,9 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 			session.Set("csrf_token", token)
 			session.Save()
 		}
+	}
+	if session == nil {
+		session.Save()
 	}
 	context.SetSiteName(config.CurrentConfig.D.Uadmin.SiteName)
 	context.SetRootAdminURL(config.CurrentConfig.D.Uadmin.RootAdminURL)
@@ -139,6 +156,7 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	if adminRequestParams.NeedAllLanguages {
 		context.SetLanguages(utils.GetActiveLanguages())
 	}
+	// context.SetDemo()
 	if session != nil {
 		context.SetUser(session.GetUser().Username)
 		context.SetUserExists(session.GetUser().ID != 0)
