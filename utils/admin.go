@@ -492,6 +492,7 @@ type GrouppedFields struct {
 
 type AdminForm struct {
 	FieldsToShow []string
+	Fields []*Field
 	CustomDefinedFields map[string]*Field
 }
 
