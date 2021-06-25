@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/debug"
+	"github.com/uadmin/uadmin/interfaces"
 	"io/fs"
 	"strings"
 	"text/template"
@@ -22,11 +23,6 @@ var FuncMap = template.FuncMap{
 type IncludeContext struct {
 	SiteName    string
 	PageTitle string
-}
-
-type ITemplateRenderer interface {
-	AddFuncMap(funcName string, concreteFunc interface{})
-	Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, funcs ...template.FuncMap)
 }
 
 type TemplateRenderer struct {
@@ -66,7 +62,7 @@ func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, da
 	RenderHTML(ctx, fsys, path, data, funcs1)
 }
 
-func NewTemplateRenderer(pageTitle string) ITemplateRenderer {
+func NewTemplateRenderer(pageTitle string) interfaces.ITemplateRenderer {
 	templateRenderer := TemplateRenderer{funcMap: template.FuncMap{}, pageTitle: pageTitle}
 	return &templateRenderer
 }

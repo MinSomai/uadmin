@@ -3,7 +3,6 @@ package interfaces
 import (
 	"container/list"
 	"fmt"
-	"github.com/uadmin/uadmin/utils"
 	"sort"
 	"strings"
 )
@@ -118,7 +117,7 @@ func (n MigrationNode) TraverseDeps(migrationList []string, depList MigrationDep
 			continue
 		}
 		migrationName := l.Value.(IMigrationNode).GetMigration().GetName()
-		if !utils.Contains(migrationList, migrationName) && !utils.Contains(depList, migrationName) {
+		if !Contains(migrationList, migrationName) && !Contains(depList, migrationName) {
 			depList = append(depList, l.Value.(IMigrationNode).GetMigration().GetName())
 			depList = l.Value.(IMigrationNode).TraverseDeps(migrationList, depList)
 		}
@@ -133,7 +132,7 @@ func (n MigrationNode) TraverseChildren(migrationList []string) []string {
 			continue
 		}
 		migrationName := l.Value.(IMigrationNode).GetMigration().GetName()
-		if !utils.Contains(migrationList, migrationName) {
+		if !Contains(migrationList, migrationName) {
 			migrationList = append(migrationList, l.Value.(IMigrationNode).GetMigration().GetName())
 			migrationDepList := n.TraverseDeps(migrationList, make(MigrationDepList, 0))
 			sort.Reverse(migrationDepList)
