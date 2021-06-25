@@ -11,6 +11,7 @@ import (
 	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -68,7 +69,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
 		return
 	}
-	if utils.Contains(config.CurrentConfig.D.Auth.Twofactor_auth_required_for_signin_adapters, ap.GetName()) {
+	if interfaces.Contains(config.CurrentConfig.D.Auth.Twofactor_auth_required_for_signin_adapters, ap.GetName()) {
 		if json.OTP == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "otp is required"})
 			return

@@ -7,7 +7,6 @@ import (
 	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/utils"
 	"log"
 	"os"
 	"strings"
@@ -73,7 +72,7 @@ func (command ServeAdminServer) Proceed(subaction string, args []string) error {
 			if err != nil {
 				return err
 			}
-			if !utils.Contains([]string{"yes", "no"}, strings.ToLower(answer)) {
+			if !interfaces.Contains([]string{"yes", "no"}, strings.ToLower(answer)) {
 				continue
 			}
 			break
