@@ -24,6 +24,11 @@ type IncludeContext struct {
 	PageTitle string
 }
 
+type ITemplateRenderer interface {
+	AddFuncMap(funcName string, concreteFunc interface{})
+	Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, funcs ...template.FuncMap)
+}
+
 type TemplateRenderer struct {
 	funcMap template.FuncMap
 	pageTitle string
@@ -61,7 +66,7 @@ func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, da
 	RenderHTML(ctx, fsys, path, data, funcs1)
 }
 
-func NewTemplateRenderer(pageTitle string) *TemplateRenderer {
+func NewTemplateRenderer(pageTitle string) ITemplateRenderer {
 	templateRenderer := TemplateRenderer{funcMap: template.FuncMap{}, pageTitle: pageTitle}
 	return &templateRenderer
 }

@@ -7,10 +7,13 @@ import (
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
+	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/config"
+	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/templatecontext"
 	"github.com/uadmin/uadmin/utils"
+	"gorm.io/gorm/schema"
 	"strings"
 )
 
@@ -79,6 +82,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ProfilePhoto string
 			OTPImage     string
 			OTPRequired  bool
+			DBFields []*schema.Field
 		}
 
 		c := &Context{}
@@ -90,7 +94,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		session, _ := sessionAdapter.GetByKey(cookie)
 		c.ProfilePhoto = session.GetUser().Photo
 		c.OTPRequired = session.GetUser().OTPRequired
-
+		db := dialect.GetDB()
+		c.DBFields = db.Model(usermodels.User{}).Statement.Schema.Fields
 		tr := utils.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
 		tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("profile"), c)
 	})
