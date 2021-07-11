@@ -2,7 +2,6 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
 	"io"
 	"log"
@@ -48,7 +47,7 @@ type ServeSwaggerServer struct {
 }
 
 func (command ServeSwaggerServer) Proceed(subaction string, args []string) error {
-	appInstance.Config.ApiSpec = config.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
+	appInstance.Config.ApiSpec = interfaces.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
 	commandToExecute := exec.Command(
 		"swagger", "serve", "--flavor=swagger", "--no-open",
 		fmt.Sprintf("--port=%d", appInstance.Config.D.Swagger.ListenPort), appInstance.Config.D.Swagger.PathToSpec,

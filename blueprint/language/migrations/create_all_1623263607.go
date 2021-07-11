@@ -2,7 +2,7 @@ package migrations
 
 import (
     langmodel "github.com/uadmin/uadmin/blueprint/language/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type create_all_1623263607 struct {
@@ -204,7 +204,7 @@ func (m create_all_1623263607) Up() {
         {"Zhuang, Chuang", "Saɯ cueŋƅ, Saw cuengh", "za"},
         {"Zulu", "isiZulu", "zu"},
     }
-    tx := dialect.GetDB().Begin()
+    tx := interfaces.GetDB().Begin()
     for _, lang := range langs {
         l := langmodel.Language{
             EnglishName: lang[0],
@@ -223,7 +223,7 @@ func (m create_all_1623263607) Up() {
 }
 
 func (m create_all_1623263607) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     db.Unscoped().Where("1 = 1").Delete(&langmodel.Language{})
 }
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/database"
 	model2 "github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"net/http"
@@ -93,11 +92,11 @@ func (l Log) String() string {
 
 // Save !
 func (l *Log) Save() {
-	database.Save(l)
+	// database.Save(l)
 	if l.Action == l.Action.Modified() || l.Action == l.Action.Deleted() {
 		l.RollBack = preloaded.RootURL + "revertHandler/?log_id=" + fmt.Sprint(l.ID)
 	}
-	database.Save(l)
+	// database.Save(l)
 }
 
 // ParseRecord !

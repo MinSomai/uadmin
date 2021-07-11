@@ -5,7 +5,7 @@ import (
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	"github.com/uadmin/uadmin/config"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"time"
 )
@@ -25,6 +25,8 @@ type IAdminContext interface {
 	SetDemo()
 	SetError(err string)
 	SetErrorExists()
+	GetLanguage() *langmodel.Language
+	GetRootURL() string
 }
 
 type AdminRequestParams struct {
@@ -77,6 +79,10 @@ func (c *AdminContext) SetRootURL(rootURL string) {
 	c.RootURL = rootURL
 }
 
+func (c *AdminContext) GetRootURL() string {
+	return c.RootURL
+}
+
 func (c *AdminContext) SetLanguage(language *langmodel.Language) {
 	c.Language = language
 }
@@ -87,6 +93,10 @@ func (c *AdminContext) SetLogo(logo string) {
 
 func (c *AdminContext) SetFavIcon(favicon string) {
 	c.FavIcon = favicon
+}
+
+func (c *AdminContext) GetLanguage() *langmodel.Language {
+	return c.Language
 }
 
 func (c *AdminContext) SetLanguages(langs []langmodel.Language) {
@@ -120,7 +130,7 @@ func (c *AdminContext) SetErrorExists() {
 func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContext, adminRequestParams *AdminRequestParams) {
 	sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 	var cookieName string
-	cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
+	cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, _ := ctx.Cookie(cookieName)
 	var session interfaces2.ISessionProvider
 	if cookie != "" {
@@ -128,9 +138,9 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	}
 	if adminRequestParams.CreateSession && session == nil {
 		session = sessionAdapter.Create()
-		expiresOn := time.Now().Add(time.Duration(config.CurrentConfig.D.Uadmin.SessionDuration)*time.Second)
+		expiresOn := time.Now().Add(time.Duration(interfaces.CurrentConfig.D.Uadmin.SessionDuration)*time.Second)
 		session.ExpiresOn(&expiresOn)
-		ctx.SetCookie(config.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(config.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, config.CurrentConfig.D.Uadmin.SecureCookie, config.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+		ctx.SetCookie(interfaces.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(interfaces.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, interfaces.CurrentConfig.D.Uadmin.SecureCookie, interfaces.CurrentConfig.D.Uadmin.HttpOnlyCookie)
 		session.Save()
 	}
 	if adminRequestParams.GenerateCSRFToken {
@@ -144,15 +154,15 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	if session == nil {
 		session.Save()
 	}
-	context.SetSiteName(config.CurrentConfig.D.Uadmin.SiteName)
-	context.SetRootAdminURL(config.CurrentConfig.D.Uadmin.RootAdminURL)
+	context.SetSiteName(interfaces.CurrentConfig.D.Uadmin.SiteName)
+	context.SetRootAdminURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
 	if session != nil {
 		context.SetSessionKey(session.GetKey())
 	}
-	context.SetRootURL(config.CurrentConfig.D.Uadmin.RootAdminURL)
+	context.SetRootURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
 	context.SetLanguage(utils.GetLanguage(ctx))
-	context.SetLogo(config.CurrentConfig.D.Uadmin.Logo)
-	context.SetFavIcon(config.CurrentConfig.D.Uadmin.FavIcon)
+	context.SetLogo(interfaces.CurrentConfig.D.Uadmin.Logo)
+	context.SetFavIcon(interfaces.CurrentConfig.D.Uadmin.FavIcon)
 	if adminRequestParams.NeedAllLanguages {
 		context.SetLanguages(utils.GetActiveLanguages())
 	}
@@ -161,4 +171,15 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 		context.SetUser(session.GetUser().Username)
 		context.SetUserExists(session.GetUser().ID != 0)
 	}
+}
+
+func CreateContextForTests() *AdminContext {
+	context := &AdminContext{}
+	context.SetSiteName(interfaces.CurrentConfig.D.Uadmin.SiteName)
+	context.SetRootAdminURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
+	context.SetRootURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
+	context.SetLanguage(utils.GetDefaultLanguage())
+	context.SetLogo(interfaces.CurrentConfig.D.Uadmin.Logo)
+	context.SetFavIcon(interfaces.CurrentConfig.D.Uadmin.FavIcon)
+	return context
 }

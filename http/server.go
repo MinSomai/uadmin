@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/uadmin/uadmin/config"
+	"github.com/uadmin/uadmin/interfaces"
 	"io/ioutil"
 	"os"
 	"path"
@@ -32,7 +32,7 @@ var ServerReady = false
 
 // @todo analyze start server
 // StartServer !
-func StartServer(config *config.UadminConfig) {
+func StartServer(config *interfaces.UadminConfig) {
 	//InitializeDbSettingsFromConfig(config)
 	//if !registered {
 	//	Register()
@@ -80,7 +80,7 @@ func StartServer(config *config.UadminConfig) {
 
 // @todo analyze start server
 // StartSecureServer !
-func StartSecureServer(certFile, keyFile string, config *config.UadminConfig) {
+func StartSecureServer(certFile, keyFile string, config *interfaces.UadminConfig) {
 	//InitializeDbSettingsFromConfig(config)
 	//if !registered {
 	//	Register()

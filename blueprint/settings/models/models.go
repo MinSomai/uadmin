@@ -5,9 +5,7 @@ import (
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/colors"
-	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/debug"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/metrics"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
@@ -76,10 +74,10 @@ type Setting struct {
 
 // Save overides save
 func (s *Setting) Save() {
-	database.Preload(s)
-	s.Code = strings.Replace(s.Category.Name, " ", "", -1) + "." + strings.Replace(s.Name, " ", "", -1)
-	s.ApplyValue()
-	database.Save(s)
+	//database.Preload(s)
+	//s.Code = strings.Replace(s.Category.Name, " ", "", -1) + "." + strings.Replace(s.Name, " ", "", -1)
+	//s.ApplyValue()
+	//database.Save(s)
 }
 
 // ParseFormValue takes the value of a setting from an HTTP request and saves in the instance of setting
@@ -268,7 +266,7 @@ func (s *Setting) ApplyValue() {
 	case "uAdmin.LogTrail":
 		preloaded.LogTrail = v.(bool)
 	case "uAdmin.TrailLoggingLevel":
-		debug.TrailLoggingLevel = v.(int)
+		interfaces.TrailLoggingLevel = v.(int)
 	case "uAdmin.SystemMetrics":
 		metrics.SystemMetrics = v.(bool)
 	case "uAdmin.UserMetrics":
@@ -299,7 +297,7 @@ func (s *Setting) ApplyValue() {
 // GetSetting return the value of a setting based on its code
 func GetSetting(code string) interface{} {
 	s := Setting{}
-	database.Get(&s, "code = ?", code)
+	// database.Get(&s, "code = ?", code)
 
 	if s.ID == 0 {
 		return nil
@@ -310,10 +308,10 @@ func GetSetting(code string) interface{} {
 func syncSystemSettings() {
 	// Check if the uAdmin category is not there and add it
 	cat := SettingCategory{}
-	database.Get(&cat, "Name = ?", "uAdmin")
+	// database.Get(&cat, "Name = ?", "uAdmin")
 	if cat.ID == 0 {
 		cat = SettingCategory{Name: "uAdmin"}
-		database.Save(&cat)
+		// database.Save(&cat)
 	}
 
 	t := DataType(0)
@@ -736,7 +734,7 @@ func syncSystemSettings() {
 		},
 		{
 			Name:         "Trail Logging Level",
-			Value:        fmt.Sprint(debug.TrailLoggingLevel),
+			Value:        fmt.Sprint(interfaces.TrailLoggingLevel),
 			DefaultValue: "2",
 			DataType:     t.Integer(),
 			Help:         "Is the minimum level to be logged into syslog.",
@@ -839,10 +837,10 @@ func syncSystemSettings() {
 	// Check if the settings exist in the DB
 	var s Setting
 	sList := []Setting{}
-	database.Filter(&sList, "category_id = ?", cat.ID)
-	tx := dialect.GetDB("default").Begin()
+	// database.Filter(&sList, "category_id = ?", cat.ID)
+	tx := interfaces.GetDB("default").Begin()
 	for i, setting := range settings {
-		debug.Trail(debug.WORKING, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, i+1, len(settings), colors.FGNormal)
+		interfaces.Trail(interfaces.WORKING, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, i+1, len(settings), colors.FGNormal)
 		s = Setting{}
 		for c := range sList {
 			if sList[c].Code == setting.Code {
@@ -867,17 +865,17 @@ func syncSystemSettings() {
 		}
 	}
 	tx.Commit()
-	debug.Trail(debug.OK, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, len(settings), len(settings), colors.FGNormal)
+	interfaces.Trail(interfaces.OK, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, len(settings), len(settings), colors.FGNormal)
 	applySystemSettings()
 	preloaded.SettingsSynched = true
 }
 
 func applySystemSettings() {
-	cat := SettingCategory{}
+	_ = SettingCategory{}
 	settings := []Setting{}
 
-	database.Get(&cat, "name = ?", "uAdmin")
-	database.Filter(&settings, "category_id = ?", cat.ID)
+	//database.Get(&cat, "name = ?", "uAdmin")
+	//database.Filter(&settings, "category_id = ?", cat.ID)
 
 	for _, setting := range settings {
 		setting.ApplyValue()

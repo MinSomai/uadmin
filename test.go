@@ -5,9 +5,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm"
@@ -156,7 +153,7 @@ func Run(t *testing.T, currentsuite suite.TestingSuite) {
 					downCommand := MigrateCommand{}
 					downCommand.Proceed("down", make([]string, 0))
 				} else {
-					dialect.GetDB().Transaction(func(tx *gorm.DB) error {
+					interfaces.GetDB().Transaction(func(tx *gorm.DB) error {
 						method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
 						// return nil will commit the whole transaction
 						return fmt.Errorf("dont commit")
@@ -207,12 +204,12 @@ func runTests(t testing.TB, tests []testing.InternalTest) {
 
 func NewTestApp() (*App, *gorm.DB) {
 	a := App{}
-	a.Config = config.NewConfig("configs/" + "test" + ".yaml")
+	a.Config = interfaces.NewConfig("configs/" + "test" + ".yaml")
 	a.CommandRegistry = &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
 	}
 	a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
-	a.Database = database.NewDatabase(a.Config)
+	a.Database = interfaces.NewDatabase(a.Config)
 	a.Router = gin.Default()
 	a.Router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://foo.com"},
@@ -227,10 +224,10 @@ func NewTestApp() (*App, *gorm.DB) {
 	}))
 	a.RegisterBaseCommands()
 	// a.InitializeRouter()
-	dialect.CurrentDatabaseSettings = &dialect.DatabaseSettings{
+	interfaces.CurrentDatabaseSettings = &interfaces.DatabaseSettings{
 		Default: a.Config.D.Db.Default,
 	}
-	dialectdb := dialect.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
+	dialectdb := interfaces.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
 	db, err := dialectdb.GetDb()
 	if err != nil {
 		panic(fmt.Errorf("Couldn't initialize db %s", err))
@@ -257,10 +254,10 @@ var appForTests *App
 
 func NewFullAppForTests() (*App, *gorm.DB) {
 	if appForTests != nil {
-		return appForTests, dialect.GetDB()
+		return appForTests, interfaces.GetDB()
 	}
 	a := NewApp("test")
-	dialectdb := dialect.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
+	dialectdb := interfaces.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
 	db, err := dialectdb.GetDb()
 	if err != nil {
 		panic(fmt.Errorf("Couldn't initialize db %s", err))

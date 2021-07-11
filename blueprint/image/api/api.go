@@ -6,7 +6,7 @@ import (
 	"github.com/nfnt/resize"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
-	"github.com/uadmin/uadmin/debug"
+	"github.com/uadmin/uadmin/interfaces"
 	model2 "github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
 	"image"
@@ -70,7 +70,7 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 	if _, err = os.Stat("." + uploadTo); os.IsNotExist(err) {
 		err = os.MkdirAll("."+uploadTo, os.ModePerm)
 		if err != nil {
-			debug.Trail(debug.ERROR, "processForm.MkdirAll. %s", err)
+			interfaces.Trail(interfaces.ERROR, "processForm.MkdirAll. %s", err)
 			return ""
 		}
 	}
@@ -105,12 +105,12 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 	fName = pathName + fName
 	err = os.MkdirAll(pathName, os.ModePerm)
 	if err != nil {
-		debug.Trail(debug.ERROR, "processForm.MkdirAll. unable to create folder for uploaded file. %s", err)
+		interfaces.Trail(interfaces.ERROR, "processForm.MkdirAll. unable to create folder for uploaded file. %s", err)
 		return ""
 	}
 	fRaw, err := os.OpenFile(fName, os.O_WRONLY|os.O_CREATE, preloaded.DefaultMediaPermission)
 	if err != nil {
-		debug.Trail(debug.ERROR, "processForm.OpenFile. unable to create file. %s", err)
+		interfaces.Trail(interfaces.ERROR, "processForm.OpenFile. unable to create file. %s", err)
 		return ""
 	}
 
@@ -118,24 +118,24 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 	if base64Format {
 		data, err := base64.StdEncoding.DecodeString(r.Form.Get(f.Name + "-raw")[strings.Index(r.Form.Get(f.Name+"-raw"), "://")+3 : len(r.Form.Get(f.Name+"-raw"))])
 		if err != nil {
-			debug.Trail(debug.ERROR, "ProcessForm error decoding base64. %s", err)
+			interfaces.Trail(interfaces.ERROR, "ProcessForm error decoding base64. %s", err)
 			return ""
 		}
 		_, err = fRaw.Write(data)
 		if err != nil {
-			debug.Trail(debug.ERROR, "ProcessForm error writing file. %s", err)
+			interfaces.Trail(interfaces.ERROR, "ProcessForm error writing file. %s", err)
 			return ""
 		}
 	} else {
 		_, err = io.Copy(fRaw, httpFile)
 		if err != nil {
-			debug.Trail(debug.ERROR, "ProcessForm error uploading http file. %s", err)
+			interfaces.Trail(interfaces.ERROR, "ProcessForm error uploading http file. %s", err)
 			return ""
 		}
 	}
 	fRaw.Close()
 
-	debug.Trail(debug.DEBUG, "t:"+f.Type)
+	interfaces.Trail(interfaces.DEBUG, "t:"+f.Type)
 	// store the file path to DB
 	if f.Type == preloaded.CFILE {
 		val = fmt.Sprint(strings.TrimPrefix(fName, "."))
@@ -144,7 +144,7 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 		// If case it is an image, process it first
 		fRaw, err = os.Open(fName)
 		if err != nil {
-			debug.Trail(debug.ERROR, "ProcessForm.Open %s", err)
+			interfaces.Trail(interfaces.ERROR, "ProcessForm.Open %s", err)
 			return ""
 		}
 
@@ -162,7 +162,7 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 		}
 		if err != nil {
 			f.ErrMsg = "Unknown image format or image corrupted."
-			debug.Trail(debug.WARNING, "ProcessForm.Decode %s", err)
+			interfaces.Trail(interfaces.WARNING, "ProcessForm.Decode %s", err)
 			return ""
 		}
 
@@ -191,14 +191,14 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 		fActiveName := strings.Replace(fName, "_raw", "", -1)
 		fActive, err := os.Create(fActiveName)
 		if err != nil {
-			debug.Trail(debug.ERROR, "ProcessForm.Create unable to create file for resized image. %s", err)
+			interfaces.Trail(interfaces.ERROR, "ProcessForm.Create unable to create file for resized image. %s", err)
 			return ""
 		}
 		defer fActive.Close()
 
 		fRaw, err = os.OpenFile(fName, os.O_WRONLY, 0644)
 		if err != nil {
-			debug.Trail(debug.ERROR, "ProcessForm.Open %s", err)
+			interfaces.Trail(interfaces.ERROR, "ProcessForm.Open %s", err)
 			return ""
 		}
 		defer fRaw.Close()
@@ -207,13 +207,13 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 		if fExt == preloaded.CJPG || fExt == preloaded.CJPEG {
 			err = jpeg.Encode(fActive, img, nil)
 			if err != nil {
-				debug.Trail(debug.ERROR, "ProcessForm.Encode active jpg. %s", err)
+				interfaces.Trail(interfaces.ERROR, "ProcessForm.Encode active jpg. %s", err)
 				return ""
 			}
 
 			err = jpeg.Encode(fRaw, img, nil)
 			if err != nil {
-				debug.Trail(debug.ERROR, "ProcessForm.Encode raw jpg. %s", err)
+				interfaces.Trail(interfaces.ERROR, "ProcessForm.Encode raw jpg. %s", err)
 				return ""
 			}
 		}
@@ -221,13 +221,13 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 		if fExt == preloaded.CPNG {
 			err = png.Encode(fActive, img)
 			if err != nil {
-				debug.Trail(debug.ERROR, "ProcessForm.Encode active png. %s", err)
+				interfaces.Trail(interfaces.ERROR, "ProcessForm.Encode active png. %s", err)
 				return ""
 			}
 
 			err = png.Encode(fRaw, img)
 			if err != nil {
-				debug.Trail(debug.ERROR, "ProcessForm.Encode raw png. %s", err)
+				interfaces.Trail(interfaces.ERROR, "ProcessForm.Encode raw png. %s", err)
 				return ""
 			}
 		}
@@ -236,13 +236,13 @@ func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sess
 			o := gif.Options{}
 			err = gif.Encode(fActive, img, &o)
 			if err != nil {
-				debug.Trail(debug.ERROR, "ProcessForm.Encode active gif. %s", err)
+				interfaces.Trail(interfaces.ERROR, "ProcessForm.Encode active gif. %s", err)
 				return ""
 			}
 
 			err = gif.Encode(fRaw, img, &o)
 			if err != nil {
-				debug.Trail(debug.ERROR, "ProcessForm.Encode raw gif. %s", err)
+				interfaces.Trail(interfaces.ERROR, "ProcessForm.Encode raw gif. %s", err)
 				return ""
 			}
 		}

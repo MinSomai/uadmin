@@ -3,11 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/config"
+	"github.com/uadmin/uadmin/interfaces"
+
 	// "encoding/json"
 	"github.com/gin-gonic/gin"
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
-	"github.com/uadmin/uadmin/dialect"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ func GetLanguage(c *gin.Context) *langmodel.Language {
 		return GetDefaultLanguage()
 	}
 	var lang langmodel.Language
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	db.Model(langmodel.Language{}).Where(&langmodel.Language{Code: langCookie}).First(&lang)
 	return &lang
 }
@@ -29,7 +29,7 @@ func GetDefaultLanguage() *langmodel.Language {
 		return defaultLang
 	}
 	var lang langmodel.Language
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	db.Model(langmodel.Language{}).Where(&langmodel.Language{Default: true}).First(&lang)
 	defaultLang = &lang
 	return &lang
@@ -38,7 +38,7 @@ func GetDefaultLanguage() *langmodel.Language {
 // GetActiveLanguages returns a list of active langages
 func GetActiveLanguages() []langmodel.Language {
 	var langs []langmodel.Language
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	db.Model(langmodel.Language{}).Where(&langmodel.Language{Active: true}).Find(&langs)
 	return langs
 }
@@ -76,7 +76,7 @@ func Tf(path string, lang string, term string, args ...interface{}) string {
 	}
 	langMap, ok := langMapCache[lang]
 	if !ok {
-		langFile, err := config.CurrentConfig.LocalizationFS.ReadFile(fmt.Sprintf("localization/%s.json", lang))
+		langFile, err := interfaces.CurrentConfig.LocalizationFS.ReadFile(fmt.Sprintf("localization/%s.json", lang))
 		if err != nil {
 			Trail(ERROR, "Unable to unmarshal json file with language (%s)", err)
 		} else {

@@ -2,7 +2,7 @@ package migrations
 
 import (
     abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type initial_1623083395 struct {
@@ -17,7 +17,7 @@ func (m initial_1623083395) GetId() int64 {
 }
 
 func (m initial_1623083395) Up() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.AutoMigrate(abtestmodel.ABTest{})
     if err != nil {
         panic(err)
@@ -29,7 +29,7 @@ func (m initial_1623083395) Up() {
 }
 
 func (m initial_1623083395) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.Migrator().DropTable(abtestmodel.ABTestValue{})
     if err != nil {
         panic(err)

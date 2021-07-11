@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/preloaded"
 	// "github.com/uadmin/uadmin/utils"
 	"net/http"
@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/model"
 )
 
@@ -73,8 +72,8 @@ func (a *ABTest) Save() {
 	if a.ResetABTest == "" {
 		a.ResetABTest = preloaded.RootURL + "api/d/abtest/method/Reset/" + fmt.Sprint(a.ID) + "/?$next=$back"
 	}
-	database.Save(a)
-	AbTestCount = database.Count([]ABTest{}, "active = ?", true)
+	//database.Save(a)
+	//AbTestCount = database.Count([]ABTest{}, "active = ?", true)
 }
 
 // @todo, redo
@@ -113,7 +112,7 @@ func SyncABTests() {
 	// Check if there are stats to save to the DB
 	AbTestsMutex.Lock()
 	if StaticABTests != nil {
-		tx := dialect.GetDB("default").Begin()
+		tx := interfaces.GetDB("default").Begin()
 		for _, v := range StaticABTests {
 			for i := range v {
 				if v[i].imp != 0 || v[i].click != 0 {
@@ -152,15 +151,15 @@ func SyncABTests() {
 	}{}
 
 	tests := []ABTest{}
-	database.Filter(&tests, "active = ?", true)
+	// database.Filter(&tests, "active = ?", true)
 
 	// Process Static AB Tests
 	for _, t := range tests {
 		if t.Type != t.Type.Static() {
 			continue
 		}
-		values := []ABTestValue{}
-		database.Filter(&values, "ab_test_id = ? AND active = ?", t.ID, true)
+		// values := []ABTestValue{}
+		// database.Filter(&values, "ab_test_id = ? AND active = ?", t.ID, true)
 		tempList := []struct {
 			v     string
 			vid   uint
@@ -260,8 +259,8 @@ func GetABT(r *http.Request) int {
 // AB Test ID
 func (a ABTest) Reset() {
 	AbTestsMutex.Lock()
-	abtestValue := ABTestValue{}
-	database.Update(&abtestValue, "Impressions", 0, "ab_test_id = ?", a.ID)
-	database.Update(&abtestValue, "Clicks", 0, "ab_test_id = ?", a.ID)
+	// abtestValue := ABTestValue{}
+	// database.Update(&abtestValue, "Impressions", 0, "ab_test_id = ?", a.ID)
+	// database.Update(&abtestValue, "Clicks", 0, "ab_test_id = ?", a.ID)
 	AbTestsMutex.Unlock()
 }

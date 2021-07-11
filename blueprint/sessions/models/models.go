@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/uadmin/uadmin/blueprint/auth/services"
 	"github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"gorm.io/gorm"
@@ -38,11 +37,11 @@ func (s Session) String() string {
 func (s *Session) Save() {
 	u := s.User
 	s.User = models.User{}
-	database.Save(s)
+	// database.Save(s)
 	s.User = u
 	if preloaded.CacheSessions {
 		if s.Active {
-			database.Preload(s)
+			// database.Preload(s)
 			// @todo, redo
 			// services.CachedSessions[s.Key] = *s
 		} else {
@@ -59,9 +58,9 @@ func (s *Session) GenerateKey() {
 		// TODO: Increase the session length to 124 and add 4 bytes for User.ID
 		// @todo, redo
 		// s.Key = services.GenerateBase64(24)
-		dialect1 := dialect.GetDialectForDb("default")
+		dialect1 := interfaces.GetDialectForDb("default")
 		dialect1.Equals("key", s.Key)
-		database.Get(&session, dialect1.ToString(), s.Key)
+		// database.Get(&session, dialect1.ToString(), s.Key)
 		if session.ID == 0 {
 			break
 		}
@@ -117,16 +116,16 @@ func (Session) HideInDashboard() bool {
 }
 
 func LoadSessions() {
-	sList := []Session{}
-	database.Filter(&sList, "active = ? AND (expires_on IS NULL OR expires_on > ?)", true, time.Now())
-	// @todo, redo
-	// services.CachedSessions = map[string]Session{}
-	for _, s := range sList {
-		database.Preload(&s)
-		database.Preload(&s.User)
-		// @todo, redo
-		// services.CachedSessions[s.Key] = s
-	}
+	// sList := []Session{}
+	//database.Filter(&sList, "active = ? AND (expires_on IS NULL OR expires_on > ?)", true, time.Now())
+	//// @todo, redo
+	//// services.CachedSessions = map[string]Session{}
+	//for _, s := range sList {
+	//	database.Preload(&s)
+	//	database.Preload(&s.User)
+	//	// @todo, redo
+	//	// services.CachedSessions[s.Key] = s
+	//}
 }
 
 func NewSession() *Session {

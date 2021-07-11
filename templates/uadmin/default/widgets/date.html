@@ -1,0 +1,8 @@
+<div class="form-group search">
+    <div class='input-group date datetimepicker' id='datetimepicker_{{.Name}}'>
+                  <span style="min-width:140px;" class="input-group-addon">
+                    <label class="camelcaseFix">{{.FieldDisplayName}}</label>
+                  </span>
+        <input class="form-control" name="{{.Name}}" type="text" value="{{.Value}}" {{Include "widgets/attrs" }} {{if .ReadOnly}} readonly {{end}}>
+    </div>
+</div>

@@ -2,7 +2,7 @@ package migrations
 
 import (
     logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type initial_1623082882 struct {
@@ -17,7 +17,7 @@ func (m initial_1623082882) GetId() int64 {
 }
 
 func (m initial_1623082882) Up() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.AutoMigrate(logmodel.Log{})
     if err != nil {
         panic(err)
@@ -25,7 +25,7 @@ func (m initial_1623082882) Up() {
 }
 
 func (m initial_1623082882) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.Migrator().DropTable(logmodel.Log{})
     if err != nil {
         panic(err)

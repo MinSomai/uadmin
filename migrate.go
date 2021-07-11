@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/debug"
-	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -350,7 +348,7 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 		if appInstance.Config.D.Db.Default.Type == "sqlite" {
 			traverseMigrationResult.Node.Apply()
 		} else {
-			dialect.GetDB().Transaction(func(tx *gorm.DB) error {
+			interfaces.GetDB().Transaction(func(tx *gorm.DB) error {
 				traverseMigrationResult.Node.Apply()
 				return nil
 			})
@@ -402,7 +400,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 			traverseMigrationResult.Node.Downgrade()
 			appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
 		} else {
-			dialect.GetDB().Transaction(func(tx *gorm.DB) error {
+			interfaces.GetDB().Transaction(func(tx *gorm.DB) error {
 				traverseMigrationResult.Node.Downgrade()
 				appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
 				return nil
@@ -425,7 +423,7 @@ func (command DetermineConflictsMigration) Proceed(subaction string, args []stri
 	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
 		if traverseMigrationResult.Error != nil {
 			isEverythingOk = false
-			debug.Trail(debug.WARNING, "Potential problems with migrations %s", traverseMigrationResult.Error.Error())
+			interfaces.Trail(interfaces.WARNING, "Potential problems with migrations %s", traverseMigrationResult.Error.Error())
 		}
 		appliedMigration := Migration{}
 		appInstance.Database.ConnectTo(
@@ -437,7 +435,7 @@ func (command DetermineConflictsMigration) Proceed(subaction string, args []stri
 			continue
 		}
 		isEverythingOk = false
-		debug.Trail(debug.WARNING, "Not applied migration: %s", traverseMigrationResult.Node.GetMigration().GetName())
+		interfaces.Trail(interfaces.WARNING, "Not applied migration: %s", traverseMigrationResult.Node.GetMigration().GetName())
 	}
 	if !isEverythingOk {
 		return fmt.Errorf("determined some problems with migrations")

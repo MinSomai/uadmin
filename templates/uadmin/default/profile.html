@@ -3,50 +3,13 @@
 <style type="text/css" media="all">
   /* fix rtl for demo */
   .chosen-rtl .chosen-drop { left: -9000px; }
+  .change-password-error span {
+      padding-left: 5px;
+  }
 </style>
-    <div class="container-fluid main-content" >
+    <div class="container-fluid main-content admin-page">
       <div class="col-sm-12">
-        <form method="POST" action="" enctype="multipart/form-data">
-          <br/>
-          <div class="col-sm-3">
-            <br />
-            <div class="list-group">
-              <span class="list-group-item" >
-                <center>
-                  <img src="{{.ProfilePhoto}}" style="width:100%">
-                </center>
-              </span>
-              <button type="submit" class="pointer list-group-item search"> <i class="fa fa-save fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .Language.Code "Save Changes"}}</button>
-              <button type="button" class="pointer list-group-item search" onclick="$('#myModal').modal('show');"><i class="fa fa-unlock-alt fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .Language.Code "Change Password"}}</button>
-              {{if .OTPRequired}}
-              <a type="button" style="text-align:left;" class="btn pointer list-group-item search" href="{{.RootAdminURL}}/profile?otp_required=0"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .Language.Code "Disable 2-Factor Auth"}}</a>
-              {{else}}
-              <a type="button" style="text-align:left;" class="btn pointer list-group-item search" href="{{.RootAdminURL}}/profile?otp_required=1"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .Language.Code "Enable 2-Factor Auth"}}</a>
-              {{end}}
-            </div>
-          </div>
-          <div class="col-sm-9">
-            <div class="form-horizontal form-signin">
-              <div class="form-group search">
-                <div class="input-group">
-                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">2FA Verification</span>
-                  <img src="{{.OTPImage}}">
-                </div>
-              </div>
-            </div>
-            {{if .IsUpdated}}
-              {{if .Status}}
-              <div class="alert alert-warning">
-                <strong><i class="fa fa-exclamation"></i></strong>&nbsp;{{.Notif}}
-              </div>
-              {{else}}
-              <div class="alert alert-info">
-                <strong>{{Tf "uadmin/system" .Language.Code "Info:"}}</strong>&nbsp;&nbsp;{{Tf "uadmin/system" .Language.Code "Changes Successfully Applied!"}}
-              </div>
-              {{end}} {{/* if .Status */}}
-            {{end}} {{/* if .IsUpdated */}}
-          </div>
-        </form>
+        {{ .F.Render }}
       </div>
     </div>
 
@@ -59,8 +22,12 @@
             <button type="button" class="close" data-dismiss="modal">&times;</button>
             <h4 class="modal-title"><i class="fa fa-unlock-alt fa-fw"></i></h4>
           </div>
-          <form method="POST" action="">
+          <form method="POST" action="" id="changePassword">
+              <input type="hidden" name="csrf_token" value="{{CSRF .SessionKey}}" />
             <div class="modal-body">
+                <div class="change-password-error alert alert-error hidden">
+                    <strong><i class="fa fa-exclamation"></i></strong><span></span>
+                </div>
               <div class="form-group search">
                 <div class="input-group">
                   <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf "uadmin/system" .Language.Code "Old Password"}}</span>
@@ -100,6 +67,63 @@
     };
     $('.close_modal_btn').click(function(){
       window.location.hash = "";
+    });
+    $('#disable2FactorAuth').click(function(ev) {
+        ev.preventDefault();
+        $.ajax({
+            url: "/user/api/disable-2fa",
+            method: "POST",
+            processData: false,
+            contentType:"application/json; charset=utf-8",
+            data: "",
+            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', $('input[name="csrf_token"]').val());},
+            success: function() {
+                location.reload();
+            },
+            error: function(xhr) {
+            }
+        });
+    });
+    $('#changePassword').submit(function(ev) {
+        ev.preventDefault();
+        var form = $(ev.currentTarget);
+        $.ajax({
+            url: "/user/api/change-password",
+            method: "POST",
+            processData: false,
+            contentType:"application/json; charset=utf-8",
+            data: JSON.stringify({
+                old_password: form.find('input[name="oldPassword"]').val(),
+                password: form.find('input[name="newPassword"]').val(),
+                confirm_password: form.find('input[name="confirmPassword"]').val(),
+            }),
+            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
+            success: function() {
+                $('.change-password-error').toggleClass('hidden', true);
+                $('#myModal').modal('toggle');
+            },
+            error: function(xhr) {
+                $('.change-password-error').toggleClass('hidden', false);
+                $('.change-password-error span').html(JSON.parse(xhr.responseText).error);
+            }
+        });
+        console.log('change password');
+    });
+    $('#enable2FactorAuth').click(function(ev) {
+        ev.preventDefault();
+        $.ajax({
+            url: "/user/api/enable-2fa",
+            method: "POST",
+            processData: false,
+            contentType:"application/json; charset=utf-8",
+            data: "",
+            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', $('input[name="csrf_token"]').val());},
+            success: function() {
+                location.reload();
+            },
+            error: function(xhr) {
+            }
+        });
     });
     setHeaderTabs(arrayVariableHeader, '#headtab-container', 'col-sm-4');
 

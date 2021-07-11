@@ -7,10 +7,9 @@ import (
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/form"
 	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/template"
 	"github.com/uadmin/uadmin/templatecontext"
 	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm/schema"
@@ -30,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		adapterGroup.POST("/logout/", adapter.Logout)
 		adapterGroup.GET("/status/", adapter.IsAuthenticated)
 	}
-	mainRouter.GET(config.CurrentConfig.D.Uadmin.RootAdminURL, func(ctx *gin.Context) {
+	mainRouter.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL, func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
@@ -42,8 +41,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			adminRequestParams.NeedAllLanguages = true
 			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
-			tr := utils.NewTemplateRenderer("Admin Login")
-			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("login"), c)
+			tr := interfaces.NewTemplateRenderer("Admin Login")
+			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("login"), c, template.FuncMap)
 		} else {
 			type Context struct {
 				templatecontext.AdminContext
@@ -55,7 +54,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
 			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 			var cookieName string
-			cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
+			cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
 			cookie, _ := ctx.Cookie(cookieName)
 			session, _ := sessionAdapter.GetByKey(cookie)
 
@@ -68,11 +67,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 			c.Menu = strings.Join(allMenus, ",")
 			c.Demo = false
-			tr := utils.NewTemplateRenderer("Dashboard")
-			tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("home"), c)
+			tr := interfaces.NewTemplateRenderer("Dashboard")
+			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
 		}
 	})
-	mainRouter.GET(config.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
+	mainRouter.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
 		type Context struct {
 			templatecontext.AdminContext
 			ID           uint
@@ -82,26 +81,38 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ProfilePhoto string
 			OTPImage     string
 			OTPRequired  bool
+			ChangesSaved bool
 			DBFields []*schema.Field
+			F *form.Form
 		}
 
 		c := &Context{}
 		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
-		cookieName = config.CurrentConfig.D.Uadmin.AdminCookieName
+		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
-		c.ProfilePhoto = session.GetUser().Photo
-		c.OTPRequired = session.GetUser().OTPRequired
-		db := dialect.GetDB()
-		c.DBFields = db.Model(usermodels.User{}).Statement.Schema.Fields
-		tr := utils.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
-		tr.Render(ctx, config.CurrentConfig.TemplatesFS, config.CurrentConfig.GetPathToTemplate("profile"), c)
+		user := session.GetUser()
+		form1 := form.NewFormFromModelFromGinContext(c, user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
+		form1.TemplateName = interfaces.CurrentConfig.GetPathToTemplate("form/profile_form")
+		c.F = form1
+		if ctx.Request.Method == "POST" {
+			requestForm, _ := ctx.MultipartForm()
+			formError := form1.ProceedRequest(requestForm, user)
+			if formError.IsEmpty() {
+				db := interfaces.GetDB()
+				db.Save(user).Preload("UserGroup")
+				ctx.Redirect(200, ctx.Request.URL.String())
+				return
+			}
+		}
+		tr := interfaces.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
+		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("profile"), c, template.FuncMap)
 	})
 }
 
-func (b Blueprint) Init(config *config.UadminConfig) {
+func (b Blueprint) Init(config *interfaces.UadminConfig) {
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthForAdminProvider{})

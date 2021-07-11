@@ -1,15 +1,13 @@
-package dialect
+package interfaces
 
 import (
 	"context"
 	"database/sql"
-	config2 "github.com/uadmin/uadmin/config"
 	"gorm.io/driver/sqlite"
-	"gorm.io/gorm/logger"
-	"reflect"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
+	"reflect"
 )
 
 type SqliteDialect struct {
@@ -298,13 +296,13 @@ func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 	} else {
 		alias = alias_[0]
 	}
-	var aliasDatabaseSettings *config2.DBSettings
+	var aliasDatabaseSettings *DBSettings
 	if alias == "default" {
 		aliasDatabaseSettings = CurrentDatabaseSettings.Default
 	}
 	var db *gorm.DB
 	var err error
-	if config2.CurrentConfig.D.Uadmin.DebugTests {
+	if CurrentConfig.D.Uadmin.DebugTests {
 		db, err = gorm.Open(sqlite.Open(aliasDatabaseSettings.Name), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		})
@@ -386,3 +384,4 @@ func (d *SqliteDialect) CreateDb() error {
 	var err error
 	return err
 }
+

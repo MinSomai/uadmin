@@ -4,7 +4,7 @@ import (
 	"fmt"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"time"
 )
 
@@ -49,7 +49,7 @@ func (s *DbSession) GetUser() *usermodels.User {
 }
 
 func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	var session sessionmodel.Session
 	db.Model(&sessionmodel.Session{}).Where(&sessionmodel.Session{Key: sessionKey}).Preload("User").First(&session)
 	if session.ID == 0 {
@@ -62,7 +62,7 @@ func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
 
 func (s *DbSession) Create() ISessionProvider {
 	session := sessionmodel.NewSession()
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	db.Create(session)
 	return &DbSession{
 		session: session,
@@ -70,7 +70,7 @@ func (s *DbSession) Create() ISessionProvider {
 }
 
 func (s *DbSession) Delete() bool {
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	db.Unscoped().Delete(&sessionmodel.Session{}, s.session.ID)
 	return db.Error == nil
 }
@@ -80,7 +80,7 @@ func (s *DbSession) IsExpired() bool {
 }
 
 func (s *DbSession) Save() bool {
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	res := db.Save(s.session)
 	return res.Error == nil
 }

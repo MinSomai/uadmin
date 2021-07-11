@@ -2,7 +2,7 @@ package migrations
 
 import (
     menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type Adddashbo_1623217408 struct {
@@ -17,7 +17,7 @@ func (m Adddashbo_1623217408) GetId() int64 {
 }
 
 func (m Adddashbo_1623217408) Up() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     dashboardmenu := menumodel.DashboardMenu{
         MenuName: "Dashboard Menus",
         URL:      "dashboardmenu",
@@ -151,7 +151,7 @@ func (m Adddashbo_1623217408) Up() {
 }
 
 func (m Adddashbo_1623217408) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     db.Unscoped().Where("1 = 1").Delete(&menumodel.DashboardMenu{})
 }
 

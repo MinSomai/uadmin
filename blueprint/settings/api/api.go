@@ -5,8 +5,7 @@ import (
 	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
-	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
 	// "github.com/uadmin/uadmin/translation"
@@ -51,7 +50,7 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	}
 
 	settings := []settingmodel.Setting{}
-	database.All(&settings)
+	// database.All(&settings)
 	if r.Method == preloaded.CPOST {
 		if !perm.Edit {
 			// @todo, redo
@@ -59,7 +58,7 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 			return
 		}
 		//var tempSet Setting
-		tx := dialect.GetDB("default").Begin()
+		tx := interfaces.GetDB("default").Begin()
 
 		for _, s := range settings {
 			v, ok := r.Form[s.Code]
@@ -108,18 +107,18 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	c.Logo = preloaded.Logo
 	c.FavIcon = preloaded.FavIcon
 
-	catList := []settingmodel.SettingCategory{}
-	database.All(&catList)
-
-	for _, cat := range catList {
-		c.SCat = append(c.SCat, SCat{
-			ID:       cat.ID,
-			Name:     cat.Name,
-			Icon:     cat.Icon,
-			Settings: []settingmodel.Setting{},
-		})
-		database.Filter(&c.SCat[len(c.SCat)-1].Settings, "category_id = ?", cat.ID)
-	}
+	// catList := []settingmodel.SettingCategory{}
+	//database.All(&catList)
+	//
+	//for _, cat := range catList {
+	//	c.SCat = append(c.SCat, SCat{
+	//		ID:       cat.ID,
+	//		Name:     cat.Name,
+	//		Icon:     cat.Icon,
+	//		Settings: []settingmodel.Setting{},
+	//	})
+	//	database.Filter(&c.SCat[len(c.SCat)-1].Settings, "category_id = ?", cat.ID)
+	//}
 
 	// @todo, redo
 	// uadminhttp.RenderHTML(w, r, "./templates/uadmin/"+preloaded.Theme+"/setting.html", c)

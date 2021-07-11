@@ -4,7 +4,6 @@ import (
 	"fmt"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/config"
 	"sort"
 )
 
@@ -18,7 +17,7 @@ type IBlueprint interface {
 	GetDescription() string
 	GetMigrationRegistry() IMigrationRegistry
 	InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup)
-	Init(config *config.UadminConfig)
+	Init(config *UadminConfig)
 }
 
 type IBlueprintRegistry interface {
@@ -29,7 +28,7 @@ type IBlueprintRegistry interface {
 	TraverseMigrations() <- chan *TraverseMigrationResult
 	TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult
 	InitializeRouting(router *gin.Engine)
-	Initialize(config *config.UadminConfig)
+	Initialize(config *UadminConfig)
 }
 
 type Blueprint struct {
@@ -50,7 +49,7 @@ func (b Blueprint) GetDescription() string {
 	return b.Description
 }
 
-func (b Blueprint) Init(config *config.UadminConfig) {
+func (b Blueprint) Init(config *UadminConfig) {
 
 }
 
@@ -289,13 +288,14 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 	})
 }
 
-func (r BlueprintRegistry) Initialize(config *config.UadminConfig) {
+func (r BlueprintRegistry) Initialize(config *UadminConfig) {
 	for blueprint := range r.Iterate() {
 		blueprint.Init(config)
 	}
 }
 
 func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult {
+	// @todo, fix this implementation
 	chnl := make(chan *TraverseMigrationResult)
 	go func() {
 		defer close(chnl)

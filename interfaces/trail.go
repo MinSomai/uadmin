@@ -1,9 +1,8 @@
-package debug
+package interfaces
 
 import (
 	"fmt"
 	"github.com/uadmin/uadmin/colors"
-	"github.com/uadmin/uadmin/config"
 	"log"
 	"runtime/debug"
 	"strings"
@@ -58,22 +57,22 @@ func Trail(level int, msg interface{}, i ...interface{}) {
 		} else if level == WORKING && !strings.HasPrefix(message, "\r") {
 			message = message + "\r"
 		}
-		if config.CurrentConfig.D.Uadmin.ReportTimeStamp {
+		if CurrentConfig.D.Uadmin.ReportTimeStamp {
 			log.Printf(trailTag[level]+message, i...)
 		} else {
 			fmt.Printf(trailTag[level]+message, i...)
 		}
 
 		// Run error handler if it exists
-		if config.CurrentConfig.ErrorHandleFunc != nil {
+		if CurrentConfig.ErrorHandleFunc != nil {
 			stack := string(debug.Stack())
 			stackList := strings.Split(stack, "\n")
 			stack = strings.Join(stackList[5:], "\n")
-			go config.CurrentConfig.ErrorHandleFunc(level, fmt.Sprintf(fmt.Sprint(msg), i...), stack)
+			go CurrentConfig.ErrorHandleFunc(level, fmt.Sprintf(fmt.Sprint(msg), i...), stack)
 		}
 
 		// Log to syslog
-		if config.CurrentConfig.D.Uadmin.LogTrail && level >= TrailLoggingLevel && level != WORKING {
+		if CurrentConfig.D.Uadmin.LogTrail && level >= TrailLoggingLevel && level != WORKING {
 			// Send log to syslog
 			Syslogf(level, message, i...)
 		}
@@ -82,4 +81,3 @@ func Trail(level int, msg interface{}, i ...interface{}) {
 
 // TrailLoggingLevel is the minimum level to be logged into syslog
 var TrailLoggingLevel = INFO
-

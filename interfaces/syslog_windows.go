@@ -1,6 +1,6 @@
 // +build windows
 
-package debug
+package interfaces
 
 import (
 "fmt"
@@ -16,3 +16,4 @@ func Syslogf(level int, msg string, a ...interface{}) error {
 	f.Close()
 	return nil
 }
+

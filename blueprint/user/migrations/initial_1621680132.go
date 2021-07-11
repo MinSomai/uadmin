@@ -2,7 +2,7 @@ package migrations
 
 import (
     models2 "github.com/uadmin/uadmin/blueprint/user/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type initial_1621680132 struct {
@@ -17,7 +17,7 @@ func (m initial_1621680132) GetId() int64 {
 }
 
 func (m initial_1621680132) Up() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.AutoMigrate(models2.UserGroup{})
     if err != nil {
         panic(err)
@@ -41,7 +41,7 @@ func (m initial_1621680132) Up() {
 }
 
 func (m initial_1621680132) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.Migrator().DropTable(models2.UserPermission{})
     if err != nil {
         panic(err)

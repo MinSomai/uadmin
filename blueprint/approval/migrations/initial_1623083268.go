@@ -2,7 +2,7 @@ package migrations
 
 import (
     "github.com/uadmin/uadmin/blueprint/approval/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type initial_1623083268 struct {
@@ -17,7 +17,7 @@ func (m initial_1623083268) GetId() int64 {
 }
 
 func (m initial_1623083268) Up() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.AutoMigrate(models.Approval{})
     if err != nil {
         panic(err)
@@ -25,7 +25,7 @@ func (m initial_1623083268) Up() {
 }
 
 func (m initial_1623083268) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     err := db.Migrator().DropTable(models.Approval{})
     if err != nil {
         panic(err)

@@ -2,7 +2,7 @@ package migrations
 
 import (
     usermodels "github.com/uadmin/uadmin/blueprint/user/models"
-    "github.com/uadmin/uadmin/dialect"
+    "github.com/uadmin/uadmin/interfaces"
 )
 
 type adding_use_1623259185 struct {
@@ -17,7 +17,7 @@ func (m adding_use_1623259185) GetId() int64 {
 }
 
 func (m adding_use_1623259185) Up() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     var superuserGroup usermodels.UserGroup
     db.Model(&usermodels.UserGroup{}).Where(&usermodels.UserGroup{GroupName: "Superusers"}).First(&superuserGroup)
     if superuserGroup.ID == 0 {
@@ -29,7 +29,7 @@ func (m adding_use_1623259185) Up() {
 }
 
 func (m adding_use_1623259185) Down() {
-    db := dialect.GetDB()
+    db := interfaces.GetDB()
     var superuserGroup usermodels.UserGroup
     db.Model(&usermodels.UserGroup{}).Where(&usermodels.UserGroup{GroupName: "Superusers"}).First(&superuserGroup)
     db.Delete(&superuserGroup)

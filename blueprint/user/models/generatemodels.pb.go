@@ -29,7 +29,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type User struct {
 	model.Model
 
-	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" gorm:"uniqueIndex" json:"Username,omitempty"`
+	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" gorm:"uniqueIndex" json:"Username,omitempty" uadminform:"UsernameOptions"`
 	FirstName            string     `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
 	LastName             string     `protobuf:"bytes,3,opt,name=LastName,proto3" json:"LastName,omitempty"`
 	Password             string     `protobuf:"bytes,4,opt,name=Password,proto3" json:"Password,omitempty"`
@@ -39,12 +39,12 @@ type User struct {
 	RemoteAccess         bool       `protobuf:"varint,8,opt,name=RemoteAccess,proto3" json:"RemoteAccess,omitempty"`
 	UserGroup            UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty"`
 	UserGroupID          uint       `protobuf:"varint,10,opt,name=UserGroupID,proto3" json:"UserGroupID,omitempty"`
-	Photo                string     `protobuf:"bytes,11,opt,name=Photo,proto3" json:"Photo,omitempty"`
-	LastLogin            *time.Time `protobuf:"bytes,12,opt,name=LastLogin,proto3" json:"LastLogin,omitempty"`
-	ExpiresOn            *time.Time `protobuf:"bytes,13,opt,name=ExpiresOn,proto3" json:"ExpiresOn,omitempty"`
+	Photo                string     `protobuf:"bytes,11,opt,name=Photo,proto3" json:"Photo,omitempty" uadminform:"UserPhotoOptions"`
+	LastLogin            *time.Time `protobuf:"bytes,12,opt,name=LastLogin,proto3" json:"LastLogin,omitempty" uadminform:"LastLoginOptions"`
+	ExpiresOn            *time.Time `protobuf:"bytes,13,opt,name=ExpiresOn,proto3" json:"ExpiresOn,omitempty" uadminform:"ExpiresOnOptions"`
 	GeneratedOTPToVerify string     `protobuf:"bytes,14,opt,name=GeneratedOTPToVerify,proto3" json:"GeneratedOTPToVerify,omitempty"`
 	OTPSeed              string     `protobuf:"bytes,15,opt,name=OTPSeed,proto3" json:"OTPSeed,omitempty"`
-	OTPRequired          bool     `protobuf:"bytes,15,opt,name=OTPRequired,proto3" json:"OTPRequired,omitempty"`
+	OTPRequired          bool     `protobuf:"bytes,15,opt,name=OTPRequired,proto3" json:"OTPRequired,omitempty" uadminform:"OTPRequiredOptions"`
 	Salt                 string     `protobuf:"bytes,16,opt,name=Salt,proto3" json:"Salt,omitempty"`
 }
 

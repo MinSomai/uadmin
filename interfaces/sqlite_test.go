@@ -1,14 +1,13 @@
-package dialect
+package interfaces
 
 import (
 	"fmt"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"testing"
+	"time"
 )
 
 // User !
@@ -79,3 +78,4 @@ func TestSqliteFunctional(t *testing.T) {
 	//db.Commit()
 	// assert.Equal(t, 1, len(last_ids))
 }
+

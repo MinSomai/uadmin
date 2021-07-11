@@ -7,7 +7,6 @@ import (
 	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
 	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/database"
 	"github.com/uadmin/uadmin/metrics"
 	"github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
@@ -154,7 +153,7 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.FormValue("u")
 
 	user := &usermodel.User{}
-	database.Get(user, "id = ?", userID)
+	// database.Get(user, "id = ?", userID)
 	if user.ID == 0 {
 		go func() {
 			log := &logmodel.Log{}
@@ -241,9 +240,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if r.FormValue("save") == "Send Request" {
 			// This is a password reset request
 			metrics.IncrementMetric("uadmin/security/passwordreset/request")
-			email := r.FormValue("email")
+			// email := r.FormValue("email")
 			user := usermodel.User{}
-			database.Get(&user, "Email = ?", email)
+			// database.Get(&user, "Email = ?", email)
 			if user.ID != 0 {
 				metrics.IncrementMetric("uadmin/security/passwordreset/emailsent")
 				c.ErrExists = true

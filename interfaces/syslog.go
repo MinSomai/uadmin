@@ -1,6 +1,6 @@
 // +build !windows
 
-package debug
+package interfaces
 
 import (
 "log/syslog"
@@ -31,3 +31,4 @@ func Syslogf(level int, msg string, a ...interface{}) {
 	}
 	logger.Printf(msg, a...)
 }
+

@@ -3,8 +3,7 @@ package models
 import (
 	"fmt"
 	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
-	"github.com/uadmin/uadmin/debug"
-	"github.com/uadmin/uadmin/dialect"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/model"
 	"time"
 
@@ -112,12 +111,12 @@ func (u *User) Save() {
 // GetDashboardMenu !
 func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
 	allItems := []menumodel.DashboardMenu{}
-	dialect.GetDB().Model(menumodel.DashboardMenu{}).Find(&allItems)
+	interfaces.GetDB().Model(menumodel.DashboardMenu{}).Find(&allItems)
 	userItems := []UserPermission{}
-	dialect.GetDB().Model(UserPermission{}).Where(&UserPermission{UserID: u.ID}).Find(&userItems)
+	interfaces.GetDB().Model(UserPermission{}).Where(&UserPermission{UserID: u.ID}).Find(&userItems)
 
 	groupItems := []GroupPermission{}
-	dialect.GetDB().Model(GroupPermission{}).Where(&GroupPermission{UserGroupID: u.UserGroupID}).Find(&groupItems)
+	interfaces.GetDB().Model(GroupPermission{}).Where(&GroupPermission{UserGroupID: u.UserGroupID}).Find(&groupItems)
 
 	var groupItemIndex int
 	var userItemIndex int
@@ -168,7 +167,7 @@ func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
 // HasAccess returns the user level permission to a model. The modelName
 // the the URL of the model
 func (u *User) HasAccess(modelName string) UserPermission {
-	debug.Trail(debug.WARNING, "User.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
+	interfaces.Trail(interfaces.WARNING, "User.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
 	return u.hasAccess(modelName)
 }
 

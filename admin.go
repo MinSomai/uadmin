@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/miquella/ask"
 	"github.com/uadmin/uadmin/colors"
-	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/debug"
 	"github.com/uadmin/uadmin/interfaces"
 	"log"
 	"os"
@@ -61,7 +59,7 @@ func (command ServeAdminServer) Proceed(subaction string, args []string) error {
 	migrateCommand := MigrateCommand{}
 	err := migrateCommand.Proceed("determine-conflicts", []string{})
 	if err != nil {
-		debug.Trail(debug.CRITICAL, "Found problems with migrations")
+		interfaces.Trail(interfaces.CRITICAL, "Found problems with migrations")
 		err = ask.Print("Warning! Found problems with migrations.\n")
 		if err != nil {
 			return err
@@ -78,13 +76,13 @@ func (command ServeAdminServer) Proceed(subaction string, args []string) error {
 			break
 		}
 		if answer == "no" {
-			debug.Trail(debug.WARNING, "You decided to solve first migration problems, so see you next time!")
+			interfaces.Trail(interfaces.WARNING, "You decided to solve first migration problems, so see you next time!")
 			return nil
 		}
 	}
-	debug.Trail(debug.OK, "Server Started: http://%s:%d", config.CurrentConfig.D.Admin.BindIP, config.CurrentConfig.D.Admin.ListenPort)
+	interfaces.Trail(interfaces.OK, "Server Started: http://%s:%d", interfaces.CurrentConfig.D.Admin.BindIP, interfaces.CurrentConfig.D.Admin.ListenPort)
 	fmt.Println(welcomeMessage)
-	log.Println(appInstance.Router.Run(fmt.Sprintf("%s:%d", config.CurrentConfig.D.Admin.BindIP, config.CurrentConfig.D.Admin.ListenPort)))
+	log.Println(appInstance.Router.Run(fmt.Sprintf("%s:%d", interfaces.CurrentConfig.D.Admin.BindIP, interfaces.CurrentConfig.D.Admin.ListenPort)))
 	return nil
 }
 

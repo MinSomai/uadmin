@@ -3,7 +3,6 @@ package logging
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/logging/migrations"
-	"github.com/uadmin/uadmin/config"
 	"github.com/uadmin/uadmin/interfaces"
 )
 
@@ -14,7 +13,7 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
-func (b Blueprint) Init(config *config.UadminConfig) {
+func (b Blueprint) Init(config *interfaces.UadminConfig) {
 }
 
 var ConcreteBlueprint = Blueprint{

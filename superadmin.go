@@ -8,7 +8,6 @@ import (
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
 	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"os"
@@ -73,7 +72,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
-	db := dialect.GetDB()
+	db := interfaces.GetDB()
 	var superuserGroup usermodels.UserGroup
 	db.Model(&usermodels.UserGroup{}).Where(&usermodels.UserGroup{GroupName: "Superusers"}).First(&superuserGroup)
 	if superuserGroup.ID == 0 {

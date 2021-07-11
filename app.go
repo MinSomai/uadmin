@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/uadmin/uadmin/admin"
 	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
 	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
 	authblueprint "github.com/uadmin/uadmin/blueprint/auth"
@@ -13,9 +14,6 @@ import (
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	settingsblueprint "github.com/uadmin/uadmin/blueprint/settings"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
-	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/database"
-	"github.com/uadmin/uadmin/dialect"
 	"github.com/uadmin/uadmin/http"
 	"github.com/uadmin/uadmin/interfaces"
 	"io/fs"
@@ -26,11 +24,12 @@ import (
 )
 
 type App struct {
-	Config            *config.UadminConfig
-	Database          *database.Database
+	Config            *interfaces.UadminConfig
+	Database          *interfaces.Database
 	Router            *gin.Engine
 	CommandRegistry   *CommandRegistry
 	BlueprintRegistry interfaces.IBlueprintRegistry
+	DashboardAdminPanel *admin.DashboardAdminPanel
 }
 
 var appInstance *App
@@ -38,17 +37,19 @@ var appInstance *App
 func NewApp(environment string) *App {
 	if appInstance == nil {
 		a := App{}
-		a.Config = config.NewConfig("configs/" + environment + ".yaml")
+		a.DashboardAdminPanel = admin.NewDashboardAdminPanel()
+		admin.CurrentDashboardAdminPanel = a.DashboardAdminPanel
+		a.Config = interfaces.NewConfig("configs/" + environment + ".yaml")
 		a.Config.TemplatesFS = templatesRoot
 		a.Config.LocalizationFS = localizationRoot
 		a.CommandRegistry = &CommandRegistry{
 			Actions: make(map[string]interfaces.ICommand),
 		}
-		dialect.CurrentDatabaseSettings = &dialect.DatabaseSettings{
+		interfaces.CurrentDatabaseSettings = &interfaces.DatabaseSettings{
 			Default: a.Config.D.Db.Default,
 		}
 		a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
-		a.Database = database.NewDatabase(a.Config)
+		a.Database = interfaces.NewDatabase(a.Config)
 		a.Router = gin.Default()
 		//a.Router.Use(cors.New(cors.Config{
 		//	AllowOrigins:     []string{"https://foo.com"},

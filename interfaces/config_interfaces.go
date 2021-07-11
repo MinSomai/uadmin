@@ -1,4 +1,4 @@
-package config
+package interfaces
 
 import (
 	"container/list"
@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/loads"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
-
-	"gopkg.in/yaml.v2"
 )
 
 // DBSettings !
@@ -80,6 +79,11 @@ type UadminConfigOptions struct {
 	DebugTests bool `yaml:"debug_tests"`
 	PoweredOnSite string `yaml:"powered_on_site"`
 	ForgotCodeExpiration int `yaml:"forgot_code_expiration"`
+	DateFormat string `yaml:"date_format"`
+	UploadPath string `yaml:"upload_path"`
+	DateTimeFormat string `yaml:"datetime_format"`
+	TimeFormat string `yaml:"time_format"`
+	DateFormatOrder string `yaml:"date_format_order"`
 }
 
 type UadminDbOptions struct {
@@ -129,6 +133,35 @@ type UadminConfigurableConfig struct {
 	Swagger *UadminSwaggerOptions `yaml:"swagger"`
 }
 
+type FieldChoice struct {
+	DisplayAs string
+	Value interface{}
+}
+
+type IFieldChoiceRegistryInterface interface {
+	IsValidChoice (v interface{}) bool
+}
+
+type FieldChoiceRegistry struct {
+	IFieldChoiceRegistryInterface
+	Choices []*FieldChoice
+}
+
+func (fcr *FieldChoiceRegistry) IsValidChoice(v interface{}) bool {
+	return false
+}
+
+type IFieldFormOptions interface {
+	GetName() string
+	GetInitial() interface{}
+	GetDisplayName() string
+	GetValidators() []IValidator
+	GetChoices() *FieldChoiceRegistry
+	GetHelpText() string
+	GetWidgetType() string
+	GetReadOnly() bool
+}
+
 // Info from config file
 type UadminConfig struct {
 	ApiSpec *loads.Document
@@ -139,10 +172,24 @@ type UadminConfig struct {
 	PatternsToIgnoreCsrfCheck *list.List
 	ErrorHandleFunc func(int, string, string)
 	InTests bool
+	FieldFormOptions map[string]IFieldFormOptions
 }
 
 func (c *UadminConfig) GetPathToTemplate(templateName string) string {
 	return fmt.Sprintf("templates/uadmin/%s/%s.html", c.D.Uadmin.Theme, templateName)
+}
+
+func (c *UadminConfig) GetPathToUploadDirectory() string {
+	return fmt.Sprintf("%s/%s", os.Getenv("UADMIN_PATH"), c.D.Uadmin.UploadPath)
+}
+
+func (c *UadminConfig) AddFieldFormOptions(formOptions IFieldFormOptions) {
+	c.FieldFormOptions[formOptions.GetName()] = formOptions
+}
+
+func (c *UadminConfig) GetFieldFormOptions(formOptionsName string) IFieldFormOptions {
+	ret, _ := c.FieldFormOptions[formOptionsName]
+	return ret
 }
 
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -201,6 +248,11 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			DirectApiSigninByField: "username",
 			DebugTests: false,
 			ForgotCodeExpiration: 10,
+			DateFormat: "01/_2/2006",
+			DateTimeFormat: "01/_2/2006 15:04",
+			TimeFormat: "15:04",
+			UploadPath: "uploads",
+			DateFormatOrder: "mm/dd/yyyy",
 		},
 	}
 	// Put your defaults here
@@ -231,6 +283,7 @@ func NewConfig(file string) *UadminConfig {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+	c.FieldFormOptions = make(map[string]IFieldFormOptions)
 	c.PatternsToIgnoreCsrfCheck = list.New()
 	c.PatternsToIgnoreCsrfCheck.PushBack("/ignorecsrfcheck")
 	c.RequiresCsrfCheck = func(c *gin.Context) bool {
@@ -258,3 +311,4 @@ func NewSwaggerSpec(file string) *loads.Document {
 	}
 	return doc
 }
+
