@@ -123,7 +123,6 @@ Please provide flags -n and -e which are username and email of the user respecti
 		Username:     opts.Username,
 		Email: opts.Email,
 		Password:     hashedPassword,
-		Admin:        true,
 		RemoteAccess: true,
 		Active:       true,
 		UserGroup:    superuserGroup,

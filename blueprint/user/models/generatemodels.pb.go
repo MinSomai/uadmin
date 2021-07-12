@@ -35,7 +35,6 @@ type User struct {
 	Password             string     `protobuf:"bytes,4,opt,name=Password,proto3" json:"Password,omitempty"`
 	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" gorm:"uniqueIndex" json:"Email,omitempty"`
 	Active               bool       `protobuf:"varint,6,opt,name=Active,proto3" json:"Active,omitempty"`
-	Admin                bool       `protobuf:"varint,7,opt,name=Admin,proto3" json:"Admin,omitempty"`
 	RemoteAccess         bool       `protobuf:"varint,8,opt,name=RemoteAccess,proto3" json:"RemoteAccess,omitempty"`
 	UserGroup            UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty"`
 	UserGroupID          uint       `protobuf:"varint,10,opt,name=UserGroupID,proto3" json:"UserGroupID,omitempty"`
@@ -106,13 +105,6 @@ func (m *User) GetEmail() string {
 func (m *User) GetActive() bool {
 	if m != nil {
 		return m.Active
-	}
-	return false
-}
-
-func (m *User) GetAdmin() bool {
-	if m != nil {
-		return m.Admin
 	}
 	return false
 }
@@ -254,9 +246,6 @@ func (m *User) Size() (n int) {
 		n += 1 + l + sovGeneratemodels(uint64(l))
 	}
 	if m.Active {
-		n += 2
-	}
-	if m.Admin {
 		n += 2
 	}
 	if m.RemoteAccess {
