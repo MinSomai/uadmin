@@ -128,6 +128,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		Active:       true,
 		UserGroup:    superuserGroup,
 		Salt: salt,
+		IsSuperUser: true,
 	}
 	db.Create(&admin)
 	return nil
