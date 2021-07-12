@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -194,7 +193,10 @@ func (apr *AdminPageRegistry) PreparePagesForTemplate() []byte {
 	for page := range apr.GetAll() {
 		pages = append(pages, page)
 	}
-	ret, _ := json.Marshal(pages)
+	ret, err := json.Marshal(pages)
+	if err != nil {
+		interfaces.Trail(interfaces.CRITICAL, "error while generating menu in admin", err)
+	}
 	return ret
 }
 
@@ -211,64 +213,47 @@ func NewDashboardAdminPanel() *DashboardAdminPanel {
 }
 
 type AdminPage struct {
-	Actions []*AdminModelAction
-	ActionsSelectionCounter bool
-	DateHierarchyField string
-	EmptyValueDisplay string
-	ExcludeFields interfaces.IFieldRegistry
-	FieldsToShow interfaces.IFieldRegistry
-	FilterHorizontal bool
-	FilterVertical bool
-	Form *form.Form
-	ShowAllFields bool
-	Validators []interfaces.IValidator
-	SortBy []*SortBy
-	Inlines []*AdminPageInlines
-	ListDisplay []*ListDisplay
-	ListFilter []*ListFilter
-	MaxShowAll int
-	PreserveFilters bool
-	SaveAndContinue bool
-	SaveOnTop bool
-	SearchFields []*SearchField
-	ShowFullResultCount bool
-	ViewOnSite bool
-	ListTemplate string
-	AddTemplate string
-	EditTemplate string
-	DeleteConfirmationTemplate string
-	DeleteSelectedConfirmationTemplate string
-	ObjectHistoryTemplate string
-	PopupResponseTemplate string
-	ExtraStatic *StaticFiles
-	Paginator *Paginator
-	SubPages *AdminPageRegistry
+	Actions []*AdminModelAction `json:"-"`
+	ActionsSelectionCounter bool `json:"-"`
+	DateHierarchyField string `json:"-"`
+	EmptyValueDisplay string `json:"-"`
+	ExcludeFields interfaces.IFieldRegistry `json:"-"`
+	FieldsToShow interfaces.IFieldRegistry `json:"-"`
+	FilterHorizontal bool `json:"-"`
+	FilterVertical bool `json:"-"`
+	Form *form.Form `json:"-"`
+	ShowAllFields bool `json:"-"`
+	Validators []interfaces.IValidator `json:"-"`
+	SortBy []*SortBy `json:"-"`
+	Inlines []*AdminPageInlines `json:"-"`
+	ListDisplay []*ListDisplay `json:"-"`
+	ListFilter []*ListFilter `json:"-"`
+	MaxShowAll int `json:"-"`
+	PreserveFilters bool `json:"-"`
+	SaveAndContinue bool `json:"-"`
+	SaveOnTop bool `json:"-"`
+	SearchFields []*SearchField `json:"-"`
+	ShowFullResultCount bool `json:"-"`
+	ViewOnSite bool `json:"-"`
+	ListTemplate string `json:"-"`
+	AddTemplate string `json:"-"`
+	EditTemplate string `json:"-"`
+	DeleteConfirmationTemplate string `json:"-"`
+	DeleteSelectedConfirmationTemplate string `json:"-"`
+	ObjectHistoryTemplate string `json:"-"`
+	PopupResponseTemplate string `json:"-"`
+	ExtraStatic *StaticFiles `json:"-"`
+	Paginator *Paginator `json:"-"`
+	SubPages *AdminPageRegistry `json:"-"`
 	Ordering int
 	PageName string
 	Slug string
 	ToolTip string
 	Icon string
-	ListHandler func (ctx *gin.Context)
-	EditHandler func (ctx *gin.Context)
-	AddHandler func (ctx *gin.Context)
-	DeleteHandler func (ctx *gin.Context)
-}
-
-func (ap *AdminPage) MarshalJSON() ([]byte, error) {
-	buffer := bytes.NewBufferString("{")
-	jsonValue, _ := json.Marshal(ap.PageName)
-	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "PageName", string(jsonValue)))
-	buffer.WriteString(",")
-	jsonValue, _ = json.Marshal(ap.Slug)
-	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "Slug", string(jsonValue)))
-	buffer.WriteString(",")
-	jsonValue, _ = json.Marshal(ap.Icon)
-	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "Icon", string(jsonValue)))
-	buffer.WriteString(",")
-	jsonValue, _ = json.Marshal(ap.ToolTip)
-	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "ToolTip", string(jsonValue)))
-	buffer.WriteString("}")
-	return buffer.Bytes(), nil
+	ListHandler func (ctx *gin.Context) `json:"-"`
+	EditHandler func (ctx *gin.Context) `json:"-"`
+	AddHandler func (ctx *gin.Context) `json:"-"`
+	DeleteHandler func (ctx *gin.Context) `json:"-"`
 }
 
 type ConnectionToParentModel struct {
