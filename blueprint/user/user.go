@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
+	"github.com/uadmin/uadmin/admin"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	"github.com/uadmin/uadmin/blueprint/user/migrations"
@@ -227,7 +228,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		// ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 		type Context struct {
 			templatecontext.AdminContext
-			Demo     bool
 			Menu     string
 		}
 
@@ -244,6 +244,34 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		tr := interfaces.NewTemplateRenderer("Page not found")
 		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, template2.FuncMap)
 	})
+	usersAdminPage := admin.NewAdminPage()
+	usersAdminPage.PageName = "Users"
+	usersAdminPage.Slug = "users"
+	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing user blueprint: %s", err))
+	}
+	usermodelAdminPage := admin.NewAdminPage()
+	usermodelAdminPage.PageName = "Users"
+	usermodelAdminPage.Slug = "user"
+	err = usersAdminPage.SubPages.AddAdminPage(usermodelAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing user blueprint: %s", err))
+	}
+	usergroupsAdminPage := admin.NewAdminPage()
+	usergroupsAdminPage.PageName = "User groups"
+	usergroupsAdminPage.Slug = "usergroup"
+	err = usersAdminPage.SubPages.AddAdminPage(usergroupsAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing user blueprint: %s", err))
+	}
+	userpermissionsAdminPage := admin.NewAdminPage()
+	userpermissionsAdminPage.PageName = "User Permissions"
+	userpermissionsAdminPage.Slug = "userpermission"
+	err = usersAdminPage.SubPages.AddAdminPage(userpermissionsAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing user blueprint: %s", err))
+	}
 }
 
 type UsernameFormOptions struct {
@@ -307,7 +335,7 @@ func PasswordUadminValidator(i interface{}, o interface{}) error {
 	return nil
 }
 
-func (b Blueprint) Init(config *interfaces.UadminConfig) {
+func (b Blueprint) Init() {
 	fieldChoiceRegistry := interfaces.FieldChoiceRegistry{}
 	fieldChoiceRegistry.Choices = make([]*interfaces.FieldChoice, 0)
 	formOptions := &UsernameFormOptions{

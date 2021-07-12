@@ -18,11 +18,11 @@ func (m initial_1621680132) GetId() int64 {
 
 func (m initial_1621680132) Up() {
     db := interfaces.GetDB()
-    err := db.AutoMigrate(models2.UserGroup{})
+    err := db.AutoMigrate(models2.ContentType{})
     if err != nil {
         panic(err)
     }
-    err = db.AutoMigrate(models2.GroupPermission{})
+    err = db.AutoMigrate(models2.UserGroup{})
     if err != nil {
         panic(err)
     }
@@ -50,10 +50,6 @@ func (m initial_1621680132) Down() {
     if err != nil {
         panic(err)
     }
-    err = db.Migrator().DropTable(models2.GroupPermission{})
-    if err != nil {
-        panic(err)
-    }
     err = db.Migrator().DropTable(models2.UserGroup{})
     if err != nil {
         panic(err)
@@ -62,8 +58,12 @@ func (m initial_1621680132) Down() {
     if err != nil {
         panic(err)
     }
+    err = db.Migrator().DropTable(models2.ContentType{})
+    if err != nil {
+        panic(err)
+    }
 }
 
 func (m initial_1621680132) Deps() []string {
-    return []string{"menu.1623081544"}
+    return []string{}
 }

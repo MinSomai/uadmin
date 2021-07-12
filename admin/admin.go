@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/form"
@@ -144,6 +146,9 @@ type AdminPagesList []*AdminPage
 
 func (apl AdminPagesList) Len() int { return len(apl) }
 func (apl AdminPagesList) Less(i, j int) bool {
+	if apl[i].Ordering == apl[j].Ordering {
+		return apl[i].PageName < apl[j].PageName
+	}
 	return apl[i].Ordering < apl[j].Ordering
 }
 func (apl AdminPagesList) Swap(i, j int){ apl[i], apl[j] = apl[j], apl[i] }
@@ -152,16 +157,16 @@ type AdminPageRegistry struct {
 	AdminPages map[string]*AdminPage
 }
 
-func (apr *AdminPageRegistry) GetByName(name string) (*AdminPage, error){
-	adminPage, ok := apr.AdminPages[name]
+func (apr *AdminPageRegistry) GetBySlug(slug string) (*AdminPage, error){
+	adminPage, ok := apr.AdminPages[slug]
 	if !ok {
-		return nil, fmt.Errorf("No admin page with alias %s", name)
+		return nil, fmt.Errorf("No admin page with alias %s", slug)
 	}
 	return adminPage, nil
 }
 
 func (apr *AdminPageRegistry) AddAdminPage(adminPage *AdminPage) error{
-	apr.AdminPages[adminPage.PageName] = adminPage
+	apr.AdminPages[adminPage.Slug] = adminPage
 	return nil
 }
 
@@ -183,6 +188,16 @@ func (apr *AdminPageRegistry) GetAll() <- chan *AdminPage{
 	return chnl
 }
 
+func (apr *AdminPageRegistry) PreparePagesForTemplate() []byte {
+	pages := make([]*AdminPage, 0)
+
+	for page := range apr.GetAll() {
+		pages = append(pages, page)
+	}
+	ret, _ := json.Marshal(pages)
+	return ret
+}
+
 type DashboardAdminPanel struct {
 	AdminPages *AdminPageRegistry
 }
@@ -191,7 +206,7 @@ var CurrentDashboardAdminPanel *DashboardAdminPanel
 
 func NewDashboardAdminPanel() *DashboardAdminPanel {
 	return &DashboardAdminPanel{
-		AdminPages: &AdminPageRegistry{},
+		AdminPages: NewAdminPageRegistry(),
 	}
 }
 
@@ -230,6 +245,30 @@ type AdminPage struct {
 	SubPages *AdminPageRegistry
 	Ordering int
 	PageName string
+	Slug string
+	ToolTip string
+	Icon string
+	ListHandler func (ctx *gin.Context)
+	EditHandler func (ctx *gin.Context)
+	AddHandler func (ctx *gin.Context)
+	DeleteHandler func (ctx *gin.Context)
+}
+
+func (ap *AdminPage) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString("{")
+	jsonValue, _ := json.Marshal(ap.PageName)
+	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "PageName", string(jsonValue)))
+	buffer.WriteString(",")
+	jsonValue, _ = json.Marshal(ap.Slug)
+	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "Slug", string(jsonValue)))
+	buffer.WriteString(",")
+	jsonValue, _ = json.Marshal(ap.Icon)
+	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "Icon", string(jsonValue)))
+	buffer.WriteString(",")
+	jsonValue, _ = json.Marshal(ap.ToolTip)
+	buffer.WriteString(fmt.Sprintf("\"%s\":%s", "ToolTip", string(jsonValue)))
+	buffer.WriteString("}")
+	return buffer.Bytes(), nil
 }
 
 type ConnectionToParentModel struct {
@@ -258,3 +297,25 @@ type AdminPageInlines struct {
 	Permissions *interfaces.Perm
 }
 
+func NewAdminPageRegistry() *AdminPageRegistry {
+	return &AdminPageRegistry{AdminPages: make(map[string]*AdminPage)}
+}
+func NewAdminPage() *AdminPage {
+	return &AdminPage{
+		SubPages: NewAdminPageRegistry(),
+		Validators: make([]interfaces.IValidator, 0),
+		ExcludeFields: interfaces.NewFieldRegistry(),
+		FieldsToShow: interfaces.NewFieldRegistry(),
+		Actions: make([]*AdminModelAction, 0),
+		SortBy: make([]*SortBy, 0),
+		Inlines: make([]*AdminPageInlines, 0),
+		ListDisplay: make([]*ListDisplay, 0),
+		ListFilter: make([]*ListFilter, 0),
+		SearchFields: make([]*SearchField, 0),
+		ExtraStatic: &StaticFiles{
+			ExtraCSS: make([]string, 0),
+			ExtraJS: make([]string, 0),
+		},
+		Paginator: &Paginator{},
+	}
+}

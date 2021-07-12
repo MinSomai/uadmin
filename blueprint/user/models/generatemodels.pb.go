@@ -46,6 +46,8 @@ type User struct {
 	OTPSeed              string     `protobuf:"bytes,15,opt,name=OTPSeed,proto3" json:"OTPSeed,omitempty"`
 	OTPRequired          bool     `protobuf:"bytes,15,opt,name=OTPRequired,proto3" json:"OTPRequired,omitempty" uadminform:"OTPRequiredOptions"`
 	Salt                 string     `protobuf:"bytes,16,opt,name=Salt,proto3" json:"Salt,omitempty"`
+	IsStaff bool `json:"IsStaff,omitempty"`
+	IsSuperUser bool `json:"IsSuperUser,omitempty"`
 }
 
 func (m *User) Reset()         { *m = User{} }

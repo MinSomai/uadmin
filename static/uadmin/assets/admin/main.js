@@ -64,12 +64,9 @@ function setHomeTabs(me, container, extclass){
   var icon;
   var cat;
   for (i = 0; i < arrayLength; i++) {
-    if(me[i].Hidden){
-      continue;
-    }
-    var name = me[i].MenuName;
+    var name = me[i].PageName;
     lowercase_name = name.toLowerCase();
-    var url = me[i].URL;
+    var url = me[i].Slug;
     var icon = me[i].Icon;
     var cat = me[i].Cat;
     var tooltip = me[i].ToolTip;
@@ -80,11 +77,7 @@ function setHomeTabs(me, container, extclass){
     if (icon == '') {
       icon = '/static-inbuilt/uadmin/assets/admin/images/icons/'+lowercase_name+'.png';
     }
-    if (cat!=""){
-      withribbon = '<div class="ribbon-wrapper"><div class="ribbon roboto-regular">'+cat+'</div></div>';
-    }else{
-      withribbon = "";
-    }
+    withribbon = "";
 
     // for (x=0; x < arrayTooltip.length; x++){
     //   if (arrayTooltip[x].split(':')[0] == modifiedname){

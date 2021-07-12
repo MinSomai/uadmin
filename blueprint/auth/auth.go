@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/uadmin/uadmin/admin"
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
@@ -11,9 +11,7 @@ import (
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/template"
 	"github.com/uadmin/uadmin/templatecontext"
-	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm/schema"
-	"strings"
 )
 
 type Blueprint struct {
@@ -46,7 +44,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		} else {
 			type Context struct {
 				templatecontext.AdminContext
-				Demo     bool
 				Menu     string
 			}
 
@@ -56,17 +53,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			var cookieName string
 			cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
 			cookie, _ := ctx.Cookie(cookieName)
-			session, _ := sessionAdapter.GetByKey(cookie)
 
-			allMenu := session.GetUser().GetDashboardMenu()
-			allMenus := make([]string, len(allMenu))
-			for i := range allMenu {
-				allMenu[i].MenuName = utils.Translate(ctx, allMenu[i].MenuName, c.Language.Code, true)
-				tmpMenu, _ := json.Marshal(allMenu[i])
-				allMenus[i] = string(tmpMenu)
-			}
-			c.Menu = strings.Join(allMenus, ",")
-			c.Demo = false
+			sessionAdapter.GetByKey(cookie)
+			menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate())
+			c.Menu = menu
 			tr := interfaces.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
 		}
@@ -112,7 +102,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	})
 }
 
-func (b Blueprint) Init(config *interfaces.UadminConfig) {
+func (b Blueprint) Init() {
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthForAdminProvider{})

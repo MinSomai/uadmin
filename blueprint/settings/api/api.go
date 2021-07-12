@@ -42,21 +42,21 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	}
 
 	// Check if the user has permission to settings models
-	perm := session.User.GetAccess("setting")
-	if !perm.Read {
-		// @todo, redo
-		// uadminhttp.PageErrorHandler(w, r, session)
-		return
-	}
+	// perm := session.User.GetAccess("setting")
+	//if !perm.Read {
+	//	// @todo, redo
+	//	// uadminhttp.PageErrorHandler(w, r, session)
+	//	return
+	//}
 
 	settings := []settingmodel.Setting{}
 	// database.All(&settings)
 	if r.Method == preloaded.CPOST {
-		if !perm.Edit {
-			// @todo, redo
-			// uadminhttp.PageErrorHandler(w, r, session)
-			return
-		}
+		//if !perm.Edit {
+		//	// @todo, redo
+		//	// uadminhttp.PageErrorHandler(w, r, session)
+		//	return
+		//}
 		//var tempSet Setting
 		tx := interfaces.GetDB("default").Begin()
 

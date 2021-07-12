@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"fmt"
 	"gorm.io/gorm/schema"
 	"mime/multipart"
 	"text/template"
@@ -139,3 +140,31 @@ func (f *Field) ProceedForm(form *multipart.Form) ValidationError {
 }
 
 type ValidationError []error
+
+type FieldRegistry struct {
+	IFieldRegistry
+	Fields map[string]*Field
+}
+
+func (fr *FieldRegistry) GetByName(name string) (*Field, error) {
+	f, ok := fr.Fields[name]
+	if !ok {
+		return nil, fmt.Errorf("no field %s found", name)
+	}
+	return f, nil
+}
+
+func (fr *FieldRegistry) GetAllFields() map[string]*Field {
+	return fr.Fields
+}
+
+func (fr *FieldRegistry) AddField(field *Field) {
+	if _, err := fr.GetByName(field.Name); err == nil {
+		panic(fmt.Errorf("field %s already in the field registry", field.Name))
+	}
+	fr.Fields[field.Name] = field
+}
+
+func NewFieldRegistry() *FieldRegistry {
+	return &FieldRegistry{Fields: make(map[string]*Field)}
+}

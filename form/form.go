@@ -62,30 +62,6 @@ func (ffo *FieldFormOptions) GetReadOnly() bool {
 	return ffo.ReadOnly
 }
 
-type FieldRegistry struct {
-	interfaces.IFieldRegistry
-	Fields map[string]*interfaces.Field
-}
-
-func (fr *FieldRegistry) GetByName(name string) (*interfaces.Field, error) {
-	f, ok := fr.Fields[name]
-	if !ok {
-		return nil, fmt.Errorf("No field %s found", name)
-	}
-	return f, nil
-}
-
-func (fr *FieldRegistry) GetAllFields() map[string]*interfaces.Field {
-	return fr.Fields
-}
-
-func (fr *FieldRegistry) AddField(field *interfaces.Field) {
-	if _, err := fr.GetByName(field.Name); err == nil {
-		panic(fmt.Errorf("field %s already in the field registry", field.Name))
-	}
-	fr.Fields[field.Name] = field
-}
-
 type ColumnSchema struct {
 	ShowLabel bool
 	Fields []*interfaces.Field
@@ -357,9 +333,9 @@ func IsTruthyValue(value interface{}) bool {
 }
 
 func NewFormFromModel(gormModel interface{}, excludeFields []string, fieldsToShow []string, buildFieldPlacement bool, formTitle string) *Form {
-	fieldRegistry := &FieldRegistry{Fields: make(map[string]*interfaces.Field)}
-	fieldsToShowRegistry := &FieldRegistry{Fields: make(map[string]*interfaces.Field)}
-	excludeFieldsRegistry := &FieldRegistry{Fields: make(map[string]*interfaces.Field)}
+	fieldRegistry := interfaces.NewFieldRegistry()
+	fieldsToShowRegistry := interfaces.NewFieldRegistry()
+	excludeFieldsRegistry := interfaces.NewFieldRegistry()
 	statement := &gorm.Statement{DB: interfaces.GetDB()}
 	statement.Parse(gormModel)
 	r := interfaces.NewTemplateRenderer(formTitle)

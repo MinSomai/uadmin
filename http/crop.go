@@ -31,10 +31,10 @@ func cropImageHandler(w http.ResponseWriter, r *http.Request, session *sessionmo
 	}
 	modelName := modelNameParts[len(modelNameParts)-2]
 	modelName = strings.Split(modelName, "_")[0]
-	if !session.User.GetAccess(modelName).Edit {
-		utils.ReturnJSON(w, r, map[string]string{"status": "error", "err_msg": "You don't have permission to edit this model"})
-		return
-	}
+	//if !session.User.GetAccess(modelName).Edit {
+	//	utils.ReturnJSON(w, r, map[string]string{"status": "error", "err_msg": "You don't have permission to edit this model"})
+	//	return
+	//}
 
 	// Open the file
 	imageFile, err := os.Open(img)

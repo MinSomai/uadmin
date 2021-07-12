@@ -1,7 +1,9 @@
 package approval
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/approval/migrations"
 	"github.com/uadmin/uadmin/interfaces"
 )
@@ -11,9 +13,23 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+	approvalAdminPage := admin.NewAdminPage()
+	approvalAdminPage.PageName = "Approvals"
+	approvalAdminPage.Slug = "approval"
+	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
+	}
+	approvalmodelAdminPage := admin.NewAdminPage()
+	approvalmodelAdminPage.PageName = "Logs"
+	approvalmodelAdminPage.Slug = "log"
+	err = approvalAdminPage.SubPages.AddAdminPage(approvalmodelAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
+	}
 }
 
-func (b Blueprint) Init(config *interfaces.UadminConfig) {
+func (b Blueprint) Init() {
 }
 
 var ConcreteBlueprint = Blueprint{

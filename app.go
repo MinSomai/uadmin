@@ -10,7 +10,6 @@ import (
 	authblueprint "github.com/uadmin/uadmin/blueprint/auth"
 	languageblueprint "github.com/uadmin/uadmin/blueprint/language"
 	logblueprint "github.com/uadmin/uadmin/blueprint/logging"
-	menublueprint "github.com/uadmin/uadmin/blueprint/menu"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	settingsblueprint "github.com/uadmin/uadmin/blueprint/settings"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
@@ -81,12 +80,11 @@ func StoreCurrentApp(app *App) {
 }
 
 func (a App) Initialize() {
-	a.BlueprintRegistry.Initialize(a.Config)
+	a.BlueprintRegistry.Initialize()
 }
 
 func (a App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(userblueprint.ConcreteBlueprint)
-	a.BlueprintRegistry.Register(menublueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(sessionsblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(settingsblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(logblueprint.ConcreteBlueprint)

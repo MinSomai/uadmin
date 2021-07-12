@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	menumodel "github.com/uadmin/uadmin/blueprint/menu/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/model"
 	"time"
@@ -108,62 +107,6 @@ func (u *User) Save() {
 //	return nil
 //}
 
-// GetDashboardMenu !
-func (u *User) GetDashboardMenu() (menus []menumodel.DashboardMenu) {
-	allItems := []menumodel.DashboardMenu{}
-	interfaces.GetDB().Model(menumodel.DashboardMenu{}).Find(&allItems)
-	userItems := []UserPermission{}
-	interfaces.GetDB().Model(UserPermission{}).Where(&UserPermission{UserID: u.ID}).Find(&userItems)
-
-	groupItems := []GroupPermission{}
-	interfaces.GetDB().Model(GroupPermission{}).Where(&GroupPermission{UserGroupID: u.UserGroupID}).Find(&groupItems)
-
-	var groupItemIndex int
-	var userItemIndex int
-	dashboardItems := []menumodel.DashboardMenu{}
-	for _, item := range allItems {
-		groupItemIndex = -1
-		userItemIndex = -1
-		for i, groupItem := range groupItems {
-			if groupItem.DashboardMenuID == item.ID {
-				groupItemIndex = i
-				break
-			}
-		}
-		for i, userItem := range userItems {
-			if userItem.DashboardMenuID == item.ID {
-				userItemIndex = i
-				break
-			}
-		}
-		// Permission exists for group and user: overide group with user
-		if groupItemIndex != -1 && userItemIndex != -1 {
-			groupItems[groupItemIndex].Read = userItems[userItemIndex].Read
-			groupItems[groupItemIndex].Add = userItems[userItemIndex].Add
-			groupItems[groupItemIndex].Edit = userItems[userItemIndex].Edit
-			groupItems[groupItemIndex].Delete = userItems[userItemIndex].Delete
-		}
-		// User permission exists but no group, add it to permessions
-		if groupItemIndex == -1 && userItemIndex != -1 {
-			groupItems = append(groupItems, GroupPermission{
-				DashboardMenuID: userItems[userItemIndex].DashboardMenuID,
-				Read:            userItems[userItemIndex].Read,
-				Add:             userItems[userItemIndex].Add,
-				Edit:            userItems[userItemIndex].Edit,
-				Delete:          userItems[userItemIndex].Delete,
-			})
-			groupItemIndex = len(groupItems) - 1
-		}
-		// Reconstruct the dashboard list
-		if u.Admin || groupItemIndex != -1 || userItemIndex != -1 {
-			if u.Admin || groupItems[groupItemIndex].Read {
-				dashboardItems = append(dashboardItems, item)
-			}
-		}
-	}
-	return dashboardItems
-}
-
 // HasAccess returns the user level permission to a model. The modelName
 // the the URL of the model
 func (u *User) HasAccess(modelName string) UserPermission {
@@ -204,31 +147,31 @@ func (u *User) GetAccess(modelName string) UserPermission {
 	//if u.UserGroup.ID != u.UserGroupID {
 	//	database.Preload(u)
 	//}
-	uPerm := u.hasAccess(modelName)
-	gPerm := u.UserGroup.hasAccess(modelName)
+	//uPerm := u.hasAccess(modelName)
+	//gPerm := u.UserGroup.hasAccess(modelName)
 	perm := UserPermission{}
 
-	if gPerm.ID != 0 {
-		perm.Read = gPerm.Read
-		perm.Edit = gPerm.Edit
-		perm.Add = gPerm.Add
-		perm.Delete = gPerm.Delete
-		perm.Approval = gPerm.Approval
-	}
-	if uPerm.ID != 0 {
-		perm.Read = uPerm.Read
-		perm.Edit = uPerm.Edit
-		perm.Add = uPerm.Add
-		perm.Delete = uPerm.Delete
-		perm.Approval = uPerm.Approval
-	}
-	if u.Admin {
-		perm.Read = true
-		perm.Edit = true
-		perm.Add = true
-		perm.Delete = true
-		perm.Approval = true
-	}
+	//if gPerm.ID != 0 {
+	//	perm.Read = gPerm.Read
+	//	perm.Edit = gPerm.Edit
+	//	perm.Add = gPerm.Add
+	//	perm.Delete = gPerm.Delete
+	//	perm.Approval = gPerm.Approval
+	//}
+	//if uPerm.ID != 0 {
+	//	perm.Read = uPerm.Read
+	//	perm.Edit = uPerm.Edit
+	//	perm.Add = uPerm.Add
+	//	perm.Delete = uPerm.Delete
+	//	perm.Approval = uPerm.Approval
+	//}
+	//if u.Admin {
+	//	perm.Read = true
+	//	perm.Edit = true
+	//	perm.Add = true
+	//	perm.Delete = true
+	//	perm.Approval = true
+	//}
 	return perm
 }
 
@@ -260,6 +203,7 @@ func (u *User) VerifyOTP(pass string) bool {
 type UserGroup struct {
 	model.Model
 	GroupName string `uadmin:"filter"`
+	Permissions []UserPermission `gorm:"foreignKey:ID"`
 }
 
 func (u UserGroup) String() string {
@@ -272,14 +216,14 @@ func (u *UserGroup) Save() {
 }
 
 // HasAccess !
-func (u *UserGroup) HasAccess(modelName string) GroupPermission {
+func (u *UserGroup) HasAccess(modelName string) UserPermission {
 	// utils.Trail(utils.WARNING, "UserGroup.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
 	return u.hasAccess(modelName)
 }
 
 // hasAccess !
-func (u *UserGroup) hasAccess(modelName string) GroupPermission {
-	up := GroupPermission{}
+func (u *UserGroup) hasAccess(modelName string) UserPermission {
+	up := UserPermission{}
 	//dm := menumodel.DashboardMenu{}
 	//if preloaded.CachePermissions {
 	//	modelID := uint(0)
@@ -303,21 +247,28 @@ func (u *UserGroup) hasAccess(modelName string) GroupPermission {
 }
 
 var cacheUserPerms []UserPermission
-var cacheGroupPerms []GroupPermission
-var cachedModels []menumodel.DashboardMenu
+
+type ContentType struct {
+	model.Model
+	BlueprintName string
+	ModelName string
+}
 
 // UserPermission !
 type UserPermission struct {
 	model.Model
-	DashboardMenu   menumodel.DashboardMenu `uadmin:"filter"`
-	DashboardMenuID uint          ``
+	Name string
+	ContentType ContentType
+	ContentTypeID uint `sql:"unique_index:idx_permission_user_content_type"`
 	User            User          `uadmin:"filter"`
-	UserID          uint          ``
-	Read            bool          `uadmin:"filter"`
-	Add             bool          `uadmin:"filter"`
-	Edit            bool          `uadmin:"filter"`
-	Delete          bool          `uadmin:"filter"`
-	Approval        bool          `uadmin:"filter"`
+	UserID          uint          `sql:"unique_index:idx_permission_user_content_type"`
+	PermissionBits uint
+	//Read            bool          `uadmin:"filter"`
+	//Add             bool          `uadmin:"filter"`
+	//Edit            bool          `uadmin:"filter"`
+	//Delete          bool          `uadmin:"filter"`
+	//Approval        bool          `uadmin:"filter"`
+	CustomPermissionName string
 }
 
 func (u UserPermission) String() string {
@@ -331,34 +282,9 @@ func (UserPermission) HideInDashboard() bool {
 
 func LoadPermissions() {
 	cacheUserPerms = []UserPermission{}
-	cacheGroupPerms = []GroupPermission{}
-	cachedModels = []menumodel.DashboardMenu{}
 	//database.All(&cacheUserPerms)
 	//database.All(&cacheGroupPerms)
 	//database.All(&cachedModels)
-}
-
-// GroupPermission !
-type GroupPermission struct {
-	model.Model
-	DashboardMenu   menumodel.DashboardMenu `uadmin:"required;filter"`
-	DashboardMenuID uint
-	UserGroup       UserGroup `uadmin:"required;filter"`
-	UserGroupID     uint
-	Read            bool `uadmin:"filter"`
-	Add             bool `uadmin:"filter"`
-	Edit            bool `uadmin:"filter"`
-	Delete          bool `uadmin:"filter"`
-	Approval        bool `uadmin:"filter"`
-}
-
-func (g GroupPermission) String() string {
-	return fmt.Sprint(g.ID)
-}
-
-// HideInDashboard to return false and auto hide this from dashboard
-func (GroupPermission) HideInDashboard() bool {
-	return true
 }
 
 // Action !

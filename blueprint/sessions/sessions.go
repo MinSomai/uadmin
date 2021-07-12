@@ -86,7 +86,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init(config *interfaces.UadminConfig) {
+func (b Blueprint) Init() {
 	b.SessionAdapterRegistry.RegisterNewAdapter(&interfaces2.DbSession{}, true)
 }
 

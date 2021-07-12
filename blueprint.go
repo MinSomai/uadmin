@@ -93,7 +93,7 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
-func (b Blueprint) Init(config *config.UadminConfig) {
+func (b Blueprint) Init() {
 }
 
 var ConcreteBlueprint = Blueprint{
