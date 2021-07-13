@@ -21,7 +21,6 @@ type User struct {
 	Active       bool
 	Admin        bool
 	RemoteAccess bool
-	UserGroupID  uint
 	Photo        string
 	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
 	LastLogin   *time.Time

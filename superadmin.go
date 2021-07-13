@@ -73,14 +73,6 @@ Please provide flags -n and -e which are username and email of the user respecti
 		return err
 	}
 	db := interfaces.GetDB()
-	var superuserGroup usermodels.UserGroup
-	db.Model(&usermodels.UserGroup{}).Where(&usermodels.UserGroup{GroupName: "Superusers"}).First(&superuserGroup)
-	if superuserGroup.ID == 0 {
-		superuserGroup = usermodels.UserGroup{
-			GroupName: "Superusers",
-		}
-		db.Create(&superuserGroup)
-	}
 	if opts.FirstName == "" {
 		opts.FirstName = "System"
 	}
@@ -125,9 +117,8 @@ Please provide flags -n and -e which are username and email of the user respecti
 		Password:     hashedPassword,
 		RemoteAccess: true,
 		Active:       true,
-		UserGroup:    superuserGroup,
+		IsSuperUser:    true,
 		Salt: salt,
-		IsSuperUser: true,
 	}
 	db.Create(&admin)
 	return nil

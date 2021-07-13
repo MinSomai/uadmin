@@ -36,8 +36,7 @@ type User struct {
 	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" gorm:"uniqueIndex" json:"Email,omitempty"`
 	Active               bool       `protobuf:"varint,6,opt,name=Active,proto3" json:"Active,omitempty"`
 	RemoteAccess         bool       `protobuf:"varint,8,opt,name=RemoteAccess,proto3" json:"RemoteAccess,omitempty"`
-	UserGroup            UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty"`
-	UserGroupID          uint       `protobuf:"varint,10,opt,name=UserGroupID,proto3" json:"UserGroupID,omitempty"`
+	UserGroups           []UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_groups;"`
 	Photo                string     `protobuf:"bytes,11,opt,name=Photo,proto3" json:"Photo,omitempty" uadminform:"UserPhotoOptions"`
 	LastLogin            *time.Time `protobuf:"bytes,12,opt,name=LastLogin,proto3" json:"LastLogin,omitempty" uadminform:"LastLoginOptions"`
 	ExpiresOn            *time.Time `protobuf:"bytes,13,opt,name=ExpiresOn,proto3" json:"ExpiresOn,omitempty" uadminform:"ExpiresOnOptions"`
@@ -114,20 +113,6 @@ func (m *User) GetRemoteAccess() bool {
 		return m.RemoteAccess
 	}
 	return false
-}
-
-func (m *User) GetUserGroup() *UserGroup {
-	if m != nil {
-		return &m.UserGroup
-	}
-	return nil
-}
-
-func (m *User) GetUserGroupID() uint {
-	if m != nil {
-		return m.UserGroupID
-	}
-	return 0
 }
 
 func (m *User) GetPhoto() string {
@@ -250,13 +235,6 @@ func (m *User) Size() (n int) {
 	}
 	if m.RemoteAccess {
 		n += 2
-	}
-	//l = len(m.UserGroup)
-	//if l > 0 {
-	//	n += 1 + l + sovGeneratemodels(uint64(l))
-	//}
-	if m.UserGroupID != 0 {
-		n += 1 + sovGeneratemodels(uint64(m.UserGroupID))
 	}
 	l = len(m.Photo)
 	if l > 0 {

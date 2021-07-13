@@ -92,7 +92,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			formError := form1.ProceedRequest(requestForm, user)
 			if formError.IsEmpty() {
 				db := interfaces.GetDB()
-				db.Save(user).Preload("UserGroup")
+				db.Save(user)
 				ctx.Redirect(200, ctx.Request.URL.String())
 				return
 			}

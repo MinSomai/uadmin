@@ -305,9 +305,12 @@ func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 	if CurrentConfig.D.Uadmin.DebugTests {
 		db, err = gorm.Open(sqlite.Open(aliasDatabaseSettings.Name), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
+			DisableForeignKeyConstraintWhenMigrating: true,
 		})
 	} else {
-		db, err = gorm.Open(sqlite.Open(aliasDatabaseSettings.Name))
+		db, err = gorm.Open(sqlite.Open(aliasDatabaseSettings.Name), &gorm.Config{
+			DisableForeignKeyConstraintWhenMigrating: true,
+		})
 	}
 	//var db *gorm.DB
 	//var err error

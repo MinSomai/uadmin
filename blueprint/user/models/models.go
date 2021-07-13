@@ -268,7 +268,6 @@ type UserPermission struct {
 	//Edit            bool          `uadmin:"filter"`
 	//Delete          bool          `uadmin:"filter"`
 	//Approval        bool          `uadmin:"filter"`
-	CustomPermissionName string
 }
 
 func (u UserPermission) String() string {

@@ -19,7 +19,6 @@ message User {
   bool Admin = 7;
   bool RemoteAccess = 8;
   string UserGroup = 9;
-  int32 UserGroupID = 10;
   string Photo = 11;
   string LastLogin = 12;
   string ExpiresOn = 13;
