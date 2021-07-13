@@ -7,7 +7,7 @@ package models
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
-	"github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/interfaces"
 
 	io "io"
 	math "math"
@@ -27,7 +27,7 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type User struct {
-	model.Model
+	interfaces.Model
 
 	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" gorm:"uniqueIndex" json:"Username,omitempty" uadminform:"UsernameOptions"`
 	FirstName            string     `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty"`

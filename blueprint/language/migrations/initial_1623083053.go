@@ -3,6 +3,7 @@ package migrations
 import (
     langmodel "github.com/uadmin/uadmin/blueprint/language/models"
     "github.com/uadmin/uadmin/interfaces"
+    "gorm.io/gorm"
 )
 
 type initial_1623083053 struct {
@@ -22,6 +23,10 @@ func (m initial_1623083053) Up() {
     if err != nil {
         panic(err)
     }
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&langmodel.Language{})
+    contentType := &interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}
+    db.Create(contentType)
 }
 
 func (m initial_1623083053) Down() {
@@ -30,6 +35,11 @@ func (m initial_1623083053) Down() {
     if err != nil {
         panic(err)
     }
+    var contentType interfaces.ContentType
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&langmodel.Language{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
 }
 
 func (m initial_1623083053) Deps() []string {

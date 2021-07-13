@@ -1,12 +1,10 @@
 package models
 
-import (
-	"github.com/uadmin/uadmin/model"
-)
+import "github.com/uadmin/uadmin/interfaces"
 
 // Language !
 type Language struct {
-	model.Model
+	interfaces.Model
 	EnglishName    string `uadmin:"required;read_only;filter;search"`
 	Name           string `uadmin:"required;read_only;filter;search"`
 	Flag           string `uadmin:"image;list_exclude"`

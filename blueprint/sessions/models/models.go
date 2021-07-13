@@ -6,7 +6,6 @@ import (
 	"github.com/uadmin/uadmin/blueprint/auth/services"
 	"github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"gorm.io/gorm"
 	"time"
@@ -14,7 +13,7 @@ import (
 
 // Session !
 type Session struct {
-	model.Model
+	interfaces.Model
 	Key        string
 	User       models.User `uadmin:"filter"`
 	UserID     uint

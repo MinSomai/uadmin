@@ -3,6 +3,7 @@ package migrations
 import (
     "github.com/uadmin/uadmin/blueprint/settings/models"
     "github.com/uadmin/uadmin/interfaces"
+    "gorm.io/gorm"
 )
 
 type initial_1623082592 struct {
@@ -20,6 +21,14 @@ func (m initial_1623082592) Up() {
     db := interfaces.GetDB()
     db.AutoMigrate(models.SettingCategory{})
     db.AutoMigrate(models.Setting{})
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&models.SettingCategory{})
+    contentType := &interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}
+    db.Create(contentType)
+    stmt = &gorm.Statement{DB: db}
+    stmt.Parse(&models.Setting{})
+    settingContentType := &interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}
+    db.Create(settingContentType)
 }
 
 func (m initial_1623082592) Down() {
@@ -32,6 +41,15 @@ func (m initial_1623082592) Down() {
     if err != nil {
         panic(err)
     }
+    var contentType interfaces.ContentType
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&models.SettingCategory{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
+    stmt = &gorm.Statement{DB: db}
+    stmt.Parse(&models.Setting{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
 }
 
 func (m initial_1623082592) Deps() []string {

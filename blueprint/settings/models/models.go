@@ -7,7 +7,6 @@ import (
 	"github.com/uadmin/uadmin/colors"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/metrics"
-	"github.com/uadmin/uadmin/model"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
 	"strconv"
@@ -16,7 +15,7 @@ import (
 )
 // SettingCategory is a category for system settings
 type SettingCategory struct {
-	model.Model
+	interfaces.Model
 	Name string
 	Icon string `uadmin:"image"`
 }
@@ -61,7 +60,7 @@ func (DataType) DateTime() DataType {
 
 // Setting model stored system settings
 type Setting struct {
-	model.Model
+	interfaces.Model
 	Name         string `uadmin:"required;filter;search"`
 	DefaultValue string
 	DataType     DataType `uadmin:"required;filter"`

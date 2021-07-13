@@ -2,14 +2,27 @@ package models
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/interfaces"
 
 	"time"
 )
 
+// ApprovalAction is a selection of approval actions
+type ApprovalAction int
+
+// Approved is an accepted change
+func (ApprovalAction) Approved() ApprovalAction {
+	return 1
+}
+
+// Rejected is a rejected change
+func (ApprovalAction) Rejected() ApprovalAction {
+	return 2
+}
+
 // Approval is a model that stores approval data
 type Approval struct {
-	model.Model
+	interfaces.Model
 	ModelName           string `uadmin:"read_only"`
 	ModelPK             uint   `uadmin:"read_only"`
 	ColumnName          string `uadmin:"read_only"`
@@ -18,7 +31,7 @@ type Approval struct {
 	NewValueDescription string    `uadmin:"read_only"`
 	ChangedBy           string    `uadmin:"read_only"`
 	ChangeDate          time.Time `uadmin:"read_only"`
-	ApprovalAction      model.ApprovalAction
+	ApprovalAction      ApprovalAction
 	ApprovalBy          string     `uadmin:"read_only"`
 	ApprovalDate        *time.Time `uadmin:"read_only"`
 	ViewRecord          string     `uadmin:"link"`

@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uadmin/uadmin/model"
 )
 
 // ABTestType is the type of the AB testing: model or static
@@ -55,7 +54,7 @@ var AbTestCount = 0
 
 // ABTest is a model that stores an A/B test
 type ABTest struct {
-	model.Model
+	interfaces.Model
 	Name        string     `uadmin:"required"`
 	Type        ABTestType `uadmin:"required"`
 	StaticPath  string

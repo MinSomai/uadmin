@@ -3,8 +3,6 @@ package modelold
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/model"
-
 	// usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/preloaded"
 	"strings"
@@ -153,7 +151,7 @@ type F struct {
 	OldValue          interface{}
 	ChangedBy         string
 	ChangeDate        *time.Time
-	ApprovalAction    model.ApprovalAction
+	ApprovalAction    int
 	ApprovalDate      *time.Time
 	ApprovalBy        string
 	ApprovalID        uint
@@ -199,7 +197,7 @@ func (f F) MarshalJSON() ([]byte, error) {
 		OldValue          interface{}
 		ChangedBy         string
 		ChangeDate        *time.Time
-		ApprovalAction    model.ApprovalAction
+		ApprovalAction    int
 		ApprovalDate      *time.Time
 		ApprovalBy        string
 		ApprovalID        uint

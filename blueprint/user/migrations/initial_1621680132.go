@@ -3,6 +3,7 @@ package migrations
 import (
     models2 "github.com/uadmin/uadmin/blueprint/user/models"
     "github.com/uadmin/uadmin/interfaces"
+    "gorm.io/gorm"
 )
 
 type initial_1621680132 struct {
@@ -18,7 +19,7 @@ func (m initial_1621680132) GetId() int64 {
 
 func (m initial_1621680132) Up() {
     db := interfaces.GetDB()
-    err := db.AutoMigrate(models2.ContentType{})
+    err := db.AutoMigrate(interfaces.ContentType{})
     if err != nil {
         panic(err)
     }
@@ -38,6 +39,14 @@ func (m initial_1621680132) Up() {
     if err != nil {
         panic(err)
     }
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&models2.OneTimeAction{})
+    contentType := &interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}
+    db.Create(contentType)
+    stmt = &gorm.Statement{DB: db}
+    stmt.Parse(&models2.User{})
+    userContentType := &interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}
+    db.Create(userContentType)
 }
 
 func (m initial_1621680132) Down() {
@@ -58,10 +67,19 @@ func (m initial_1621680132) Down() {
     if err != nil {
         panic(err)
     }
-    err = db.Migrator().DropTable(models2.ContentType{})
+    err = db.Migrator().DropTable(interfaces.ContentType{})
     if err != nil {
         panic(err)
     }
+    var contentType interfaces.ContentType
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&models2.OneTimeAction{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
+    stmt = &gorm.Statement{DB: db}
+    stmt.Parse(&models2.User{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
 }
 
 func (m initial_1621680132) Deps() []string {

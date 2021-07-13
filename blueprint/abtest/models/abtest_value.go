@@ -2,14 +2,14 @@ package models
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/interfaces"
 	"io/ioutil"
 	"strings"
 )
 
 // ABTestValue is a model to represent a possible value of an AB test
 type ABTestValue struct {
-	model.Model
+	interfaces.Model
 	ABTest      ABTest
 	ABTestID    uint
 	Value       string `uadmin:"list_exclude"`

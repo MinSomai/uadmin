@@ -2,13 +2,13 @@ package models
 
 import (
 	"github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/interfaces"
 	"time"
 )
 
 // Session !
 type UserAuthToken struct {
-	model.Model
+	interfaces.Model
 	User       models.User
 	UserID     uint
 	Token      string

@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/model"
 	"time"
 
 	// "time"
@@ -201,7 +200,7 @@ func (u *User) VerifyOTP(pass string) bool {
 
 // UserGroup !
 type UserGroup struct {
-	model.Model
+	interfaces.Model
 	GroupName string `uadmin:"filter"`
 	Permissions []UserPermission `gorm:"foreignKey:ID"`
 }
@@ -248,17 +247,11 @@ func (u *UserGroup) hasAccess(modelName string) UserPermission {
 
 var cacheUserPerms []UserPermission
 
-type ContentType struct {
-	model.Model
-	BlueprintName string
-	ModelName string
-}
-
 // UserPermission !
 type UserPermission struct {
-	model.Model
+	interfaces.Model
 	Name string
-	ContentType ContentType
+	ContentType interfaces.ContentType
 	ContentTypeID uint `sql:"unique_index:idx_permission_user_content_type"`
 	User            User          `uadmin:"filter"`
 	UserID          uint          `sql:"unique_index:idx_permission_user_content_type"`
@@ -294,7 +287,7 @@ func (a OneTimeActionType) ResetPassword() OneTimeActionType {
 }
 
 type OneTimeAction struct {
-	model.Model
+	interfaces.Model
 	User       User
 	UserID     uint
 	ExpiresOn *time.Time `gorm:"index"`

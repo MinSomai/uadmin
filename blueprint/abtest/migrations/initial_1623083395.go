@@ -3,6 +3,7 @@ package migrations
 import (
     abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
     "github.com/uadmin/uadmin/interfaces"
+    "gorm.io/gorm"
 )
 
 type initial_1623083395 struct {
@@ -26,6 +27,14 @@ func (m initial_1623083395) Up() {
     if err != nil {
         panic(err)
     }
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&abtestmodel.ABTest{})
+    contentType := &interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}
+    db.Create(contentType)
+    stmt = &gorm.Statement{DB: db}
+    stmt.Parse(&abtestmodel.ABTestValue{})
+    contentType = &interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}
+    db.Create(contentType)
 }
 
 func (m initial_1623083395) Down() {
@@ -38,6 +47,15 @@ func (m initial_1623083395) Down() {
     if err != nil {
         panic(err)
     }
+    var contentType interfaces.ContentType
+    stmt := &gorm.Statement{DB: db}
+    stmt.Parse(&abtestmodel.ABTestValue{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
+    stmt = &gorm.Statement{DB: db}
+    stmt.Parse(&abtestmodel.ABTest{})
+    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Delete(&contentType)
 }
 
 func (m initial_1623083395) Deps() []string {

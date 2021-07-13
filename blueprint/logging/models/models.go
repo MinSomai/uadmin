@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
-	model2 "github.com/uadmin/uadmin/model"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/preloaded"
 	"net/http"
 	"reflect"
@@ -76,7 +76,7 @@ func (a Action) Custom() Action {
 
 // Log !
 type Log struct {
-	model2.Model
+	interfaces.Model
 	Username  string    `uadmin:"filter;read_only"`
 	Action    Action    `uadmin:"filter;read_only"`
 	TableName string    `uadmin:"filter;read_only"`
