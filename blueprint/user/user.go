@@ -239,7 +239,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//}
 		//if code, err := strconv.ParseUint(r.Form.Get("err_code"), 10, 16); err == nil {
 		//	c.ErrCode = int(code)
-		//}
+		//}NewAdminPage
 		ctx.Status(404)
 		tr := interfaces.NewTemplateRenderer("Page not found")
 		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, template2.FuncMap)
@@ -247,6 +247,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usersAdminPage := admin.NewAdminPage()
 	usersAdminPage.PageName = "Users"
 	usersAdminPage.Slug = "users"
+	usersAdminPage.BlueprintName = "user"
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
@@ -254,6 +255,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usermodelAdminPage := admin.NewAdminPage()
 	usermodelAdminPage.PageName = "Users"
 	usermodelAdminPage.Slug = "user"
+	usermodelAdminPage.BlueprintName = "user"
 	err = usersAdminPage.SubPages.AddAdminPage(usermodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
@@ -261,6 +263,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usergroupsAdminPage := admin.NewAdminPage()
 	usergroupsAdminPage.PageName = "User groups"
 	usergroupsAdminPage.Slug = "usergroup"
+	usergroupsAdminPage.BlueprintName = "user"
 	err = usersAdminPage.SubPages.AddAdminPage(usergroupsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
@@ -268,6 +271,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	userpermissionsAdminPage := admin.NewAdminPage()
 	userpermissionsAdminPage.PageName = "User Permissions"
 	userpermissionsAdminPage.Slug = "userpermission"
+	userpermissionsAdminPage.BlueprintName = "user"
 	err = usersAdminPage.SubPages.AddAdminPage(userpermissionsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))

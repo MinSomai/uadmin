@@ -215,6 +215,7 @@ func NewDashboardAdminPanel() *DashboardAdminPanel {
 type AdminPage struct {
 	Actions []*AdminModelAction `json:"-"`
 	ActionsSelectionCounter bool `json:"-"`
+	BlueprintName string
 	DateHierarchyField string `json:"-"`
 	EmptyValueDisplay string `json:"-"`
 	ExcludeFields interfaces.IFieldRegistry `json:"-"`
@@ -285,6 +286,7 @@ type AdminPageInlines struct {
 func NewAdminPageRegistry() *AdminPageRegistry {
 	return &AdminPageRegistry{AdminPages: make(map[string]*AdminPage)}
 }
+
 func NewAdminPage() *AdminPage {
 	return &AdminPage{
 		SubPages: NewAdminPageRegistry(),

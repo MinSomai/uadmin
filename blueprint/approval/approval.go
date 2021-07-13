@@ -16,13 +16,15 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	approvalAdminPage := admin.NewAdminPage()
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
+	approvalAdminPage.BlueprintName = "approval"
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
 	}
 	approvalmodelAdminPage := admin.NewAdminPage()
-	approvalmodelAdminPage.PageName = "Logs"
-	approvalmodelAdminPage.Slug = "log"
+	approvalmodelAdminPage.PageName = "Approval"
+	approvalmodelAdminPage.Slug = "approval"
+	approvalmodelAdminPage.BlueprintName = "approval"
 	err = approvalAdminPage.SubPages.AddAdminPage(approvalmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
