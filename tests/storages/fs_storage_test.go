@@ -26,6 +26,7 @@ func (suite *FsStorageTestSuite) TearDownSuite() {
 	if err != nil {
 		assert.True(suite.T(), false, fmt.Errorf("Couldnt remove directory for file uploading"))
 	}
+	uadmin.ClearTestApp()
 }
 
 func (suite *FsStorageTestSuite) TestFullFlow() {

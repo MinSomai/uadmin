@@ -29,6 +29,7 @@ func (suite *ConcreteTestSuite) TearDownSuite() {
 	if err != nil {
 		assert.Equal(suite.T(), true, false, fmt.Errorf("Couldnt remove db with name %s", suite.app.Config.D.Db.Default.Name))
 	}
+	uadmin.ClearTestApp()
 }
 
 func (suite *ConcreteTestSuite) TestRouterInitialization() {

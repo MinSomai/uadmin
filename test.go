@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
+	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm"
@@ -31,6 +32,12 @@ func (suite *UadminTestSuite) SetupTest() {
 }
 
 func (suite *UadminTestSuite) TearDownSuite() {
+	ClearTestApp()
+}
+
+func ClearTestApp() {
+	appForTests = nil
+	appInstance = nil
 }
 
 func failOnPanic(t *testing.T) {
@@ -204,6 +211,8 @@ func runTests(t testing.TB, tests []testing.InternalTest) {
 
 func NewTestApp() (*App, *gorm.DB) {
 	a := App{}
+	a.DashboardAdminPanel = admin.NewDashboardAdminPanel()
+	admin.CurrentDashboardAdminPanel = a.DashboardAdminPanel
 	a.Config = interfaces.NewConfig("configs/" + "test" + ".yaml")
 	a.CommandRegistry = &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),
@@ -262,7 +271,7 @@ func NewFullAppForTests() (*App, *gorm.DB) {
 		panic(fmt.Errorf("Couldn't initialize db %s", err))
 	}
 	appForTests = a
-	appForTests.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
+	// appForTests.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
 	StoreCurrentApp(a)
 	return a, db
 }
