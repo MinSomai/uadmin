@@ -223,7 +223,6 @@ func NewTestApp() (*App, *gorm.DB) {
 		MaxAge: 12 * time.Hour,
 	}))
 	a.RegisterBaseCommands()
-	// a.InitializeRouter()
 	interfaces.CurrentDatabaseSettings = &interfaces.DatabaseSettings{
 		Default: a.Config.D.Db.Default,
 	}
@@ -263,6 +262,7 @@ func NewFullAppForTests() (*App, *gorm.DB) {
 		panic(fmt.Errorf("Couldn't initialize db %s", err))
 	}
 	appForTests = a
+	appForTests.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
 	StoreCurrentApp(a)
 	return a, db
 }

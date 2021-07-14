@@ -182,6 +182,7 @@ func (a App) InitializeRouter() {
 	// Serve static files
 	a.Router.StaticFS("/static-inbuilt/", fs1)
 	a.BlueprintRegistry.InitializeRouting(a.Router)
+	a.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
 }
 
 func (a App) BaseApiUrl() string {

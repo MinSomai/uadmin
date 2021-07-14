@@ -216,6 +216,13 @@ func (apr *AdminPageRegistry) PreparePagesForTemplate(permRegistry *interfaces.U
 
 type DashboardAdminPanel struct {
 	AdminPages *AdminPageRegistry
+	ListHandler func (ctx *gin.Context)
+}
+
+func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
+	if dap.ListHandler != nil {
+		router.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL, dap.ListHandler)
+	}
 }
 
 var CurrentDashboardAdminPanel *DashboardAdminPanel
@@ -270,6 +277,7 @@ type AdminPage struct {
 	EditHandler func (ctx *gin.Context) `json:"-"`
 	AddHandler func (ctx *gin.Context) `json:"-"`
 	DeleteHandler func (ctx *gin.Context) `json:"-"`
+	Router *gin.RouterGroup `json:"-"`
 }
 
 type ConnectionToParentModel struct {

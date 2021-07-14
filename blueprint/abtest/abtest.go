@@ -17,6 +17,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
 	abTestAdminPage.BlueprintName = "abtest"
+	abTestAdminPage.Router = group
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(abTestAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
@@ -25,6 +26,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abtestmodelAdminPage.PageName = "AB Tests"
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
+	abtestmodelAdminPage.Router = group
 	err = abTestAdminPage.SubPages.AddAdminPage(abtestmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
@@ -33,6 +35,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abtestvaluemodelAdminPage.PageName = "AB Test Values"
 	abtestvaluemodelAdminPage.Slug = "abtestvalue"
 	abtestvaluemodelAdminPage.BlueprintName = "abtest"
+	abtestvaluemodelAdminPage.Router = group
 	err = abTestAdminPage.SubPages.AddAdminPage(abtestvaluemodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))

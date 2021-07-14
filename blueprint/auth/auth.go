@@ -27,7 +27,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		adapterGroup.POST("/logout/", adapter.Logout)
 		adapterGroup.GET("/status/", adapter.IsAuthenticated)
 	}
-	mainRouter.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL, func(ctx *gin.Context) {
+	admin.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
@@ -60,7 +60,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			tr := interfaces.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
 		}
-	})
+	}
 	mainRouter.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
 		type Context struct {
 			templatecontext.AdminContext
