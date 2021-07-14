@@ -58,6 +58,9 @@ func (u *User) Save() {
 func (u *User) BuildPermissionRegistry() *interfaces.UserPermRegistry {
 	userPermRegistry := interfaces.NewUserPermRegistry()
 	userPermRegistry.IsSuperUser = u.IsSuperUser
+	if u.IsSuperUser {
+		return userPermRegistry
+	}
 	db := interfaces.GetDB()
 	var permissions []Permission
 	var userGroups []UserGroup
