@@ -13,7 +13,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	logAdminPage := admin.NewAdminPage()
+	logAdminPage := admin.NewAdminPage("")
 	logAdminPage.PageName = "Logs"
 	logAdminPage.Slug = "log"
 	logAdminPage.BlueprintName = "logging"
@@ -21,7 +21,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing log blueprint: %s", err))
 	}
-	logmodelAdminPage := admin.NewAdminPage()
+	logmodelAdminPage := admin.NewAdminPage("log")
 	logmodelAdminPage.PageName = "Logs"
 	logmodelAdminPage.Slug = "log"
 	logmodelAdminPage.BlueprintName = "logging"

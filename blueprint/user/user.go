@@ -244,7 +244,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		tr := interfaces.NewTemplateRenderer("Page not found")
 		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, template2.FuncMap)
 	})
-	usersAdminPage := admin.NewAdminPage()
+	usersAdminPage := admin.NewAdminPage("")
 	usersAdminPage.PageName = "Users"
 	usersAdminPage.Slug = "users"
 	usersAdminPage.BlueprintName = "user"
@@ -252,7 +252,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usermodelAdminPage := admin.NewAdminPage()
+	usermodelAdminPage := admin.NewAdminPage("user")
 	usermodelAdminPage.PageName = "Users"
 	usermodelAdminPage.Slug = "user"
 	usermodelAdminPage.BlueprintName = "user"
@@ -260,7 +260,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usergroupsAdminPage := admin.NewAdminPage()
+	usergroupsAdminPage := admin.NewAdminPage("usergroup")
 	usergroupsAdminPage.PageName = "User groups"
 	usergroupsAdminPage.Slug = "usergroup"
 	usergroupsAdminPage.BlueprintName = "user"

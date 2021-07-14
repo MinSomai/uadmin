@@ -192,10 +192,18 @@ func (apr *AdminPageRegistry) PreparePagesForTemplate(permRegistry *interfaces.U
 
 	for page := range apr.GetAll() {
 		blueprintName := page.BlueprintName
-		modelName := page.PageName
-		userPerm := permRegistry.GetPermissionForBlueprint(blueprintName, modelName)
-		if !userPerm.HasReadPermission() {
-			continue
+		modelName := page.ModelName
+		var userPerm *interfaces.UserPerm
+		if modelName != "" {
+			userPerm = permRegistry.GetPermissionForBlueprint(blueprintName, modelName)
+			if !userPerm.HasReadPermission() {
+				continue
+			}
+		} else {
+			existsAnyPermission := permRegistry.IsThereAnyPermissionForBlueprint(blueprintName)
+			if !existsAnyPermission {
+				continue
+			}
 		}
 		pages = append(pages, page)
 	}
@@ -254,6 +262,7 @@ type AdminPage struct {
 	SubPages *AdminPageRegistry `json:"-"`
 	Ordering int
 	PageName string
+	ModelName string
 	Slug string
 	ToolTip string
 	Icon string
@@ -293,9 +302,10 @@ func NewAdminPageRegistry() *AdminPageRegistry {
 	return &AdminPageRegistry{AdminPages: make(map[string]*AdminPage)}
 }
 
-func NewAdminPage() *AdminPage {
+func NewAdminPage(modelName string) *AdminPage {
 	return &AdminPage{
 		SubPages: NewAdminPageRegistry(),
+		ModelName: modelName,
 		Validators: make([]interfaces.IValidator, 0),
 		ExcludeFields: interfaces.NewFieldRegistry(),
 		FieldsToShow: interfaces.NewFieldRegistry(),

@@ -13,7 +13,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	settingsAdminPage := admin.NewAdminPage()
+	settingsAdminPage := admin.NewAdminPage("")
 	settingsAdminPage.PageName = "Settings"
 	settingsAdminPage.Slug = "setting"
 	settingsAdminPage.BlueprintName = "setting"
@@ -21,7 +21,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
-	settingmodelAdminPage := admin.NewAdminPage()
+	settingmodelAdminPage := admin.NewAdminPage("setting")
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
 	settingmodelAdminPage.BlueprintName = "setting"
@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
-	settingcategoriesmodelAdminPage := admin.NewAdminPage()
+	settingcategoriesmodelAdminPage := admin.NewAdminPage("settingcategory")
 	settingcategoriesmodelAdminPage.PageName = "Setting categories"
 	settingcategoriesmodelAdminPage.Slug = "settingcategory"
 	settingcategoriesmodelAdminPage.BlueprintName = "setting"

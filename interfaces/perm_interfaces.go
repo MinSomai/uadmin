@@ -1,6 +1,9 @@
 package interfaces
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type IPermissionRegistry interface {
 	AddPermission(permission CustomPermission, permissionBit PermBitInteger)
@@ -37,6 +40,18 @@ func (upr *UserPermRegistry) GetPermissionForBlueprint(blueprintName string, mod
 		return userPerm
 	}
 	return userPerm
+}
+
+func (upr *UserPermRegistry) IsThereAnyPermissionForBlueprint(blueprintName string) bool {
+	if upr.IsSuperUser {
+		return true
+	}
+	for userPermIdentifier, _ := range upr.BlueprintPerm {
+		if strings.HasSuffix(userPermIdentifier, fmt.Sprintf("b.%s.", blueprintName)) {
+			return true
+		}
+	}
+	return false
 }
 
 type PermRegistry struct {

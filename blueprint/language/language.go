@@ -13,7 +13,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	languageAdminPage := admin.NewAdminPage()
+	languageAdminPage := admin.NewAdminPage("")
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
 	languageAdminPage.BlueprintName = "language"
@@ -21,7 +21,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))
 	}
-	languagemodelAdminPage := admin.NewAdminPage()
+	languagemodelAdminPage := admin.NewAdminPage("language")
 	languagemodelAdminPage.PageName = "Languages"
 	languagemodelAdminPage.Slug = "language"
 	languagemodelAdminPage.BlueprintName = "language"

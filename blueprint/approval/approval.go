@@ -13,7 +13,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	approvalAdminPage := admin.NewAdminPage()
+	approvalAdminPage := admin.NewAdminPage("")
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
 	approvalAdminPage.BlueprintName = "approval"
@@ -21,7 +21,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
 	}
-	approvalmodelAdminPage := admin.NewAdminPage()
+	approvalmodelAdminPage := admin.NewAdminPage("approval")
 	approvalmodelAdminPage.PageName = "Approval"
 	approvalmodelAdminPage.Slug = "approval"
 	approvalmodelAdminPage.BlueprintName = "approval"

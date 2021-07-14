@@ -13,7 +13,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	abTestAdminPage := admin.NewAdminPage()
+	abTestAdminPage := admin.NewAdminPage("")
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
 	abTestAdminPage.BlueprintName = "abtest"
@@ -21,7 +21,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
 	}
-	abtestmodelAdminPage := admin.NewAdminPage()
+	abtestmodelAdminPage := admin.NewAdminPage("abtest")
 	abtestmodelAdminPage.PageName = "AB Tests"
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
 	}
-	abtestvaluemodelAdminPage := admin.NewAdminPage()
+	abtestvaluemodelAdminPage := admin.NewAdminPage("abtestvalue")
 	abtestvaluemodelAdminPage.PageName = "AB Test Values"
 	abtestvaluemodelAdminPage.Slug = "abtestvalue"
 	abtestvaluemodelAdminPage.BlueprintName = "abtest"
