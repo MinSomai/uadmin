@@ -55,7 +55,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			cookie, _ := ctx.Cookie(cookieName)
 
 			sessionAdapter.GetByKey(cookie)
-			menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate())
+			menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
 			c.Menu = menu
 			tr := interfaces.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)

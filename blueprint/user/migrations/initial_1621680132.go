@@ -31,7 +31,7 @@ func (m initial_1621680132) Up() {
     if err != nil {
         panic(err)
     }
-    err = db.AutoMigrate(models2.UserPermission{})
+    err = db.AutoMigrate(models2.Permission{})
     if err != nil {
         panic(err)
     }
@@ -51,7 +51,7 @@ func (m initial_1621680132) Up() {
 
 func (m initial_1621680132) Down() {
     db := interfaces.GetDB()
-    err := db.Migrator().DropTable(models2.UserPermission{})
+    err := db.Migrator().DropTable(models2.Permission{})
     if err != nil {
         panic(err)
     }

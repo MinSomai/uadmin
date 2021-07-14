@@ -27,6 +27,7 @@ type IAdminContext interface {
 	SetErrorExists()
 	GetLanguage() *langmodel.Language
 	GetRootURL() string
+	SetUserPermissionRegistry(permRegistry *interfaces.UserPermRegistry)
 }
 
 type AdminRequestParams struct {
@@ -61,6 +62,7 @@ type AdminContext struct {
 	User string
 	UserExists bool
 	Demo bool
+	UserPermissionRegistry *interfaces.UserPermRegistry
 }
 
 func (c *AdminContext) SetSiteName(siteName string) {
@@ -101,6 +103,10 @@ func (c *AdminContext) GetLanguage() *langmodel.Language {
 
 func (c *AdminContext) SetLanguages(langs []langmodel.Language) {
 	c.Languages = langs
+}
+
+func (c *AdminContext) SetUserPermissionRegistry(permRegistry *interfaces.UserPermRegistry) {
+	c.UserPermissionRegistry = permRegistry
 }
 
 func (c *AdminContext) SetPageTitle(pageTitle string) {
@@ -168,18 +174,11 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	}
 	// context.SetDemo()
 	if session != nil {
-		context.SetUser(session.GetUser().Username)
-		context.SetUserExists(session.GetUser().ID != 0)
+		user := session.GetUser()
+		context.SetUser(user.Username)
+		context.SetUserExists(user.ID != 0)
+		if user.ID != 0 {
+			context.SetUserPermissionRegistry(user.BuildPermissionRegistry())
+		}
 	}
-}
-
-func CreateContextForTests() *AdminContext {
-	context := &AdminContext{}
-	context.SetSiteName(interfaces.CurrentConfig.D.Uadmin.SiteName)
-	context.SetRootAdminURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
-	context.SetRootURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
-	context.SetLanguage(utils.GetDefaultLanguage())
-	context.SetLogo(interfaces.CurrentConfig.D.Uadmin.Logo)
-	context.SetFavIcon(interfaces.CurrentConfig.D.Uadmin.FavIcon)
-	return context
 }

@@ -29,11 +29,11 @@ type AdminModelAction struct {
 	Description string
 	ShowFutureChanges bool
 	RedirectToRootModelPage bool
-	Permissions *interfaces.Perm
+	Permissions *interfaces.UserPerm
 	Placement *AdminActionPlacement
 }
 
-func NewAdminModelAction(actionName string, httpMethod string, perm *interfaces.Perm, placement *AdminActionPlacement) *AdminModelAction {
+func NewAdminModelAction(actionName string, httpMethod string, perm *interfaces.UserPerm, placement *AdminActionPlacement) *AdminModelAction {
 	return &AdminModelAction{
 		RedirectToRootModelPage: true,
 		ActionName: actionName,
@@ -187,10 +187,16 @@ func (apr *AdminPageRegistry) GetAll() <- chan *AdminPage{
 	return chnl
 }
 
-func (apr *AdminPageRegistry) PreparePagesForTemplate() []byte {
+func (apr *AdminPageRegistry) PreparePagesForTemplate(permRegistry *interfaces.UserPermRegistry) []byte {
 	pages := make([]*AdminPage, 0)
 
 	for page := range apr.GetAll() {
+		blueprintName := page.BlueprintName
+		modelName := page.PageName
+		userPerm := permRegistry.GetPermissionForBlueprint(blueprintName, modelName)
+		if !userPerm.HasReadPermission() {
+			continue
+		}
 		pages = append(pages, page)
 	}
 	ret, err := json.Marshal(pages)
@@ -280,7 +286,7 @@ type AdminPageInlines struct {
 	ShowChangeLink bool
 	ConnectionToParentModel ConnectionToParentModel
 	Template string
-	Permissions *interfaces.Perm
+	Permissions *interfaces.UserPerm
 }
 
 func NewAdminPageRegistry() *AdminPageRegistry {

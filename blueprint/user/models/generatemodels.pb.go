@@ -36,7 +36,8 @@ type User struct {
 	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" gorm:"uniqueIndex" json:"Email,omitempty"`
 	Active               bool       `protobuf:"varint,6,opt,name=Active,proto3" json:"Active,omitempty"`
 	RemoteAccess         bool       `protobuf:"varint,8,opt,name=RemoteAccess,proto3" json:"RemoteAccess,omitempty"`
-	UserGroups           []UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_groups;"`
+	UserGroups           []UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_groups;foreignKey:ID;"`
+	Permissions           []Permission  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_permissions;foreignKey:ID;"`
 	Photo                string     `protobuf:"bytes,11,opt,name=Photo,proto3" json:"Photo,omitempty" uadminform:"UserPhotoOptions"`
 	LastLogin            *time.Time `protobuf:"bytes,12,opt,name=LastLogin,proto3" json:"LastLogin,omitempty" uadminform:"LastLoginOptions"`
 	ExpiresOn            *time.Time `protobuf:"bytes,13,opt,name=ExpiresOn,proto3" json:"ExpiresOn,omitempty" uadminform:"ExpiresOnOptions"`

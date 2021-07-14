@@ -1,8 +1,8 @@
 package models
 
 import (
-	"fmt"
 	"github.com/uadmin/uadmin/interfaces"
+	"gorm.io/gorm/clause"
 	"time"
 
 	// "time"
@@ -53,6 +53,34 @@ func (u *User) Save() {
 	//}
 	// u.Username = strings.ToLower(u.Username)
 	// database.Save(u)
+}
+
+func (u *User) BuildPermissionRegistry() *interfaces.UserPermRegistry {
+	userPermRegistry := interfaces.NewUserPermRegistry()
+	userPermRegistry.IsSuperUser = u.IsSuperUser
+	db := interfaces.GetDB()
+	var permissions []Permission
+	var userGroups []UserGroup
+	db.Preload(clause.Associations).Model(u).Association("UserGroups").Find(&userGroups)
+	for _, group := range userGroups {
+		db.Preload(clause.Associations).Model(&group).Association("Permissions").Find(&permissions)
+		for _, permission := range permissions {
+			blueprintName := permission.ContentType.BlueprintName
+			modelName := permission.ContentType.ModelName
+			permBits := permission.PermissionBits
+			blueprintPerms := userPermRegistry.GetPermissionForBlueprint(blueprintName, modelName)
+			blueprintPerms.AddPermission(permBits)
+		}
+	}
+	db.Preload(clause.Associations).Model(u).Association("Permissions").Find(&permissions)
+	for _, permission := range permissions {
+		blueprintName := permission.ContentType.BlueprintName
+		modelName := permission.ContentType.ModelName
+		permBits := permission.PermissionBits
+		blueprintPerms := userPermRegistry.GetPermissionForBlueprint(blueprintName, modelName)
+		blueprintPerms.AddPermission(permBits)
+	}
+	return userPermRegistry
 }
 
 // @todo, redo
@@ -108,15 +136,15 @@ func (u *User) Save() {
 
 // HasAccess returns the user level permission to a model. The modelName
 // the the URL of the model
-func (u *User) HasAccess(modelName string) UserPermission {
+func (u *User) HasAccess(modelName string) Permission {
 	interfaces.Trail(interfaces.WARNING, "User.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
 	return u.hasAccess(modelName)
 }
 
 // hasAccess returns the user level permission to a model. The modelName
 // the the URL of the model
-func (u *User) hasAccess(modelName string) UserPermission {
-	up := UserPermission{}
+func (u *User) hasAccess(modelName string) Permission {
+	up := Permission{}
 	//dm := menumodel.DashboardMenu{}
 	//if preloaded.CachePermissions {
 	//	modelID := uint(0)
@@ -141,14 +169,14 @@ func (u *User) hasAccess(modelName string) UserPermission {
 
 // GetAccess returns the user's permission to a dashboard menu based on
 // their admin status, group and user permissions
-func (u *User) GetAccess(modelName string) UserPermission {
+func (u *User) GetAccess(modelName string) Permission {
 	// Check if the user has permission to a model
 	//if u.UserGroup.ID != u.UserGroupID {
 	//	database.Preload(u)
 	//}
 	//uPerm := u.hasAccess(modelName)
 	//gPerm := u.UserGroup.hasAccess(modelName)
-	perm := UserPermission{}
+	perm := Permission{}
 
 	//if gPerm.ID != 0 {
 	//	perm.Read = gPerm.Read
@@ -202,11 +230,15 @@ func (u *User) VerifyOTP(pass string) bool {
 type UserGroup struct {
 	interfaces.Model
 	GroupName string `uadmin:"filter"`
-	Permissions []UserPermission `gorm:"foreignKey:ID"`
+	Permissions []Permission `gorm:"foreignKey:ID;many2many:usergroup_permissions;"`
 }
 
 func (u UserGroup) String() string {
 	return u.GroupName
+}
+
+func (u *UserGroup) TableName() string {
+	return "user_group"
 }
 
 // Save !
@@ -215,14 +247,14 @@ func (u *UserGroup) Save() {
 }
 
 // HasAccess !
-func (u *UserGroup) HasAccess(modelName string) UserPermission {
+func (u *UserGroup) HasAccess(modelName string) Permission {
 	// utils.Trail(utils.WARNING, "UserGroup.HasAccess will be deprecated in version 0.6.0. Use User.GetAccess instead.")
 	return u.hasAccess(modelName)
 }
 
 // hasAccess !
-func (u *UserGroup) hasAccess(modelName string) UserPermission {
-	up := UserPermission{}
+func (u *UserGroup) hasAccess(modelName string) Permission {
+	up := Permission{}
 	//dm := menumodel.DashboardMenu{}
 	//if preloaded.CachePermissions {
 	//	modelID := uint(0)
@@ -245,17 +277,15 @@ func (u *UserGroup) hasAccess(modelName string) UserPermission {
 	return up
 }
 
-var cacheUserPerms []UserPermission
+var cacheUserPerms []Permission
 
 // UserPermission !
-type UserPermission struct {
+type Permission struct {
 	interfaces.Model
 	Name string
 	ContentType interfaces.ContentType
-	ContentTypeID uint `sql:"unique_index:idx_permission_user_content_type"`
-	User            User          `uadmin:"filter"`
-	UserID          uint          `sql:"unique_index:idx_permission_user_content_type"`
-	PermissionBits uint
+	ContentTypeID uint
+	PermissionBits interfaces.PermBitInteger
 	//Read            bool          `uadmin:"filter"`
 	//Add             bool          `uadmin:"filter"`
 	//Edit            bool          `uadmin:"filter"`
@@ -263,17 +293,13 @@ type UserPermission struct {
 	//Approval        bool          `uadmin:"filter"`
 }
 
-func (u UserPermission) String() string {
-	return fmt.Sprint(u.ID)
-}
-
 // HideInDashboard to return false and auto hide this from dashboard
-func (UserPermission) HideInDashboard() bool {
+func (Permission) HideInDashboard() bool {
 	return true
 }
 
 func LoadPermissions() {
-	cacheUserPerms = []UserPermission{}
+	cacheUserPerms = []Permission{}
 	//database.All(&cacheUserPerms)
 	//database.All(&cacheGroupPerms)
 	//database.All(&cachedModels)

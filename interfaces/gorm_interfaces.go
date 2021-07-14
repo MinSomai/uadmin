@@ -10,7 +10,7 @@ type Model struct {
 
 type ContentType struct {
 	Model
-	BlueprintName string
-	ModelName string
+	BlueprintName string `sql:"unique_index:idx_contenttype_content_type"`
+	ModelName string `sql:"unique_index:idx_contenttype_content_type"`
 }
 

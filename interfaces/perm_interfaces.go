@@ -1,55 +1,133 @@
 package interfaces
 
-type PermissionRegistry interface {
-	DoesUserHaveRightFor(permissionName string) bool
-	AddCustomPermission(permission CustomPermission)
+import "fmt"
+
+type IPermissionRegistry interface {
+	AddPermission(permission CustomPermission, permissionBit PermBitInteger)
+	GetPermissionBit(permission CustomPermission) PermBitInteger
 }
+
+type IUserPermissionRegistry interface {
+	DoesUserHaveRightFor(permissionName string) bool
+}
+
 type CustomPermission string
 
-type Perm struct {
-	PermissionRegistry
-	PermBitInteger PermBitInteger
-	CustomPermissions []CustomPermission
+type UserPermRegistry struct {
+	BlueprintPerm map[string]*UserPerm
+	IsSuperUser bool
 }
 
-func (ap *Perm) HasReadPermission() bool {
+func getPermissionAliasForBlueprintAndModel(blueprintName string, modelName string) string {
+	return fmt.Sprintf("b.%s.m.%s", blueprintName, modelName)
+}
+
+func (upr *UserPermRegistry) AddPermissionForBlueprint(blueprintName string, modelName string, userPerm *UserPerm) {
+	blueprintModelAlias := getPermissionAliasForBlueprintAndModel(blueprintName, modelName)
+	upr.BlueprintPerm[blueprintModelAlias] = userPerm
+}
+
+func (upr *UserPermRegistry) GetPermissionForBlueprint(blueprintName string, modelName string) *UserPerm {
+	blueprintModelAlias := getPermissionAliasForBlueprintAndModel(blueprintName, modelName)
+	userPerm, isExists := upr.BlueprintPerm[blueprintModelAlias]
+	if !isExists {
+		userPerm := NewUserPerm(0)
+		userPerm.IsSuperUser = upr.IsSuperUser
+		upr.AddPermissionForBlueprint(blueprintName, modelName, userPerm)
+		return userPerm
+	}
+	return userPerm
+}
+
+type PermRegistry struct {
+	IPermissionRegistry
+	PermNameBitInteger map[CustomPermission]PermBitInteger
+}
+
+func (ap *PermRegistry) AddPermission(permission CustomPermission, permissionBit PermBitInteger){
+	_, isRegistered := ap.PermNameBitInteger[permission]
+	if isRegistered {
+		Trail(WARNING, "you are overriding permission with name %s", permission)
+	}
+	ap.PermNameBitInteger[permission] = permissionBit
+}
+
+func (ap *PermRegistry) GetPermissionBit(permission CustomPermission) PermBitInteger {
+	permissionBit, isRegistered := ap.PermNameBitInteger[permission]
+	if !isRegistered {
+		Trail(CRITICAL, "no permission registered with name %s", permission)
+		panic(fmt.Errorf("no permission registered with name %s", permission))
+	}
+	return permissionBit
+}
+
+type UserPerm struct {
+	IUserPermissionRegistry
+	PermBitInteger PermBitInteger
+	IsSuperUser bool
+}
+
+func (ap *UserPerm) DoesUserHaveRightFor(permissionName CustomPermission) bool {
+	if ap.IsSuperUser {
+		return true
+	}
+	permissionBit := ProjectPermRegistry.GetPermissionBit(permissionName)
+	return (ap.PermBitInteger & permissionBit) == permissionBit
+}
+
+func (ap *UserPerm) AddPermission(permBitInteger PermBitInteger) {
+	ap.PermBitInteger = ap.PermBitInteger | permBitInteger
+}
+
+func (ap *UserPerm) HasReadPermission() bool {
+	if ap.IsSuperUser {
+		return true
+	}
 	return (ap.PermBitInteger & ReadPermBit) == ReadPermBit
 }
 
-func (ap *Perm) DoesUserHaveRightFor(permissionName CustomPermission) bool {
-	for _, a := range ap.CustomPermissions {
-		if a == permissionName {
-			return true
-		}
+func (ap *UserPerm) HasAddPermission() bool {
+	if ap.IsSuperUser {
+		return true
 	}
-	return false
-}
-
-func (ap *Perm) AddCustomPermission(permission CustomPermission){
-	ap.CustomPermissions = append(ap.CustomPermissions, permission)
-}
-
-func (ap *Perm) HasAddPermission() bool {
 	return (ap.PermBitInteger & AddPermBit) == AddPermBit
 }
 
-func (ap *Perm) HasEditPermission() bool {
+func (ap *UserPerm) HasEditPermission() bool {
+	if ap.IsSuperUser {
+		return true
+	}
 	return (ap.PermBitInteger & EditPermBit) == EditPermBit
 }
 
-func (ap *Perm) HasDeletePermission() bool {
+func (ap *UserPerm) HasDeletePermission() bool {
+	if ap.IsSuperUser {
+		return true
+	}
 	return (ap.PermBitInteger & DeletePermBit) == DeletePermBit
 }
 
-func (ap *Perm) HasPublishPermission() bool {
+func (ap *UserPerm) HasPublishPermission() bool {
+	if ap.IsSuperUser {
+		return true
+	}
 	return (ap.PermBitInteger & PublishPermBit) == PublishPermBit
 }
 
-func (ap *Perm) HasRevertPermission() bool {
+func (ap *UserPerm) HasRevertPermission() bool {
+	if ap.IsSuperUser {
+		return true
+	}
 	return (ap.PermBitInteger & RevertPermBit) == RevertPermBit
 }
 
-type PermBitInteger int
+func NewPerm() *PermRegistry {
+	return &PermRegistry{
+		PermNameBitInteger: make(map[CustomPermission]PermBitInteger),
+	}
+}
+
+type PermBitInteger uint
 
 const ReadPermBit PermBitInteger = 0
 const AddPermBit PermBitInteger = 2
@@ -58,11 +136,22 @@ const DeletePermBit PermBitInteger = 8
 const PublishPermBit PermBitInteger = 16
 const RevertPermBit PermBitInteger = 32
 
-func NewPerm(permBitInteger PermBitInteger, customPermissions ...CustomPermission) *Perm {
-	return &Perm{
-		PermBitInteger: permBitInteger,
-		CustomPermissions: customPermissions,
-	}
+var ProjectPermRegistry *PermRegistry
+
+func init() {
+	ProjectPermRegistry = NewPerm()
+	ProjectPermRegistry.AddPermission("read", ReadPermBit)
+	ProjectPermRegistry.AddPermission("add", AddPermBit)
+	ProjectPermRegistry.AddPermission("edit", EditPermBit)
+	ProjectPermRegistry.AddPermission("delete", DeletePermBit)
+	ProjectPermRegistry.AddPermission("publish", PublishPermBit)
+	ProjectPermRegistry.AddPermission("revert", RevertPermBit)
 }
 
+func NewUserPerm(permBitInteger PermBitInteger) *UserPerm {
+	return &UserPerm{PermBitInteger: permBitInteger}
+}
 
+func NewUserPermRegistry() *UserPermRegistry {
+	return &UserPermRegistry{BlueprintPerm: make(map[string]*UserPerm)}
+}

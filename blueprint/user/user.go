@@ -268,14 +268,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	userpermissionsAdminPage := admin.NewAdminPage()
-	userpermissionsAdminPage.PageName = "User Permissions"
-	userpermissionsAdminPage.Slug = "userpermission"
-	userpermissionsAdminPage.BlueprintName = "user"
-	err = usersAdminPage.SubPages.AddAdminPage(userpermissionsAdminPage)
-	if err != nil {
-		panic(fmt.Errorf("error initializing user blueprint: %s", err))
-	}
 }
 
 type UsernameFormOptions struct {
