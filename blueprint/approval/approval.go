@@ -17,7 +17,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
 	approvalAdminPage.BlueprintName = "approval"
-	approvalAdminPage.Router = group
+	approvalAdminPage.Router = mainRouter
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
@@ -26,7 +26,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	approvalmodelAdminPage.PageName = "Approval"
 	approvalmodelAdminPage.Slug = "approval"
 	approvalmodelAdminPage.BlueprintName = "approval"
-	approvalmodelAdminPage.Router = group
+	approvalmodelAdminPage.Router = mainRouter
 	err = approvalAdminPage.SubPages.AddAdminPage(approvalmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))

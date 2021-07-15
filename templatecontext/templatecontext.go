@@ -182,3 +182,8 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 		}
 	}
 }
+
+//
+//func BuildAdminHandlerForBlueprintfunc(PageTitle string) func (ctx *gin.Context) {
+//
+//}

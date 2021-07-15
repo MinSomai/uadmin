@@ -240,10 +240,6 @@ func (u UserGroup) String() string {
 	return u.GroupName
 }
 
-func (u *UserGroup) TableName() string {
-	return "user_group"
-}
-
 // Save !
 func (u *UserGroup) Save() {
 	// database.Save(u)

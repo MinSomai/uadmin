@@ -17,7 +17,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	logAdminPage.PageName = "Logs"
 	logAdminPage.Slug = "log"
 	logAdminPage.BlueprintName = "logging"
-	logAdminPage.Router = group
+	logAdminPage.Router = mainRouter
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(logAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing log blueprint: %s", err))
@@ -26,7 +26,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	logmodelAdminPage.PageName = "Logs"
 	logmodelAdminPage.Slug = "log"
 	logmodelAdminPage.BlueprintName = "logging"
-	logmodelAdminPage.Router = group
+	logmodelAdminPage.Router = mainRouter
 	err = logAdminPage.SubPages.AddAdminPage(logmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing log blueprint: %s", err))

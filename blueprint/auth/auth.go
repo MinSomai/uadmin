@@ -49,12 +49,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 			c := &Context{}
 			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
-			sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
-			var cookieName string
-			cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
-			cookie, _ := ctx.Cookie(cookieName)
-
-			sessionAdapter.GetByKey(cookie)
 			menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
 			c.Menu = menu
 			tr := interfaces.NewTemplateRenderer("Dashboard")

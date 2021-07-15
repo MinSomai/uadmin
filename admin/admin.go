@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/form"
 	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/template"
+	"github.com/uadmin/uadmin/templatecontext"
 	"sort"
 )
 
@@ -223,6 +225,23 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 	if dap.ListHandler != nil {
 		router.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL, dap.ListHandler)
 	}
+	for adminPage := range dap.AdminPages.GetAll() {
+		router.GET(fmt.Sprintf("%s/%s", interfaces.CurrentConfig.D.Uadmin.RootAdminURL, adminPage.BlueprintName), func(pageTitle string, adminPageRegistry *AdminPageRegistry) func (ctx *gin.Context) {
+			return func(ctx *gin.Context) {
+				type Context struct {
+					templatecontext.AdminContext
+					Menu string
+				}
+
+				c := &Context{}
+				templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
+				menu := string(adminPageRegistry.PreparePagesForTemplate(c.UserPermissionRegistry))
+				c.Menu = menu
+				tr := interfaces.NewTemplateRenderer(pageTitle)
+				tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
+			}
+		}(adminPage.PageName, adminPage.SubPages))
+	}
 }
 
 var CurrentDashboardAdminPanel *DashboardAdminPanel
@@ -277,7 +296,7 @@ type AdminPage struct {
 	EditHandler func (ctx *gin.Context) `json:"-"`
 	AddHandler func (ctx *gin.Context) `json:"-"`
 	DeleteHandler func (ctx *gin.Context) `json:"-"`
-	Router *gin.RouterGroup `json:"-"`
+	Router *gin.Engine `json:"-"`
 }
 
 type ConnectionToParentModel struct {

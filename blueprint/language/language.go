@@ -17,7 +17,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
 	languageAdminPage.BlueprintName = "language"
-	languageAdminPage.Router = group
+	languageAdminPage.Router = mainRouter
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(languageAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))
@@ -26,7 +26,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	languagemodelAdminPage.PageName = "Languages"
 	languagemodelAdminPage.Slug = "language"
 	languagemodelAdminPage.BlueprintName = "language"
-	languagemodelAdminPage.Router = group
+	languagemodelAdminPage.Router = mainRouter
 	err = languageAdminPage.SubPages.AddAdminPage(languagemodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))

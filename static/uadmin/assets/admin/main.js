@@ -85,7 +85,7 @@ function setHomeTabs(me, container, extclass){
     //   }
     // }
     content += '<div id="model-' + lowercase_name.replace(" ", "-") + '" class="'+extclass+'">';
-    content += '  <a class="no-style" href="'+url+'">';
+    content += '  <a class="no-style" href="'+RootURL + "/" + url +'">';
     content += '  <center>';
     content += '    <div class="pop_itemHV defaultmargin container-fluid hvr-grow col-md-12" style="width:100%;" >';
     content += withribbon;

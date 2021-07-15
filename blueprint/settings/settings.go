@@ -17,7 +17,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingsAdminPage.PageName = "Settings"
 	settingsAdminPage.Slug = "setting"
 	settingsAdminPage.BlueprintName = "setting"
-	settingsAdminPage.Router = group
+	settingsAdminPage.Router = mainRouter
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(settingsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
@@ -26,7 +26,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
 	settingmodelAdminPage.BlueprintName = "setting"
-	settingmodelAdminPage.Router = group
+	settingmodelAdminPage.Router = mainRouter
 	err = settingsAdminPage.SubPages.AddAdminPage(settingmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
@@ -35,7 +35,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingcategoriesmodelAdminPage.PageName = "Setting categories"
 	settingcategoriesmodelAdminPage.Slug = "settingcategory"
 	settingcategoriesmodelAdminPage.BlueprintName = "setting"
-	settingcategoriesmodelAdminPage.Router = group
+	settingcategoriesmodelAdminPage.Router = mainRouter
 	err = settingsAdminPage.SubPages.AddAdminPage(settingcategoriesmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))

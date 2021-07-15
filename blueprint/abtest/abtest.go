@@ -17,7 +17,22 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
 	abTestAdminPage.BlueprintName = "abtest"
-	abTestAdminPage.Router = group
+	abTestAdminPage.Router = mainRouter
+	// abTestAdminPage.ListHandler = templatecontext.BuildAdminHandlerForBlueprintfunc(abTestAdminPage.PageName)
+	//func (ctx *gin.Context) {
+	//	type Context struct {
+	//		templatecontext.AdminContext
+	//		Menu     string
+	//	}
+	//
+	//	c := &Context{}
+	//	templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
+	//	menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
+	//	c.Menu = menu
+	//	tr := interfaces.NewTemplateRenderer("AB Tests")
+	//	tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
+	//}
+
 	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(abTestAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
@@ -26,7 +41,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abtestmodelAdminPage.PageName = "AB Tests"
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
-	abtestmodelAdminPage.Router = group
+	abtestmodelAdminPage.Router = mainRouter
 	err = abTestAdminPage.SubPages.AddAdminPage(abtestmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
@@ -35,7 +50,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abtestvaluemodelAdminPage.PageName = "AB Test Values"
 	abtestvaluemodelAdminPage.Slug = "abtestvalue"
 	abtestvaluemodelAdminPage.BlueprintName = "abtest"
-	abtestvaluemodelAdminPage.Router = group
+	abtestvaluemodelAdminPage.Router = mainRouter
 	err = abTestAdminPage.SubPages.AddAdminPage(abtestvaluemodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
