@@ -293,47 +293,6 @@ type ExpiresOnOptions struct {
 	form.FieldFormOptions
 }
 
-func UsernameUniqueValidator(i interface{}, o interface{}) error {
-	db := interfaces.GetDB()
-	var cUsers int64
-	db.Model(&models.User{}).Where(&models.User{Username: i.(string)}).Count(&cUsers)
-	if cUsers == 0 {
-		return nil
-	}
-	return fmt.Errorf("user with name %s is already registered", i.(string))
-}
-
-func EmailUniqueValidator(i interface{}, o interface{}) error {
-	db := interfaces.GetDB()
-	var cUsers int64
-	db.Model(&models.User{}).Where(&models.User{Email: i.(string)}).Count(&cUsers)
-	if cUsers == 0 {
-		return nil
-	}
-	return fmt.Errorf("user with email %s is already registered", i.(string))
-}
-
-func UsernameUadminValidator(i interface{}, o interface{}) error {
-	minLength := interfaces.CurrentConfig.D.Auth.MinUsernameLength
-	maxLength := interfaces.CurrentConfig.D.Auth.MaxUsernameLength
-	currentUsername := i.(string)
-	if maxLength < len(currentUsername) || len(currentUsername) < minLength {
-		return fmt.Errorf("length of the username has to be between %d and %d symbols", minLength, maxLength)
-	}
-	return nil
-}
-
-func PasswordUadminValidator(i interface{}, o interface{}) error {
-	passwordStruct := o.(PasswordValidationStruct)
-	if passwordStruct.Password != passwordStruct.ConfirmedPassword {
-		return fmt.Errorf("password doesn't equal to confirmed password")
-	}
-	if len(passwordStruct.Password) < interfaces.CurrentConfig.D.Auth.MinPasswordLength {
-		return fmt.Errorf("length of the password has to be at least %d symbols", interfaces.CurrentConfig.D.Auth.MinPasswordLength)
-	}
-	return nil
-}
-
 func (b Blueprint) Init() {
 	fieldChoiceRegistry := interfaces.FieldChoiceRegistry{}
 	fieldChoiceRegistry.Choices = make([]*interfaces.FieldChoice, 0)
@@ -376,20 +335,66 @@ func (b Blueprint) Init() {
 		},
 	}
 	interfaces.CurrentConfig.AddFieldFormOptions(expiresOnOptions)
+
+	interfaces.UadminValidatorRegistry.AddValidator("username-unique", func (i interface{}, o interface{}) error {
+		db := interfaces.GetDB()
+		var cUsers int64
+		db.Model(&models.User{}).Where(&models.User{Username: i.(string)}).Count(&cUsers)
+		if cUsers == 0 {
+			return nil
+		}
+		return fmt.Errorf("user with name %s is already registered", i.(string))
+	})
+
+	interfaces.UadminValidatorRegistry.AddValidator("email-unique", func (i interface{}, o interface{}) error {
+		db := interfaces.GetDB()
+		var cUsers int64
+		db.Model(&models.User{}).Where(&models.User{Email: i.(string)}).Count(&cUsers)
+		if cUsers == 0 {
+			return nil
+		}
+		return fmt.Errorf("user with email %s is already registered", i.(string))
+	})
+
+	interfaces.UadminValidatorRegistry.AddValidator("username-uadmin", func (i interface{}, o interface{}) error {
+		minLength := interfaces.CurrentConfig.D.Auth.MinUsernameLength
+		maxLength := interfaces.CurrentConfig.D.Auth.MaxUsernameLength
+		currentUsername := i.(string)
+		if maxLength < len(currentUsername) || len(currentUsername) < minLength {
+			return fmt.Errorf("length of the username has to be between %d and %d symbols", minLength, maxLength)
+		}
+		return nil
+	})
+
+	interfaces.UadminValidatorRegistry.AddValidator("password-uadmin", func (i interface{}, o interface{}) error {
+		passwordStruct := o.(PasswordValidationStruct)
+		if passwordStruct.Password != passwordStruct.ConfirmedPassword {
+			return fmt.Errorf("password doesn't equal to confirmed password")
+		}
+		if len(passwordStruct.Password) < interfaces.CurrentConfig.D.Auth.MinPasswordLength {
+			return fmt.Errorf("length of the password has to be at least %d symbols", interfaces.CurrentConfig.D.Auth.MinPasswordLength)
+		}
+		return nil
+	})
+
 	govalidator.CustomTypeTagMap.Set("username-unique", func(i interface{}, o interface{}) bool {
-		userExists := UsernameUniqueValidator(i, o)
+		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("username-unique")
+		userExists := validator(i, o)
 		return userExists == nil
 	})
 	govalidator.CustomTypeTagMap.Set("email-unique", func(i interface{}, o interface{}) bool {
-		emailExists := EmailUniqueValidator(i, o)
+		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("email-unique")
+		emailExists := validator(i, o)
 		return emailExists == nil
 	})
 	govalidator.CustomTypeTagMap.Set("username-uadmin", func(i interface{}, o interface{}) bool {
-		isValidUsername := UsernameUadminValidator(i, o)
+		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("username-uadmin")
+		isValidUsername := validator(i, o)
 		return isValidUsername == nil
 	})
 	govalidator.CustomTypeTagMap.Set("password-uadmin", func(i interface{}, o interface{}) bool {
-		isValidPassword := PasswordUadminValidator(i, o)
+		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("password-uadmin")
+		isValidPassword := validator(i, o)
 		return isValidPassword == nil
 	})
 }
