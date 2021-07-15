@@ -5,9 +5,14 @@ import (
 	"strings"
 )
 
+type PermissionDescribed struct {
+	Name CustomPermission
+	Bit PermBitInteger
+}
 type IPermissionRegistry interface {
 	AddPermission(permission CustomPermission, permissionBit PermBitInteger)
 	GetPermissionBit(permission CustomPermission) PermBitInteger
+	GetAllPermissions() <- chan *PermissionDescribed
 }
 
 type IUserPermissionRegistry interface {
@@ -74,6 +79,17 @@ func (ap *PermRegistry) GetPermissionBit(permission CustomPermission) PermBitInt
 		panic(fmt.Errorf("no permission registered with name %s", permission))
 	}
 	return permissionBit
+}
+
+func (ap *PermRegistry) GetAllPermissions() <- chan *PermissionDescribed {
+	chnl := make(chan *PermissionDescribed)
+	go func() {
+		defer close(chnl)
+		for permName, permBit := range ap.PermNameBitInteger {
+			chnl <- &PermissionDescribed{Name: permName, Bit: permBit}
+		}
+	}()
+	return chnl
 }
 
 type UserPerm struct {

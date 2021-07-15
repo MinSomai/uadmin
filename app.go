@@ -109,6 +109,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("openapi", &OpenApiCommand{})
 	a.RegisterCommand("superuser", &SuperadminCommand{})
 	a.RegisterCommand("admin", &AdminCommand{})
+	a.RegisterCommand("contenttype", &ContentTypeCommand{})
 }
 
 func (a App) ExecuteCommand() {
