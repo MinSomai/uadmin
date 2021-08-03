@@ -49,9 +49,10 @@ func (s *DbSession) GetUser() *usermodels.User {
 }
 
 func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
-	db := interfaces.GetDB()
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
 	var session sessionmodel.Session
-	db.Model(&sessionmodel.Session{}).Where(&sessionmodel.Session{Key: sessionKey}).Preload("User").First(&session)
+	db.Db.Model(&sessionmodel.Session{}).Where(&sessionmodel.Session{Key: sessionKey}).Preload("User").First(&session)
 	if session.ID == 0 {
 		return nil, fmt.Errorf("no session with key %s found", sessionKey)
 	}
@@ -62,17 +63,19 @@ func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
 
 func (s *DbSession) Create() ISessionProvider {
 	session := sessionmodel.NewSession()
-	db := interfaces.GetDB()
-	db.Create(session)
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
+	db.Db.Create(session)
 	return &DbSession{
 		session: session,
 	}
 }
 
 func (s *DbSession) Delete() bool {
-	db := interfaces.GetDB()
-	db.Unscoped().Delete(&sessionmodel.Session{}, s.session.ID)
-	return db.Error == nil
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
+	db.Db.Unscoped().Delete(&sessionmodel.Session{}, s.session.ID)
+	return db.Db.Error == nil
 }
 
 func (s *DbSession) IsExpired() bool {
@@ -80,7 +83,8 @@ func (s *DbSession) IsExpired() bool {
 }
 
 func (s *DbSession) Save() bool {
-	db := interfaces.GetDB()
-	res := db.Save(s.session)
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
+	res := db.Db.Save(s.session)
 	return res.Error == nil
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/settings/migrations"
+	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
 	"github.com/uadmin/uadmin/interfaces"
 )
 
@@ -13,7 +14,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	settingsAdminPage := admin.NewAdminPage("")
+	settingsAdminPage := admin.NewGormAdminPage(func() interface{} {return nil}, "")
 	settingsAdminPage.PageName = "Settings"
 	settingsAdminPage.Slug = "setting"
 	settingsAdminPage.BlueprintName = "setting"
@@ -22,7 +23,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
-	settingmodelAdminPage := admin.NewAdminPage("setting")
+	settingmodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &settingmodel.Setting{}}, "setting")
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
 	settingmodelAdminPage.BlueprintName = "setting"
@@ -31,7 +32,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
-	settingcategoriesmodelAdminPage := admin.NewAdminPage("settingcategory")
+	settingcategoriesmodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &settingmodel.SettingCategory{}}, "settingcategory")
 	settingcategoriesmodelAdminPage.PageName = "Setting categories"
 	settingcategoriesmodelAdminPage.Slug = "settingcategory"
 	settingcategoriesmodelAdminPage.BlueprintName = "setting"
@@ -43,6 +44,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	interfaces.ProjectModels.RegisterModel(&settingmodel.SettingCategory{})
+	interfaces.ProjectModels.RegisterModel(&settingmodel.Setting{})
 }
 
 var ConcreteBlueprint = Blueprint{

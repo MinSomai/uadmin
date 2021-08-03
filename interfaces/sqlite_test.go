@@ -49,13 +49,13 @@ func GetDb() *gorm.DB {
 
 func TestSqlite(t *testing.T) {
 	db := GetDb()
-	sql_dialect := NewDbDialect(db, "sqlite")
+	sql_dialect := NewDbAdapter(db, "sqlite")
 	sql_dialect.Equals("admin", true)
 	assert.Equal(t, sql_dialect.ToString(), "`admin` = ?")
-	sql_dialect = NewDbDialect(db, "sqlite")
+	sql_dialect = NewDbAdapter(db, "sqlite")
 	sql_dialect.GetLastInsertId()
 	assert.Equal(t, sql_dialect.ToString(), "SELECT last_insert_rowid() AS lastid")
-	sql_dialect = NewDbDialect(db, "sqlite")
+	sql_dialect = NewDbAdapter(db, "sqlite")
 	quoted_field := sql_dialect.Quote("test")
 	assert.Equal(t, quoted_field, "`test`")
 	quoted_field = sql_dialect.LikeOperator()
@@ -78,3 +78,10 @@ func TestSqliteFunctional(t *testing.T) {
 	// assert.Equal(t, 1, len(last_ids))
 }
 
+func TestSqlite_uadmin_datetime_cast_date(t *testing.T) {
+	time1 := "2005-07-29 09:56:00-05"
+	dt := sqlite_uadmin_datetime_parse(time1, "UTC", "UTC")
+	assert.Equal(t, dt.Year(), 2005)
+	dt = sqlite_uadmin_datetime_parse("", "UTC", "UTC")
+	assert.Nil(t, dt)
+}

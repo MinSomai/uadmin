@@ -16,20 +16,22 @@ func (m initial_1623582035) GetId() int64 {
     return 1623582035
 }
 
-func (m initial_1623582035) Up() {
-    db := interfaces.GetDB()
+func (m initial_1623582035) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.AutoMigrate(models2.UserAuthToken{})
     if err != nil {
-        panic(err)
+        return err
     }
+    return nil
 }
 
-func (m initial_1623582035) Down() {
-    db := interfaces.GetDB()
+func (m initial_1623582035) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.Migrator().DropTable(models2.UserAuthToken{})
     if err != nil {
-        panic(err)
+        return err
     }
+    return nil
 }
 
 func (m initial_1623582035) Deps() []string {

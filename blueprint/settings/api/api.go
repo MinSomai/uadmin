@@ -58,7 +58,8 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 		//	return
 		//}
 		//var tempSet Setting
-		tx := interfaces.GetDB("default").Begin()
+		uadminDatabase := interfaces.NewUadminDatabase()
+		tx := uadminDatabase.Db.Begin()
 
 		for _, s := range settings {
 			v, ok := r.Form[s.Code]
@@ -94,6 +95,7 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 			tx.Save(&s)
 		}
 		tx.Commit()
+		uadminDatabase.Close()
 	}
 
 	c := Context{}

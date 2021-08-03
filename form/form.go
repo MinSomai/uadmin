@@ -193,84 +193,13 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}) *Form
 				formError.AddGeneralError(fmt.Errorf("can't set field %s for model", field.Name))
 				continue
 			}
-			switch modelF.Kind() {
-			case reflect.Int:
-			case reflect.Int8:
-			case reflect.Int16:
-			case reflect.Int32:
-			case reflect.Int64:
-				v := field.FieldConfig.Widget.GetOutputValue().(int64)
-				if !modelF.OverflowInt(v) {
-					modelF.SetInt(v)
-				} else {
-					formError.AddGeneralError(fmt.Errorf("can't set field %s for model with value %d", field.Name, v))
-				}
-			case reflect.Uint:
-			case reflect.Uint8:
-			case reflect.Uint16:
-			case reflect.Uint32:
-			case reflect.Uint64:
-				v := field.FieldConfig.Widget.GetOutputValue().(uint64)
-				if !modelF.OverflowUint(v) {
-					modelF.SetUint(v)
-				} else {
-					formError.AddGeneralError(fmt.Errorf("can't set field %s for model with value %d", field.Name, v))
-				}
-			case reflect.Bool:
-				v := field.FieldConfig.Widget.GetOutputValue().(string)
-				modelF.SetBool(v != "")
-			case reflect.String:
-				v := field.FieldConfig.Widget.GetOutputValue().(string)
-				modelF.SetString(v)
-			case reflect.Float32:
-			case reflect.Float64:
-				v := field.FieldConfig.Widget.GetOutputValue().(float64)
-				modelF.SetFloat(v)
-			case reflect.Struct:
-				switch modelF.Interface().(type) {
-				case time.Time:
-					v := field.FieldConfig.Widget.GetOutputValue().(time.Time)
-					modelF.Set(reflect.ValueOf(v))
-				case gorm.DeletedAt:
-					v := field.FieldConfig.Widget.GetOutputValue().(gorm.DeletedAt)
-					modelF.Set(reflect.ValueOf(v))
-				}
+			err := interfaces.SetUpStructField(modelF, field.FieldConfig.Widget.GetOutputValue())
+			if err != nil {
+				formError.AddGeneralError(err)
 			}
 		}
 	}
 	return formError
-}
-
-func GetUadminFieldTypeFromGormField(gormField *schema.Field) interfaces.UadminFieldType {
-	var t interfaces.UadminFieldType
-	switch gormField.FieldType.Kind() {
-	case reflect.Bool:
-		t = interfaces.BooleanUadminFieldType
-	case reflect.Int:
-	case reflect.Int8:
-	case reflect.Int16:
-	case reflect.Int32:
-	case reflect.Int64:
-	case reflect.Uint:
-	case reflect.Uint8:
-	case reflect.Uint16:
-	case reflect.Uint32:
-	case reflect.Uint64:
-		t = interfaces.IntegerUadminFieldType
-	case reflect.String:
-		t = interfaces.TextUadminFieldType
-	case reflect.Float32:
-	case reflect.Float64:
-		t = interfaces.FloatUadminFieldType
-	case reflect.Struct:
-		//s := gormField.
-		//switch s. {
-		//case time.Time:
-		//	return value.(time.Time)
-		//}
-		//
-	}
-	return t
 }
 
 func GetWidgetByWidgetType(widgetType string) interfaces.IWidget {
@@ -293,12 +222,12 @@ func NewFieldFromGormField(gormField *schema.Field, forcedWidgetType string) *in
 		widget.SetName(gormField.Name)
 		widget.SetValue(gormField.DefaultValueInterface)
 	} else {
-		uadminFieldType := GetUadminFieldTypeFromGormField(gormField)
+		uadminFieldType := interfaces.GetUadminFieldTypeFromGormField(gormField)
 		widget = GetWidgetFromUadminFieldTypeAndGormField(uadminFieldType, gormField)
 	}
 	field := &interfaces.Field{
 		Field: *gormField,
-		UadminFieldType: GetUadminFieldTypeFromGormField(gormField),
+		UadminFieldType: interfaces.GetUadminFieldTypeFromGormField(gormField),
 		FieldConfig: &interfaces.FieldConfig{Widget: widget},
 		Required: gormField.NotNull && !gormField.HasDefaultValue,
 		DisplayName: gormField.Name,
@@ -307,36 +236,13 @@ func NewFieldFromGormField(gormField *schema.Field, forcedWidgetType string) *in
 	return field
 }
 
-func IsTruthyValue(value interface{}) bool {
-	r := reflect.TypeOf(value)
-	if value == nil {
-		return false
-	}
-	var typeString string
-	if r.Kind() == reflect.Ptr {
-		typeString = r.Elem().Name()
-	} else {
-		typeString = r.Name()
-	}
-	if r.Kind() == reflect.Slice {
-		s := reflect.ValueOf(value)
-		return s.Len() != 0
-	} else if r.Kind() == reflect.Struct {
-	} else if typeString == "string" {
-		return value != ""
-	} else if typeString == "int" {
-		return value.(int) != 0
-	} else if typeString == "Month" {
-		return value.(int) != 0
-	}
-	return true
-}
-
 func NewFormFromModel(gormModel interface{}, excludeFields []string, fieldsToShow []string, buildFieldPlacement bool, formTitle string) *Form {
 	fieldRegistry := interfaces.NewFieldRegistry()
 	fieldsToShowRegistry := interfaces.NewFieldRegistry()
 	excludeFieldsRegistry := interfaces.NewFieldRegistry()
-	statement := &gorm.Statement{DB: interfaces.GetDB()}
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	statement := &gorm.Statement{DB: uadminDatabase.Db}
 	statement.Parse(gormModel)
 	r := interfaces.NewTemplateRenderer(formTitle)
 	fields := statement.Schema.Fields
@@ -364,9 +270,12 @@ func NewFormFromModel(gormModel interface{}, excludeFields []string, fieldsToSho
 		} else {
 			uadminField = NewFieldFromGormField(field, "")
 		}
+		uadminField.DisplayName = field.Name
 		if uadminformtag != "" {
 			uadminField.Initial = fieldOptions.GetInitial()
-			uadminField.DisplayName = fieldOptions.GetDisplayName()
+			if fieldOptions.GetDisplayName() != "" {
+				uadminField.DisplayName = fieldOptions.GetDisplayName()
+			}
 			uadminField.Validators = fieldOptions.GetValidators()
 			uadminField.Choices = fieldOptions.GetChoices()
 			uadminField.HelpText = fieldOptions.GetHelpText()
@@ -376,9 +285,9 @@ func NewFormFromModel(gormModel interface{}, excludeFields []string, fieldsToSho
 		}
 		uadminField.FieldConfig.Widget.RenderUsingRenderer(r)
 		uadminField.FieldConfig.Widget.SetFieldDisplayName(field.Name)
-		isTruthyValue := IsTruthyValue(gormModelV.FieldByName(field.Name).Interface())
+		isTruthyValue := interfaces.IsTruthyValue(gormModelV.FieldByName(field.Name).Interface())
 		if isTruthyValue {
-			v := TransformValueForWidget(gormModelV.FieldByName(field.Name).Interface())
+			v := interfaces.TransformValueForWidget(gormModelV.FieldByName(field.Name).Interface())
 			uadminField.FieldConfig.Widget.SetValue(v)
 		}
 		fieldRegistry.AddField(uadminField)
@@ -527,59 +436,8 @@ func (w *Widget) Render() string {
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func TransformValueForWidget(value interface{}) interface{} {
-	r := reflect.TypeOf(value)
-	if value == nil {
-		return ""
-	}
-	var typeString string
-	if r.Kind() == reflect.Ptr {
-		typeString = r.Elem().Name()
-	} else {
-		typeString = r.Name()
-	}
-	if r.Kind() == reflect.Slice {
-		newSlice := make([]string, 0)
-		s := reflect.ValueOf(value)
-		for i := 0; i < s.Len(); i++ {
-			newSlice = append(newSlice, TransformValueForWidget(s.Index(i).Interface()).(string))
-		}
-		return newSlice
-	} else if r.Kind() == reflect.Bool {
-		return strconv.FormatBool(value.(bool))
-	} else if r.Kind() == reflect.Struct {
-		s := reflect.ValueOf(value)
-		switch s.Interface().(type) {
-		case time.Time:
-			return value.(time.Time).Format(interfaces.CurrentConfig.D.Uadmin.DateFormat)
-		case gorm.DeletedAt:
-			return value.(gorm.DeletedAt).Time.Format(interfaces.CurrentConfig.D.Uadmin.DateFormat)
-		}
-		return ""
-	} else if r.Kind() == reflect.Ptr {
-		// @todo, handle pointer to time.Time
-		s := reflect.Indirect(reflect.ValueOf(value))
-		if !s.IsValid() {
-			return nil
-		}
-		switch s.Interface().(type) {
-		case time.Time:
-			return value.(*time.Time)
-		}
-	} else if typeString == "string" {
-		return value
-	} else if typeString == "int" {
-		return strconv.Itoa(value.(int))
-	} else if typeString == "uint" {
-		return fmt.Sprint(value.(uint))
-	} else if typeString == "Month" {
-		return strconv.Itoa(int(value.(time.Month)))
-	}
-	return value
-}
-
 func (w *Widget) GetDataForRendering() interfaces.WidgetData {
-	value := TransformValueForWidget(w.Value)
+	value := interfaces.TransformValueForWidget(w.Value)
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(), "Value": template.HTMLEscapeString(value.(string)),
 		"Name": w.Name, "FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
@@ -1031,7 +889,7 @@ func (w *CheckboxWidget) GetTemplateName() string {
 }
 
 func (w *CheckboxWidget) Render() string {
-	value := TransformValueForWidget(w.Value)
+	value := interfaces.TransformValueForWidget(w.Value)
 	if value != "" {
 		w.Attrs["checked"] = "checked"
 	}
@@ -1081,12 +939,12 @@ func (w *SelectWidget) GetTemplateName() string {
 }
 
 func (w *SelectWidget) GetDataForRendering() interfaces.WidgetData {
-	value := TransformValueForWidget(w.Value)
+	value := interfaces.TransformValueForWidget(w.Value)
 	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
 	for optGroupName, optGroups := range w.OptGroups {
 		optGroupSstringified[optGroupName] = make([]*SelectOptGroupStringified, 0)
 		for _, optGroup := range optGroups {
-			value1 := TransformValueForWidget(optGroup.Value).(string)
+			value1 := interfaces.TransformValueForWidget(optGroup.Value).(string)
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
 				OptLabel: optGroup.OptLabel,
 				Value: value1,
@@ -1173,12 +1031,12 @@ func (w *NullBooleanWidget) GetOptGroups() map[string][]*SelectOptGroup {
 }
 
 func (w *NullBooleanWidget) GetDataForRendering() interfaces.WidgetData {
-	value := TransformValueForWidget(w.Value)
+	value := interfaces.TransformValueForWidget(w.Value)
 	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
 	for optGroupName, optGroups := range w.GetOptGroups() {
 		optGroupSstringified[optGroupName] = make([]*SelectOptGroupStringified, 0)
 		for _, optGroup := range optGroups {
-			value1 := TransformValueForWidget(optGroup.Value).(string)
+			value1 := interfaces.TransformValueForWidget(optGroup.Value).(string)
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
 				OptLabel: optGroup.OptLabel,
 				Value: value1,
@@ -1249,12 +1107,12 @@ func (w *SelectMultipleWidget) GetTemplateName() string {
 
 func (w *SelectMultipleWidget) GetDataForRendering() interfaces.WidgetData {
 	w.Attrs["multiple"] = "true"
-	value := TransformValueForWidget(w.Value).([]string)
+	value := interfaces.TransformValueForWidget(w.Value).([]string)
 	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
 	for optGroupName, optGroups := range w.OptGroups {
 		optGroupSstringified[optGroupName] = make([]*SelectOptGroupStringified, 0)
 		for _, optGroup := range optGroups {
-			value1 := TransformValueForWidget(optGroup.Value).(string)
+			value1 := interfaces.TransformValueForWidget(optGroup.Value).(string)
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
 				OptLabel: optGroup.OptLabel,
 				Value: value1,
@@ -1352,12 +1210,12 @@ func (w *RadioSelectWidget) SetId(id string) {
 }
 
 func (w *RadioSelectWidget) GetDataForRendering() interfaces.WidgetData {
-	value := TransformValueForWidget(w.Value).(string)
+	value := interfaces.TransformValueForWidget(w.Value).(string)
 	optGroupSstringified := make(map[string][]*RadioOptGroupStringified)
 	for optGroupName, optGroups := range w.OptGroups {
 		optGroupSstringified[optGroupName] = make([]*RadioOptGroupStringified, 0)
 		for _, optGroup := range optGroups {
-			value1 := TransformValueForWidget(optGroup.Value).(string)
+			value1 := interfaces.TransformValueForWidget(optGroup.Value).(string)
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &RadioOptGroupStringified{
 				OptLabel: optGroup.OptLabel,
 				Value: value1,
@@ -1439,12 +1297,12 @@ func (w *CheckboxSelectMultipleWidget) SetId(id string) {
 }
 
 func (w *CheckboxSelectMultipleWidget) GetDataForRendering() interfaces.WidgetData {
-	value := TransformValueForWidget(w.Value).([]string)
+	value := interfaces.TransformValueForWidget(w.Value).([]string)
 	optGroupSstringified := make(map[string][]*RadioOptGroupStringified)
 	for optGroupName, optGroups := range w.OptGroups {
 		optGroupSstringified[optGroupName] = make([]*RadioOptGroupStringified, 0)
 		for _, optGroup := range optGroups {
-			value1 := TransformValueForWidget(optGroup.Value).(string)
+			value1 := interfaces.TransformValueForWidget(optGroup.Value).(string)
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &RadioOptGroupStringified{
 				OptLabel: optGroup.OptLabel,
 				Value: value1,
@@ -1671,7 +1529,7 @@ func (w *MultipleInputHiddenWidget) Render() string {
 	}
 	data["Type"] = w.GetWidgetType()
 	subwidgets := make([]interfaces.WidgetData, 0)
-	value := TransformValueForWidget(w.Value).([]string)
+	value := interfaces.TransformValueForWidget(w.Value).([]string)
 	for _, v := range value {
 		w1 := HiddenWidget{}
 		w1.Name = w.Name
@@ -1742,7 +1600,7 @@ func (w *SplitDateTimeWidget) Render() string {
 		data["TimeLabel"] = w.TimeLabel
 	}
 	subwidgets := make([]interfaces.WidgetData, 0)
-	value := TransformValueForWidget(w.Value).(*time.Time)
+	value := interfaces.TransformValueForWidget(w.Value).(*time.Time)
 	w1 := DateWidget{}
 	w1.Name = w.Name + "_date"
 	if w.DateValue != "" {
@@ -1829,7 +1687,7 @@ func (w *SplitHiddenDateTimeWidget) Render() string {
 	}
 	data["Type"] = w.GetWidgetType()
 	subwidgets := make([]interfaces.WidgetData, 0)
-	value := TransformValueForWidget(w.Value).(*time.Time)
+	value := interfaces.TransformValueForWidget(w.Value).(*time.Time)
 	w1 := DateWidget{}
 	w1.Name = w.Name + "_date"
 	if w.DateValue != "" {
@@ -1912,7 +1770,7 @@ func (w *SelectDateWidget) GetTemplateName() string {
 }
 
 func (w *SelectDateWidget) Render() string {
-	value := TransformValueForWidget(w.Value).(*time.Time)
+	value := interfaces.TransformValueForWidget(w.Value).(*time.Time)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
 		"Name": w.Name,

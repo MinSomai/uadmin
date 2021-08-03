@@ -72,7 +72,9 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	if opts.FirstName == "" {
 		opts.FirstName = "System"
 	}
@@ -99,7 +101,8 @@ Please provide flags -n and -e which are username and email of the user respecti
 		}
 		_, err = govalidator.ValidateStruct(passwordValidationStruct)
 		if err != nil {
-			return err
+			interfaces.Trail(interfaces.ERROR, fmt.Errorf("please try to to repeat password again"))
+			continue
 		}
 		break
 	}
@@ -121,6 +124,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		Salt: salt,
 	}
 	db.Create(&admin)
+	interfaces.Trail(interfaces.INFO, "Superuser created successfully")
 	return nil
 }
 

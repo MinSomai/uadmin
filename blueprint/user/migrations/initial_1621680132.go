@@ -17,27 +17,27 @@ func (m initial_1621680132) GetId() int64 {
     return 1621680132
 }
 
-func (m initial_1621680132) Up() {
-    db := interfaces.GetDB()
+func (m initial_1621680132) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.AutoMigrate(interfaces.ContentType{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.AutoMigrate(models2.UserGroup{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.AutoMigrate(models2.User{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.AutoMigrate(models2.Permission{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.AutoMigrate(models2.OneTimeAction{})
     if err != nil {
-        panic(err)
+        return err
     }
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&models2.OneTimeAction{})
@@ -47,29 +47,30 @@ func (m initial_1621680132) Up() {
     stmt.Parse(&models2.User{})
     userContentType := &interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}
     db.Create(userContentType)
+    return nil
 }
 
-func (m initial_1621680132) Down() {
-    db := interfaces.GetDB()
+func (m initial_1621680132) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.Migrator().DropTable(models2.Permission{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.Migrator().DropTable(models2.User{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.Migrator().DropTable(models2.UserGroup{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.Migrator().DropTable(models2.OneTimeAction{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.Migrator().DropTable(interfaces.ContentType{})
     if err != nil {
-        panic(err)
+        return err
     }
     var contentType interfaces.ContentType
     stmt := &gorm.Statement{DB: db}
@@ -80,6 +81,7 @@ func (m initial_1621680132) Down() {
     stmt.Parse(&models2.User{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Delete(&contentType)
+    return nil
 }
 
 func (m initial_1621680132) Deps() []string {

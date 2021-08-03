@@ -54,12 +54,10 @@ func (c MigrateCommand) GetHelpText() string {
 	return "Migrate your database"
 }
 
-var re = regexp.MustCompile("[[:^ascii:]]")
-
 func prepareMigrationName(message string) string {
 	now := time.Now()
 	sec := now.Unix()
-	message = re.ReplaceAllLiteralString(message, "")
+	message = interfaces.AsciiRegex.ReplaceAllLiteralString(message, "")
 	if len(message) > 30 {
 		message = message[:30]
 	}
@@ -116,10 +114,12 @@ func (m {{.MigrationName}}) GetId() int64 {
     return {{.ConcreteMigrationId}}
 }
 
-func (m {{.MigrationName}}) Up() {
+func (m {{.MigrationName}}) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    return nil
 }
 
-func (m {{.MigrationName}}) Down() {
+func (m {{.MigrationName}}) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    return nil
 }
 
 func (m {{.MigrationName}}) Deps() []string {
@@ -305,12 +305,15 @@ func (command CreateMigration) GetHelpText() string {
 }
 
 func ensureDatabaseIsReadyForMigrationsAndReadAllApplied() []Migration {
-	err := appInstance.Database.ConnectTo("default").AutoMigrate(Migration{})
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	dbForMigrations := uadminDatabase.Db
+	err := dbForMigrations.AutoMigrate(Migration{})
 	if err != nil {
 		panic(fmt.Errorf("error while preparing database for migrations: %s", err))
 	}
 	var appliedMigrations []Migration
-	appInstance.Database.ConnectTo("default").Find(&appliedMigrations)
+	dbForMigrations.Find(&appliedMigrations)
 	return appliedMigrations
 }
 
@@ -329,30 +332,37 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 		if traverseMigrationResult.Node.IsApplied() {
 			continue
 		}
+		uadminDatabase := interfaces.NewUadminDatabase()
+		defer uadminDatabase.Close()
 		appliedMigration := Migration{}
-		appInstance.Database.ConnectTo(
-			"default",
-		).Where(
+		uadminDatabase.Db.Where(
 			&Migration{MigrationName: traverseMigrationResult.Node.GetMigration().GetName()},
 		).First(&appliedMigration)
 		if appliedMigration.ID != 0 {
 			continue
 		}
-		appInstance.Database.ConnectTo("default").Create(
-			&Migration{
-				MigrationName: traverseMigrationResult.Node.GetMigration().GetName(),
-				AppliedAt: time.Now(),
-			},
-		)
 		color.Blue("Applying migration %s", traverseMigrationResult.Node.GetMigration().GetName())
-		if appInstance.Config.D.Db.Default.Type == "sqlite" {
-			traverseMigrationResult.Node.Apply()
-		} else {
-			interfaces.GetDB().Transaction(func(tx *gorm.DB) error {
-				traverseMigrationResult.Node.Apply()
-				return nil
-			})
-		}
+		//if appInstance.Config.D.Db.Default.Type == "sqlite" {
+		//	traverseMigrationResult.Node.Apply()
+		//} else {
+		db := uadminDatabase.Db
+		db.Transaction(func(tx *gorm.DB) error {
+			uadminDatabase1 := &interfaces.UadminDatabase{
+				Adapter: uadminDatabase.Adapter,
+				Db: tx,
+			}
+			res := traverseMigrationResult.Node.Apply(uadminDatabase1)
+			if res == nil {
+				tx.Create(
+					&Migration{
+						MigrationName: traverseMigrationResult.Node.GetMigration().GetName(),
+						AppliedAt:     time.Now(),
+					},
+				)
+			}
+			return res
+		})
+		//}
 
 	}
 	return nil
@@ -384,7 +394,9 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 		}
 		migrationName := traverseMigrationResult.Node.GetMigration().GetName()
 		appliedMigration := Migration{}
-		result := appInstance.Database.ConnectTo("default").Where(
+		uadminDatabase := interfaces.NewUadminDatabase()
+		defer uadminDatabase.Close()
+		result := uadminDatabase.Db.Where(
 			"migration_name = ?", migrationName,
 		).First(&appliedMigration)
 		if result.RowsAffected == 0 {
@@ -396,16 +408,26 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 			//)
 		}
 		color.Blue("Downgrading migration %s", traverseMigrationResult.Node.GetMigration().GetName())
-		if appInstance.Config.D.Db.Default.Type == "sqlite" {
-			traverseMigrationResult.Node.Downgrade()
-			appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
-		} else {
-			interfaces.GetDB().Transaction(func(tx *gorm.DB) error {
-				traverseMigrationResult.Node.Downgrade()
-				appInstance.Database.ConnectTo("default").Unscoped().Delete(&appliedMigration)
-				return nil
-			})
-		}
+		//if appInstance.Config.D.Db.Default.Type == "sqlite" {
+		//	uadminDatabase := interfaces.NewUadminDatabase()
+		//	traverseMigrationResult.Node.Downgrade()
+		//	defer uadminDatabase.Close()
+		//	db := uadminDatabase.Db
+		//	db.Unscoped().Delete(&appliedMigration)
+		//} else {
+		db := uadminDatabase.Db
+		db.Transaction(func(tx *gorm.DB) error {
+			uadminDatabase1 := &interfaces.UadminDatabase{
+				Adapter: uadminDatabase.Adapter,
+				Db: tx,
+			}
+			res := traverseMigrationResult.Node.Downgrade(uadminDatabase1)
+			if res == nil {
+				tx.Unscoped().Delete(&appliedMigration)
+			}
+			return res
+		})
+//		}
 	}
 	return nil
 }
@@ -420,15 +442,15 @@ type DetermineConflictsMigration struct {
 func (command DetermineConflictsMigration) Proceed(subaction string, args []string) error {
 	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
 	isEverythingOk := true
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
 	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
 		if traverseMigrationResult.Error != nil {
 			isEverythingOk = false
 			interfaces.Trail(interfaces.WARNING, "Potential problems with migrations %s", traverseMigrationResult.Error.Error())
 		}
 		appliedMigration := Migration{}
-		appInstance.Database.ConnectTo(
-			"default",
-		).Where(
+		uadminDatabase.Db.Where(
 			&Migration{MigrationName: traverseMigrationResult.Node.GetMigration().GetName()},
 		).First(&appliedMigration)
 		if appliedMigration.ID != 0 {

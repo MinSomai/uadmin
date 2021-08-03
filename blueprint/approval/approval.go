@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/approval/migrations"
+	"github.com/uadmin/uadmin/blueprint/approval/models"
 	"github.com/uadmin/uadmin/interfaces"
 )
 
@@ -13,7 +14,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	approvalAdminPage := admin.NewAdminPage("")
+	approvalAdminPage := admin.NewGormAdminPage(func() interface{} {return nil}, "")
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
 	approvalAdminPage.BlueprintName = "approval"
@@ -22,7 +23,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
 	}
-	approvalmodelAdminPage := admin.NewAdminPage("approval")
+	approvalmodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &models.Approval{}}, "approval")
 	approvalmodelAdminPage.PageName = "Approval"
 	approvalmodelAdminPage.Slug = "approval"
 	approvalmodelAdminPage.BlueprintName = "approval"
@@ -34,6 +35,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	interfaces.ProjectModels.RegisterModel(&models.Approval{})
 }
 
 var ConcreteBlueprint = Blueprint{

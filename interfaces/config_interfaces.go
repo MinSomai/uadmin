@@ -84,6 +84,7 @@ type UadminConfigOptions struct {
 	DateTimeFormat string `yaml:"datetime_format"`
 	TimeFormat string `yaml:"time_format"`
 	DateFormatOrder string `yaml:"date_format_order"`
+	AdminPerPage int `yaml:"admin_per_page"`
 }
 
 type UadminDbOptions struct {
@@ -253,6 +254,7 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			TimeFormat: "15:04",
 			UploadPath: "uploads",
 			DateFormatOrder: "mm/dd/yyyy",
+			AdminPerPage: 10,
 		},
 	}
 	// Put your defaults here

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/language/migrations"
+	"github.com/uadmin/uadmin/blueprint/language/models"
 	"github.com/uadmin/uadmin/interfaces"
 )
 
@@ -13,7 +14,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	languageAdminPage := admin.NewAdminPage("")
+	languageAdminPage := admin.NewGormAdminPage(func() interface{} {return nil}, "")
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
 	languageAdminPage.BlueprintName = "language"
@@ -22,7 +23,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))
 	}
-	languagemodelAdminPage := admin.NewAdminPage("language")
+	languagemodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &models.Language{}}, "language")
 	languagemodelAdminPage.PageName = "Languages"
 	languagemodelAdminPage.Slug = "language"
 	languagemodelAdminPage.BlueprintName = "language"
@@ -34,6 +35,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	interfaces.ProjectModels.RegisterModel(&models.Language{})
 }
 
 var ConcreteBlueprint = Blueprint{

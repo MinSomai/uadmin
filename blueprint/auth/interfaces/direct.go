@@ -49,11 +49,12 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	db := interfaces.GetDB()
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
 	var user usermodels.User
 	// @todo, complete
 	directApiSigninByField := interfaces.CurrentConfig.D.Uadmin.DirectApiSigninByField
-	db.Model(usermodels.User{}).Where(fmt.Sprintf("%s = ?", directApiSigninByField), json.SigninField).First(&user)
+	db.Db.Model(usermodels.User{}).Where(fmt.Sprintf("%s = ?", directApiSigninByField), json.SigninField).First(&user)
 	if user.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
 		return
@@ -77,7 +78,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 			return
 		}
 		user.GeneratedOTPToVerify = ""
-		db.Save(&user)
+		db.Db.Save(&user)
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
@@ -130,7 +131,8 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	//	user.GeneratedOTPToVerify = ""
 	//	db.Save(&user)
 	//}
-	db := interfaces.GetDB()
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
 	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass(json.Password, salt)
@@ -141,7 +143,7 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 		Active:       true,
 		Salt: salt,
 	}
-	db.Create(&user)
+	db.Db.Create(&user)
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter = sessionAdapter.Create()

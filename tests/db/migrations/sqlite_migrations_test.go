@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/interfaces"
-	"gorm.io/gorm"
 	"os"
 	"strings"
 	"testing"
@@ -17,16 +16,17 @@ import (
 type MigrationTestSuite struct {
 	suite.Suite
 	app *uadmin.App
-	db *gorm.DB
+	db *interfaces.UadminDatabase
 }
 
 func (suite *MigrationTestSuite) SetupTest() {
 	appliedMigrations = make([]string, 0)
-	app, db := uadmin.NewTestApp()
+	app := uadmin.NewTestApp()
 	suite.app = app
-	suite.db = db
-	suite.db.Exec("DROP TABLE migrations")
-	suite.db.AutoMigrate(uadmin.Migration{})
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
+	db.Db.Exec("DROP TABLE migrations")
+	db.Db.AutoMigrate(uadmin.Migration{})
 	suite.app.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 	suite.app.BlueprintRegistry.Register(TestBlueprint)
 	suite.app.BlueprintRegistry.Register(Test1Blueprint)
@@ -56,7 +56,9 @@ func (suite *MigrationTestSuite) TestUpgradeDatabase() {
 	}
 	assert.Equal(suite.T(), appliedMigrationsExpected, appliedMigrationsActual)
 	var appliedMigrationsDb []uadmin.Migration
-	suite.db.Find(&appliedMigrationsDb)
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
+	db.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 4, len(appliedMigrationsDb))
 }
 
@@ -68,24 +70,26 @@ func (suite *MigrationTestSuite) TestDowngradeDatabase() {
 	appliedMigrationsExpected.Add("user.1621680132")
 	appliedMigrationsExpected.Add("test1.1621667393")
 	appliedMigrationsExpected.Add("test1.1621680132")
-	suite.db.Create(
+	db := interfaces.NewUadminDatabase()
+	defer db.Close()
+	db.Db.Create(
 		&uadmin.Migration{MigrationName: "user.1621667393", AppliedAt: time.Now()},
 	)
-	suite.db.Create(
+	db.Db.Create(
 		&uadmin.Migration{MigrationName: "user.1621680132", AppliedAt: time.Now()},
 	)
-	suite.db.Create(
+	db.Db.Create(
 		&uadmin.Migration{MigrationName: "test1.1621667393", AppliedAt: time.Now()},
 	)
-	suite.db.Create(
+	db.Db.Create(
 		&uadmin.Migration{MigrationName: "test1.1621680132", AppliedAt: time.Now()},
 	)
 	var appliedMigrationsDb []uadmin.Migration
-	suite.db.Find(&appliedMigrationsDb)
+	db.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 4, len(appliedMigrationsDb))
 	suite.app.TriggerCommandExecution("migrate", "down", []string{""})
 	appliedMigrationsDb = make([]uadmin.Migration, 0)
-	suite.db.Find(&appliedMigrationsDb)
+	db.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 0, len(appliedMigrationsDb))
 }
 
@@ -93,8 +97,10 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForUpgrade() {
 	concreteBlueprintRegistry := interfaces.NewBlueprintRegistry()
 	concreteBlueprintRegistry.Register(TestBlueprint)
 	concreteBlueprintRegistry.Register(Test1Blueprint)
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
 	for res := range concreteBlueprintRegistry.TraverseMigrations() {
-		res.Node.Apply()
+		res.Node.Apply(uadminDatabase)
 	}
 	appliedMigrationsExpected := mapset.NewSet()
 	appliedMigrationsExpected.Add("user.1621667393")
@@ -118,8 +124,10 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForDowngrade() {
 	toDowngradeMigrationsExpected.Add("test1.1621667393")
 	toDowngradeMigrationsExpected.Add("test1.1621680132")
 	downgradedMigrationsActual := mapset.NewSet()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
 	for res := range concreteBlueprintRegistry.TraverseMigrationsDownTo("") {
-		res.Node.Downgrade()
+		res.Node.Downgrade(uadminDatabase)
 		downgradedMigrationsActual.Add(res.Node.GetMigration().GetName())
 	}
 	assert.Equal(suite.T(), toDowngradeMigrationsExpected, downgradedMigrationsActual)

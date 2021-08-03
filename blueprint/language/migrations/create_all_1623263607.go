@@ -16,7 +16,7 @@ func (m create_all_1623263607) GetId() int64 {
     return 1623263607
 }
 
-func (m create_all_1623263607) Up() {
+func (m create_all_1623263607) Up(uadminDatabase *interfaces.UadminDatabase) error {
     langs := [][]string{
         {"Abkhaz", "аҧсуа бызшәа, аҧсшәа", "ab"},
         {"Afar", "Afaraf", "aa"},
@@ -204,7 +204,8 @@ func (m create_all_1623263607) Up() {
         {"Zhuang, Chuang", "Saɯ cueŋƅ, Saw cuengh", "za"},
         {"Zulu", "isiZulu", "zu"},
     }
-    tx := interfaces.GetDB().Begin()
+    db := uadminDatabase.Db
+    tx := db
     for _, lang := range langs {
         l := langmodel.Language{
             EnglishName: lang[0],
@@ -219,12 +220,13 @@ func (m create_all_1623263607) Up() {
         }
         tx.Create(&l)
     }
-    tx.Commit()
+    return nil
 }
 
-func (m create_all_1623263607) Down() {
-    db := interfaces.GetDB()
+func (m create_all_1623263607) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     db.Unscoped().Where("1 = 1").Delete(&langmodel.Language{})
+    return nil
 }
 
 func (m create_all_1623263607) Deps() []string {

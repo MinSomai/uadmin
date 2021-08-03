@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm/clause"
 	"time"
@@ -34,7 +35,10 @@ import (
 //	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
 //}
 
-// Save !
+func (u *User) FullName() string {
+	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
+}
+	// Save !
 func (u *User) Save() {
 	// @todo, redo
 	//if !strings.HasPrefix(u.Password, "$2a$") && len(u.Password) != 60 {
@@ -61,7 +65,8 @@ func (u *User) BuildPermissionRegistry() *interfaces.UserPermRegistry {
 	if u.IsSuperUser {
 		return userPermRegistry
 	}
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	db := uadminDatabase.Db
 	var permissions []Permission
 	var userGroups []UserGroup
 	db.Preload(clause.Associations).Model(u).Association("UserGroups").Find(&userGroups)
@@ -83,6 +88,7 @@ func (u *User) BuildPermissionRegistry() *interfaces.UserPermRegistry {
 		blueprintPerms := userPermRegistry.GetPermissionForBlueprint(blueprintName, modelName)
 		blueprintPerms.AddPermission(permBits)
 	}
+	uadminDatabase.Close()
 	return userPermRegistry
 }
 
@@ -315,7 +321,7 @@ type OneTimeAction struct {
 	interfaces.Model
 	User       User
 	UserID     uint
-	ExpiresOn *time.Time `gorm:"index"`
+	ExpiresOn time.Time `gorm:"index"`
 	Code string `gorm:"uniqueIndex"`
 	ActionType OneTimeActionType
 	IsUsed bool

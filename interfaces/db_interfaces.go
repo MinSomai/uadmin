@@ -2,16 +2,15 @@ package interfaces
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"io/ioutil"
+	"gorm.io/gorm/schema"
 	"reflect"
 	"text/template"
 )
 
-type DbDialect interface {
+type IDbAdapter interface {
 	Equals(name interface{}, args ...interface{})
 	Quote(name interface{}) string
 	LikeOperator() string
@@ -25,14 +24,64 @@ type DbDialect interface {
 	GetDb(alias_ ...string) (*gorm.DB, error)
 	CreateDb() error
 	Transaction(handler func()) error
+	GetStringToExtractYearFromField(filterOptionField string) string
+	GetStringToExtractMonthFromField(filterOptionField string) string
+	Exact(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	IExact(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Contains(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	IContains(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	In(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Gt(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Gte(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Lt(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Lte(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	StartsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	IStartsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	EndsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	IEndsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Range(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Date(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Year(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Month(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Day(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Week(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	WeekDay(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Quarter(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Time(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Hour(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Minute(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Second(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	IsNull(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Regex(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	IRegex(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
 }
 
 var Db *gorm.DB
 
 type UadminDatabase struct {
-	db *gorm.DB
-	dialect DbDialect
+	Db *gorm.DB
+	Adapter IDbAdapter
 }
+
+func (uad *UadminDatabase) Close() {
+	db, _ := uad.Db.DB()
+	db.Close()
+}
+
+func NewUadminDatabase(alias_ ...string) *UadminDatabase {
+	var alias string
+	if len(alias_) == 0 {
+		alias = "default"
+	} else {
+		alias = alias_[0]
+	}
+	adapter := GetAdapterForDb(alias)
+	Db, _ = adapter.GetDb(
+		alias,
+	)
+	return &UadminDatabase{Db: Db, Adapter: adapter}
+}
+
 type Database struct {
 	config    *UadminConfig
 	databases map[string]*UadminDatabase
@@ -53,25 +102,22 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 	if alias == "" {
 		alias = "default"
 	}
-	database := d.databases[alias]
-	if database == nil {
-		//var tplBytes bytes.Buffer
-		//databaseConfig, _ := reflections.GetField(d.config.D.Db, strings.Title(alias))
-		//err := postgresDsnTemplate.Execute(&tplBytes, databaseConfig)
-		//if err != nil {
-		//	panic(err)
-		//}
-		//databaseOpened, err := gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
-		//if err != nil {
-		//	panic(err)
-		//}
-		databaseOpened := GetDB(alias)
-		d.databases[alias] = &UadminDatabase{
-			db: databaseOpened,
-			dialect: NewDbDialect(databaseOpened, d.config.D.Db.Default.Type),
-		}
-	}
-	return d.databases[alias].db
+	//var tplBytes bytes.Buffer
+	//databaseConfig, _ := reflections.GetField(d.config.D.Db, strings.Title(alias))
+	//err := postgresDsnTemplate.Execute(&tplBytes, databaseConfig)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//databaseOpened, err := gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
+	//if err != nil {
+	//	panic(err)
+	//}
+	//d.databases[alias] = &UadminDatabase{
+	//	db: databaseOpened,
+	//	dialect: NewDbAdapter(databaseOpened, d.config.D.Db.Default.Type),
+	//}
+	// return d.databases[alias].db
+	return GetDB(alias)
 }
 
 type DatabaseSettings struct {
@@ -87,22 +133,10 @@ func GetDB(alias_ ...string) *gorm.DB {
 	} else {
 		alias = alias_[0]
 	}
-	if Db != nil{
-		return Db
-	}
 	var err error
 
 	// Check if there is a database config file
-	if CurrentDatabaseSettings == nil {
-		buf, err := ioutil.ReadFile(".database")
-		if err == nil {
-			err = json.Unmarshal(buf, CurrentDatabaseSettings)
-			if err != nil {
-				Trail(WARNING, ".database file is not a valid json file. %s", err)
-			}
-		}
-	}
-	dialect := GetDialectForDb(alias)
+	dialect := GetAdapterForDb(alias)
 	Db, err = dialect.GetDb(
 		alias,
 	)
@@ -115,7 +149,7 @@ func GetDB(alias_ ...string) *gorm.DB {
 
 
 
-func GetDialectForDb(alias_ ...string) DbDialect {
+func GetAdapterForDb(alias_ ...string) IDbAdapter {
 	var databaseConfig *DBSettings
 	var alias string
 	if len(alias_) == 0 {
@@ -126,6 +160,6 @@ func GetDialectForDb(alias_ ...string) DbDialect {
 	if alias == "default" {
 		databaseConfig = CurrentDatabaseSettings.Default
 	}
-	return NewDbDialect(Db, databaseConfig.Type)
+	return NewDbAdapter(Db, databaseConfig.Type)
 }
 

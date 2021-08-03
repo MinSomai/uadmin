@@ -110,6 +110,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("superuser", &SuperadminCommand{})
 	a.RegisterCommand("admin", &AdminCommand{})
 	a.RegisterCommand("contenttype", &ContentTypeCommand{})
+	a.RegisterCommand("generate-faked-users", &CreateFakedUsersCommand{})
 }
 
 func (a App) ExecuteCommand() {

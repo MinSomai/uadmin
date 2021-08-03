@@ -1,14 +1,11 @@
 package routing
 
 import (
-	"fmt"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/interfaces"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
@@ -18,17 +15,13 @@ type ConcreteTestSuite struct {
 }
 
 func (suite *ConcreteTestSuite) SetupTest() {
-	app, _ := uadmin.NewTestApp()
+	app := uadmin.NewTestApp()
 	suite.app = app
 	suite.app.BlueprintRegistry = interfaces.NewBlueprintRegistry()
 	suite.app.BlueprintRegistry.Register(ConcreteBlueprint)
 }
 
 func (suite *ConcreteTestSuite) TearDownSuite() {
-	err := os.Remove(suite.app.Config.D.Db.Default.Name)
-	if err != nil {
-		assert.Equal(suite.T(), true, false, fmt.Errorf("Couldnt remove db with name %s", suite.app.Config.D.Db.Default.Name))
-	}
 	uadmin.ClearTestApp()
 }
 

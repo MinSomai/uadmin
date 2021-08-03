@@ -11,6 +11,7 @@ type IFieldRegistry interface {
 	GetByName(name string) (*Field, error)
 	AddField(field *Field)
 	GetAllFields() map[string]*Field
+	GetPrimaryKey() (*Field, error)
 }
 
 type WidgetType string
@@ -156,6 +157,15 @@ func (fr *FieldRegistry) GetByName(name string) (*Field, error) {
 
 func (fr *FieldRegistry) GetAllFields() map[string]*Field {
 	return fr.Fields
+}
+
+func (fr *FieldRegistry) GetPrimaryKey() (*Field, error) {
+	for _, field := range fr.Fields {
+		if field.PrimaryKey {
+			return field, nil
+		}
+	}
+	return nil, fmt.Errorf("no primary key found for model")
 }
 
 func (fr *FieldRegistry) AddField(field *Field) {

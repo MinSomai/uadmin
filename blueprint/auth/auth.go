@@ -35,7 +35,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				templatecontext.AdminContext
 			}
 			c := &Context{}
-			adminRequestParams := templatecontext.NewAdminRequestParams()
+			adminRequestParams := interfaces.NewAdminRequestParams()
 			adminRequestParams.NeedAllLanguages = true
 			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
@@ -45,12 +45,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			type Context struct {
 				templatecontext.AdminContext
 				Menu     string
+				CurrentPath string
 			}
 
 			c := &Context{}
-			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
+			templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 			menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
 			c.Menu = menu
+			c.CurrentPath = ctx.Request.URL.Path
 			tr := interfaces.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
 		}
@@ -71,7 +73,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 
 		c := &Context{}
-		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
+		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
 		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
@@ -85,7 +87,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			requestForm, _ := ctx.MultipartForm()
 			formError := form1.ProceedRequest(requestForm, user)
 			if formError.IsEmpty() {
-				db := interfaces.GetDB()
+				uadminDatabase := interfaces.NewUadminDatabase()
+				defer uadminDatabase.Close()
+				db := uadminDatabase.Db
 				db.Save(user)
 				ctx.Redirect(200, ctx.Request.URL.String())
 				return

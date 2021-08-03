@@ -18,9 +18,9 @@ func (m insert_all_1623263908) GetId() int64 {
     return 1623263908
 }
 
-func (m insert_all_1623263908) Up() {
+func (m insert_all_1623263908) Up(uadminDatabase *interfaces.UadminDatabase) error {
     // Check if the uAdmin category is not there and add it
-    db := interfaces.GetDB()
+    db := uadminDatabase.Db
     var uadminSettingcategory settingmodel.SettingCategory
     db.Model(&settingmodel.SettingCategory{}).Where(&settingmodel.SettingCategory{Name: "uAdmin"}).First(&uadminSettingcategory)
     if uadminSettingcategory.ID == 0 {
@@ -491,7 +491,7 @@ func (m insert_all_1623263908) Up() {
     var s settingmodel.Setting
     sList := []settingmodel.Setting{}
     db.Model(&settingmodel.Setting{}).Where(&settingmodel.Setting{CategoryID: uadminSettingcategory.ID}).Find(&sList)
-    tx := interfaces.GetDB().Begin()
+    tx := db
     for _, setting := range settings {
         s = settingmodel.Setting{}
         for c := range sList {
@@ -515,12 +515,13 @@ func (m insert_all_1623263908) Up() {
             }
         }
     }
-    tx.Commit()
+    return nil
 }
 
-func (m insert_all_1623263908) Down() {
-    db := interfaces.GetDB()
+func (m insert_all_1623263908) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     db.Unscoped().Where("1 = 1").Delete(&settingmodel.Setting{})
+    return nil
 }
 
 func (m insert_all_1623263908) Deps() []string {

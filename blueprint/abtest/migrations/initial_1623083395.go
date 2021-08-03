@@ -17,15 +17,15 @@ func (m initial_1623083395) GetId() int64 {
     return 1623083395
 }
 
-func (m initial_1623083395) Up() {
-    db := interfaces.GetDB()
+func (m initial_1623083395) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.AutoMigrate(abtestmodel.ABTest{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.AutoMigrate(abtestmodel.ABTestValue{})
     if err != nil {
-        panic(err)
+        return err
     }
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&abtestmodel.ABTest{})
@@ -35,17 +35,18 @@ func (m initial_1623083395) Up() {
     stmt.Parse(&abtestmodel.ABTestValue{})
     contentType = &interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}
     db.Create(contentType)
+    return nil
 }
 
-func (m initial_1623083395) Down() {
-    db := interfaces.GetDB()
+func (m initial_1623083395) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.Migrator().DropTable(abtestmodel.ABTestValue{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.Migrator().DropTable(abtestmodel.ABTest{})
     if err != nil {
-        panic(err)
+        return err
     }
     var contentType interfaces.ContentType
     stmt := &gorm.Statement{DB: db}
@@ -56,6 +57,7 @@ func (m initial_1623083395) Down() {
     stmt.Parse(&abtestmodel.ABTest{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Delete(&contentType)
+    return nil
 }
 
 func (m initial_1623083395) Deps() []string {

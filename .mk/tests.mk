@@ -1,4 +1,5 @@
 TEST_PATTERN?=
+RACE?=-race
 UT_PACKAGES?=$(shell $(GO) list ./...)
 FUNC_TESTS_CMD:="grep -e 'func Test${TEST_PATTERN}' tests/*.go | perl -pe 's|.*func (.*?)\(.*|\1|g' | shuf"
 FUNC_TESTS:=$(shell sh -c $(FUNC_TESTS_CMD))
@@ -81,11 +82,11 @@ ifneq ($(TEST_PATTERN),)
 	set -v ; \
 	export UADMIN_PATH=$(shell pwd) ; \
 	$(GO) clean -testcache ; \
-	$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" -race ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} ${UT_PACKAGES}
+	$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} ${UT_PACKAGES}
 else
 	set -v ; \
 	export UADMIN_PATH=$(shell pwd) ; \
 	$(GO) clean -testcache ; \
-	$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" -race ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} ${UT_PACKAGES}
+	$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} ${UT_PACKAGES}
 endif
 endif

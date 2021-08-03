@@ -18,8 +18,10 @@ func GetLanguage(c *gin.Context) *langmodel.Language {
 		return GetDefaultLanguage()
 	}
 	var lang langmodel.Language
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	db := uadminDatabase.Db
 	db.Model(langmodel.Language{}).Where(&langmodel.Language{Code: langCookie}).First(&lang)
+	uadminDatabase.Close()
 	return &lang
 }
 
@@ -29,7 +31,9 @@ func GetDefaultLanguage() *langmodel.Language {
 		return defaultLang
 	}
 	var lang langmodel.Language
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	db.Model(langmodel.Language{}).Where(&langmodel.Language{Default: true}).First(&lang)
 	defaultLang = &lang
 	return &lang
@@ -38,7 +42,9 @@ func GetDefaultLanguage() *langmodel.Language {
 // GetActiveLanguages returns a list of active langages
 func GetActiveLanguages() []langmodel.Language {
 	var langs []langmodel.Language
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	db.Model(langmodel.Language{}).Where(&langmodel.Language{Active: true}).Find(&langs)
 	return langs
 }

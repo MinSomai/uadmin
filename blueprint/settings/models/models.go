@@ -837,7 +837,10 @@ func syncSystemSettings() {
 	var s Setting
 	sList := []Setting{}
 	// database.Filter(&sList, "category_id = ?", cat.ID)
-	tx := interfaces.GetDB("default").Begin()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
+	tx := db.Begin()
 	for i, setting := range settings {
 		interfaces.Trail(interfaces.WORKING, "Synching System Settings: [%s%d/%d%s]", colors.FGGreenB, i+1, len(settings), colors.FGNormal)
 		s = Setting{}

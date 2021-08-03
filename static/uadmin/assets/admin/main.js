@@ -72,7 +72,7 @@ function setHomeTabs(me, container, extclass){
     var tooltip = me[i].ToolTip;
 
     if (url == '') {
-      url = RootURL+lowercase_name+'/';
+      url = CurrentPath+lowercase_name+'/';
     }
     if (icon == '') {
       icon = '/static-inbuilt/uadmin/assets/admin/images/icons/'+lowercase_name+'.png';
@@ -85,7 +85,7 @@ function setHomeTabs(me, container, extclass){
     //   }
     // }
     content += '<div id="model-' + lowercase_name.replace(" ", "-") + '" class="'+extclass+'">';
-    content += '  <a class="no-style" href="'+RootURL + "/" + url +'">';
+    content += '  <a class="no-style" href="'+CurrentPath + "/" + url +'">';
     content += '  <center>';
     content += '    <div class="pop_itemHV defaultmargin container-fluid hvr-grow col-md-12" style="width:100%;" >';
     content += withribbon;
@@ -357,7 +357,7 @@ function tableOrder (me, type){
 }
 
 
-function paginator(container_id, page_count, schemaname, pindex){
+function paginator(container_id, page_count, pindex){
       if (page_count <= 1) {
         return;
       }

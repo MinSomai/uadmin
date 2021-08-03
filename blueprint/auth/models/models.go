@@ -12,6 +12,6 @@ type UserAuthToken struct {
 	User       models.User
 	UserID     uint
 	Token      string
-	SessionDuration  *time.Duration
+	SessionDuration  time.Duration
 }
 

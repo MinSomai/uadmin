@@ -7,11 +7,14 @@ import (
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
+	"net/url"
 	"time"
 )
 
 type IAdminContext interface {
 	SetSiteName(siteName string)
+	SetCurrentURL(currentURL string)
+	SetFullURL(fullURL *url.URL)
 	SetRootAdminURL(rootAdminURL string)
 	SetSessionKey(sessionKey string)
 	SetRootURL(rootURL string)
@@ -28,20 +31,6 @@ type IAdminContext interface {
 	GetLanguage() *langmodel.Language
 	GetRootURL() string
 	SetUserPermissionRegistry(permRegistry *interfaces.UserPermRegistry)
-}
-
-type AdminRequestParams struct {
-	CreateSession bool
-	GenerateCSRFToken bool
-	NeedAllLanguages bool
-}
-
-func NewAdminRequestParams() *AdminRequestParams {
-	return &AdminRequestParams{
-		CreateSession: true,
-		GenerateCSRFToken: true,
-		NeedAllLanguages: false,
-	}
 }
 
 type AdminContext struct {
@@ -63,10 +52,20 @@ type AdminContext struct {
 	UserExists bool
 	Demo bool
 	UserPermissionRegistry *interfaces.UserPermRegistry
+	CurrentURL string
+	FullURL *url.URL
 }
 
 func (c *AdminContext) SetSiteName(siteName string) {
 	c.SiteName = siteName
+}
+
+func (c *AdminContext) SetCurrentURL(currentURL string) {
+	c.CurrentURL = currentURL
+}
+
+func (c *AdminContext) SetFullURL(fullURL *url.URL) {
+	c.FullURL = fullURL
 }
 
 func (c *AdminContext) SetRootAdminURL(rootAdminURL string) {
@@ -133,7 +132,7 @@ func (c *AdminContext) SetErrorExists() {
 	c.ErrExists = true
 }
 
-func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContext, adminRequestParams *AdminRequestParams) {
+func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContext, adminRequestParams *interfaces.AdminRequestParams) {
 	sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 	var cookieName string
 	cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
@@ -160,6 +159,8 @@ func PopulateTemplateContextForAdminPanel(ctx *gin.Context, context IAdminContex
 	if session == nil {
 		session.Save()
 	}
+	context.SetCurrentURL(ctx.Request.URL.Path)
+	context.SetFullURL(ctx.Request.URL)
 	context.SetSiteName(interfaces.CurrentConfig.D.Uadmin.SiteName)
 	context.SetRootAdminURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
 	if session != nil {

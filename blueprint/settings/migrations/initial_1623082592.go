@@ -17,8 +17,8 @@ func (m initial_1623082592) GetId() int64 {
     return 1623082592
 }
 
-func (m initial_1623082592) Up() {
-    db := interfaces.GetDB()
+func (m initial_1623082592) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     db.AutoMigrate(models.SettingCategory{})
     db.AutoMigrate(models.Setting{})
     stmt := &gorm.Statement{DB: db}
@@ -29,17 +29,18 @@ func (m initial_1623082592) Up() {
     stmt.Parse(&models.Setting{})
     settingContentType := &interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}
     db.Create(settingContentType)
+    return nil
 }
 
-func (m initial_1623082592) Down() {
-    db := interfaces.GetDB()
+func (m initial_1623082592) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.Migrator().DropTable(models.Setting{})
     if err != nil {
-        panic(err)
+        return err
     }
     err = db.Migrator().DropTable(models.SettingCategory{})
     if err != nil {
-        panic(err)
+        return err
     }
     var contentType interfaces.ContentType
     stmt := &gorm.Statement{DB: db}
@@ -50,6 +51,7 @@ func (m initial_1623082592) Down() {
     stmt.Parse(&models.Setting{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Delete(&contentType)
+    return nil
 }
 
 func (m initial_1623082592) Deps() []string {

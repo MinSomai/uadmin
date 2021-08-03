@@ -3,7 +3,6 @@ package forms
 import (
 	"bytes"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/form"
@@ -390,14 +389,12 @@ func (w *WidgetTestSuite) TestFileWidget() {
 	writer := multipart.NewWriter(body)
 	err := writer.SetBoundary("foo")
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
 	path := os.Getenv("UADMIN_PATH") + "/tests/file_for_uploading.txt"
 	file, err := os.Open(path)
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
@@ -410,19 +407,16 @@ func (w *WidgetTestSuite) TestFileWidget() {
 	defer os.RemoveAll(fmt.Sprintf("%s/%s", os.Getenv("UADMIN_PATH"), "upload-for-tests"))
 	part, err := writer.CreateFormFile("dsadas", filepath.Base(path))
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
 	_, err = io.Copy(part, file)
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
 	err = writer.Close()
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
@@ -466,14 +460,12 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 	writer := multipart.NewWriter(body)
 	err := writer.SetBoundary("foo")
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
 	path := os.Getenv("UADMIN_PATH") + "/tests/file_for_uploading.txt"
 	file, err := os.Open(path)
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
@@ -486,19 +478,16 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 	defer os.RemoveAll(fmt.Sprintf("%s/%s", os.Getenv("UADMIN_PATH"), "upload-for-tests"))
 	part, err := writer.CreateFormFile("dsadas", filepath.Base(path))
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
 	_, err = io.Copy(part, file)
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}
 	err = writer.Close()
 	if err != nil {
-		spew.Dump("File widget error", err)
 		assert.True(w.T(), false)
 		return
 	}

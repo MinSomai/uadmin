@@ -48,7 +48,9 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	var user usermodels.User
 	db.Model(usermodels.User{}).Where(&usermodels.User{Username: json.SigninField}).First(&user)
 	if user.ID == 0 {
@@ -117,7 +119,9 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	//	user.GeneratedOTPToVerify = ""
 	//	db.Save(&user)
 	//}
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass(json.Password, salt)

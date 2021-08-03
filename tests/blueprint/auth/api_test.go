@@ -90,7 +90,9 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		Active:       false,
 		Salt: salt,
 	}
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	db.Create(&user)
 	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
@@ -215,7 +217,9 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		Active:       false,
 		Salt: salt,
 	}
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	db.Create(&user)
 	req, _ = http.NewRequest("POST", "/auth/direct/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
@@ -314,7 +318,10 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 				Subject: "Password reset for admin panel",
 			})
 			var oneTimeAction usermodels.OneTimeAction
-			interfaces.GetDB().Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
+			uadminDatabase := interfaces.NewUadminDatabase()
+			defer uadminDatabase.Close()
+			db := uadminDatabase.Db
+			db.Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
 			var jsonStr1 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
 			req1, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr1))
 			req1.Header.Set(
@@ -325,7 +332,10 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 			req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
 			uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
 				var oneTimeAction usermodels.OneTimeAction
-				interfaces.GetDB().Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
+				uadminDatabase := interfaces.NewUadminDatabase()
+				defer uadminDatabase.Close()
+				db := uadminDatabase.Db
+				db.Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
 				assert.True(s.T(), oneTimeAction.IsUsed)
 				assert.Equal(s.T(), w.Code, 200)
 				return w.Code == 200

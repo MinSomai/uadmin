@@ -45,7 +45,9 @@ type SyncContentTypes struct {
 }
 
 func (command SyncContentTypes) Proceed(subaction string, args []string) error {
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	var contentType interfaces.ContentType
 	var permission usermodels.Permission
 	for blueprintRootAdminPage := range admin.CurrentDashboardAdminPanel.AdminPages.GetAll() {

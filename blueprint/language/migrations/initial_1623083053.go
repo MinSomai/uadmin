@@ -17,29 +17,31 @@ func (m initial_1623083053) GetId() int64 {
     return 1623083053
 }
 
-func (m initial_1623083053) Up() {
-    db := interfaces.GetDB()
+func (m initial_1623083053) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.AutoMigrate(langmodel.Language{})
     if err != nil {
-        panic(err)
+        return err
     }
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&langmodel.Language{})
     contentType := &interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}
     db.Create(contentType)
+    return nil
 }
 
-func (m initial_1623083053) Down() {
-    db := interfaces.GetDB()
+func (m initial_1623083053) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    db := uadminDatabase.Db
     err := db.Migrator().DropTable(langmodel.Language{})
     if err != nil {
-        panic(err)
+        return err
     }
     var contentType interfaces.ContentType
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&langmodel.Language{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Delete(&contentType)
+    return nil
 }
 
 func (m initial_1623083053) Deps() []string {

@@ -1,5 +1,7 @@
 package migrations
 
+import "github.com/uadmin/uadmin/interfaces"
+
 type adding_use_1623259185 struct {
 }
 
@@ -11,10 +13,12 @@ func (m adding_use_1623259185) GetId() int64 {
     return 1623259185
 }
 
-func (m adding_use_1623259185) Up() {
+func (m adding_use_1623259185) Up(uadminDatabase *interfaces.UadminDatabase) error {
+    return nil
 }
 
-func (m adding_use_1623259185) Down() {
+func (m adding_use_1623259185) Down(uadminDatabase *interfaces.UadminDatabase) error {
+    return nil
 }
 
 func (m adding_use_1623259185) Deps() []string {

@@ -22,13 +22,11 @@ import (
 type UadminTestSuite struct {
 	suite.Suite
 	App *App
-	Db *gorm.DB
 }
 
 func (suite *UadminTestSuite) SetupTest() {
-	app, db := NewFullAppForTests()
+	app := NewFullAppForTests()
 	suite.App = app
-	suite.Db = db
 }
 
 func (suite *UadminTestSuite) TearDownSuite() {
@@ -160,11 +158,13 @@ func Run(t *testing.T, currentsuite suite.TestingSuite) {
 					downCommand := MigrateCommand{}
 					downCommand.Proceed("down", make([]string, 0))
 				} else {
-					interfaces.GetDB().Transaction(func(tx *gorm.DB) error {
+					uadminDatabase := interfaces.NewUadminDatabase()
+					uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
 						method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
 						// return nil will commit the whole transaction
 						return fmt.Errorf("dont commit")
 					})
+					uadminDatabase.Close()
 				}
 			},
 		}
@@ -209,7 +209,7 @@ func runTests(t testing.TB, tests []testing.InternalTest) {
 	}
 }
 
-func NewTestApp() (*App, *gorm.DB) {
+func NewTestApp() *App {
 	a := App{}
 	a.DashboardAdminPanel = admin.NewDashboardAdminPanel()
 	admin.CurrentDashboardAdminPanel = a.DashboardAdminPanel
@@ -235,13 +235,8 @@ func NewTestApp() (*App, *gorm.DB) {
 	interfaces.CurrentDatabaseSettings = &interfaces.DatabaseSettings{
 		Default: a.Config.D.Db.Default,
 	}
-	dialectdb := interfaces.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
-	db, err := dialectdb.GetDb()
-	if err != nil {
-		panic(fmt.Errorf("Couldn't initialize db %s", err))
-	}
 	StoreCurrentApp(&a)
-	return &a, db
+	return &a
 }
 
 // Helper function to process a request and test its response
@@ -260,20 +255,15 @@ func TestHTTPResponse(t *testing.T, app *App, req *http.Request, f func(w *httpt
 
 var appForTests *App
 
-func NewFullAppForTests() (*App, *gorm.DB) {
+func NewFullAppForTests() *App {
 	if appForTests != nil {
-		return appForTests, interfaces.GetDB()
+		return appForTests
 	}
 	a := NewApp("test")
-	dialectdb := interfaces.NewDbDialect(a.Database.ConnectTo("default"), a.Config.D.Db.Default.Type)
-	db, err := dialectdb.GetDb()
-	if err != nil {
-		panic(fmt.Errorf("Couldn't initialize db %s", err))
-	}
 	appForTests = a
 	// appForTests.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
 	StoreCurrentApp(a)
-	return a, db
+	return a
 }
 //type UadminTestSuite struct {
 //	suite.Suite

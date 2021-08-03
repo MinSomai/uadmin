@@ -14,8 +14,8 @@ type IMigrationRegistry interface {
 }
 
 type IMigration interface {
-	Up()
-	Down()
+	Up(uadminDatabase *UadminDatabase) error
+	Down(uadminDatabase *UadminDatabase) error
 	GetName() string
 	GetId() int64
 	Deps() []string
@@ -34,8 +34,8 @@ type IMigrationNode interface {
 	TraverseDeps(migrationList []string, depList MigrationDepList) MigrationDepList
 	TraverseChildren(migrationList []string) []string
 	IsDummy() bool
-	Downgrade()
-	Apply()
+	Downgrade(uadminDatabase *UadminDatabase) error
+	Apply(uadminDatabase *UadminDatabase) error
 }
 
 type IMigrationTree interface {
@@ -64,14 +64,20 @@ func (n MigrationNode) IsDummy() bool {
 	return n.dummy
 }
 
-func (n MigrationNode) Apply() {
-	n.Node.Up()
-	n.applied = true
+func (n MigrationNode) Apply(uadminDatabase *UadminDatabase) error {
+	res := n.Node.Up(uadminDatabase)
+	if res == nil {
+		n.applied = true
+	}
+	return res
 }
 
-func (n MigrationNode) Downgrade() {
-	n.Node.Down()
-	n.applied = false
+func (n MigrationNode) Downgrade(uadminDatabase *UadminDatabase) error {
+	res := n.Node.Down(uadminDatabase)
+	if res == nil {
+		n.applied = false
+	}
+	return res
 }
 
 func (n MigrationNode) GetMigration() IMigration {

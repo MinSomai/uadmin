@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/abtest/migrations"
+	abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
 	"github.com/uadmin/uadmin/interfaces"
 )
 
@@ -13,7 +14,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	abTestAdminPage := admin.NewAdminPage("")
+	abTestAdminPage := admin.NewGormAdminPage(func() interface{} {return nil}, "")
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
 	abTestAdminPage.BlueprintName = "abtest"
@@ -37,7 +38,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
 	}
-	abtestmodelAdminPage := admin.NewAdminPage("abtest")
+	abtestmodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &abtestmodel.ABTest{}}, "abtest")
 	abtestmodelAdminPage.PageName = "AB Tests"
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
@@ -46,7 +47,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
 	}
-	abtestvaluemodelAdminPage := admin.NewAdminPage("abtestvalue")
+	abtestvaluemodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &abtestmodel.ABTestValue{}}, "abtestvalue")
 	abtestvaluemodelAdminPage.PageName = "AB Test Values"
 	abtestvaluemodelAdminPage.Slug = "abtestvalue"
 	abtestvaluemodelAdminPage.BlueprintName = "abtest"
@@ -58,6 +59,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	interfaces.ProjectModels.RegisterModel(&abtestmodel.ABTestValue{})
+	interfaces.ProjectModels.RegisterModel(&abtestmodel.ABTest{})
 }
 
 var ConcreteBlueprint = Blueprint{

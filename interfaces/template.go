@@ -3,7 +3,6 @@ package interfaces
 import (
 	"bytes"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"io/fs"
 	"strings"
@@ -62,7 +61,6 @@ func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interfa
 			if len(data1) == 1 {
 				data2 = data1[0]
 				if strings.Contains(path, "multipleinputhidden") {
-					spew.Dump("DDDDDD", data2)
 				}
 			}
 			return tr.RenderAsString(fsys, CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)

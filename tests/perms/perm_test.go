@@ -13,7 +13,9 @@ type PermTestSuite struct {
 }
 
 func (suite *PermTestSuite) TestIntegration() {
-	db := interfaces.GetDB()
+	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	db := uadminDatabase.Db
 	contentType := interfaces.ContentType{BlueprintName: "user", ModelName: "user"}
 	db.Create(&contentType)
 	permission := usermodels.Permission{ContentType: contentType, PermissionBits: interfaces.RevertPermBit}

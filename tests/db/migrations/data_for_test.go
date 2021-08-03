@@ -16,12 +16,14 @@ func (m initial_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m initial_1621667392) Up() {
+func (m initial_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = append(appliedMigrations, m.GetName())
+	return nil
 }
 
-func (m initial_1621667392) Down() {
+func (m initial_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	return nil
 }
 
 func (m initial_1621667392) Deps() []string {
@@ -39,12 +41,14 @@ func (m migration2_1621667393) GetId() int64 {
 	return 1621667393
 }
 
-func (m migration2_1621667393) Up() {
+func (m migration2_1621667393) Up(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = append(appliedMigrations, m.GetName())
+	return nil
 }
 
-func (m migration2_1621667393) Down() {
+func (m migration2_1621667393) Down(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	return nil
 }
 
 func (m migration2_1621667393) Deps() []string {
@@ -62,12 +66,14 @@ func (m initialtest1_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m initialtest1_1621667392) Up() {
+func (m initialtest1_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = append(appliedMigrations, m.GetName())
+	return nil
 }
 
-func (m initialtest1_1621667392) Down() {
+func (m initialtest1_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	return nil
 }
 
 func (m initialtest1_1621667392) Deps() []string {
@@ -85,12 +91,14 @@ func (m migration2test_1621667393) GetId() int64 {
 	return 1621667393
 }
 
-func (m migration2test_1621667393) Up() {
+func (m migration2test_1621667393) Up(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = append(appliedMigrations, m.GetName())
+	return nil
 }
 
-func (m migration2test_1621667393) Down() {
+func (m migration2test_1621667393) Down(uadminDatabase *interfaces.UadminDatabase) error {
 	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	return nil
 }
 
 func (m migration2test_1621667393) Deps() []string {
@@ -108,10 +116,12 @@ func (m initialblueprintconflicts_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m initialblueprintconflicts_1621667392) Up() {
+func (m initialblueprintconflicts_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m initialblueprintconflicts_1621667392) Down() {
+func (m initialblueprintconflicts_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m initialblueprintconflicts_1621667392) Deps() []string {
@@ -129,10 +139,12 @@ func (m migration2blueprintconflicts_1621667392) GetId() int64 {
 	return 1621667393
 }
 
-func (m migration2blueprintconflicts_1621667392) Up() {
+func (m migration2blueprintconflicts_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m migration2blueprintconflicts_1621667392) Down() {
+func (m migration2blueprintconflicts_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m migration2blueprintconflicts_1621667392) Deps() []string {
@@ -150,10 +162,12 @@ func (m migration3blueprintconflicts_1621667392) GetId() int64 {
 	return 1621667394
 }
 
-func (m migration3blueprintconflicts_1621667392) Up() {
+func (m migration3blueprintconflicts_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m migration3blueprintconflicts_1621667392) Down() {
+func (m migration3blueprintconflicts_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m migration3blueprintconflicts_1621667392) Deps() []string {
@@ -171,10 +185,12 @@ func (m migration4blueprintconflicts_1621667392) GetId() int64 {
 	return 1621667395
 }
 
-func (m migration4blueprintconflicts_1621667392) Up() {
+func (m migration4blueprintconflicts_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m migration4blueprintconflicts_1621667392) Down() {
+func (m migration4blueprintconflicts_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m migration4blueprintconflicts_1621667392) Deps() []string {
@@ -192,10 +208,12 @@ func (m nodeps1_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m nodeps1_1621667392) Up() {
+func (m nodeps1_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m nodeps1_1621667392) Down() {
+func (m nodeps1_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m nodeps1_1621667392) Deps() []string {
@@ -213,10 +231,12 @@ func (m nodeps2_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m nodeps2_1621667392) Up() {
+func (m nodeps2_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m nodeps2_1621667392) Down() {
+func (m nodeps2_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m nodeps2_1621667392) Deps() []string {
@@ -234,10 +254,12 @@ func (m loopedmigration1_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m loopedmigration1_1621667392) Up() {
+func (m loopedmigration1_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m loopedmigration1_1621667392) Down() {
+func (m loopedmigration1_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m loopedmigration1_1621667392) Deps() []string {
@@ -255,10 +277,12 @@ func (m loopedmigration2_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m loopedmigration2_1621667392) Up() {
+func (m loopedmigration2_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m loopedmigration2_1621667392) Down() {
+func (m loopedmigration2_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m loopedmigration2_1621667392) Deps() []string {
@@ -276,10 +300,12 @@ func (m samenamemigration1_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m samenamemigration1_1621667392) Up() {
+func (m samenamemigration1_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m samenamemigration1_1621667392) Down() {
+func (m samenamemigration1_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m samenamemigration1_1621667392) Deps() []string {
@@ -297,10 +323,12 @@ func (m samenamemigration2_1621667392) GetId() int64 {
 	return 1621667392
 }
 
-func (m samenamemigration2_1621667392) Up() {
+func (m samenamemigration2_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
-func (m samenamemigration2_1621667392) Down() {
+func (m samenamemigration2_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
+	return nil
 }
 
 func (m samenamemigration2_1621667392) Deps() []string {
