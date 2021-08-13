@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	sessioninterfaces "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/interfaces"
 )
 
 type IAuthProvider interface {
-	GetUserFromRequest (c *gin.Context) *usermodels.User
+	GetUserFromRequest (c *gin.Context) *interfaces.User
 	Signin(c *gin.Context)
 	Logout(c *gin.Context)
 	IsAuthenticated(c *gin.Context)

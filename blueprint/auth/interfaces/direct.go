@@ -8,7 +8,6 @@ import (
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	sessioninterfaces "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	user2 "github.com/uadmin/uadmin/blueprint/user"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -35,7 +34,7 @@ type SignupParams struct {
 type DirectAuthProvider struct {
 }
 
-func (ap *DirectAuthProvider) GetUserFromRequest(c *gin.Context) *usermodels.User {
+func (ap *DirectAuthProvider) GetUserFromRequest(c *gin.Context) *interfaces.User {
 	session := ap.GetSession(c)
 	if session != nil {
 		return session.GetUser()
@@ -51,16 +50,20 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	}
 	db := interfaces.NewUadminDatabase()
 	defer db.Close()
-	var user usermodels.User
+	var user interfaces.User
 	// @todo, complete
 	directApiSigninByField := interfaces.CurrentConfig.D.Uadmin.DirectApiSigninByField
-	db.Db.Model(usermodels.User{}).Where(fmt.Sprintf("%s = ?", directApiSigninByField), json.SigninField).First(&user)
+	db.Db.Model(interfaces.User{}).Where(fmt.Sprintf("%s = ?", directApiSigninByField), json.SigninField).First(&user)
 	if user.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
 		return
 	}
 	if !user.Active {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
+		return
+	}
+	if !user.IsPasswordConfigured {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
 		return
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password + user.Salt))
@@ -136,12 +139,13 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass(json.Password, salt)
-	user := usermodels.User{
+	user := interfaces.User{
 		Username:     json.Username,
 		Email: json.Email,
 		Password:     hashedPassword,
 		Active:       true,
 		Salt: salt,
+		IsPasswordConfigured: true,
 	}
 	db.Db.Create(&user)
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
@@ -219,7 +223,7 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 	c.JSON(http.StatusOK, GetUserForApi(sessionAdapter.GetUser()))
 }
 
-var GetUserForApi func(user *usermodels.User) *gin.H = func(user *usermodels.User) *gin.H {
+var GetUserForApi func(user *interfaces.User) *gin.H = func(user *interfaces.User) *gin.H {
 	return &gin.H{"name": user.Username, "id": user.ID}
 }
 

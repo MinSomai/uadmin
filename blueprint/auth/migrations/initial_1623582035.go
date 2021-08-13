@@ -1,7 +1,6 @@
 package migrations
 
 import (
-    models2 "github.com/uadmin/uadmin/blueprint/auth/models"
     "github.com/uadmin/uadmin/interfaces"
 )
 
@@ -18,7 +17,7 @@ func (m initial_1623582035) GetId() int64 {
 
 func (m initial_1623582035) Up(uadminDatabase *interfaces.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.AutoMigrate(models2.UserAuthToken{})
+    err := db.AutoMigrate(interfaces.UserAuthToken{})
     if err != nil {
         return err
     }
@@ -27,7 +26,7 @@ func (m initial_1623582035) Up(uadminDatabase *interfaces.UadminDatabase) error 
 
 func (m initial_1623582035) Down(uadminDatabase *interfaces.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.Migrator().DropTable(models2.UserAuthToken{})
+    err := db.Migrator().DropTable(interfaces.UserAuthToken{})
     if err != nil {
         return err
     }

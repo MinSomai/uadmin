@@ -289,6 +289,8 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 }
 
 func (r BlueprintRegistry) Initialize() {
+	ClearProjectModels()
+	ProjectModels.RegisterModel(func() interface{}{return &ContentType{}})
 	for blueprint := range r.Iterate() {
 		blueprint.Init()
 	}

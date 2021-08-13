@@ -25,6 +25,17 @@ func (ABTestType) Model() ABTestType {
 	return 2
 }
 
+func HumanizeAbTestType(abTestType ABTestType) string {
+	switch abTestType {
+	case 1:
+		return "static"
+	case 2:
+		return "model"
+	default:
+		return "unknown"
+	}
+}
+
 // ModelList a list of registered models
 type ModelList int
 
@@ -64,6 +75,10 @@ type ABTest struct {
 	Active      bool
 	Group       string
 	ResetABTest string `uadmin:"link"`
+}
+
+func (m *ABTest) String() string {
+	return fmt.Sprintf("ABTest %s", m.Name)
 }
 
 // Save !

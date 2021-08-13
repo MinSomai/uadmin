@@ -5,7 +5,6 @@ import (
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/blueprint/sessions/migrations"
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/template"
 	"github.com/uadmin/uadmin/utils"
 	"strings"
 )
@@ -78,7 +77,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Next()
 		}
 	}())
-	template.FuncMap["CSRF"] = func(Key string) string {
+	interfaces.FuncMap["CSRF"] = func(Key string) string {
 		sessionAdapter, _ := ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		session, _ := sessionAdapter.GetByKey(Key)
 		csrfToken, _ := session.Get("csrf_token")
@@ -88,6 +87,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 func (b Blueprint) Init() {
 	b.SessionAdapterRegistry.RegisterNewAdapter(&interfaces2.DbSession{}, true)
+	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.Session{}})
 }
 
 var ConcreteBlueprint = Blueprint{

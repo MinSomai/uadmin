@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/nfnt/resize"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	"github.com/uadmin/uadmin/interfaces"
 	model2 "github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
@@ -25,7 +24,7 @@ type GetImageSizer interface {
 	GetImageSize() (int, int)
 }
 
-func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *sessionmodel.Session, s *model2.ModelSchema) (val string) {
+func ProcessUpload(r *http.Request, f *model2.F, modelName string, session *interfaces.Session, s *model2.ModelSchema) (val string) {
 	base64Format := false
 	// Get file description from http request
 	httpFile, handler, err := r.FormFile(f.Name)

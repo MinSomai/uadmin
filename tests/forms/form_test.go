@@ -3,14 +3,12 @@ package forms
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/form"
 	"github.com/uadmin/uadmin/interfaces"
 	"testing"
 )
 
 type UsernameFormOptions struct {
-	form.FieldFormOptions
+	interfaces.FieldFormOptions
 }
 
 type FormTestSuite struct {
@@ -21,7 +19,7 @@ func (s *FormTestSuite) TestFormBuilder() {
 	fieldChoiceRegistry := interfaces.FieldChoiceRegistry{}
 	fieldChoiceRegistry.Choices = make([]*interfaces.FieldChoice, 0)
 	formOptions := &UsernameFormOptions{
-		FieldFormOptions: form.FieldFormOptions{
+		FieldFormOptions: interfaces.FieldFormOptions{
 			Name: "UsernameOptions",
 			Initial: "InitialUsername",
 			DisplayName: "Display name",
@@ -32,8 +30,8 @@ func (s *FormTestSuite) TestFormBuilder() {
 	}
 	interfaces.CurrentConfig.AddFieldFormOptions(formOptions)
 	// initial=\"test\",displayname=\"uname\",validators=\"password-uadmin\",choices=UsernameChoices,helptext=\"HELPPPPPPPPPP\"
-	user := &usermodels.User{}
-	form1 := form.NewFormFromModel(user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
+	user := &interfaces.User{}
+	form1 := interfaces.NewFormFromModel(user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
 	res := form1.Render()
 	assert.Contains(s.T(), res, "<form")
 	form2 := NewTestForm()

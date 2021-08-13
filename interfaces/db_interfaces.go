@@ -10,6 +10,14 @@ import (
 	"text/template"
 )
 
+type DeleteRowStructure struct {
+	SQL string
+	Values []interface{}
+	Explanation string
+	Table string
+	Cond string
+}
+
 type IDbAdapter interface {
 	Equals(name interface{}, args ...interface{})
 	Quote(name interface{}) string
@@ -54,6 +62,7 @@ type IDbAdapter interface {
 	IsNull(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
 	Regex(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
 	IRegex(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	BuildDeleteString(table string, cond string, values ...interface{}) *DeleteRowStructure
 }
 
 var Db *gorm.DB

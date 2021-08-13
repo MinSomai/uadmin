@@ -2,8 +2,6 @@ package models
 
 import (
 	"fmt"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
-	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/colors"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/metrics"
@@ -18,6 +16,10 @@ type SettingCategory struct {
 	interfaces.Model
 	Name string
 	Icon string `uadmin:"image"`
+}
+
+func (m *SettingCategory) String() string {
+	return fmt.Sprintf("Setting category %s", m.Name)
 }
 
 // DataType is a list of data types used for settings
@@ -58,6 +60,27 @@ func (DataType) DateTime() DataType {
 	return 7
 }
 
+func HumanizeDataType(dataType DataType) string {
+	switch dataType {
+	case 1:
+		return "string"
+	case 2:
+		return "integer"
+	case 3:
+		return "float"
+	case 4:
+		return "boolean"
+	case 5:
+		return "file"
+	case 6:
+		return "image"
+	case 7:
+		return "datetime"
+	default:
+		return "unknown"
+	}
+}
+
 // Setting model stored system settings
 type Setting struct {
 	interfaces.Model
@@ -69,6 +92,10 @@ type Setting struct {
 	Category     SettingCategory `uadmin:"required;filter"`
 	CategoryID   uint
 	Code         string `uadmin:"read_only;search"`
+}
+
+func (m *Setting) String() string {
+	return fmt.Sprintf("Setting %s", m.Name)
 }
 
 // Save overides save
@@ -273,12 +300,14 @@ func (s *Setting) ApplyValue() {
 	case "uAdmin.CacheSessions":
 		preloaded.CacheSessions = v.(bool)
 		if preloaded.CacheSessions {
-			sessionmodel.LoadSessions()
+			// @todo, probably fix
+			// sessionmodel.LoadSessions()
 		}
 	case "uAdmin.CachePermissions":
 		preloaded.CachePermissions = v.(bool)
 		if preloaded.CachePermissions {
-			usermodel.LoadPermissions()
+			// @todo, probably fix
+			// usermodel.LoadPermissions()
 		}
 	case "uAdmin.PasswordAttempts":
 		preloaded.PasswordAttempts = v.(int)

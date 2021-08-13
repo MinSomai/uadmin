@@ -1,7 +1,25 @@
 {{Include "header"}}
 {{Include "header-bar"}}
+<style type="text/css">
+    #model-actions {
+        width: 200px;
+        display: inline-block;
+    }
+    #action-form button.button {
+        display: inline-block;
+        margin-left: 10px;
+    }
+    #action-form action-description {
+        padding-left: 10px;
+    }
+</style>
 <div class="container-fluid main-content admin-page">
     <div class="col-xs-12 justify-content-md-center" style="position:relative;padding:0px;margin:0px 0px 0px 0px; bottom:65px; top:30px;">
+        {{ if .Message }}
+        <div class="alert alert-info">
+            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{ .Message }}</span>
+        </div>
+        {{ end }}
         <div class="col-xs-9 col-sm-8" style="padding:0px;">
             <form method="GET" id="search-form">
                 <div id="search_box" class="input-group search" style="float:left;">
@@ -23,8 +41,38 @@
             </a>
             {{ end }}
         </div>
+        {{ if .AdminModelActionRegistry.IsThereAnyActions }}
+            <form method="POST" id="action-form">
+                <input type="hidden" name="csrf-token" value="{{CSRF .SessionKey}}" />
+                <input type="hidden" name="object_ids" value="" />
+                <div class="col-xs-12" style="padding:0px;margin:0px;margin-top:5px;" >
+                    <select class="form-control" id="model-actions">
+                        <option>Choose action</option>
+                        {{ end }}
+
+                        {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActions }}
+                        {{ if $adminModelAction.Placement.ShowOnTheListPage }}
+                        <option {{ if $adminModelAction.RequiresExtraSteps }}data-extrasteps="1"{{ end }} name="{{ $adminModelAction.SlugifiedActionName }}" data-description="{{ $adminModelAction.Description }}" data-method="{{ $adminModelAction.RequestMethod }}">{{ $adminModelAction.ActionName }}</option>
+                        {{ end }}
+                        {{ end }}
+
+                        {{ if .AdminModelActionRegistry.IsThereAnyActions }}
+                    </select><button type="submit" class="button" title="Run the selected action" name="index" value="0">Go</button>
+                    <span class="action-description"></span>
+                </div>
+            </form>
+        {{ end }}
         <div class="col-xs-12" style="padding:0px;margin:0px;margin-top:5px;" >
             <div class="{{if not .ListFilter.IsEmpty}}col-sm-10{{else}}col-sm-12{{end}} main-content2" style="margin:0px;padding:0px;overflow-x:auto;">
+                {{ if .ListDisplay.IsThereAnyEditable }}
+                    {{ if .ListEditableFormError }}
+                        <div class="alert alert-warning">
+                            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>There was some error, so no changed were saved</span>
+                        </div>
+                    {{ end }}
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf-token" value="{{CSRF .SessionKey}}" />
+                {{ end }}
                 <table style="margin:0px;padding:0px;width:100%;" id="listtable" class="table table-striped  table-bordered  table-hover table-condensed float-header">
                     <thead class="admin_font" >
                     <tr class="table-header capitalized">
@@ -47,17 +95,35 @@
                     {{range $iterateAdminObjects := .AdminFilterObjects.GetPaginated}}
                         <tr>
                             <td onclick="$('#main_check').prop('checked', false);">
-                                <input  class="item_check" type="checkbox">
+                                <input type="hidden" value="{{ $iterateAdminObjects.Id }}" name="object_id"/>
+                                <input  class="item_check" type="checkbox" value="{{ $iterateAdminObjects.Id }}">
                             </td>
                             {{$i  := 0 }}
+                            {{ $form := $listDisplay.BuildFormForListEditable $iterateAdminObjects.Id $iterateAdminObjects.Model}}
                             {{range $field := $listDisplay.GetAllFields}}
-                                <td>{{if eq $i 0}}<a href="{{$currentURL}}/{{$iterateAdminObjects.Id}}">{{ end }}{{ $field.GetValue $iterateAdminObjects.Model}}{{if eq $i 0}}</a>{{ end }}</td>
+                                <td>
+                                    {{if eq $i 0}}<a href="{{$currentURL}}/{{$iterateAdminObjects.Id}}">{{ end }}
+                                    {{ $fieldExistsInTheForm := $form.ExistsField $field }}
+                                    {{ if $fieldExistsInTheForm }}
+                                        {{ $fieldEditable := $form.FieldRegistry.GetByName $field.Field.Name }}
+                                        {{ $fieldEditable.FieldConfig.Widget.Render }}
+                                    {{ else }}
+                                        {{ $field.GetValue $iterateAdminObjects.Model}}
+                                    {{ end }}
+                                    {{if eq $i 0}}</a>{{ end }}
+                                </td>
                                 {{ $i = (add $i 1) }}
                             {{end}}
                         </tr>
                     {{end}}
                     </tbody>
                 </table>
+                {{ if .ListDisplay.IsThereAnyEditable }}
+                        <div style="margin: 10px; text-align: center;">
+                            <input value="Save" type="submit" class="btn btn-primary" />
+                        </div>
+                    </form>
+                {{ end }}
             </div>
             {{if not .ListFilter.IsEmpty}}
             <div class="col-sm-2" style="">
@@ -83,20 +149,21 @@
         </div>
     </div>
     <div class="fixed-bottom bg-footer default-padding z-index9 admin_font bold">
-        {{ if .PermissionForBlueprint.HasDeletePermission }}
-        <div class="col-sm-4 col-xs-2">
-            <button onclick="BuildDeleteList('item_check')" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;{{Tf "uadmin/system" .Language.Code "Delete Selected"}}</button>
-            <button onclick="BuildDeleteList('item_check')" class="hidden-sm hidden-md hidden-lg btn-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i></button>
-        </div>
-        {{end}}
-        <div class="col-sm-4 col-xs-8">
+<!--        {{ if .PermissionForBlueprint.HasDeletePermission }}-->
+<!--        <div class="col-sm-4 col-xs-2">-->
+<!--            <button onclick="BuildDeleteList('item_check')" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;{{Tf "uadmin/system" .Language.Code "Delete Selected"}}</button>-->
+<!--            <button onclick="BuildDeleteList('item_check')" class="hidden-sm hidden-md hidden-lg btn-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i></button>-->
+<!--        </div>-->
+<!--        {{end}}-->
+        <div class="col-sm-8 col-xs-10">
             <center><ul id="pagination_container" class="pagination pagination-sm pagination-xs" style="margin:0px;"></ul></center>
         </div>
         <div class="col-sm-4 col-xs-2">
             <div style="display:inline-block;float:right;">
-                <form id="export_form" method="POST">
+                <form id="export_form" method="POST" action="{{ .CurrentURL }}/export?{{ .CurrentQuery }}">
+                    <input type="hidden" name="csrf-token" value="{{CSRF .SessionKey}}" />
                     <input type="hidden" class="form-control camelcaseFixPlaceHolder"
-                           name="export" placeholder="Search..." value="export" />
+                           name="export" placeholder="Search..." value="true" />
                     <button type="submit" class="btn btn-success search pull-right">
                         <i class="fa fa-table"></i> {{Tf "uadmin/system" .Language.Code "Excel"}}
                     </button>
@@ -128,6 +195,60 @@
 
         return params;
     })(window, document);
-    paginator('pagination_container', {{ .TotalRecords }});
+    paginator('pagination_container', {{ .TotalPages }});
+    fixcamelcase_pagination('camelcasefixPagination');
+    $('#model-actions').change(function(ev) {
+        $('.action-description').text($('#model-actions').children("option:selected").data('description') || '');
+    });
+    $('#action-form').submit(function(ev) {
+        if (!$('#model-actions').children("option:selected").length) {
+            ev.preventDefault();
+            alert('Please choose any action');
+            return;
+        }
+        if (!$('.item_check:checked').length) {
+            ev.preventDefault();
+            alert('Please choose at least one object');
+            return;
+        }
+        var form = $('#action-form');
+        var selectedAction = $('#model-actions').children("option:selected");
+        var requiresExtraSteps = selectedAction.data('extrasteps');
+        var url = location.pathname + '/' + selectedAction.attr('name');
+        var objectIdsInput = $(ev.currentTarget).find('input[name="object_ids"]');
+        var objectIds = [];
+        $('.item_check:checked').each(function(_, item) {
+            objectIds.push($(item).val());
+        });
+        objectIdsInput.val(objectIds.join(','));
+        if (!requiresExtraSteps) {
+            ev.preventDefault();
+            show_loading();
+            $.ajax({
+                url: url,
+                method: "POST",
+                processData: false,
+                contentType:"application/json; charset=utf-8",
+                data: JSON.stringify({
+                    object_ids: objectIds.join(',')
+                }),
+                beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf-token"]').val());},
+                success: function() {
+                    hide_loading(300);
+                    // @todo, show success message
+                },
+                error: function(xhr) {
+                    hide_loading(300);
+                    // @todo, show error message
+                }
+            });
+            return;
+        }
+        if (location.search.length) {
+            url += '?' + location.search;
+        }
+        $(ev.currentTarget).attr('action', url);
+        return true;
+    });
 </script>
 {{Include "footer"}}

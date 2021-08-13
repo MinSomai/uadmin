@@ -11,7 +11,7 @@ import (
 )
 
 // User !
-type User struct {
+type UserTest struct {
 	gorm.Model
 	Username     string
 	FirstName    string
@@ -38,7 +38,7 @@ func GetDb() *gorm.DB {
 	}
 	// Initialize system models
 	modelList := []interface{}{
-		User{},
+		UserTest{},
 	}
 	// Migrate schema
 	for _, model := range modelList {

@@ -9,13 +9,8 @@ import (
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	"github.com/uadmin/uadmin/blueprint/user/migrations"
-	"github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/form"
 	"github.com/uadmin/uadmin/interfaces"
-	template2 "github.com/uadmin/uadmin/template"
-	"github.com/uadmin/uadmin/templatecontext"
 	"github.com/uadmin/uadmin/utils"
-	"gorm.io/gorm"
 	"net/http"
 	"text/template"
 	"time"
@@ -49,12 +44,12 @@ type ChangePasswordHandlerParams struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.GET("/reset-password", func(ctx *gin.Context) {
 		type Context struct {
-			templatecontext.AdminContext
+			interfaces.AdminContext
 		}
 		c := &Context{}
-		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		admin.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 		tr := interfaces.NewTemplateRenderer("Reset Password")
-		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("resetpassword"), c, template2.FuncMap)
+		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("resetpassword"), c, interfaces.FuncMap)
 	})
 	group.POST("/api/forgot", func(ctx *gin.Context) {
 		var json ForgotPasswordHandlerParams
@@ -71,8 +66,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		uadminDatabase := interfaces.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		var user models.User
-		db.Model(models.User{}).Where(&models.User{Email: json.Email}).First(&user)
+		var user interfaces.User
+		db.Model(interfaces.User{}).Where(&interfaces.User{Email: json.Email}).First(&user)
 		if user.ID == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "User with this email not found"})
 			return
@@ -97,7 +92,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		// @todo, generate code to restore access
 		actionExpiresAt := time.Now()
 		actionExpiresAt = actionExpiresAt.Add(time.Duration(interfaces.CurrentConfig.D.Uadmin.ForgotCodeExpiration)*time.Minute)
-		var oneTimeAction = models.OneTimeAction{
+		var oneTimeAction = interfaces.OneTimeAction{
 			User:       user,
 			ExpiresOn: actionExpiresAt,
 			Code: utils.RandStringRunesForOneTimeAction(32),
@@ -105,7 +100,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 		}
 
-		db.Model(models.OneTimeAction{}).Save(&oneTimeAction)
+		db.Model(interfaces.OneTimeAction{}).Save(&oneTimeAction)
 		link := host + interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/resetpassword?key=" + oneTimeAction.Code
 		c.URL = link
 		err = template1.Execute(templateWriter, c)
@@ -133,8 +128,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		uadminDatabase := interfaces.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		var oneTimeAction models.OneTimeAction
-		db.Model(models.OneTimeAction{}).Where(&models.OneTimeAction{Code: json.Code, IsUsed: false}).Preload("User").First(&oneTimeAction)
+		var oneTimeAction interfaces.OneTimeAction
+		db.Model(interfaces.OneTimeAction{}).Where(&interfaces.OneTimeAction{Code: json.Code, IsUsed: false}).Preload("User").First(&oneTimeAction)
 		if oneTimeAction.ID == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "No such code found"})
 			return
@@ -158,6 +153,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			return
 		}
 		oneTimeAction.User.Password = hashedPassword
+		oneTimeAction.User.IsPasswordConfigured = true
 		oneTimeAction.IsUsed = true
 		db.Save(&oneTimeAction.User)
 		db.Save(&oneTimeAction)
@@ -201,6 +197,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//}
 		hashedPassword, err = utils2.HashPass(json.Password, user.Salt)
 		user.Password = hashedPassword
+		user.IsPasswordConfigured = true
 		uadminDatabase := interfaces.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
@@ -238,12 +235,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.NoRoute(func(ctx *gin.Context) {
 		// ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 		type Context struct {
-			templatecontext.AdminContext
+			interfaces.AdminContext
 			Menu     string
 		}
 
 		c := &Context{}
-		templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		admin.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 		//
 		//if r.Form.Get("err_msg") != "" {
 		//	c.ErrMsg = r.Form.Get("err_msg")
@@ -253,9 +250,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//}NewAdminPage
 		ctx.Status(404)
 		tr := interfaces.NewTemplateRenderer("Page not found")
-		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, template2.FuncMap)
+		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, interfaces.FuncMap)
 	})
-	usersAdminPage := admin.NewGormAdminPage(func() interface{} {return nil}, "")
+	usersAdminPage := admin.NewGormAdminPage(nil, func() (interface{}, interface{}) {return nil, nil}, "")
 	usersAdminPage.PageName = "Users"
 	usersAdminPage.Slug = "users"
 	usersAdminPage.BlueprintName = "user"
@@ -264,34 +261,37 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usermodelAdminPage := admin.NewGormAdminPage(func() interface{} {return &models.User{}}, "user")
+	usermodelAdminPage := admin.NewGormAdminPage(usersAdminPage, func() (interface{}, interface{}) {return &interfaces.User{}, &[]*interfaces.User{}}, "user")
 	usermodelAdminPage.PageName = "Users"
 	usermodelAdminPage.Slug = "user"
 	usermodelAdminPage.BlueprintName = "user"
 	usermodelAdminPage.Router = mainRouter
-	adminContext := &templatecontext.AdminContext{}
-	userForm := form.NewFormFromModelFromGinContext(adminContext, &models.User{}, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin"}, true, "")
+	adminContext := &interfaces.AdminContext{}
+	userForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.User{}, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin"}, true, "")
+	usermodelAdminPage.Form = userForm
 	usernameField, _ := userForm.FieldRegistry.GetByName("Username")
-	usermodelAdminPage.ListDisplay.AddField(admin.NewListDisplay(usernameField))
+	usernameListDisplay := interfaces.NewListDisplay(usernameField)
+	usermodelAdminPage.ListDisplay.AddField(usernameListDisplay)
 	firstNameField, _ := userForm.FieldRegistry.GetByName("FirstName")
-	usermodelAdminPage.ListDisplay.AddField(admin.NewListDisplay(firstNameField))
+	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(firstNameField))
 	lastNameField, _ := userForm.FieldRegistry.GetByName("LastName")
-	usermodelAdminPage.ListDisplay.AddField(admin.NewListDisplay(lastNameField))
+	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(lastNameField))
 	emailField, _ := userForm.FieldRegistry.GetByName("Email")
-	usermodelAdminPage.ListDisplay.AddField(admin.NewListDisplay(emailField))
+	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(emailField))
 	photoField, _ := userForm.FieldRegistry.GetByName("Email")
-	usermodelAdminPage.ListDisplay.AddField(admin.NewListDisplay(photoField))
+	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(photoField))
 	lastLoginField, _ := userForm.FieldRegistry.GetByName("LastLogin")
-	usermodelAdminPage.ListDisplay.AddField(admin.NewListDisplay(lastLoginField))
+	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(lastLoginField))
 	uadminDatabase := interfaces.NewUadminDatabase()
-	statement := &gorm.Statement{DB: uadminDatabase.Db}
-	statement.Parse(&models.User{})
-	fieldEmail, _ := statement.Schema.FieldsByDBName["email"]
-	searchField := &admin.SearchField{
+	defer uadminDatabase.Close()
+	userModelDescription := interfaces.ProjectModels.GetModelFromInterface(&interfaces.User{})
+	statementUser := userModelDescription.Statement
+	fieldEmail, _ := statementUser.Schema.FieldsByDBName["email"]
+	searchField := &interfaces.SearchField{
 		Field: fieldEmail,
 	}
 	usermodelAdminPage.SearchFields = append(usermodelAdminPage.SearchFields, searchField)
-	listFilter := &admin.ListFilter{
+	listFilter := &interfaces.ListFilter{
 		UrlFilteringParam: "IsSuperUser__exact",
 		Title: "Is super user ?",
 	}
@@ -302,14 +302,17 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usergroupsAdminPage := admin.NewGormAdminPage(func() interface{} {return &models.UserGroup{}}, "usergroup")
+	usergroupsAdminPage := admin.NewGormAdminPage(usersAdminPage, func() (interface{}, interface{}) {return &interfaces.UserGroup{}, &[]*interfaces.UserGroup{}}, "usergroup")
 	usergroupsAdminPage.PageName = "User groups"
 	usergroupsAdminPage.Slug = "usergroup"
 	usergroupsAdminPage.BlueprintName = "user"
 	usergroupsAdminPage.Router = mainRouter
-	userGroupForm := form.NewFormFromModelFromGinContext(adminContext, &models.UserGroup{}, make([]string, 0), []string{}, true, "")
+	adminContext = &interfaces.AdminContext{}
+	userGroupForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.UserGroup{}, make([]string, 0), []string{}, true, "")
+	usergroupsAdminPage.Form = userGroupForm
 	groupNameField, _ := userGroupForm.FieldRegistry.GetByName("GroupName")
-	usergroupsAdminPage.ListDisplay.AddField(admin.NewListDisplay(groupNameField))
+	groupNameListDisplay := interfaces.NewListDisplay(groupNameField)
+	usergroupsAdminPage.ListDisplay.AddField(groupNameListDisplay)
 	err = usersAdminPage.SubPages.AddAdminPage(usergroupsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
@@ -317,34 +320,34 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 type UsernameFormOptions struct {
-	form.FieldFormOptions
+	interfaces.FieldFormOptions
 }
 
 type UserPhotoOptions struct {
-	form.FieldFormOptions
+	interfaces.FieldFormOptions
 }
 
 type OtpRequiredOptions struct {
-	form.FieldFormOptions
+	interfaces.FieldFormOptions
 }
 
 type LastLoginOptions struct {
-	form.FieldFormOptions
+	interfaces.FieldFormOptions
 }
 
 type ExpiresOnOptions struct {
-	form.FieldFormOptions
+	interfaces.FieldFormOptions
 }
 
 func (b Blueprint) Init() {
-	interfaces.ProjectModels.RegisterModel(&models.OneTimeAction{})
-	interfaces.ProjectModels.RegisterModel(&models.User{})
-	interfaces.ProjectModels.RegisterModel(&models.UserGroup{})
-	interfaces.ProjectModels.RegisterModel(&models.Permission{})
+	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.OneTimeAction{}})
+	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.User{}})
+	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.UserGroup{}})
+	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.Permission{}})
 	fieldChoiceRegistry := interfaces.FieldChoiceRegistry{}
 	fieldChoiceRegistry.Choices = make([]*interfaces.FieldChoice, 0)
 	formOptions := &UsernameFormOptions{
-		FieldFormOptions: form.FieldFormOptions{
+		FieldFormOptions: interfaces.FieldFormOptions{
 			Name: "UsernameOptions",
 			Initial: "InitialUsername",
 			DisplayName: "Username",
@@ -355,28 +358,28 @@ func (b Blueprint) Init() {
 	}
 	interfaces.CurrentConfig.AddFieldFormOptions(formOptions)
 	userPhotoOptions := &UserPhotoOptions{
-		FieldFormOptions: form.FieldFormOptions{
+		FieldFormOptions: interfaces.FieldFormOptions{
 			Name: "UserPhotoOptions",
 			WidgetType: "image",
 		},
 	}
 	interfaces.CurrentConfig.AddFieldFormOptions(userPhotoOptions)
 	otpRequiredOptions := &OtpRequiredOptions{
-		FieldFormOptions: form.FieldFormOptions{
+		FieldFormOptions: interfaces.FieldFormOptions{
 			Name: "OTPRequiredOptions",
 			WidgetType: "hidden",
 		},
 	}
 	interfaces.CurrentConfig.AddFieldFormOptions(otpRequiredOptions)
 	lastLoginOptions := &LastLoginOptions{
-		FieldFormOptions: form.FieldFormOptions{
+		FieldFormOptions: interfaces.FieldFormOptions{
 			Name: "LastLoginOptions",
 			ReadOnly: true,
 		},
 	}
 	interfaces.CurrentConfig.AddFieldFormOptions(lastLoginOptions)
 	expiresOnOptions := &ExpiresOnOptions{
-		FieldFormOptions: form.FieldFormOptions{
+		FieldFormOptions: interfaces.FieldFormOptions{
 			Name: "ExpiresOnOptions",
 			ReadOnly: true,
 		},
@@ -388,7 +391,7 @@ func (b Blueprint) Init() {
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		var cUsers int64
-		db.Model(&models.User{}).Where(&models.User{Username: i.(string)}).Count(&cUsers)
+		db.Model(&interfaces.User{}).Where(&interfaces.User{Username: i.(string)}).Count(&cUsers)
 		if cUsers == 0 {
 			return nil
 		}
@@ -400,7 +403,7 @@ func (b Blueprint) Init() {
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		var cUsers int64
-		db.Model(&models.User{}).Where(&models.User{Email: i.(string)}).Count(&cUsers)
+		db.Model(&interfaces.User{}).Where(&interfaces.User{Email: i.(string)}).Count(&cUsers)
 		if cUsers == 0 {
 			return nil
 		}

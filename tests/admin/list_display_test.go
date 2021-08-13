@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/admin"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/interfaces"
 	"testing"
 )
 
@@ -13,16 +13,16 @@ type AdminListDisplayTestSuite struct {
 }
 
 func (suite *AdminListDisplayTestSuite) TestListDisplay() {
-	userModel := &usermodels.User{Username: "admin", FirstName: "firstname", LastName: "lastname"}
+	userModel := &interfaces.User{Username: "admin", FirstName: "firstname", LastName: "lastname"}
 	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	listDisplayUsername, _ := adminUserPage.ListDisplay.GetFieldByDisplayName("Username")
 	assert.Equal(suite.T(), listDisplayUsername.GetValue(userModel), "admin")
-	compositeField := admin.NewListDisplay(nil)
+	compositeField := interfaces.NewListDisplay(nil)
 	compositeField.MethodName = "FullName"
-	compositeField = admin.NewListDisplay(nil)
+	compositeField = interfaces.NewListDisplay(nil)
 	compositeField.Populate = func(m interface{}) string {
-		return m.(*usermodels.User).FullName()
+		return m.(*interfaces.User).FullName()
 	}
 	assert.Equal(suite.T(), compositeField.GetValue(userModel), "firstname lastname")
 }

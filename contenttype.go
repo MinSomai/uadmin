@@ -3,7 +3,6 @@ package uadmin
 import (
 	"fmt"
 	"github.com/uadmin/uadmin/admin"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"os"
 )
@@ -49,7 +48,7 @@ func (command SyncContentTypes) Proceed(subaction string, args []string) error {
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
 	var contentType interfaces.ContentType
-	var permission usermodels.Permission
+	var permission interfaces.Permission
 	for blueprintRootAdminPage := range admin.CurrentDashboardAdminPanel.AdminPages.GetAll() {
 		interfaces.Trail(interfaces.INFO, "Sync content types for blueprint %s", blueprintRootAdminPage.BlueprintName)
 		for modelPage := range blueprintRootAdminPage.SubPages.GetAll() {
@@ -62,16 +61,16 @@ func (command SyncContentTypes) Proceed(subaction string, args []string) error {
 				interfaces.Trail(interfaces.INFO, "Created content type for blueprint %s model %s", modelPage.BlueprintName, modelPage.ModelName)
 			}
 			for permDescribed := range interfaces.ProjectPermRegistry.GetAllPermissions() {
-				db.Model(&usermodels.Permission{}).Where(
-					&usermodels.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit},
+				db.Model(&interfaces.Permission{}).Where(
+					&interfaces.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit},
 				).First(&permission)
 				if permission.ID == 0 {
-					permission = usermodels.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit}
+					permission = interfaces.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit}
 					db.Create(&permission)
 					interfaces.Trail(interfaces.INFO, "Created permission %s for blueprint %s model %s", permDescribed.Name, modelPage.BlueprintName, modelPage.ModelName)
-					permission = usermodels.Permission{}
+					permission = interfaces.Permission{}
 				}
-				permission = usermodels.Permission{}
+				permission = interfaces.Permission{}
 			}
 			contentType = interfaces.ContentType{}
 		}

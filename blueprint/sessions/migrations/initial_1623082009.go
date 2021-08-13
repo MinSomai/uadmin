@@ -1,7 +1,6 @@
 package migrations
 
 import (
-    "github.com/uadmin/uadmin/blueprint/sessions/models"
     "github.com/uadmin/uadmin/interfaces"
 )
 
@@ -18,7 +17,7 @@ func (m initial_1623082009) GetId() int64 {
 
 func (m initial_1623082009) Up(uadminDatabase *interfaces.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.AutoMigrate(models.Session{})
+    err := db.AutoMigrate(interfaces.Session{})
     if err != nil {
         return err
     }
@@ -27,7 +26,7 @@ func (m initial_1623082009) Up(uadminDatabase *interfaces.UadminDatabase) error 
 
 func (m initial_1623082009) Down(uadminDatabase *interfaces.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.Migrator().DropTable(models.Session{})
+    err := db.Migrator().DropTable(interfaces.Session{})
     if err != nil {
         return err
     }

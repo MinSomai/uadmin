@@ -1,56 +1,52 @@
-package utils
+package interfaces
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
-
-	// "encoding/json"
 	"github.com/gin-gonic/gin"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	"strings"
 )
 
 // GetLanguage returns the language of the request
-func GetLanguage(c *gin.Context) *langmodel.Language {
+func GetLanguage(c *gin.Context) *Language {
 	langCookie, err := c.Cookie("language")
 	if err != nil || langCookie == "" {
 		return GetDefaultLanguage()
 	}
-	var lang langmodel.Language
-	uadminDatabase := interfaces.NewUadminDatabase()
+	var lang Language
+	uadminDatabase := NewUadminDatabase()
 	db := uadminDatabase.Db
-	db.Model(langmodel.Language{}).Where(&langmodel.Language{Code: langCookie}).First(&lang)
+	db.Model(Language{}).Where(&Language{Code: langCookie}).First(&lang)
 	uadminDatabase.Close()
 	return &lang
 }
 
 // GetDefaultLanguage returns the default language
-func GetDefaultLanguage() *langmodel.Language {
+func GetDefaultLanguage() *Language {
 	if defaultLang != nil {
 		return defaultLang
 	}
-	var lang langmodel.Language
-	uadminDatabase := interfaces.NewUadminDatabase()
+	var lang Language
+	uadminDatabase := NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	db.Model(langmodel.Language{}).Where(&langmodel.Language{Default: true}).First(&lang)
+	db.Model(Language{}).Where(&Language{Default: true}).First(&lang)
 	defaultLang = &lang
 	return &lang
 }
 
 // GetActiveLanguages returns a list of active langages
-func GetActiveLanguages() []langmodel.Language {
-	var langs []langmodel.Language
-	uadminDatabase := interfaces.NewUadminDatabase()
+func GetActiveLanguages() []Language {
+	var langs []Language
+	uadminDatabase := NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	db.Model(langmodel.Language{}).Where(&langmodel.Language{Active: true}).Find(&langs)
+	db.Model(Language{}).Where(&Language{Active: true}).Find(&langs)
 	return langs
 }
 
 // DefaultLang is the default language of the system.
-var defaultLang *langmodel.Language
+var defaultLang *Language
 type translationLoaded map[string]string
 var langMapCache map[string]translationLoaded
 const translateMe = "Translate me ---> "
@@ -82,7 +78,7 @@ func Tf(path string, lang string, term string, args ...interface{}) string {
 	}
 	langMap, ok := langMapCache[lang]
 	if !ok {
-		langFile, err := interfaces.CurrentConfig.LocalizationFS.ReadFile(fmt.Sprintf("localization/%s.json", lang))
+		langFile, err := CurrentConfig.LocalizationFS.ReadFile(fmt.Sprintf("localization/%s.json", lang))
 		if err != nil {
 			Trail(ERROR, "Unable to unmarshal json file with language (%s)", err)
 		} else {
@@ -140,3 +136,4 @@ func Translate(c *gin.Context, raw string, lang string, args ...bool) string {
 	}
 	return ""
 }
+

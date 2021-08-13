@@ -7,7 +7,6 @@ import (
 	"github.com/miquella/ask"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"os"
@@ -112,7 +111,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
-	admin := usermodels.User{
+	admin := interfaces.User{
 		FirstName:    opts.FirstName,
 		LastName:     opts.LastName,
 		Username:     opts.Username,
@@ -122,6 +121,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		Active:       true,
 		IsSuperUser:    true,
 		Salt: salt,
+		IsPasswordConfigured: true,
 	}
 	db.Create(&admin)
 	interfaces.Trail(interfaces.INFO, "Superuser created successfully")

@@ -1,7 +1,6 @@
 package migrations
 
 import (
-    langmodel "github.com/uadmin/uadmin/blueprint/language/models"
     "github.com/uadmin/uadmin/interfaces"
 )
 
@@ -207,7 +206,7 @@ func (m create_all_1623263607) Up(uadminDatabase *interfaces.UadminDatabase) err
     db := uadminDatabase.Db
     tx := db
     for _, lang := range langs {
-        l := langmodel.Language{
+        l := interfaces.Language{
             EnglishName: lang[0],
             Name:        lang[1],
             Code:        lang[2],
@@ -225,7 +224,7 @@ func (m create_all_1623263607) Up(uadminDatabase *interfaces.UadminDatabase) err
 
 func (m create_all_1623263607) Down(uadminDatabase *interfaces.UadminDatabase) error {
     db := uadminDatabase.Db
-    db.Unscoped().Where("1 = 1").Delete(&langmodel.Language{})
+    db.Unscoped().Where("1 = 1").Delete(&interfaces.Language{})
     return nil
 }
 

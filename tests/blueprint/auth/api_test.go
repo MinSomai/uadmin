@@ -8,7 +8,6 @@ import (
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	"github.com/uadmin/uadmin/blueprint/otp/services"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
@@ -82,13 +81,14 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
-	user := usermodels.User{
+	user := interfaces.User{
 		FirstName:    "testuser-firstname",
 		LastName:     "testuser-lastname",
 		Username:     "test",
 		Password:     hashedPassword,
 		Active:       false,
 		Salt: salt,
+		IsPasswordConfigured: true,
 	}
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()
@@ -209,13 +209,14 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
-	user := usermodels.User{
+	user := interfaces.User{
 		FirstName:    "testuser-firstname",
 		LastName:     "testuser-lastname",
 		Username:     "test",
 		Password:     hashedPassword,
 		Active:       false,
 		Salt: salt,
+		IsPasswordConfigured: true,
 	}
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()
@@ -317,11 +318,11 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 			isSentEmail := utils.SentEmailsDuringTests.IsAnyEmailSentWithStringInBodyOrSubject(&utils.SentEmail{
 				Subject: "Password reset for admin panel",
 			})
-			var oneTimeAction usermodels.OneTimeAction
+			var oneTimeAction interfaces.OneTimeAction
 			uadminDatabase := interfaces.NewUadminDatabase()
 			defer uadminDatabase.Close()
 			db := uadminDatabase.Db
-			db.Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
+			db.Model(interfaces.OneTimeAction{}).First(&oneTimeAction)
 			var jsonStr1 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
 			req1, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr1))
 			req1.Header.Set(
@@ -331,11 +332,11 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 			tokenmasked := utils.MaskCSRFToken(token)
 			req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
 			uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
-				var oneTimeAction usermodels.OneTimeAction
+				var oneTimeAction interfaces.OneTimeAction
 				uadminDatabase := interfaces.NewUadminDatabase()
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
-				db.Model(usermodels.OneTimeAction{}).First(&oneTimeAction)
+				db.Model(interfaces.OneTimeAction{}).First(&oneTimeAction)
 				assert.True(s.T(), oneTimeAction.IsUsed)
 				assert.Equal(s.T(), w.Code, 200)
 				return w.Code == 200

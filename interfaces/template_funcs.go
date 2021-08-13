@@ -1,20 +1,21 @@
-package template
+package interfaces
 
-import (
-	"github.com/uadmin/uadmin/utils"
-	"text/template"
-)
+import "text/template"
 
 func add(n1 int, n2 int) int {
 	return n1 + n2
 }
 
+func mul(n1 int, n2 int) int {
+	return n1 * n2
+}
+
 var FuncMap = template.FuncMap{
-	"Tf": utils.Tf,
+	"Tf": Tf,
 	"add": add,
+	"mul": mul,
 	//"CSRF": func() string {
 	//	return "dfsafsa"
 	//	// return authapi.GetSession(r)
 	//},
 }
-

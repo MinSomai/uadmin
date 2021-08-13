@@ -2,8 +2,6 @@ package api
 
 import (
 	imageapi "github.com/uadmin/uadmin/blueprint/image/api"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/modelold"
@@ -13,7 +11,7 @@ import (
 	"strings"
 )
 
-func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
+func SettingsHandler(w http.ResponseWriter, r *http.Request, session *interfaces.Session) {
 	r.ParseMultipartForm(32 << 20)
 	type SCat struct {
 		ID       uint
@@ -24,7 +22,7 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request, session *sessionmod
 	type Context struct {
 		User     string
 		SiteName string
-		Language langmodel.Language
+		Language interfaces.Language
 		RootURL  string
 		SCat     []SCat
 		Logo     string

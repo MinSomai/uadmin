@@ -1,7 +1,6 @@
 package security
 
 import (
-	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"net"
 	"net/http"
@@ -18,7 +17,7 @@ func SQLInjection(r *http.Request, key, value string) bool {
 
 	// user := authapi.GetUserFromRequest(r)
 	// if user == nil {
-	user := &usermodel.User{}
+	user := &interfaces.User{}
 	// }
 	ip := r.RemoteAddr
 	if ip, _, err = net.SplitHostPort(ip); err != nil {

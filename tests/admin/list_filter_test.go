@@ -5,7 +5,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/admin"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
 	"strconv"
@@ -19,7 +18,7 @@ type AdminListFilterTestSuite struct {
 func (apts *AdminListFilterTestSuite) SetupTestData() {
 	uadminDatabase := interfaces.NewUadminDatabase()
 	for i := range interfaces.GenerateNumberSequence(101, 200) {
-		userModel := &usermodels.User{
+		userModel := &interfaces.User{
 			Email: fmt.Sprintf("admin_%d@example.com", i),
 			Username: "admin_" + strconv.Itoa(i),
 			FirstName: "firstname_" + strconv.Itoa(i),
@@ -34,13 +33,14 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 	suite.SetupTestData()
 	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
-	var users []usermodels.User
+	var users []interfaces.User
 	adminRequestParams := interfaces.NewAdminRequestParams()
 	adminRequestParams.RequestURL = "http://127.0.0.1/?Username__exact=admin_101"
 	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
-	statement.Parse(&usermodels.User{})
-	listFilter := &admin.ListFilter{
+	statement.Parse(&interfaces.User{})
+	listFilter := &interfaces.ListFilter{
 		UrlFilteringParam: "Username__exact",
 	}
 	adminUserPage.ListFilter.Add(listFilter)

@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
+	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/interfaces"
 	"testing"
 	"time"
@@ -15,22 +15,22 @@ type SessionTestSuite struct {
 }
 
 func (s *SessionTestSuite) TestSavingSession() {
-	session := sessionmodel.NewSession()
+	session := interfaces2.NewSession()
 	session.SetData("testkey", "testvalue")
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.Create(session)
-	var loadedsession sessionmodel.Session
-	uadminDatabase.Db.Model(&sessionmodel.Session{}).First(&loadedsession)
+	var loadedsession interfaces.Session
+	uadminDatabase.Db.Model(&interfaces.Session{}).First(&loadedsession)
 	val, _ := loadedsession.GetData("testkey")
 	assert.Equal(s.T(), val, "testvalue")
 }
 
 func (s *SessionTestSuite) TestTransactionConsistencyInTests() {
-	var loadedsession sessionmodel.Session
+	var loadedsession interfaces.Session
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	uadminDatabase.Db.Model(&sessionmodel.Session{}).First(&loadedsession)
+	uadminDatabase.Db.Model(&interfaces.Session{}).First(&loadedsession)
 	val, _ := loadedsession.GetData("testkey")
 	assert.Equal(s.T(), val, "")
 }

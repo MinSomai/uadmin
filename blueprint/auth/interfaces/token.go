@@ -3,13 +3,13 @@ package interfaces
 import (
 	"github.com/gin-gonic/gin"
 	sessioninterfaces "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/interfaces"
 )
 
 type TokenAuthProvider struct {
 }
 
-func (ap *TokenAuthProvider) GetUserFromRequest(c *gin.Context) *usermodels.User {
+func (ap *TokenAuthProvider) GetUserFromRequest(c *gin.Context) *interfaces.User {
 	return nil
 }
 

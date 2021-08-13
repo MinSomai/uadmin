@@ -1,7 +1,6 @@
 package migrations
 
 import (
-    models2 "github.com/uadmin/uadmin/blueprint/user/models"
     "github.com/uadmin/uadmin/interfaces"
     "gorm.io/gorm"
 )
@@ -23,28 +22,28 @@ func (m initial_1621680132) Up(uadminDatabase *interfaces.UadminDatabase) error 
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(models2.UserGroup{})
+    err = db.AutoMigrate(interfaces.UserGroup{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(models2.User{})
+    err = db.AutoMigrate(interfaces.User{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(models2.Permission{})
+    err = db.AutoMigrate(interfaces.Permission{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(models2.OneTimeAction{})
+    err = db.AutoMigrate(interfaces.OneTimeAction{})
     if err != nil {
         return err
     }
     stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&models2.OneTimeAction{})
+    stmt.Parse(&interfaces.OneTimeAction{})
     contentType := &interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}
     db.Create(contentType)
     stmt = &gorm.Statement{DB: db}
-    stmt.Parse(&models2.User{})
+    stmt.Parse(&interfaces.User{})
     userContentType := &interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}
     db.Create(userContentType)
     return nil
@@ -52,19 +51,19 @@ func (m initial_1621680132) Up(uadminDatabase *interfaces.UadminDatabase) error 
 
 func (m initial_1621680132) Down(uadminDatabase *interfaces.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.Migrator().DropTable(models2.Permission{})
+    err := db.Migrator().DropTable(interfaces.Permission{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(models2.User{})
+    err = db.Migrator().DropTable(interfaces.User{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(models2.UserGroup{})
+    err = db.Migrator().DropTable(interfaces.UserGroup{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(models2.OneTimeAction{})
+    err = db.Migrator().DropTable(interfaces.OneTimeAction{})
     if err != nil {
         return err
     }
@@ -74,11 +73,11 @@ func (m initial_1621680132) Down(uadminDatabase *interfaces.UadminDatabase) erro
     }
     var contentType interfaces.ContentType
     stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&models2.OneTimeAction{})
+    stmt.Parse(&interfaces.OneTimeAction{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Delete(&contentType)
     stmt = &gorm.Statement{DB: db}
-    stmt.Parse(&models2.User{})
+    stmt.Parse(&interfaces.User{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Delete(&contentType)
     return nil

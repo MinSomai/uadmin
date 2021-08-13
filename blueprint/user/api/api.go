@@ -3,10 +3,8 @@ package api
 import (
 	"fmt"
 	authservices "github.com/uadmin/uadmin/blueprint/auth/services"
-	langmodel "github.com/uadmin/uadmin/blueprint/language/models"
 	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
-	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/metrics"
 	"github.com/uadmin/uadmin/modelold"
 	"github.com/uadmin/uadmin/preloaded"
@@ -31,7 +29,7 @@ var apiHandlers = []utils.ApiHandlerRequest{
 }
 
 // profileHandler !
-func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
+func ProfileHandler(w http.ResponseWriter, r *http.Request, session *interfaces.Session) {
 	/*
 		http://domain.com/admin/profile/
 	*/
@@ -45,7 +43,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request, session *sessionmode
 		Notif        string
 		Demo         bool
 		SiteName     string
-		Language     langmodel.Language
+		Language     interfaces.Language
 		RootURL      string
 		ProfilePhoto string
 		OTPImage     string
@@ -135,7 +133,7 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 		Err       string
 		ErrExists bool
 		SiteName  string
-		Language  langmodel.Language
+		Language  interfaces.Language
 		RootURL   string
 		Logo      string
 		FavIcon   string
@@ -152,7 +150,7 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the user and the code and verify them
 	userID := r.FormValue("u")
 
-	user := &usermodel.User{}
+	user := &interfaces.User{}
 	// database.Get(user, "id = ?", userID)
 	if user.ID == 0 {
 		go func() {
@@ -201,7 +199,7 @@ func PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // logoutHandler !
-func LogoutHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
+func LogoutHandler(w http.ResponseWriter, r *http.Request, session *interfaces.Session) {
 	// authapi.Logout(r)
 
 	// Expire all cookies on logout
@@ -218,10 +216,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Err         string
 		ErrExists   bool
 		SiteName    string
-		Languages   []langmodel.Language
+		Languages   []interfaces.Language
 		RootURL     string
 		OTPRequired bool
-		Language    langmodel.Language
+		Language    interfaces.Language
 		Username    string
 		Password    string
 		Logo        string
@@ -241,7 +239,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			// This is a password reset request
 			metrics.IncrementMetric("uadmin/security/passwordreset/request")
 			// email := r.FormValue("email")
-			user := usermodel.User{}
+			user := interfaces.User{}
 			// database.Get(&user, "Email = ?", email)
 			if user.ID != 0 {
 				metrics.IncrementMetric("uadmin/security/passwordreset/emailsent")
@@ -311,7 +309,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // forgotPasswordHandler !
-func forgotPasswordHandler(u *usermodel.User, r *http.Request) error {
+func forgotPasswordHandler(u *interfaces.User, r *http.Request) error {
 //	if u.Email == "" {
 //		return fmt.Errorf("unable to reset password, the user does not have an email")
 //	}

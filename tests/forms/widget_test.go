@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/form"
-	"github.com/uadmin/uadmin/template"
+	"github.com/uadmin/uadmin/interfaces"
 	"io"
 	"mime/multipart"
 	"os"
@@ -28,10 +27,10 @@ func NewTestForm() *multipart.Form {
 }
 
 func (w *WidgetTestSuite) TestTextWidget() {
-	textWidget := &form.TextWidget{
-		Widget: form.Widget{
+	textWidget := &interfaces.TextWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	textWidget.SetName("dsadas")
@@ -48,10 +47,10 @@ func (w *WidgetTestSuite) TestTextWidget() {
 }
 
 func (w *WidgetTestSuite) TestNumberWidget() {
-	widget := &form.NumberWidget{
-		Widget: form.Widget{
+	widget := &interfaces.NumberWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -68,10 +67,10 @@ func (w *WidgetTestSuite) TestNumberWidget() {
 }
 
 func (w *WidgetTestSuite) TestEmailWidget() {
-	widget := &form.EmailWidget{
-		Widget: form.Widget{
+	widget := &interfaces.EmailWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -85,10 +84,10 @@ func (w *WidgetTestSuite) TestEmailWidget() {
 }
 
 func (w *WidgetTestSuite) TestURLWidget() {
-	widget := &form.URLWidget{
-		Widget: form.Widget{
+	widget := &interfaces.URLWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -102,10 +101,10 @@ func (w *WidgetTestSuite) TestURLWidget() {
 }
 
 func (w *WidgetTestSuite) TestPasswordWidget() {
-	widget := &form.PasswordWidget{
-		Widget: form.Widget{
+	widget := &interfaces.PasswordWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -119,10 +118,10 @@ func (w *WidgetTestSuite) TestPasswordWidget() {
 }
 
 func (w *WidgetTestSuite) TestHiddenWidget() {
-	widget := &form.HiddenWidget{
-		Widget: form.Widget{
+	widget := &interfaces.HiddenWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -136,10 +135,10 @@ func (w *WidgetTestSuite) TestHiddenWidget() {
 }
 
 func (w *WidgetTestSuite) TestDateWidget() {
-	widget := &form.DateWidget{
-		Widget: form.Widget{
+	widget := &interfaces.DateWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -153,10 +152,10 @@ func (w *WidgetTestSuite) TestDateWidget() {
 }
 
 func (w *WidgetTestSuite) TestDateTimeWidget() {
-	widget := &form.DateTimeWidget{
-		Widget: form.Widget{
+	widget := &interfaces.DateTimeWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -170,10 +169,10 @@ func (w *WidgetTestSuite) TestDateTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestTimeWidget() {
-	widget := &form.TimeWidget{
-		Widget: form.Widget{
+	widget := &interfaces.TimeWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -187,10 +186,10 @@ func (w *WidgetTestSuite) TestTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestTextareaWidget() {
-	widget := &form.TextareaWidget{
-		Widget: form.Widget{
+	widget := &interfaces.TextareaWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -204,10 +203,10 @@ func (w *WidgetTestSuite) TestTextareaWidget() {
 }
 
 func (w *WidgetTestSuite) TestCheckboxWidget() {
-	widget := &form.CheckboxWidget{
-		Widget: form.Widget{
+	widget := &interfaces.CheckboxWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -221,21 +220,21 @@ func (w *WidgetTestSuite) TestCheckboxWidget() {
 }
 
 func (w *WidgetTestSuite) TestSelectWidget() {
-	widget := &form.SelectWidget{
-		Widget: form.Widget{
+	widget := &interfaces.SelectWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	widget.OptGroups = make(map[string][]*form.SelectOptGroup)
-	widget.OptGroups["test"] = make([]*form.SelectOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.SelectOptGroup{
+	widget.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
+	widget.OptGroups["test"] = make([]*interfaces.SelectOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.SelectOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
@@ -251,19 +250,19 @@ func (w *WidgetTestSuite) TestSelectWidget() {
 }
 
 func (w *WidgetTestSuite) TestNullBooleanWidget() {
-	widget := &form.NullBooleanWidget{
-		Widget: form.Widget{
+	widget := &interfaces.NullBooleanWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
-	widget.OptGroups = make(map[string][]*form.SelectOptGroup)
-	widget.OptGroups["test"] = make([]*form.SelectOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.SelectOptGroup{
+	widget.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
+	widget.OptGroups["test"] = make([]*interfaces.SelectOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
 		OptLabel: "test1",
 		Value: "yes",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.SelectOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
 		OptLabel: "test2",
 		Value: "no",
 	})
@@ -281,21 +280,21 @@ func (w *WidgetTestSuite) TestNullBooleanWidget() {
 }
 
 func (w *WidgetTestSuite) TestSelectMultipleWidget() {
-	widget := &form.SelectMultipleWidget{
-		Widget: form.Widget{
+	widget := &interfaces.SelectMultipleWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue([]string{"dsadas"})
-	widget.OptGroups = make(map[string][]*form.SelectOptGroup)
-	widget.OptGroups["test"] = make([]*form.SelectOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.SelectOptGroup{
+	widget.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
+	widget.OptGroups["test"] = make([]*interfaces.SelectOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.SelectOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
@@ -311,23 +310,23 @@ func (w *WidgetTestSuite) TestSelectMultipleWidget() {
 }
 
 func (w *WidgetTestSuite) TestRadioSelectWidget() {
-	widget := &form.RadioSelectWidget{
-		Widget: form.Widget{
+	widget := &interfaces.RadioSelectWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		Id: "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	widget.OptGroups = make(map[string][]*form.RadioOptGroup)
-	widget.OptGroups["test"] = make([]*form.RadioOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.RadioOptGroup{
+	widget.OptGroups = make(map[string][]*interfaces.RadioOptGroup)
+	widget.OptGroups["test"] = make([]*interfaces.RadioOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.RadioOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
@@ -343,23 +342,23 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 }
 
 func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
-	widget := &form.CheckboxSelectMultipleWidget{
-		Widget: form.Widget{
+	widget := &interfaces.CheckboxSelectMultipleWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		Id: "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
 	widget.SetValue([]string{"dsadas"})
-	widget.OptGroups = make(map[string][]*form.RadioOptGroup)
-	widget.OptGroups["test"] = make([]*form.RadioOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.RadioOptGroup{
+	widget.OptGroups = make(map[string][]*interfaces.RadioOptGroup)
+	widget.OptGroups["test"] = make([]*interfaces.RadioOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &form.RadioOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
@@ -375,10 +374,10 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 }
 
 func (w *WidgetTestSuite) TestFileWidget() {
-	widget := &form.FileWidget{
-		Widget: form.Widget{
+	widget := &interfaces.FileWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -426,10 +425,10 @@ func (w *WidgetTestSuite) TestFileWidget() {
 }
 
 func (w *WidgetTestSuite) TestClearableFileWidget() {
-	widget := &form.ClearableFileWidget{
-		Widget: form.Widget{
+	widget := &interfaces.ClearableFileWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		InitialText: "test",
 		Required: true,
@@ -440,17 +439,17 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 	widget.SetName("dsadas")
 	renderedWidget := widget.Render()
 	assert.Equal(w.T(), renderedWidget, "<p class=\"file-upload\">test: <br>\nupload your image:\n    <input type=\"file\" name=\"dsadas\" test=\"test1\"></p>")
-	widget = &form.ClearableFileWidget{
-		Widget: form.Widget{
+	widget = &interfaces.ClearableFileWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		InitialText: "test",
 		Required: true,
 		Id: "test",
 		ClearCheckboxLabel: "clear file",
 		InputText: "upload your image",
-		CurrentValue: &form.URLValue{URL: "https://microsoft.com"},
+		CurrentValue: &interfaces.URLValue{URL: "https://microsoft.com"},
 	}
 	widget.SetName("dsadas")
 	renderedWidget = widget.Render()
@@ -497,10 +496,10 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 }
 
 func (w *WidgetTestSuite) TestMultipleHiddenInputWidget() {
-	widget := &form.MultipleInputHiddenWidget{
-		Widget: form.Widget{
+	widget := &interfaces.MultipleInputHiddenWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
@@ -514,10 +513,10 @@ func (w *WidgetTestSuite) TestMultipleHiddenInputWidget() {
 }
 
 func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
-	widget := &form.SplitDateTimeWidget{
-		Widget: form.Widget{
+	widget := &interfaces.SplitDateTimeWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		DateAttrs: map[string]string{"test": "test1"},
 		TimeAttrs: map[string]string{"test": "test1"},
@@ -538,10 +537,10 @@ func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
-	widget := &form.SplitHiddenDateTimeWidget{
-		Widget: form.Widget{
+	widget := &interfaces.SplitHiddenDateTimeWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		DateAttrs: map[string]string{"test": "test1"},
 		TimeAttrs: map[string]string{"test": "test1"},
@@ -562,10 +561,10 @@ func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestSelectDateWidget() {
-	widget := &form.SelectDateWidget{
-		Widget: form.Widget{
+	widget := &interfaces.SelectDateWidget{
+		Widget: interfaces.Widget{
 			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: template.FuncMap,
+			BaseFuncMap: interfaces.FuncMap,
 		},
 		EmptyLabelString: "choose any",
 	}

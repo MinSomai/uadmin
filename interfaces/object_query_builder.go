@@ -679,8 +679,6 @@ func FilterGormModel(adapter IDbAdapter, db *gorm.DB, schema1 *schema.Schema, fi
 		field, _ := schema1.FieldsByName[filterNameParams[0]]
 		if field.DBName == "" {
 			joinModelI := ProjectModels.GetModelByName(field.FieldType.Name())
-			statement1 := &gorm.Statement{DB: db}
-			statement1.Parse(joinModelI)
 			relation := context.Statement.Schema.Relationships
 			relationsString := []string{}
 			for _, relation1 := range relation.Relations {
@@ -689,7 +687,7 @@ func FilterGormModel(adapter IDbAdapter, db *gorm.DB, schema1 *schema.Schema, fi
 						relationsString,
 						fmt.Sprintf(
 							"%s.%s = %s.%s",
-							statement1.Table, reference.PrimaryKey.DBName, context.Statement.Table,
+							joinModelI.Statement.Table, reference.PrimaryKey.DBName, context.Statement.Table,
 							reference.ForeignKey.DBName,
 						),
 					)
@@ -699,14 +697,14 @@ func FilterGormModel(adapter IDbAdapter, db *gorm.DB, schema1 *schema.Schema, fi
 				context.Tx = context.Tx.Joins(
 					fmt.Sprintf(
 						"INNER JOIN %s on %s",
-						statement1.Table, strings.Join(relationsString, " AND "),
+						joinModelI.Statement.Table, strings.Join(relationsString, " AND "),
 					),
 				)
 			} else {
 				context.Tx = context.Tx.Joins(
 					fmt.Sprintf(
 						"LEFT JOIN %s on %s",
-						statement1.Table, strings.Join(relationsString, " AND "),
+						joinModelI.Statement.Table, strings.Join(relationsString, " AND "),
 					),
 				)
 			}

@@ -1,13 +1,17 @@
-{{ if ne .Type "hidden" }}
-  {{ if .FieldDisplayName }}<div class="form-group search">
-    <div class="input-group">
-        <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{.FieldDisplayName}}</span>
-  {{ end }}
+{{ if not .ShowOnlyHtmlInput }}
+    {{ if ne .Type "hidden" }}
+      {{ if .FieldDisplayName }}<div class="form-group search">
+        <div class="input-group">
+            <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{.FieldDisplayName}}</span>
+      {{ end }}
+    {{ end }}
 {{ end }}
         <input class="form-control" name="{{.Name}}" type="{{ .Type }}" value="{{.Value}}" {{Include "widgets/attrs" }} {{if .ReadOnly}} readonly {{end}} />
-{{ if ne .Type "hidden" }}
-  {{ if .FieldDisplayName }}
-    </div>
-    </div>
-  {{ end }}
+{{ if not .ShowOnlyHtmlInput }}
+    {{ if ne .Type "hidden" }}
+      {{ if .FieldDisplayName }}
+        </div>
+        </div>
+      {{ end }}
+    {{ end }}
 {{ end }}

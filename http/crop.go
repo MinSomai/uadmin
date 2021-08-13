@@ -1,7 +1,7 @@
 package http
 
 import (
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
+	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/preloaded"
 	"github.com/uadmin/uadmin/utils"
 	"image"
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func cropImageHandler(w http.ResponseWriter, r *http.Request, session *sessionmodel.Session) {
+func cropImageHandler(w http.ResponseWriter, r *http.Request, session *interfaces.Session) {
 	img := "." + r.FormValue("img")
 	top, _ := strconv.ParseFloat(r.FormValue("top"), 32)
 	left, _ := strconv.ParseFloat(r.FormValue("left"), 32)

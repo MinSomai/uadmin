@@ -1,10 +1,7 @@
-package models
+package interfaces
 
-import "github.com/uadmin/uadmin/interfaces"
-
-// Language !
 type Language struct {
-	interfaces.Model
+	Model
 	EnglishName    string `uadmin:"required;read_only;filter;search"`
 	Name           string `uadmin:"required;read_only;filter;search"`
 	Flag           string `uadmin:"image;list_exclude"`
@@ -14,10 +11,6 @@ type Language struct {
 	Active         bool   `uadmin:"help:To show this in available languages;filter"`
 	AvailableInGui bool   `uadmin:"help:The App is available in this language;read_only"`
 }
-
-// Global active languages
-var activeLangs []Language
-
 
 // String !
 func (l Language) String() string {
@@ -56,3 +49,4 @@ func (l *Language) Save() {
 	//	}
 	//}
 }
+

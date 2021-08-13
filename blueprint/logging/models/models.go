@@ -3,13 +3,12 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/preloaded"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
-	"time"
 )
 
 // Action !
@@ -74,6 +73,35 @@ func (a Action) Custom() Action {
 	return 99
 }
 
+func HumanizeAction(action Action) string {
+	switch action {
+	case 1:
+		return "read"
+	case 2:
+		return "added"
+	case 3:
+		return "modified"
+	case 4:
+		return "deleted"
+	case 5:
+		return "login successful"
+	case 6:
+		return "login denied"
+	case 7:
+		return "logout"
+	case 8:
+		return "password reset request"
+	case 9:
+		return "password reset denied"
+	case 10:
+		return "password reset successful"
+	case 11:
+		return "read schema"
+	default:
+		return "unknown"
+	}
+}
+
 // Log !
 type Log struct {
 	interfaces.Model
@@ -83,11 +111,10 @@ type Log struct {
 	TableID   int       `uadmin:"filter;read_only"`
 	Activity  string    `uadmin:"code;read_only" gorm:"type:text"`
 	RollBack  string    `uadmin:"link;"`
-	CreatedAt time.Time `uadmin:"filter;read_only"`
 }
 
 func (l Log) String() string {
-	return fmt.Sprint(l.ID)
+	return fmt.Sprintf("Log %s", strconv.Itoa(int(l.ID)))
 }
 
 // Save !
@@ -100,7 +127,7 @@ func (l *Log) Save() {
 }
 
 // ParseRecord !
-func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *usermodel.User, action Action, r *http.Request) (err error) {
+func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *interfaces.User, action Action, r *http.Request) (err error) {
 	//modelName = strings.ToLower(modelName)
 	//model, _ := model2.NewModel(modelName, false)
 	//s, ok := model2.GetSchema(model.Interface())

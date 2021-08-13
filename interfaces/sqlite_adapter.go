@@ -534,6 +534,11 @@ func (d *SqliteDialect) Range(operatorContext *GormOperatorContext, field *schem
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName), f, second)
 }
 
+func (d *SqliteDialect) BuildDeleteString(table string, cond string, values ...interface{}) *DeleteRowStructure {
+	deleteRowStructure := &DeleteRowStructure{SQL: fmt.Sprintf("DELETE FROM %s WHERE %s", table, cond), Values: values}
+	return deleteRowStructure
+}
+
 func sqlite_uadmin_datetime_parse(dt string, tz_name string, conn_tzname string) *time.Time {
 	if dt == "" {
 		return nil

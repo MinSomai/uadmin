@@ -61,11 +61,11 @@ func NewApp(environment string) *App {
 		//	},
 		//	MaxAge: 12 * time.Hour,
 		//}))
+		appInstance = &a
 		a.RegisterBaseBlueprints()
 		a.RegisterBaseCommands()
 		a.Initialize()
 		a.InitializeRouter()
-		appInstance = &a
 		return &a
 	}
 	return appInstance
@@ -110,7 +110,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("superuser", &SuperadminCommand{})
 	a.RegisterCommand("admin", &AdminCommand{})
 	a.RegisterCommand("contenttype", &ContentTypeCommand{})
-	a.RegisterCommand("generate-faked-users", &CreateFakedUsersCommand{})
+	a.RegisterCommand("generate-fake-data", &CreateFakedDataCommand{})
 }
 
 func (a App) ExecuteCommand() {

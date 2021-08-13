@@ -19,7 +19,7 @@ type ABTestValue struct {
 }
 
 func (a *ABTestValue) String() string {
-	return a.Value
+	return fmt.Sprintf("ABTest Value %s", a.Value)
 }
 
 // ClickThroughRate returns the rate of click through of this value

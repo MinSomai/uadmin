@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	usermodel "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"image/png"
 	"os"
@@ -58,7 +57,7 @@ func VerifyOTP(pass, seed string, digits int, algorithm string, skew uint, perio
 	return valid
 }
 
-func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *usermodel.User) (secret string, imagePath string) {
+func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *interfaces.User) (secret string, imagePath string) {
 	algo := getOTPAlgorithm(strings.ToLower(algorithm))
 
 	opts := totp.GenerateOpts{

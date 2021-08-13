@@ -5,7 +5,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/admin"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
 	"strconv"
@@ -19,7 +18,7 @@ type AdminSearchFieldTestSuite struct {
 func (apts *AdminSearchFieldTestSuite) SetupTestData() {
 	uadminDatabase := interfaces.NewUadminDatabase()
 	for i := range interfaces.GenerateNumberSequence(201, 300) {
-		userModel := &usermodels.User{
+		userModel := &interfaces.User{
 			Email: fmt.Sprintf("admin_%d@example.com", i),
 			Username: "admin_" + strconv.Itoa(i),
 			FirstName: "firstname_" + strconv.Itoa(i),
@@ -34,11 +33,12 @@ func (suite *AdminSearchFieldTestSuite) TestFiltering() {
 	suite.SetupTestData()
 	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
-	var users []usermodels.User
+	var users []interfaces.User
 	adminRequestParams := interfaces.NewAdminRequestParams()
 	uadminDatabase := interfaces.NewUadminDatabase()
+	defer uadminDatabase.Close()
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
-	statement.Parse(&usermodels.User{})
+	statement.Parse(&interfaces.User{})
 	adminRequestParams.Search = "admin_202@example.com"
 	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GormQuerySet.Find(&users)
 	assert.Equal(suite.T(), len(users), 1)

@@ -20,6 +20,17 @@ func (ApprovalAction) Rejected() ApprovalAction {
 	return 2
 }
 
+func HumanizeApprovalAction(approvalAction ApprovalAction) string {
+	switch approvalAction {
+	case 1:
+		return "approved"
+	case 2:
+		return "rejected"
+	default:
+		return "unknown"
+	}
+}
+
 // Approval is a model that stores approval data
 type Approval struct {
 	interfaces.Model
@@ -39,7 +50,7 @@ type Approval struct {
 }
 
 func (a *Approval) String() string {
-	return fmt.Sprintf("%s.%s %d", a.ModelName, a.ColumnName, a.ModelPK)
+	return fmt.Sprintf("Approval for %s.%s %d", a.ModelName, a.ColumnName, a.ModelPK)
 }
 
 // Save overides save

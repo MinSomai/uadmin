@@ -2,7 +2,8 @@ package interfaces
 
 import (
 	"fmt"
-	usermodels "github.com/uadmin/uadmin/blueprint/user/models"
+	"github.com/uadmin/uadmin/blueprint/auth/services"
+	"github.com/uadmin/uadmin/interfaces"
 	"time"
 )
 
@@ -16,8 +17,8 @@ type ISessionProvider interface {
 	Set(name string, value string)
 	Get(name string) (string, error)
 	ClearAll() bool
-	GetUser() *usermodels.User
-	SetUser(user *usermodels.User)
+	GetUser() *interfaces.User
+	SetUser(user *interfaces.User)
 	Save() bool
 	ExpiresOn(*time.Time)
 }
@@ -56,5 +57,13 @@ func NewSessionRegistry() *SessionProviderRegistry {
 	return &SessionProviderRegistry{
 		registeredSessionAdapters: make(map[string]ISessionProvider),
 		defaultAdapter: "",
+	}
+}
+
+func NewSession() *interfaces.Session {
+	key := services.GenerateBase64(24)
+	return &interfaces.Session{
+		Key: key,
+		Data: "{}",
 	}
 }

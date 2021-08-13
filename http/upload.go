@@ -2,15 +2,15 @@ package http
 
 import (
 	"github.com/uadmin/uadmin/blueprint/auth/services"
+	"github.com/uadmin/uadmin/interfaces"
 	"io"
 	"net/http"
 	"os"
 	"strings"
-	sessionsmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
 )
 
 // UploadImageHandler handles files sent from Tiny MCE's photo uploader
-func UploadImageHandler(w http.ResponseWriter, r *http.Request, session *sessionsmodel.Session) {
+func UploadImageHandler(w http.ResponseWriter, r *http.Request, session *interfaces.Session) {
 	r.ParseMultipartForm(32 << 20)
 
 	for _, f := range r.MultipartForm.File["file"] {

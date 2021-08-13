@@ -3,7 +3,7 @@ package sessions
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	sessionmodel "github.com/uadmin/uadmin/blueprint/sessions/models"
+	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
@@ -17,7 +17,7 @@ type CsrfTestSuite struct {
 }
 
 func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
-	session := sessionmodel.NewSession()
+	session := interfaces2.NewSession()
 	token := utils.GenerateCSRFToken()
 	session.SetData("csrf_token", token)
 	uadminDatabase := interfaces.NewUadminDatabase()

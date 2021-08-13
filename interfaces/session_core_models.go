@@ -1,21 +1,17 @@
-package models
+package interfaces
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/blueprint/auth/services"
-	"github.com/uadmin/uadmin/blueprint/user/models"
-	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/preloaded"
 	"gorm.io/gorm"
 	"time"
 )
 
-// Session !
 type Session struct {
-	interfaces.Model
+	Model
 	Key        string
-	User       models.User `uadmin:"filter"`
+	User       User `uadmin:"filter"`
 	UserID     uint
 	LoginTime  time.Time
 	LastLogin  time.Time
@@ -28,14 +24,14 @@ type Session struct {
 }
 
 // String return string
-func (s Session) String() string {
-	return s.Key
+func (s *Session) String() string {
+	return fmt.Sprintf("Session for user %s", s.User.String())
 }
 
 // Save !
 func (s *Session) Save() {
 	u := s.User
-	s.User = models.User{}
+	s.User = User{}
 	// database.Save(s)
 	s.User = u
 	if preloaded.CacheSessions {
@@ -57,7 +53,7 @@ func (s *Session) GenerateKey() {
 		// TODO: Increase the session length to 124 and add 4 bytes for User.ID
 		// @todo, redo
 		// s.Key = services.GenerateBase64(24)
-		dialect1 := interfaces.GetAdapterForDb("default")
+		dialect1 := GetAdapterForDb("default")
 		dialect1.Equals("key", s.Key)
 		// database.Get(&session, dialect1.ToString(), s.Key)
 		if session.ID == 0 {
@@ -73,6 +69,9 @@ func (s *Session) Logout() {
 }
 
 func (s *Session) GetData(name string) (string, error) {
+	if s._data == nil {
+		s.ClearAll()
+	}
 	val, ok := s._data[name]
 	if ok {
 		return val, nil
@@ -86,6 +85,9 @@ func (s *Session) ClearAll() bool {
 }
 
 func (s *Session) BeforeSave(tx *gorm.DB) error {
+	if s._data == nil {
+		s.ClearAll()
+	}
 	var byteData []byte
 	byteData, err := json.Marshal(s._data)
 	if err != nil {
@@ -96,6 +98,9 @@ func (s *Session) BeforeSave(tx *gorm.DB) error {
 }
 
 func (s *Session) AfterFind(tx *gorm.DB) (err error) {
+	if s._data == nil {
+		s.ClearAll()
+	}
 	s._data = make(map[string]string)
 	if err := json.Unmarshal([]byte(s.Data), &s._data); err != nil {
 		return err
@@ -104,6 +109,9 @@ func (s *Session) AfterFind(tx *gorm.DB) (err error) {
 }
 
 func (s *Session) SetData(name string, value string) error {
+	if s._data == nil {
+		s.ClearAll()
+	}
 	s._data[name] = value
 	return nil
 }
@@ -125,13 +133,4 @@ func LoadSessions() {
 	//	// @todo, redo
 	//	// services.CachedSessions[s.Key] = s
 	//}
-}
-
-func NewSession() *Session {
-	key := services.GenerateBase64(24)
-	return &Session{
-		Key: key,
-		Data: "{}",
-		_data: make(map[string]string),
-	}
 }
