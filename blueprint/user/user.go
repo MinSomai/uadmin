@@ -269,6 +269,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	adminContext := &interfaces.AdminContext{}
 	userForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.User{}, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin"}, true, "")
 	usermodelAdminPage.Form = userForm
+	usermodelAdminPage.ListDisplay.ClearAllFields()
 	usernameField, _ := userForm.FieldRegistry.GetByName("Username")
 	usernameListDisplay := interfaces.NewListDisplay(usernameField)
 	usermodelAdminPage.ListDisplay.AddField(usernameListDisplay)
@@ -310,6 +311,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usergroupsAdminPage.Router = mainRouter
 	adminContext = &interfaces.AdminContext{}
 	userGroupForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.UserGroup{}, make([]string, 0), []string{}, true, "")
+	usergroupsAdminPage.ListDisplay.ClearAllFields()
 	usergroupsAdminPage.Form = userGroupForm
 	groupNameField, _ := userGroupForm.FieldRegistry.GetByName("GroupName")
 	groupNameListDisplay := interfaces.NewListDisplay(groupNameField)

@@ -304,6 +304,15 @@ func init() {
 
 func NewGormAdminPage(parentPage *interfaces.AdminPage, genModelI func() (interface{}, interface{}), modelName string) *interfaces.AdminPage {
 	modelI4, _ := genModelI()
+	listDisplay := &interfaces.ListDisplayRegistry{ListDisplayFields: make(map[string]*interfaces.ListDisplay)}
+	if modelI4 != nil {
+		form := interfaces.NewFormFromModelFromGinContext(&interfaces.AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
+		IDField, _ := form.FieldRegistry.GetByName("ID")
+		if IDField != nil {
+			IDListDisplay := interfaces.NewListDisplay(IDField)
+			listDisplay.AddField(IDListDisplay)
+		}
+	}
 	return &interfaces.AdminPage{
 		SubPages: interfaces.NewAdminPageRegistry(),
 		ParentPage: parentPage,
@@ -384,7 +393,7 @@ func NewGormAdminPage(parentPage *interfaces.AdminPage, genModelI func() (interf
 		FieldsToShow: interfaces.NewFieldRegistry(),
 		ModelActionsRegistry: NewAdminModelActionRegistry(),
 		Inlines: make([]*interfaces.AdminPageInlines, 0),
-		ListDisplay: &interfaces.ListDisplayRegistry{ListDisplayFields: make(map[string]*interfaces.ListDisplay)},
+		ListDisplay: listDisplay,
 		ListFilter: &interfaces.ListFilterRegistry{ListFilter: make([]*interfaces.ListFilter, 0)},
 		SearchFields: make([]*interfaces.SearchField, 0),
 		Paginator: &interfaces.Paginator{PerPage: interfaces.CurrentConfig.D.Uadmin.AdminPerPage, ShowLastPageOnPreviousPage: true},

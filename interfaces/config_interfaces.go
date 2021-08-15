@@ -44,21 +44,12 @@ type UadminConfigOptions struct {
 	OTPPeriod uint `yaml:"otp_period"`
 	OTPSkew uint `yaml:"otp_skew"`
 	PublicMedia bool `yaml:"public_media"`
-	//LogDelete bool `yaml:"log_delete"`
-	//LogAdd bool `yaml:"log_add"`
-	//LogEdit bool `yaml:"log_edit"`
-	//LogRead bool `yaml:"log_read"`
-	//CacheTranslation bool `yaml:"cache_translation"`
 	AllowedIPs string `yaml:"allowed_ips"`
 	BlockedIPs string `yaml:"blocked_ips"`
 	RestrictSessionIP bool `yaml:"restrict_session_ip"`
 	RetainMediaVersions bool `yaml:"retain_media_versions"`
 	RateLimit uint `yaml:"rate_limit"`
 	RateLimitBurst uint `yaml:"rate_limit_burst"`
-	//APILogRead bool `yaml:"api_log_read"`
-	//APILogDelete bool `yaml:"api_log_delete"`
-	//APILogAdd bool `yaml:"api_log_add"`
-	//APILogEdit bool `yaml:"api_log_edit"`
 	LogHTTPRequests bool `yaml:"log_http_requests"`
 	HTTPLogFormat string `yaml:"http_log_format"`
 	LogTrail bool `yaml:"log_trail"`

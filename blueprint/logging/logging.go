@@ -31,10 +31,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	adminContext := &interfaces.AdminContext{}
 	logForm := interfaces.NewFormFromModelFromGinContext(adminContext, &logmodel.Log{}, make([]string, 0), []string{}, true, "")
 	logmodelAdminPage.Form = logForm
-	IDField, _ := logForm.FieldRegistry.GetByName("ID")
-	IDListDisplay := interfaces.NewListDisplay(IDField)
-	IDListDisplay.Ordering = 1
-	logmodelAdminPage.ListDisplay.AddField(IDListDisplay)
 	actionField, _ := logForm.FieldRegistry.GetByName("Action")
 	actionListDisplay := interfaces.NewListDisplay(actionField)
 	actionListDisplay.Ordering = 2

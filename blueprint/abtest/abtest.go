@@ -46,10 +46,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	adminContext := &interfaces.AdminContext{}
 	abTestForm := interfaces.NewFormFromModelFromGinContext(adminContext, &abtestmodel.ABTest{}, make([]string, 0), []string{}, true, "")
 	abtestmodelAdminPage.Form = abTestForm
-	IDField, _ := abTestForm.FieldRegistry.GetByName("ID")
-	IDListDisplay := interfaces.NewListDisplay(IDField)
-	IDListDisplay.Ordering = 1
-	abtestmodelAdminPage.ListDisplay.AddField(IDListDisplay)
 	nameField, _ := abTestForm.FieldRegistry.GetByName("Name")
 	nameListDisplay := interfaces.NewListDisplay(nameField)
 	nameListDisplay.Ordering = 2

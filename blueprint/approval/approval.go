@@ -31,10 +31,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	adminContext := &interfaces.AdminContext{}
 	approvalForm := interfaces.NewFormFromModelFromGinContext(adminContext, &models.Approval{}, make([]string, 0), []string{}, true, "")
 	approvalmodelAdminPage.Form = approvalForm
-	IDField, _ := approvalForm.FieldRegistry.GetByName("ID")
-	IDListDisplay := interfaces.NewListDisplay(IDField)
-	IDListDisplay.Ordering = 1
-	approvalmodelAdminPage.ListDisplay.AddField(IDListDisplay)
 	approvalActionField, _ := approvalForm.FieldRegistry.GetByName("ApprovalAction")
 	approvalActionListDisplay := interfaces.NewListDisplay(approvalActionField)
 	approvalmodelAdminPage.ListDisplay.AddField(approvalActionListDisplay)

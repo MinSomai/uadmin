@@ -30,6 +30,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	adminContext := &interfaces.AdminContext{}
 	languageForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.Language{}, make([]string, 0), []string{}, true, "")
 	languagemodelAdminPage.Form = languageForm
+	languagemodelAdminPage.ListDisplay.ClearAllFields()
 	codeField, _ := languageForm.FieldRegistry.GetByName("Code")
 	codeListDisplay := interfaces.NewListDisplay(codeField)
 	codeListDisplay.Ordering = 1

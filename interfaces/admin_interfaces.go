@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
+	"math"
 	"net/url"
 	"reflect"
 	"sort"
@@ -239,6 +240,12 @@ func (sb *SortBy) Sort(afo *AdminFilterObjects, direction int) {
 
 type ListDisplayRegistry struct {
 	ListDisplayFields map[string]*ListDisplay
+	MaxOrdering int
+}
+
+func (ldr *ListDisplayRegistry) ClearAllFields() {
+	ldr.MaxOrdering = 0
+	ldr.ListDisplayFields = make(map[string]*ListDisplay)
 }
 
 func (ldr *ListDisplayRegistry) IsThereAnyEditable() bool {
@@ -251,6 +258,8 @@ func (ldr *ListDisplayRegistry) IsThereAnyEditable() bool {
 }
 func (ldr *ListDisplayRegistry) AddField(ld *ListDisplay) {
 	ldr.ListDisplayFields[ld.DisplayName] = ld
+	ldr.MaxOrdering = int(math.Max(float64(ldr.MaxOrdering + 1), float64(ld.Ordering + 1)))
+	ld.Ordering = ldr.MaxOrdering
 }
 
 func (ldr *ListDisplayRegistry) BuildFormForListEditable(ID uint, model interface{}) *FormListEditable {

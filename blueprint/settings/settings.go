@@ -33,6 +33,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingmodelAdminPage.Form = settingForm
 	settingNameField, _ := settingForm.FieldRegistry.GetByName("Name")
 	settingNameListDisplay := interfaces.NewListDisplay(settingNameField)
+	settingmodelAdminPage.ListDisplay.ClearAllFields()
 	settingmodelAdminPage.ListDisplay.AddField(settingNameListDisplay)
 	settingNameListDisplay.Ordering = 1
 	valueField, _ := settingForm.FieldRegistry.GetByName("Value")
@@ -73,6 +74,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	adminContext = &interfaces.AdminContext{}
 	settingCategoryForm := interfaces.NewFormFromModelFromGinContext(adminContext, &settingmodel.SettingCategory{}, make([]string, 0), []string{}, true, "")
 	settingcategoriesmodelAdminPage.Form = settingCategoryForm
+	settingcategoriesmodelAdminPage.ListDisplay.ClearAllFields()
 	settingCategoryNameField, _ := settingCategoryForm.FieldRegistry.GetByName("Name")
 	settingCategoryNameListDisplay := interfaces.NewListDisplay(settingCategoryNameField)
 	settingcategoriesmodelAdminPage.ListDisplay.AddField(settingCategoryNameListDisplay)
