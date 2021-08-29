@@ -2,7 +2,7 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"io"
 	"log"
 	"os"
@@ -16,7 +16,7 @@ func (c SwaggerCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("serve", &ServeSwaggerServer{})
@@ -47,7 +47,7 @@ type ServeSwaggerServer struct {
 }
 
 func (command ServeSwaggerServer) Proceed(subaction string, args []string) error {
-	appInstance.Config.ApiSpec = interfaces.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
+	appInstance.Config.ApiSpec = core.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
 	commandToExecute := exec.Command(
 		"swagger", "serve", "--flavor=swagger", "--no-open",
 		fmt.Sprintf("--port=%d", appInstance.Config.D.Swagger.ListenPort), appInstance.Config.D.Swagger.PathToSpec,

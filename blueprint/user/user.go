@@ -8,7 +8,7 @@ import (
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	"github.com/uadmin/uadmin/blueprint/user/migrations"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"strconv"
@@ -18,7 +18,7 @@ import (
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 
 type PasswordValidationStruct struct {
@@ -45,12 +45,12 @@ type ChangePasswordHandlerParams struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.GET("/reset-password", func(ctx *gin.Context) {
 		type Context struct {
-			interfaces.AdminContext
+			core.AdminContext
 		}
 		c := &Context{}
-		interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
-		tr := interfaces.NewTemplateRenderer("Reset Password")
-		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("resetpassword"), c, interfaces.FuncMap)
+		core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
+		tr := core.NewTemplateRenderer("Reset Password")
+		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("resetpassword"), c, core.FuncMap)
 	})
 	group.POST("/api/forgot", func(ctx *gin.Context) {
 		var json ForgotPasswordHandlerParams
@@ -64,19 +64,19 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 			return
 		}
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		var user interfaces.User
-		db.Model(interfaces.User{}).Where(&interfaces.User{Email: json.Email}).First(&user)
+		var user core.User
+		db.Model(core.User{}).Where(&core.User{Email: json.Email}).First(&user)
 		if user.ID == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "User with this email not found"})
 			return
 		}
 		templateWriter := bytes.NewBuffer([]byte{})
-		template1, err := template.ParseFS(interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("email/forgot"))
+		template1, err := template.ParseFS(core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("email/forgot"))
 		if err != nil {
-			interfaces.Trail(interfaces.ERROR, "RenderHTML unable to parse %s. %s", interfaces.CurrentConfig.GetPathToTemplate("email/forgot"), err)
+			core.Trail(core.ERROR, "RenderHTML unable to parse %s. %s", core.CurrentConfig.GetPathToTemplate("email/forgot"), err)
 			ctx.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
 			return
 		}
@@ -88,12 +88,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 		c := Context{}
 		c.Name = user.Username
-		c.Website = interfaces.CurrentConfig.D.Uadmin.SiteName
-		host := interfaces.CurrentConfig.D.Uadmin.PoweredOnSite
+		c.Website = core.CurrentConfig.D.Uadmin.SiteName
+		host := core.CurrentConfig.D.Uadmin.PoweredOnSite
 		// @todo, generate code to restore access
 		actionExpiresAt := time.Now()
-		actionExpiresAt = actionExpiresAt.Add(time.Duration(interfaces.CurrentConfig.D.Uadmin.ForgotCodeExpiration)*time.Minute)
-		var oneTimeAction = interfaces.OneTimeAction{
+		actionExpiresAt = actionExpiresAt.Add(time.Duration(core.CurrentConfig.D.Uadmin.ForgotCodeExpiration)*time.Minute)
+		var oneTimeAction = core.OneTimeAction{
 			User:       user,
 			ExpiresOn: actionExpiresAt,
 			Code: utils.RandStringRunesForOneTimeAction(32),
@@ -101,17 +101,17 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 		}
 
-		db.Model(interfaces.OneTimeAction{}).Save(&oneTimeAction)
-		link := host + interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/resetpassword?key=" + oneTimeAction.Code
+		db.Model(core.OneTimeAction{}).Save(&oneTimeAction)
+		link := host + core.CurrentConfig.D.Uadmin.RootAdminURL + "/resetpassword?key=" + oneTimeAction.Code
 		c.URL = link
 		err = template1.Execute(templateWriter, c)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
-			interfaces.Trail(interfaces.ERROR, "RenderHTML unable to parse %s. %s", interfaces.CurrentConfig.GetPathToTemplate("email/forgot"), err)
+			core.Trail(core.ERROR, "RenderHTML unable to parse %s. %s", core.CurrentConfig.GetPathToTemplate("email/forgot"), err)
 			return
 		}
-		subject := "Password reset for admin panel on the " + interfaces.CurrentConfig.D.Uadmin.SiteName
-		err = utils.SendEmail(interfaces.CurrentConfig.D.Uadmin.EmailFrom, []string{user.Email}, []string{}, []string{}, subject, templateWriter.String())
+		subject := "Password reset for admin panel on the " + core.CurrentConfig.D.Uadmin.SiteName
+		err = utils.SendEmail(core.CurrentConfig.D.Uadmin.EmailFrom, []string{user.Email}, []string{}, []string{}, subject, templateWriter.String())
 		return
 	})
 	group.POST("/api/reset-password", func(ctx *gin.Context) {
@@ -126,11 +126,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 			return
 		}
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		var oneTimeAction interfaces.OneTimeAction
-		db.Model(interfaces.OneTimeAction{}).Where(&interfaces.OneTimeAction{Code: json.Code, IsUsed: false}).Preload("User").First(&oneTimeAction)
+		var oneTimeAction core.OneTimeAction
+		db.Model(core.OneTimeAction{}).Where(&core.OneTimeAction{Code: json.Code, IsUsed: false}).Preload("User").First(&oneTimeAction)
 		if oneTimeAction.ID == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "No such code found"})
 			return
@@ -182,7 +182,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
-		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
@@ -199,7 +199,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		hashedPassword, err = utils2.HashPass(json.Password, user.Salt)
 		user.Password = hashedPassword
 		user.IsPasswordUsable = true
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		db.Save(&user)
@@ -208,12 +208,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	group.POST("/api/disable-2fa", func(ctx *gin.Context) {
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
-		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
 		user.OTPRequired = false
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		db.Save(&user)
@@ -222,12 +222,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	group.POST("/api/enable-2fa", func(ctx *gin.Context) {
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
-		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
 		user.OTPRequired = true
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		db.Save(&user)
@@ -236,12 +236,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.NoRoute(func(ctx *gin.Context) {
 		// ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 		type Context struct {
-			interfaces.AdminContext
+			core.AdminContext
 			Menu     string
 		}
 
 		c := &Context{}
-		interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
 		//
 		//if r.Form.Get("err_msg") != "" {
 		//	c.ErrMsg = r.Form.Get("err_msg")
@@ -250,42 +250,42 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//	c.ErrCode = int(code)
 		//}NewAdminPage
 		ctx.Status(404)
-		tr := interfaces.NewTemplateRenderer("Page not found")
-		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, interfaces.FuncMap)
+		tr := core.NewTemplateRenderer("Page not found")
+		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("404"), c, core.FuncMap)
 	})
-	usersAdminPage := interfaces.NewGormAdminPage(
+	usersAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
 	)
 	usersAdminPage.PageName = "Users"
 	usersAdminPage.Slug = "users"
 	usersAdminPage.BlueprintName = "user"
 	usersAdminPage.Router = mainRouter
-	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
+	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	var usermodelAdminPage *interfaces.AdminPage
-	usermodelAdminPage = interfaces.NewGormAdminPage(
+	var usermodelAdminPage *core.AdminPage
+	usermodelAdminPage = core.NewGormAdminPage(
 		usersAdminPage,
-		func() (interface{}, interface{}) {return &interfaces.User{}, &[]*interfaces.User{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+		func() (interface{}, interface{}) {return &core.User{}, &[]*core.User{}},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Username", "FirstName", "LastName", "Email", "Active", "IsStaff", "IsSuperUser", "Password", "Photo", "LastLogin", "ExpiresOn"}
 			if ctx.GetUserObject().IsSuperUser {
 				fields = append(fields, "UserGroups")
 				fields = append(fields, "Permissions")
 			}
-			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			if ctx.GetUserObject().IsSuperUser {
 				usergroupsField, _ := form.FieldRegistry.GetByName("UserGroups")
-				usergroupsField.SetUpField = func(w interfaces.IWidget, modelI interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
-					model := modelI.(*interfaces.User)
+				usergroupsField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
+					model := modelI.(*core.User)
 					vTmp := v.([]string)
-					var usergroup *interfaces.UserGroup
+					var usergroup *core.UserGroup
 					if model.ID != 0 {
 						afo.GetUadminDatabase().Db.Model(model).Association("UserGroups").Clear()
-						model.UserGroups = make([]interfaces.UserGroup, 0)
+						model.UserGroups = make([]core.UserGroup, 0)
 					}
 					for _, ID := range vTmp {
 						afo.GetUadminDatabase().Db.First(&usergroup, ID)
@@ -296,16 +296,16 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					}
 					return nil
 				}
-				userGroupsWidget := usergroupsField.FieldConfig.Widget.(*interfaces.ChooseFromSelectWidget)
-				userGroupsWidget.AddNewLink = fmt.Sprintf("%s/%s/usergroup/edit/%s?_to_field=id&_popup=1", interfaces.CurrentConfig.D.Uadmin.RootAdminURL, usersAdminPage.Slug, "new")
+				userGroupsWidget := usergroupsField.FieldConfig.Widget.(*core.ChooseFromSelectWidget)
+				userGroupsWidget.AddNewLink = fmt.Sprintf("%s/%s/usergroup/edit/%s?_to_field=id&_popup=1", core.CurrentConfig.D.Uadmin.RootAdminURL, usersAdminPage.Slug, "new")
 				userGroupsWidget.AddNewTitle = "Add another group"
-				userGroupsWidget.PopulateLeftSide = func()[]*interfaces.SelectOptGroup {
-					var groups []*interfaces.UserGroup
-					uadminDatabase := interfaces.NewUadminDatabase()
+				userGroupsWidget.PopulateLeftSide = func()[]*core.SelectOptGroup {
+					var groups []*core.UserGroup
+					uadminDatabase := core.NewUadminDatabase()
 					uadminDatabase.Db.Find(&groups)
-					ret := make([]*interfaces.SelectOptGroup, 0)
+					ret := make([]*core.SelectOptGroup, 0)
 					for _, group := range groups {
-						ret = append(ret, &interfaces.SelectOptGroup{
+						ret = append(ret, &core.SelectOptGroup{
 							OptLabel: group.GroupName,
 							Value: group.ID,
 						})
@@ -313,16 +313,16 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					uadminDatabase.Close()
 					return ret
 				}
-				userGroupsWidget.PopulateRightSide = func()[]*interfaces.SelectOptGroup {
-					ret := make([]*interfaces.SelectOptGroup, 0)
-					user := modelI.(*interfaces.User)
+				userGroupsWidget.PopulateRightSide = func()[]*core.SelectOptGroup {
+					ret := make([]*core.SelectOptGroup, 0)
+					user := modelI.(*core.User)
 					if user.ID != 0 {
-						var groups []*interfaces.UserGroup
-						uadminDatabase := interfaces.NewUadminDatabase()
+						var groups []*core.UserGroup
+						uadminDatabase := core.NewUadminDatabase()
 						uadminDatabase.Db.Model(user).Association("UserGroups").Find(&groups)
-						ret = make([]*interfaces.SelectOptGroup, 0)
+						ret = make([]*core.SelectOptGroup, 0)
 						for _, group := range groups {
-							ret = append(ret, &interfaces.SelectOptGroup{
+							ret = append(ret, &core.SelectOptGroup{
 								OptLabel: group.GroupName,
 								Value:    group.ID,
 							})
@@ -339,12 +339,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 								IdI = append(IdI, uint(tmpI))
 							}
 							if len(IdI) > 0 {
-								var groups []*interfaces.UserGroup
-								uadminDatabase := interfaces.NewUadminDatabase()
+								var groups []*core.UserGroup
+								uadminDatabase := core.NewUadminDatabase()
 								uadminDatabase.Db.Find(&groups, IdI)
-								ret = make([]*interfaces.SelectOptGroup, 0)
+								ret = make([]*core.SelectOptGroup, 0)
 								for _, group := range groups {
-									ret = append(ret, &interfaces.SelectOptGroup{
+									ret = append(ret, &core.SelectOptGroup{
 										OptLabel: group.GroupName,
 										Value:    group.ID,
 									})
@@ -366,13 +366,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				userGroupsWidget.RightHelpChooseAll = "Click to remove all chosen groups at once."
 				userGroupsWidget.HelpText = "The groups this user belongs to. A user will get all permissions granted to each of their groups. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
 				permissionsField, _ := form.FieldRegistry.GetByName("Permissions")
-				permissionsField.SetUpField = func(w interfaces.IWidget, modelI interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
-					model := modelI.(*interfaces.User)
+				permissionsField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
+					model := modelI.(*core.User)
 					vTmp := v.([]string)
-					var permission *interfaces.Permission
+					var permission *core.Permission
 					if model.ID != 0 {
 						afo.GetUadminDatabase().Db.Model(model).Association("Permissions").Clear()
-						model.Permissions = make([]interfaces.Permission, 0)
+						model.Permissions = make([]core.Permission, 0)
 					}
 					for _, ID := range vTmp {
 						afo.GetUadminDatabase().Db.First(&permission, ID)
@@ -383,14 +383,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					}
 					return nil
 				}
-				permissionsWidget := permissionsField.FieldConfig.Widget.(*interfaces.ChooseFromSelectWidget)
-				permissionsWidget.PopulateLeftSide = func()[]*interfaces.SelectOptGroup {
-					var permissions []*interfaces.Permission
-					uadminDatabase := interfaces.NewUadminDatabase()
+				permissionsWidget := permissionsField.FieldConfig.Widget.(*core.ChooseFromSelectWidget)
+				permissionsWidget.PopulateLeftSide = func()[]*core.SelectOptGroup {
+					var permissions []*core.Permission
+					uadminDatabase := core.NewUadminDatabase()
 					uadminDatabase.Db.Preload("ContentType").Find(&permissions)
-					ret := make([]*interfaces.SelectOptGroup, 0)
+					ret := make([]*core.SelectOptGroup, 0)
 					for _, permission := range permissions {
-						ret = append(ret, &interfaces.SelectOptGroup{
+						ret = append(ret, &core.SelectOptGroup{
 							OptLabel: permission.ShortDescription(),
 							Value: permission.ID,
 						})
@@ -407,16 +407,16 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				permissionsWidget.RightSearchSelectHelp = ""
 				permissionsWidget.RightHelpChooseAll = "Click to remove all chosen user permissions at once."
 				permissionsWidget.HelpText = "Specific permissions for this user. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
-				permissionsWidget.PopulateRightSide = func()[]*interfaces.SelectOptGroup {
-					ret := make([]*interfaces.SelectOptGroup, 0)
-					user := modelI.(*interfaces.User)
+				permissionsWidget.PopulateRightSide = func()[]*core.SelectOptGroup {
+					ret := make([]*core.SelectOptGroup, 0)
+					user := modelI.(*core.User)
 					if user.ID != 0 {
-						var permissions []*interfaces.Permission
-						uadminDatabase := interfaces.NewUadminDatabase()
+						var permissions []*core.Permission
+						uadminDatabase := core.NewUadminDatabase()
 						uadminDatabase.Db.Model(user).Association("Permissions").Find(&permissions)
-						ret = make([]*interfaces.SelectOptGroup, 0)
+						ret = make([]*core.SelectOptGroup, 0)
 						for _, permission := range permissions {
-							ret = append(ret, &interfaces.SelectOptGroup{
+							ret = append(ret, &core.SelectOptGroup{
 								OptLabel: permission.ShortDescription(),
 								Value:    permission.ID,
 							})
@@ -432,13 +432,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 								tmpI, _ := strconv.Atoi(tmp)
 								IdI = append(IdI, uint(tmpI))
 							}
-							var permissions []*interfaces.Permission
+							var permissions []*core.Permission
 							if len(IdI) > 0 {
-								uadminDatabase := interfaces.NewUadminDatabase()
+								uadminDatabase := core.NewUadminDatabase()
 								uadminDatabase.Db.Preload("ContentType").Find(&permissions, IdI)
-								ret = make([]*interfaces.SelectOptGroup, 0)
+								ret = make([]*core.SelectOptGroup, 0)
 								for _, permission := range permissions {
-									ret = append(ret, &interfaces.SelectOptGroup{
+									ret = append(ret, &core.SelectOptGroup{
 										OptLabel: permission.ShortDescription(),
 										Value:    permission.ID,
 									})
@@ -454,13 +454,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			return form
 		},
 	)
-	usermodelAdminPage.SaveModel = func(modelI interface{}, ID uint, afo interfaces.IAdminFilterObjects) interface{} {
-		user := modelI.(*interfaces.User)
+	usermodelAdminPage.SaveModel = func(modelI interface{}, ID uint, afo core.IAdminFilterObjects) interface{} {
+		user := modelI.(*core.User)
 		if user.Salt == "" && user.Password != "" {
-			user.Salt = utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
+			user.Salt = utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
 		}
 		if ID != 0 {
-			userM := &interfaces.User{}
+			userM := &core.User{}
 			afo.GetUadminDatabase().Db.First(userM, ID)
 			if userM.Password != user.Password && user.Password != "" {
 				// hashedPassword, err := utils2.HashPass(password, salt)
@@ -483,35 +483,35 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usermodelAdminPage.Slug = "user"
 	usermodelAdminPage.BlueprintName = "user"
 	usermodelAdminPage.Router = mainRouter
-	listFilter := &interfaces.ListFilter{
+	listFilter := &core.ListFilter{
 		UrlFilteringParam: "IsSuperUser__exact",
 		Title: "Is super user ?",
 	}
-	listFilter.OptionsToShow = append(listFilter.OptionsToShow, &interfaces.FieldChoice{DisplayAs: "Yes", Value: true})
-	listFilter.OptionsToShow = append(listFilter.OptionsToShow, &interfaces.FieldChoice{DisplayAs: "No", Value: false})
+	listFilter.OptionsToShow = append(listFilter.OptionsToShow, &core.FieldChoice{DisplayAs: "Yes", Value: true})
+	listFilter.OptionsToShow = append(listFilter.OptionsToShow, &core.FieldChoice{DisplayAs: "No", Value: false})
 	usermodelAdminPage.ListFilter.Add(listFilter)
 	err = usersAdminPage.SubPages.AddAdminPage(usermodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usergroupsAdminPage := interfaces.NewGormAdminPage(
+	usergroupsAdminPage := core.NewGormAdminPage(
 		usersAdminPage,
-		func() (interface{}, interface{}) {return &interfaces.UserGroup{}, &[]*interfaces.UserGroup{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+		func() (interface{}, interface{}) {return &core.UserGroup{}, &[]*core.UserGroup{}},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"GroupName"}
 			if ctx.GetUserObject().IsSuperUser {
 				fields = append(fields, "Permissions")
 			}
-			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			if ctx.GetUserObject().IsSuperUser {
 				permissionsField, _ := form.FieldRegistry.GetByName("Permissions")
-				permissionsField.SetUpField = func(w interfaces.IWidget, modelI interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
-					model := modelI.(*interfaces.UserGroup)
+				permissionsField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
+					model := modelI.(*core.UserGroup)
 					vTmp := v.([]string)
-					var permission *interfaces.Permission
+					var permission *core.Permission
 					if model.ID != 0 {
 						afo.GetUadminDatabase().Db.Model(model).Association("Permissions").Clear()
-						model.Permissions = make([]interfaces.Permission, 0)
+						model.Permissions = make([]core.Permission, 0)
 					}
 					for _, ID := range vTmp {
 						afo.GetUadminDatabase().Db.First(&permission, ID)
@@ -522,14 +522,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					}
 					return nil
 				}
-				permissionsWidget := permissionsField.FieldConfig.Widget.(*interfaces.ChooseFromSelectWidget)
-				permissionsWidget.PopulateLeftSide = func()[]*interfaces.SelectOptGroup {
-					var permissions []*interfaces.Permission
-					uadminDatabase := interfaces.NewUadminDatabase()
+				permissionsWidget := permissionsField.FieldConfig.Widget.(*core.ChooseFromSelectWidget)
+				permissionsWidget.PopulateLeftSide = func()[]*core.SelectOptGroup {
+					var permissions []*core.Permission
+					uadminDatabase := core.NewUadminDatabase()
 					uadminDatabase.Db.Preload("ContentType").Find(&permissions)
-					ret := make([]*interfaces.SelectOptGroup, 0)
+					ret := make([]*core.SelectOptGroup, 0)
 					for _, permission := range permissions {
-						ret = append(ret, &interfaces.SelectOptGroup{
+						ret = append(ret, &core.SelectOptGroup{
 							OptLabel: permission.ShortDescription(),
 							Value: permission.ID,
 						})
@@ -546,16 +546,16 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				permissionsWidget.RightSearchSelectHelp = ""
 				permissionsWidget.RightHelpChooseAll = "Click to remove all chosen permissions at once."
 				permissionsWidget.HelpText = "Specific permissions for this user. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
-				permissionsWidget.PopulateRightSide = func()[]*interfaces.SelectOptGroup {
-					ret := make([]*interfaces.SelectOptGroup, 0)
-					user := modelI.(*interfaces.UserGroup)
+				permissionsWidget.PopulateRightSide = func()[]*core.SelectOptGroup {
+					ret := make([]*core.SelectOptGroup, 0)
+					user := modelI.(*core.UserGroup)
 					if user.ID != 0 {
-						var permissions []*interfaces.Permission
-						uadminDatabase := interfaces.NewUadminDatabase()
+						var permissions []*core.Permission
+						uadminDatabase := core.NewUadminDatabase()
 						uadminDatabase.Db.Model(user).Association("Permissions").Find(&permissions)
-						ret = make([]*interfaces.SelectOptGroup, 0)
+						ret = make([]*core.SelectOptGroup, 0)
 						for _, permission := range permissions {
-							ret = append(ret, &interfaces.SelectOptGroup{
+							ret = append(ret, &core.SelectOptGroup{
 								OptLabel: permission.ShortDescription(),
 								Value:    permission.ID,
 							})
@@ -571,13 +571,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 								tmpI, _ := strconv.Atoi(tmp)
 								IdI = append(IdI, uint(tmpI))
 							}
-							var permissions []*interfaces.Permission
+							var permissions []*core.Permission
 							if len(IdI) > 0 {
-								uadminDatabase := interfaces.NewUadminDatabase()
+								uadminDatabase := core.NewUadminDatabase()
 								uadminDatabase.Db.Preload("ContentType").Find(&permissions, IdI)
-								ret = make([]*interfaces.SelectOptGroup, 0)
+								ret = make([]*core.SelectOptGroup, 0)
 								for _, permission := range permissions {
-									ret = append(ret, &interfaces.SelectOptGroup{
+									ret = append(ret, &core.SelectOptGroup{
 										OptLabel: permission.ShortDescription(),
 										Value:    permission.ID,
 									})
@@ -604,38 +604,38 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.OneTimeAction{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.User{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.UserGroup{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.Permission{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &core.OneTimeAction{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &core.User{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &core.UserGroup{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &core.Permission{}})
 
-	interfaces.UadminValidatorRegistry.AddValidator("username-unique", func (i interface{}, o interface{}) error {
-		uadminDatabase := interfaces.NewUadminDatabase()
+	core.UadminValidatorRegistry.AddValidator("username-unique", func (i interface{}, o interface{}) error {
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		var cUsers int64
-		db.Model(&interfaces.User{}).Where(&interfaces.User{Username: i.(string)}).Count(&cUsers)
+		db.Model(&core.User{}).Where(&core.User{Username: i.(string)}).Count(&cUsers)
 		if cUsers == 0 {
 			return nil
 		}
 		return fmt.Errorf("user with name %s is already registered", i.(string))
 	})
 
-	interfaces.UadminValidatorRegistry.AddValidator("email-unique", func (i interface{}, o interface{}) error {
-		uadminDatabase := interfaces.NewUadminDatabase()
+	core.UadminValidatorRegistry.AddValidator("email-unique", func (i interface{}, o interface{}) error {
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
 		var cUsers int64
-		db.Model(&interfaces.User{}).Where(&interfaces.User{Email: i.(string)}).Count(&cUsers)
+		db.Model(&core.User{}).Where(&core.User{Email: i.(string)}).Count(&cUsers)
 		if cUsers == 0 {
 			return nil
 		}
 		return fmt.Errorf("user with email %s is already registered", i.(string))
 	})
 
-	interfaces.UadminValidatorRegistry.AddValidator("username-uadmin", func (i interface{}, o interface{}) error {
-		minLength := interfaces.CurrentConfig.D.Auth.MinUsernameLength
-		maxLength := interfaces.CurrentConfig.D.Auth.MaxUsernameLength
+	core.UadminValidatorRegistry.AddValidator("username-uadmin", func (i interface{}, o interface{}) error {
+		minLength := core.CurrentConfig.D.Auth.MinUsernameLength
+		maxLength := core.CurrentConfig.D.Auth.MaxUsernameLength
 		currentUsername := i.(string)
 		if maxLength < len(currentUsername) || len(currentUsername) < minLength {
 			return fmt.Errorf("length of the username has to be between %d and %d symbols", minLength, maxLength)
@@ -643,43 +643,43 @@ func (b Blueprint) Init() {
 		return nil
 	})
 
-	interfaces.UadminValidatorRegistry.AddValidator("password-uadmin", func (i interface{}, o interface{}) error {
+	core.UadminValidatorRegistry.AddValidator("password-uadmin", func (i interface{}, o interface{}) error {
 		passwordStruct := o.(PasswordValidationStruct)
 		if passwordStruct.Password != passwordStruct.ConfirmedPassword {
 			return fmt.Errorf("password doesn't equal to confirmed password")
 		}
-		if len(passwordStruct.Password) < interfaces.CurrentConfig.D.Auth.MinPasswordLength {
-			return fmt.Errorf("length of the password has to be at least %d symbols", interfaces.CurrentConfig.D.Auth.MinPasswordLength)
+		if len(passwordStruct.Password) < core.CurrentConfig.D.Auth.MinPasswordLength {
+			return fmt.Errorf("length of the password has to be at least %d symbols", core.CurrentConfig.D.Auth.MinPasswordLength)
 		}
 		return nil
 	})
 
 	govalidator.CustomTypeTagMap.Set("username-unique", func(i interface{}, o interface{}) bool {
-		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("username-unique")
+		validator, _ := core.UadminValidatorRegistry.GetValidator("username-unique")
 		userExists := validator(i, o)
 		return userExists == nil
 	})
 	govalidator.CustomTypeTagMap.Set("email-unique", func(i interface{}, o interface{}) bool {
-		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("email-unique")
+		validator, _ := core.UadminValidatorRegistry.GetValidator("email-unique")
 		emailExists := validator(i, o)
 		return emailExists == nil
 	})
 	govalidator.CustomTypeTagMap.Set("username-uadmin", func(i interface{}, o interface{}) bool {
-		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("username-uadmin")
+		validator, _ := core.UadminValidatorRegistry.GetValidator("username-uadmin")
 		isValidUsername := validator(i, o)
 		return isValidUsername == nil
 	})
 	govalidator.CustomTypeTagMap.Set("password-uadmin", func(i interface{}, o interface{}) bool {
-		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("password-uadmin")
+		validator, _ := core.UadminValidatorRegistry.GetValidator("password-uadmin")
 		isValidPassword := validator(i, o)
 		return isValidPassword == nil
 	})
-	fsStorage := interfaces.NewFsStorage()
-	interfaces.UadminFormCongirurableOptionInstance.AddFieldFormOptions(&interfaces.FieldFormOptions{
+	fsStorage := core.NewFsStorage()
+	core.UadminFormCongirurableOptionInstance.AddFieldFormOptions(&core.FieldFormOptions{
 		WidgetType: "image",
 		Name: "UserPhotoFormOptions",
-		WidgetPopulate: func(m interface{}, currentField *interfaces.Field) interface{} {
-			photo := m.(*interfaces.User).Photo
+		WidgetPopulate: func(m interface{}, currentField *core.Field) interface{} {
+			photo := m.(*core.User).Photo
 			if photo == "" {
 				return ""
 			}
@@ -689,7 +689,7 @@ func (b Blueprint) Init() {
 }
 
 var ConcreteBlueprint = Blueprint{
-	interfaces.Blueprint{
+	core.Blueprint{
 		Name:              "user",
 		Description:       "this blueprint is about users",
 		MigrationRegistry: migrations.BMigrationRegistry,

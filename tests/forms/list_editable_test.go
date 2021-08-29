@@ -3,7 +3,7 @@ package forms
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"mime/multipart"
 	"testing"
 )
@@ -22,13 +22,13 @@ type ListEditableFormTestSuite struct {
 func (s *ListEditableFormTestSuite) TestFormBuilder() {
 	// userBlueprintRegistry, _ := s.App.BlueprintRegistry.GetByName("user")
 	// NewFormListEditableFromListDisplayRegistry
-	adminPanel, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminPanel, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	userAdminPage, _ := adminPanel.SubPages.GetBySlug("user")
 	ld, _ := userAdminPage.ListDisplay.GetFieldByDisplayName("Email")
 	ld.IsEditable = true
-	listEditableForm := interfaces.NewFormListEditableFromListDisplayRegistry(nil, "", 10, &interfaces.User{}, userAdminPage.ListDisplay)
+	listEditableForm := core.NewFormListEditableFromListDisplayRegistry(nil, "", 10, &core.User{}, userAdminPage.ListDisplay)
 	form := NewTestForm1()
-	userTest := &interfaces.User{}
+	userTest := &core.User{}
 	err := listEditableForm.ProceedRequest(form, userTest)
 	assert.False(s.T(), err.IsEmpty())
 	form.Value["10_Email"] = []string{"admin@example.com"}

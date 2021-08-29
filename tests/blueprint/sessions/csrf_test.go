@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"net/http/httptest"
@@ -20,7 +20,7 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 	session := interfaces2.NewSession()
 	token := utils.GenerateCSRFToken()
 	session.SetData("csrf_token", token)
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.Create(session)
 	req, _ := http.NewRequest("POST", "/testcsrf", nil)

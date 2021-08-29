@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -18,7 +18,7 @@ func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("create", &CreateBlueprint{})
@@ -65,7 +65,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 	if err != nil {
 		return err
 	}
-	name := interfaces.AsciiRegex.ReplaceAllLiteralString(opts.Name, "")
+	name := core.AsciiRegex.ReplaceAllLiteralString(opts.Name, "")
 	bluePrintPath := "blueprint/" + strings.ToLower(name)
 	if _, err := os.Stat(bluePrintPath); os.IsExist(err) {
 		panic(fmt.Sprintf("Blueprint %s does exist", name))
@@ -83,11 +83,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/{{.Name}}/migrations"
 	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
@@ -97,7 +97,7 @@ func (b Blueprint) Init() {
 }
 
 var ConcreteBlueprint = Blueprint{
-	interfaces.Blueprint{
+	core.Blueprint{
 		Name:              "{{.Name}}",
 		Description:       "{{.Message}}",
 		MigrationRegistry: migrations.BMigrationRegistry,
@@ -111,7 +111,7 @@ var ConcreteBlueprint = Blueprint{
 		Message string
 	}{
 		Name: name,
-		Message: strings.ReplaceAll(interfaces.AsciiRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
+		Message: strings.ReplaceAll(core.AsciiRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
 	}
 	if err = blueprintTpl.Execute(&blueprintTplBuffer, tplData); err != nil {
 		panic(err)

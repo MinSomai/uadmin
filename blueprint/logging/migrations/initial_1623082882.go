@@ -2,7 +2,7 @@ package migrations
 
 import (
     logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-    "github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
     "gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ func (m initial_1623082882) GetId() int64 {
     return 1623082882
 }
 
-func (m initial_1623082882) Up(uadminDatabase *interfaces.UadminDatabase) error {
+func (m initial_1623082882) Up(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
     err := db.AutoMigrate(logmodel.Log{})
     if err != nil {
@@ -26,16 +26,16 @@ func (m initial_1623082882) Up(uadminDatabase *interfaces.UadminDatabase) error 
     return nil
 }
 
-func (m initial_1623082882) Down(uadminDatabase *interfaces.UadminDatabase) error {
+func (m initial_1623082882) Down(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
     err := db.Migrator().DropTable(logmodel.Log{})
     if err != nil {
         return err
     }
-    var contentType interfaces.ContentType
+    var contentType core.ContentType
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&logmodel.Log{})
-    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "logging", ModelName: stmt.Schema.Table}).First(&contentType)
+    db.Model(&core.ContentType{}).Where(&core.ContentType{BlueprintName: "logging", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Unscoped().Delete(&contentType)
     return nil
 }

@@ -3,7 +3,7 @@ package routing
 import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,7 +17,7 @@ type ConcreteTestSuite struct {
 func (suite *ConcreteTestSuite) SetupTest() {
 	app := uadmin.NewTestApp()
 	suite.app = app
-	suite.app.BlueprintRegistry = interfaces.NewBlueprintRegistry()
+	suite.app.BlueprintRegistry = core.NewBlueprintRegistry()
 	suite.app.BlueprintRegistry.Register(ConcreteBlueprint)
 }
 

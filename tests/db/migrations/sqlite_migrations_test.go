@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"os"
 	"strings"
 	"testing"
@@ -16,18 +16,18 @@ import (
 type MigrationTestSuite struct {
 	suite.Suite
 	app *uadmin.App
-	db *interfaces.UadminDatabase
+	db *core.UadminDatabase
 }
 
 func (suite *MigrationTestSuite) SetupTest() {
 	appliedMigrations = make([]string, 0)
 	app := uadmin.NewTestApp()
 	suite.app = app
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
 	db.Db.Exec("DROP TABLE migrations")
 	db.Db.AutoMigrate(uadmin.Migration{})
-	suite.app.BlueprintRegistry = interfaces.NewBlueprintRegistry()
+	suite.app.BlueprintRegistry = core.NewBlueprintRegistry()
 	suite.app.BlueprintRegistry.Register(TestBlueprint)
 	suite.app.BlueprintRegistry.Register(Test1Blueprint)
 }
@@ -56,7 +56,7 @@ func (suite *MigrationTestSuite) TestUpgradeDatabase() {
 	}
 	assert.Equal(suite.T(), appliedMigrationsExpected, appliedMigrationsActual)
 	var appliedMigrationsDb []uadmin.Migration
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
 	db.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 4, len(appliedMigrationsDb))
@@ -70,7 +70,7 @@ func (suite *MigrationTestSuite) TestDowngradeDatabase() {
 	appliedMigrationsExpected.Add("user.1621680132")
 	appliedMigrationsExpected.Add("test1.1621667393")
 	appliedMigrationsExpected.Add("test1.1621680132")
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
 	db.Db.Create(
 		&uadmin.Migration{MigrationName: "user.1621667393", AppliedAt: time.Now()},
@@ -94,10 +94,10 @@ func (suite *MigrationTestSuite) TestDowngradeDatabase() {
 }
 
 func (suite *MigrationTestSuite) TestTraverseDatabaseForUpgrade() {
-	concreteBlueprintRegistry := interfaces.NewBlueprintRegistry()
+	concreteBlueprintRegistry := core.NewBlueprintRegistry()
 	concreteBlueprintRegistry.Register(TestBlueprint)
 	concreteBlueprintRegistry.Register(Test1Blueprint)
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	for res := range concreteBlueprintRegistry.TraverseMigrations() {
 		res.Node.Apply(uadminDatabase)
@@ -115,7 +115,7 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForUpgrade() {
 }
 
 func (suite *MigrationTestSuite) TestTraverseDatabaseForDowngrade() {
-	concreteBlueprintRegistry := interfaces.NewBlueprintRegistry()
+	concreteBlueprintRegistry := core.NewBlueprintRegistry()
 	concreteBlueprintRegistry.Register(TestBlueprint)
 	concreteBlueprintRegistry.Register(Test1Blueprint)
 	toDowngradeMigrationsExpected := mapset.NewSet()
@@ -124,7 +124,7 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForDowngrade() {
 	toDowngradeMigrationsExpected.Add("test1.1621667393")
 	toDowngradeMigrationsExpected.Add("test1.1621680132")
 	downgradedMigrationsActual := mapset.NewSet()
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	for res := range concreteBlueprintRegistry.TraverseMigrationsDownTo("") {
 		res.Node.Downgrade(uadminDatabase)
@@ -134,7 +134,7 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForDowngrade() {
 }
 
 func (suite *MigrationTestSuite) TestBuildTreeForBlueprintWithNoMigrations() {
-	blueprintRegistry := interfaces.NewBlueprintRegistry()
+	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(BlueprintWithNoMigrations)
 	for res := range blueprintRegistry.TraverseMigrations() {
 		if res.Error != nil {
@@ -145,7 +145,7 @@ func (suite *MigrationTestSuite) TestBuildTreeForBlueprintWithNoMigrations() {
 }
 
 func (suite *MigrationTestSuite) TestBuildTreeWithNoUserBlueprint() {
-	blueprintRegistry := interfaces.NewBlueprintRegistry()
+	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(Test1Blueprint)
 	for res := range blueprintRegistry.TraverseMigrations() {
 		assert.Equal(suite.T(), res.Error, fmt.Errorf("Couldn't find blueprint with name user"))
@@ -155,7 +155,7 @@ func (suite *MigrationTestSuite) TestBuildTreeWithNoUserBlueprint() {
 }
 
 func (suite *MigrationTestSuite) TestBuildTreeWithTwoNoDepsMigrationsFromtheSameBlueprint() {
-	blueprintRegistry := interfaces.NewBlueprintRegistry()
+	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(BlueprintWithTwoSameDeps)
 	for res := range blueprintRegistry.TraverseMigrations() {
 		assert.True(suite.T(), strings.Contains(res.Error.Error(), "Found two or more migrations with no children from the same blueprint"))
@@ -165,7 +165,7 @@ func (suite *MigrationTestSuite) TestBuildTreeWithTwoNoDepsMigrationsFromtheSame
 }
 
 func (suite *MigrationTestSuite) TestBuildTreeWithTwoNoChildMigrationsFromtheSameBlueprint() {
-	blueprintRegistry := interfaces.NewBlueprintRegistry()
+	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(BlueprintWithConflicts)
 	for res := range blueprintRegistry.TraverseMigrations() {
 		assert.True(suite.T(), strings.Contains(res.Error.Error(), "Found two or more migrations with no children from the same blueprint"))
@@ -175,7 +175,7 @@ func (suite *MigrationTestSuite) TestBuildTreeWithTwoNoChildMigrationsFromtheSam
 }
 
 func (suite *MigrationTestSuite) TestBuildTreeWithLoop() {
-	blueprintRegistry := interfaces.NewBlueprintRegistry()
+	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(Blueprint1WithLoopedMigrations)
 	blueprintRegistry.Register(Blueprint2WithLoopedMigrations)
 	for _ = range blueprintRegistry.TraverseMigrations() {

@@ -5,38 +5,38 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/logging/migrations"
 	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	logAdminPage := interfaces.NewGormAdminPage(
+	logAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
 	)
 	logAdminPage.PageName = "Logs"
 	logAdminPage.Slug = "log"
 	logAdminPage.BlueprintName = "logging"
 	logAdminPage.Router = mainRouter
-	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(logAdminPage)
+	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(logAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing log blueprint: %s", err))
 	}
-	logmodelAdminPage := interfaces.NewGormAdminPage(
+	logmodelAdminPage := core.NewGormAdminPage(
 		logAdminPage,
 		func() (interface{}, interface{}) {return &logmodel.Log{}, &[]*logmodel.Log{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Username", "Action", "Activity", "CreatedAt", "ContentType", "ModelPK"}
-			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			form.ExtraStatic.ExtraJS = append(form.ExtraStatic.ExtraJS, "/static-inbuilt/uadmin/assets/highlight.js/highlight.pack.js")
 			form.ExtraStatic.ExtraJS = append(form.ExtraStatic.ExtraJS, "/static-inbuilt/uadmin/assets/js/initialize.highlight.js")
 			form.ExtraStatic.ExtraCSS = append(form.ExtraStatic.ExtraCSS, "/static-inbuilt/uadmin/assets/highlight.js/styles/default.css")
 			actionField, _ := form.FieldRegistry.GetByName("Action")
-			actionField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *interfaces.Field) interface{} {
+			actionField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *core.Field) interface{} {
 				a := m.(*logmodel.Log).Action
 				return logmodel.HumanizeAction(a)
 			})
@@ -72,11 +72,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	interfaces.ProjectModels.RegisterModel(func() interface{} {return &logmodel.Log{}})
+	core.ProjectModels.RegisterModel(func() interface{} {return &logmodel.Log{}})
 }
 
 var ConcreteBlueprint = Blueprint{
-	interfaces.Blueprint{
+	core.Blueprint{
 		Name:              "logging",
 		Description:       "Logging blueprint is responsible to store all actions made through admin panel",
 		MigrationRegistry: migrations.BMigrationRegistry,

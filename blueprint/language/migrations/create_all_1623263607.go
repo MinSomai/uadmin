@@ -1,7 +1,7 @@
 package migrations
 
 import (
-    "github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
 type create_all_1623263607 struct {
@@ -15,14 +15,14 @@ func (m create_all_1623263607) GetId() int64 {
     return 1623263607
 }
 
-func (m create_all_1623263607) Up(uadminDatabase *interfaces.UadminDatabase) error {
+func (m create_all_1623263607) Up(uadminDatabase *core.UadminDatabase) error {
     langs := [][]string{
         {"English", "English", "en"},
     }
     db := uadminDatabase.Db
     tx := db
     for _, lang := range langs {
-        l := interfaces.Language{
+        l := core.Language{
             EnglishName: lang[0],
             Name:        lang[1],
             Code:        lang[2],
@@ -38,9 +38,9 @@ func (m create_all_1623263607) Up(uadminDatabase *interfaces.UadminDatabase) err
     return nil
 }
 
-func (m create_all_1623263607) Down(uadminDatabase *interfaces.UadminDatabase) error {
+func (m create_all_1623263607) Down(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
-    db.Unscoped().Where("1 = 1").Delete(&interfaces.Language{Code: "en"})
+    db.Unscoped().Where("1 = 1").Delete(&core.Language{Code: "en"})
     return nil
 }
 

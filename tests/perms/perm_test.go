@@ -3,7 +3,7 @@ package perms
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"testing"
 )
 
@@ -12,26 +12,26 @@ type PermTestSuite struct {
 }
 
 func (suite *PermTestSuite) TestIntegration() {
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	contentType := interfaces.ContentType{BlueprintName: "user", ModelName: "user"}
+	contentType := core.ContentType{BlueprintName: "user", ModelName: "user"}
 	db.Create(&contentType)
-	permission := interfaces.Permission{ContentType: contentType, PermissionBits: interfaces.RevertPermBit}
+	permission := core.Permission{ContentType: contentType, PermissionBits: core.RevertPermBit}
 	db.Create(&permission)
-	g1 := interfaces.UserGroup{GroupName: "usergroup"}
+	g1 := core.UserGroup{GroupName: "usergroup"}
 	db.Create(&g1)
 	db.Model(&g1).Association("Permissions").Append(&permission)
 	db.Save(&g1)
-	permission = interfaces.Permission{ContentType: contentType, PermissionBits: interfaces.AddPermBit}
+	permission = core.Permission{ContentType: contentType, PermissionBits: core.AddPermBit}
 	db.Create(&permission)
-	u := interfaces.User{Username: "dsadas", Email: "ffsdfsd@example.com"}
+	u := core.User{Username: "dsadas", Email: "ffsdfsd@example.com"}
 	db.Create(&u)
 	db.Model(&u).Association("Permissions").Append(&permission)
 	db.Model(&u).Association("UserGroups").Append(&g1)
 	db.Save(&u)
-	var u1 interfaces.User
-	db.Model(&interfaces.User{}).First(&u1)
+	var u1 core.User
+	db.Model(&core.User{}).First(&u1)
 	permRegistry := u1.BuildPermissionRegistry()
 	userPerm := permRegistry.GetPermissionForBlueprint("user", "user")
 	assert.True(suite.T(), userPerm.HasRevertPermission())

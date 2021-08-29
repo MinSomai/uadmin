@@ -2,7 +2,7 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"os"
 )
 
@@ -14,7 +14,7 @@ func (c ContentTypeCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("sync", &SyncContentTypes{})
@@ -43,39 +43,39 @@ type SyncContentTypes struct {
 }
 
 func (command SyncContentTypes) Proceed(subaction string, args []string) error {
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	var contentType interfaces.ContentType
-	var permission interfaces.Permission
-	for blueprintRootAdminPage := range interfaces.CurrentDashboardAdminPanel.AdminPages.GetAll() {
-		interfaces.Trail(interfaces.INFO, "Sync content types for blueprint %s", blueprintRootAdminPage.BlueprintName)
+	var contentType core.ContentType
+	var permission core.Permission
+	for blueprintRootAdminPage := range core.CurrentDashboardAdminPanel.AdminPages.GetAll() {
+		core.Trail(core.INFO, "Sync content types for blueprint %s", blueprintRootAdminPage.BlueprintName)
 		for modelPage := range blueprintRootAdminPage.SubPages.GetAll() {
 			if modelPage.Model == nil {
 				continue
 			}
-			interfaces.Trail(interfaces.INFO, "Add content type for model %s - %s", modelPage.BlueprintName, modelPage.ModelName)
-			db.Model(&interfaces.ContentType{}).Where(
-				&interfaces.ContentType{BlueprintName: modelPage.BlueprintName, ModelName: modelPage.ModelName},
+			core.Trail(core.INFO, "Add content type for model %s - %s", modelPage.BlueprintName, modelPage.ModelName)
+			db.Model(&core.ContentType{}).Where(
+				&core.ContentType{BlueprintName: modelPage.BlueprintName, ModelName: modelPage.ModelName},
 			).First(&contentType)
 			if contentType.ID == 0 {
-				contentType = interfaces.ContentType{BlueprintName: modelPage.BlueprintName, ModelName: modelPage.ModelName}
+				contentType = core.ContentType{BlueprintName: modelPage.BlueprintName, ModelName: modelPage.ModelName}
 				db.Create(&contentType)
-				interfaces.Trail(interfaces.INFO, "Created content type for blueprint %s model %s", modelPage.BlueprintName, modelPage.ModelName)
+				core.Trail(core.INFO, "Created content type for blueprint %s model %s", modelPage.BlueprintName, modelPage.ModelName)
 			}
-			for permDescribed := range interfaces.ProjectPermRegistry.GetAllPermissions() {
-				db.Model(&interfaces.Permission{}).Where(
-					&interfaces.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit},
+			for permDescribed := range core.ProjectPermRegistry.GetAllPermissions() {
+				db.Model(&core.Permission{}).Where(
+					&core.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit},
 				).First(&permission)
 				if permission.ID == 0 {
-					permission = interfaces.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit}
+					permission = core.Permission{ContentTypeID: contentType.ID, PermissionBits: permDescribed.Bit}
 					db.Create(&permission)
-					interfaces.Trail(interfaces.INFO, "Created permission %s for blueprint %s model %s", permDescribed.Name, modelPage.BlueprintName, modelPage.ModelName)
-					permission = interfaces.Permission{}
+					core.Trail(core.INFO, "Created permission %s for blueprint %s model %s", permDescribed.Name, modelPage.BlueprintName, modelPage.ModelName)
+					permission = core.Permission{}
 				}
-				permission = interfaces.Permission{}
+				permission = core.Permission{}
 			}
-			contentType = interfaces.ContentType{}
+			contentType = core.ContentType{}
 		}
 	}
 	return nil

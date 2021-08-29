@@ -4,48 +4,48 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"testing"
 	"time"
 )
 
 type BuildRemovalTreeTestSuite struct {
 	uadmin.UadminTestSuite
-	ContentType *interfaces.ContentType
+	ContentType *core.ContentType
 }
 
 func (s *BuildRemovalTreeTestSuite) SetupTest() {
 	s.UadminTestSuite.SetupTest()
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.AutoMigrate(&UserGroupContentType{})
 	uadminDatabase.Db.AutoMigrate(&UserContentType{})
 	uadminDatabase.Db.AutoMigrate(&OneTimeActionContentType{})
 	uadminDatabase.Db.AutoMigrate(&SessionContentType{})
-	interfaces.ProjectModels.RegisterModel(func() interface{} {return &SessionContentType{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{} {return &OneTimeActionContentType{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{} {return &UserContentType{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{} {return &UserGroupContentType{}})
+	core.ProjectModels.RegisterModel(func() interface{} {return &SessionContentType{}})
+	core.ProjectModels.RegisterModel(func() interface{} {return &OneTimeActionContentType{}})
+	core.ProjectModels.RegisterModel(func() interface{} {return &UserContentType{}})
+	core.ProjectModels.RegisterModel(func() interface{} {return &UserGroupContentType{}})
 }
 
-func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *interfaces.UadminDatabase) {
-	contentType := &interfaces.ContentType{BlueprintName: "user", ModelName: "user"}
+func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *core.UadminDatabase) {
+	contentType := &core.ContentType{BlueprintName: "user", ModelName: "user"}
 	uadminDatabase.Db.Create(contentType)
 	s.ContentType = contentType
-	permission := &interfaces.Permission{Name: "user_read", ContentType: *contentType}
+	permission := &core.Permission{Name: "user_read", ContentType: *contentType}
 	uadminDatabase.Db.Create(permission)
-	usergroup := &interfaces.UserGroup{GroupName: "test"}
+	usergroup := &core.UserGroup{GroupName: "test"}
 	uadminDatabase.Db.Create(usergroup)
 	uadminDatabase.Db.Model(usergroup).Association("Permissions").Append(permission)
 	uadminDatabase.Db.Save(usergroup)
-	user := &interfaces.User{Email: "admin@example.com"}
+	user := &core.User{Email: "admin@example.com"}
 	uadminDatabase.Db.Create(user)
 	uadminDatabase.Db.Model(user).Association("Permissions").Append(permission)
 	uadminDatabase.Db.Model(user).Association("UserGroups").Append(usergroup)
 	uadminDatabase.Db.Save(user)
-	oneTimeAction := &interfaces.OneTimeAction{User: *user, Code: "aaa"}
+	oneTimeAction := &core.OneTimeAction{User: *user, Code: "aaa"}
 	uadminDatabase.Db.Create(oneTimeAction)
-	session := &interfaces.Session{User: *user, LoginTime: time.Now(), LastLogin: time.Now()}
+	session := &core.Session{User: *user, LoginTime: time.Now(), LastLogin: time.Now()}
 	uadminDatabase.Db.Create(session)
 	sessionContentType := &SessionContentType{Session: *session, ContentType: *contentType}
 	uadminDatabase.Db.Save(sessionContentType)
@@ -58,7 +58,7 @@ func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *interfaces.Uad
 }
 
 func (s *BuildRemovalTreeTestSuite) TearDownSuite() {
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	uadminDatabase.Db.Migrator().DropTable(&UserGroupContentType{})
 	uadminDatabase.Db.Migrator().DropTable(&UserContentType{})
 	uadminDatabase.Db.Migrator().DropTable(&OneTimeActionContentType{})
@@ -68,10 +68,10 @@ func (s *BuildRemovalTreeTestSuite) TearDownSuite() {
 }
 
 type UserGroupContentType struct {
-	interfaces.Model
-	UserGroup interfaces.UserGroup
-	UserGroupID uint
-	ContentType interfaces.ContentType
+	core.Model
+	UserGroup     core.UserGroup
+	UserGroupID   uint
+	ContentType   core.ContentType
 	ContentTypeID uint
 }
 
@@ -80,10 +80,10 @@ func (ugct *UserGroupContentType) String() string {
 }
 
 type UserContentType struct {
-	interfaces.Model
-	User interfaces.User
-	UserID uint
-	ContentType interfaces.ContentType
+	core.Model
+	User          core.User
+	UserID        uint
+	ContentType   core.ContentType
 	ContentTypeID uint
 }
 
@@ -92,11 +92,11 @@ func (ugct *UserContentType) String() string {
 }
 
 type OneTimeActionContentType struct {
-	interfaces.Model
-	OneTimeAction interfaces.OneTimeAction
+	core.Model
+	OneTimeAction   core.OneTimeAction
 	OneTimeActionID uint
-	ContentType interfaces.ContentType
-	ContentTypeID uint
+	ContentType     core.ContentType
+	ContentTypeID   uint
 }
 
 func (ugct *OneTimeActionContentType) String() string {
@@ -104,10 +104,10 @@ func (ugct *OneTimeActionContentType) String() string {
 }
 
 type SessionContentType struct {
-	interfaces.Model
-	Session interfaces.Session
-	SessionID uint
-	ContentType interfaces.ContentType
+	core.Model
+	Session       core.Session
+	SessionID     uint
+	ContentType   core.ContentType
 	ContentTypeID uint
 }
 
@@ -116,7 +116,7 @@ func (ugct *SessionContentType) String() string {
 }
 
 func (s *BuildRemovalTreeTestSuite) TestRemovalStringified() {
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	s.ConfigureData(uadminDatabase)
 	//spew.Dump("contentType", contentType.ID)
@@ -128,19 +128,19 @@ func (s *BuildRemovalTreeTestSuite) TestRemovalStringified() {
 	//spew.Dump("usergroup permissions", len(usergroup.Permissions))
 	//spew.Dump("user permissions", len(user.Permissions))
 	//spew.Dump("user groups", len(user.UserGroups))
-	removalTreeNode := interfaces.BuildRemovalTree(uadminDatabase, s.ContentType)
+	removalTreeNode := core.BuildRemovalTree(uadminDatabase, s.ContentType)
 	deletionStringified := removalTreeNode.BuildDeletionTreeStringified(uadminDatabase)
 	assert.Equal(s.T(), len(deletionStringified), 15)
 }
 
 func (s *BuildRemovalTreeTestSuite) TestRemoval() {
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	s.ConfigureData(uadminDatabase)
 	defer uadminDatabase.Close()
 	var c int64
-	removalTreeNode := interfaces.BuildRemovalTree(uadminDatabase, s.ContentType)
+	removalTreeNode := core.BuildRemovalTree(uadminDatabase, s.ContentType)
 	removalTreeNode.RemoveFromDatabase(uadminDatabase)
-	uadminDatabase.Db.Model(&interfaces.Permission{}).Count(&c)
+	uadminDatabase.Db.Model(&core.Permission{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
 	uadminDatabase.Db.Model(&OneTimeActionContentType{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))

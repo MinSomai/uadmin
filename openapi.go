@@ -3,7 +3,7 @@ package uadmin
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"io"
 	"io/ioutil"
 	"log"
@@ -18,7 +18,7 @@ func (c OpenApiCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("editor", &ServeOpenApiEditorCommand{})

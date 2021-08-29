@@ -13,7 +13,7 @@ import (
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	settingsblueprint "github.com/uadmin/uadmin/blueprint/settings"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"io/fs"
 	nethttp "net/http"
 	"os"
@@ -22,12 +22,12 @@ import (
 )
 
 type App struct {
-	Config            *interfaces.UadminConfig
-	Database          *interfaces.Database
-	Router            *gin.Engine
-	CommandRegistry   *CommandRegistry
-	BlueprintRegistry interfaces.IBlueprintRegistry
-	DashboardAdminPanel *interfaces.DashboardAdminPanel
+	Config              *core.UadminConfig
+	Database            *core.Database
+	Router              *gin.Engine
+	CommandRegistry     *CommandRegistry
+	BlueprintRegistry   core.IBlueprintRegistry
+	DashboardAdminPanel *core.DashboardAdminPanel
 }
 
 var appInstance *App
@@ -35,19 +35,19 @@ var appInstance *App
 func NewApp(environment string) *App {
 	if appInstance == nil {
 		a := App{}
-		a.DashboardAdminPanel = interfaces.NewDashboardAdminPanel()
-		interfaces.CurrentDashboardAdminPanel = a.DashboardAdminPanel
-		a.Config = interfaces.NewConfig("configs/" + environment + ".yaml")
+		a.DashboardAdminPanel = core.NewDashboardAdminPanel()
+		core.CurrentDashboardAdminPanel = a.DashboardAdminPanel
+		a.Config = core.NewConfig("configs/" + environment + ".yaml")
 		a.Config.TemplatesFS = templatesRoot
 		a.Config.LocalizationFS = localizationRoot
 		a.CommandRegistry = &CommandRegistry{
-			Actions: make(map[string]interfaces.ICommand),
+			Actions: make(map[string]core.ICommand),
 		}
-		interfaces.CurrentDatabaseSettings = &interfaces.DatabaseSettings{
+		core.CurrentDatabaseSettings = &core.DatabaseSettings{
 			Default: a.Config.D.Db.Default,
 		}
-		a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
-		a.Database = interfaces.NewDatabase(a.Config)
+		a.BlueprintRegistry = core.NewBlueprintRegistry()
+		a.Database = core.NewDatabase(a.Config)
 		a.Router = gin.Default()
 		//a.Router.Use(cors.New(cors.Config{
 		//	AllowOrigins:     []string{"https://foo.com"},
@@ -93,11 +93,11 @@ func (a App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(authblueprint.ConcreteBlueprint)
 }
 
-func (a App) RegisterBlueprint(blueprint interfaces.IBlueprint) {
+func (a App) RegisterBlueprint(blueprint core.IBlueprint) {
 	a.BlueprintRegistry.Register(blueprint)
 }
 
-func (a App) RegisterCommand(name string, command interfaces.ICommand) {
+func (a App) RegisterCommand(name string, command core.ICommand) {
 	a.CommandRegistry.addAction(name, command)
 }
 

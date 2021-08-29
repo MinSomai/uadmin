@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 
 	"time"
 )
@@ -33,12 +33,12 @@ func HumanizeApprovalAction(approvalAction ApprovalAction) string {
 
 // Approval is a model that stores approval data
 type Approval struct {
-	interfaces.Model
-	ApprovalAction      ApprovalAction `uadmin:"list" uadminform:"SelectFieldOptions"`
-	ApprovalBy          string     `uadmin:"list" uadminform:"ReadonlyField"`
-	ApprovalDate        *time.Time `uadmin:"list" uadminform:"DatetimeReadonlyFieldOptions"`
-	ContentType interfaces.ContentType `uadmin:"list" uadminform:"ReadonlyField"`
-	ContentTypeID uint
+	core.Model
+	ApprovalAction      ApprovalAction   `uadmin:"list" uadminform:"SelectFieldOptions"`
+	ApprovalBy          string           `uadmin:"list" uadminform:"ReadonlyField"`
+	ApprovalDate        *time.Time       `uadmin:"list" uadminform:"DatetimeReadonlyFieldOptions"`
+	ContentType         core.ContentType `uadmin:"list" uadminform:"ReadonlyField"`
+	ContentTypeID       uint
 	ModelPK             uint   `uadmin:"list" uadminform:"ReadonlyField" gorm:"default:0"`
 	ColumnName          string `uadmin:"list" uadminform:"ReadonlyField"`
 	OldValue            string `uadmin:"list" uadminform:"ReadonlyField"`

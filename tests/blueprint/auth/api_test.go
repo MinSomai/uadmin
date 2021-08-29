@@ -8,7 +8,7 @@ import (
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	"github.com/uadmin/uadmin/blueprint/otp/services"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
 	"net/http/httptest"
@@ -30,7 +30,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	})
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, ""),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, ""),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "empty cookie passed")
@@ -38,7 +38,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	})
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, "test"),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, "test"),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "no session with key test found")
@@ -54,7 +54,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	// directProvider.
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, defaultAdapter.GetKey()),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, defaultAdapter.GetKey()),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "session expired")
@@ -78,10 +78,10 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		assert.Contains(s.T(), w.Body.String(), "login credentials are incorrect")
 		return strings.Contains(w.Body.String(), "login credentials are incorrect")
 	})
-	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
+	salt := utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
-	user := interfaces.User{
+	user := core.User{
 		FirstName:    "testuser-firstname",
 		LastName:     "testuser-lastname",
 		Username:     "test",
@@ -90,7 +90,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		Salt: salt,
 		IsPasswordUsable: true,
 	}
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
 	db.Create(&user)
@@ -101,9 +101,9 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		return strings.Contains(w.Body.String(), "this user is inactive")
 	})
 	user.Active = true
-	secretString, _ := services.GenerateOTPSeed(interfaces.CurrentConfig.D.Uadmin.OTPDigits, interfaces.CurrentConfig.D.Uadmin.OTPAlgorithm, interfaces.CurrentConfig.D.Uadmin.OTPSkew, interfaces.CurrentConfig.D.Uadmin.OTPPeriod, &user)
+	secretString, _ := services.GenerateOTPSeed(core.CurrentConfig.D.Uadmin.OTPDigits, core.CurrentConfig.D.Uadmin.OTPAlgorithm, core.CurrentConfig.D.Uadmin.OTPSkew, core.CurrentConfig.D.Uadmin.OTPPeriod, &user)
 	user.OTPSeed = secretString
-	otpPassword := services.GetOTP(user.OTPSeed, interfaces.CurrentConfig.D.Uadmin.OTPDigits, interfaces.CurrentConfig.D.Uadmin.OTPAlgorithm, interfaces.CurrentConfig.D.Uadmin.OTPSkew, interfaces.CurrentConfig.D.Uadmin.OTPPeriod)
+	otpPassword := services.GetOTP(user.OTPSeed, core.CurrentConfig.D.Uadmin.OTPDigits, core.CurrentConfig.D.Uadmin.OTPAlgorithm, core.CurrentConfig.D.Uadmin.OTPSkew, core.CurrentConfig.D.Uadmin.OTPPeriod)
 	user.GeneratedOTPToVerify = otpPassword
 	var jsonStrForSignup = []byte(fmt.Sprintf(`{"signinfield":"test", "password": "123456", "otp": "%s"}`, otpPassword))
 	db.Save(&user)
@@ -115,7 +115,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		req1, _ := http.NewRequest("GET", "/auth/direct-for-admin/status/", nil)
 		req1.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
 			assert.Contains(s.T(), w.Body.String(), "for-uadmin-panel")
@@ -161,7 +161,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	})
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.ApiCookieName, ""),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, ""),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "empty cookie passed")
@@ -169,7 +169,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	})
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.ApiCookieName, "test"),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, "test"),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "no session with key test found")
@@ -185,7 +185,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	// directProvider.
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.ApiCookieName, defaultAdapter.GetKey()),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, defaultAdapter.GetKey()),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "session expired")
@@ -206,10 +206,10 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		assert.Contains(s.T(), w.Body.String(), "login credentials are incorrect")
 		return strings.Contains(w.Body.String(), "login credentials are incorrect")
 	})
-	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
+	salt := utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
-	user := interfaces.User{
+	user := core.User{
 		FirstName:    "testuser-firstname",
 		LastName:     "testuser-lastname",
 		Username:     "test",
@@ -218,7 +218,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		Salt: salt,
 		IsPasswordUsable: true,
 	}
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
 	db.Create(&user)
@@ -229,9 +229,9 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		return strings.Contains(w.Body.String(), "this user is inactive")
 	})
 	user.Active = true
-	secretString, _ := services.GenerateOTPSeed(interfaces.CurrentConfig.D.Uadmin.OTPDigits, interfaces.CurrentConfig.D.Uadmin.OTPAlgorithm, interfaces.CurrentConfig.D.Uadmin.OTPSkew, interfaces.CurrentConfig.D.Uadmin.OTPPeriod, &user)
+	secretString, _ := services.GenerateOTPSeed(core.CurrentConfig.D.Uadmin.OTPDigits, core.CurrentConfig.D.Uadmin.OTPAlgorithm, core.CurrentConfig.D.Uadmin.OTPSkew, core.CurrentConfig.D.Uadmin.OTPPeriod, &user)
 	user.OTPSeed = secretString
-	otpPassword := services.GetOTP(user.OTPSeed, interfaces.CurrentConfig.D.Uadmin.OTPDigits, interfaces.CurrentConfig.D.Uadmin.OTPAlgorithm, interfaces.CurrentConfig.D.Uadmin.OTPSkew, interfaces.CurrentConfig.D.Uadmin.OTPPeriod)
+	otpPassword := services.GetOTP(user.OTPSeed, core.CurrentConfig.D.Uadmin.OTPDigits, core.CurrentConfig.D.Uadmin.OTPAlgorithm, core.CurrentConfig.D.Uadmin.OTPSkew, core.CurrentConfig.D.Uadmin.OTPPeriod)
 	user.GeneratedOTPToVerify = otpPassword
 	var jsonStrForSignup = []byte(fmt.Sprintf(`{"signinfield":"test", "password": "123456", "otp": "%s"}`, otpPassword))
 	db.Save(&user)
@@ -243,7 +243,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		req1, _ := http.NewRequest("GET", "/auth/direct/status/", nil)
 		req1.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
 			assert.Contains(s.T(), w.Body.String(), "\"id\":")
@@ -253,7 +253,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		req2.Header.Set("Content-Type", "application/json")
 		req2.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req2, func(w *httptest.ResponseRecorder) bool {
 			assert.Equal(s.T(), w.Result().StatusCode, 204)
@@ -268,7 +268,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 }
 
 func (s *AuthProviderTestSuite) TestOpenAdminPage() {
-	req, _ := http.NewRequest("GET", interfaces.CurrentConfig.D.Uadmin.RootAdminURL, nil)
+	req, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL, nil)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "uadmin - Admin Login")
 		assert.Equal(s.T(), w.Code, 200)
@@ -280,10 +280,10 @@ func (s *AuthProviderTestSuite) TestOpenAdminPage() {
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
 		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
-		req1, _ := http.NewRequest("GET", interfaces.CurrentConfig.D.Uadmin.RootAdminURL, nil)
+		req1, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL, nil)
 		req1.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
 			assert.Contains(s.T(), w.Body.String(), "uadmin - Dashboard")
@@ -310,7 +310,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 		req1, _ := http.NewRequest("POST", "/user/api/forgot", bytes.NewBuffer(jsonStr1))
 		req1.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 		)
 		tokenmasked := utils.MaskCSRFToken(token)
 		req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
@@ -318,25 +318,25 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 			isSentEmail := utils.SentEmailsDuringTests.IsAnyEmailSentWithStringInBodyOrSubject(&utils.SentEmail{
 				Subject: "Password reset for admin panel",
 			})
-			var oneTimeAction interfaces.OneTimeAction
-			uadminDatabase := interfaces.NewUadminDatabase()
+			var oneTimeAction core.OneTimeAction
+			uadminDatabase := core.NewUadminDatabase()
 			defer uadminDatabase.Close()
 			db := uadminDatabase.Db
-			db.Model(interfaces.OneTimeAction{}).First(&oneTimeAction)
+			db.Model(core.OneTimeAction{}).First(&oneTimeAction)
 			var jsonStr1 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
 			req1, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr1))
 			req1.Header.Set(
 				"Cookie",
-				fmt.Sprintf("%s=%s", interfaces.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+				fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 			)
 			tokenmasked := utils.MaskCSRFToken(token)
 			req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
 			uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
-				var oneTimeAction interfaces.OneTimeAction
-				uadminDatabase := interfaces.NewUadminDatabase()
+				var oneTimeAction core.OneTimeAction
+				uadminDatabase := core.NewUadminDatabase()
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
-				db.Model(interfaces.OneTimeAction{}).First(&oneTimeAction)
+				db.Model(core.OneTimeAction{}).First(&oneTimeAction)
 				assert.True(s.T(), oneTimeAction.IsUsed)
 				assert.Equal(s.T(), w.Code, 200)
 				return w.Code == 200

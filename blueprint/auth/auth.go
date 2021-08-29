@@ -6,13 +6,13 @@ import (
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"gorm.io/gorm/schema"
 	"net/http"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 	AuthAdapterRegistry *interfaces3.AuthProviderRegistry
 }
 
@@ -24,42 +24,42 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		adapterGroup.POST("/logout/", adapter.Logout)
 		adapterGroup.GET("/status/", adapter.IsAuthenticated)
 	}
-	interfaces.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
+	core.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
 			type Context struct {
-				interfaces.AdminContext
+				core.AdminContext
 			}
 			c := &Context{}
-			adminRequestParams := interfaces.NewAdminRequestParams()
+			adminRequestParams := core.NewAdminRequestParams()
 			adminRequestParams.NeedAllLanguages = true
-			interfaces.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
+			core.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
-			tr := interfaces.NewTemplateRenderer("Admin Login")
-			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("login"), c, interfaces.FuncMap)
+			tr := core.NewTemplateRenderer("Admin Login")
+			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("login"), c, core.FuncMap)
 		} else {
 			type Context struct {
-				interfaces.AdminContext
+				core.AdminContext
 				Menu     string
 				CurrentPath string
 			}
 
 			c := &Context{}
-			interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
-			menu := string(interfaces.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
+			core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
+			menu := string(core.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
 			c.Menu = menu
 			c.CurrentPath = ctx.Request.URL.Path
-			tr := interfaces.NewTemplateRenderer("Dashboard")
-			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, interfaces.FuncMap)
+			tr := core.NewTemplateRenderer("Dashboard")
+			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("home"), c, core.FuncMap)
 		}
 	}
-	if interfaces.CurrentConfig.GetUrlToUploadDirectory() != "" {
-		mainRouter.StaticFS(interfaces.CurrentConfig.GetUrlToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", interfaces.CurrentConfig.GetUrlToUploadDirectory())))
+	if core.CurrentConfig.GetUrlToUploadDirectory() != "" {
+		mainRouter.StaticFS(core.CurrentConfig.GetUrlToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetUrlToUploadDirectory())))
 	}
-	mainRouter.Any(interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
+	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
 		type Context struct {
-			interfaces.AdminContext
+			core.AdminContext
 			ID           uint
 			Status       bool
 			IsUpdated    bool
@@ -69,19 +69,19 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			OTPRequired  bool
 			ChangesSaved bool
 			DBFields []*schema.Field
-			F *interfaces.Form
-			User *interfaces.User
+			F *core.Form
+			User *core.User
 		}
 
 		c := &Context{}
-		interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
-		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
-		form1 := interfaces.NewFormFromModelFromGinContext(c, user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
+		form1 := core.NewFormFromModelFromGinContext(c, user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
 		form1.TemplateName = "form/profile_form"
 		c.F = form1
 		c.User = user
@@ -89,7 +89,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			requestForm, _ := ctx.MultipartForm()
 			formError := form1.ProceedRequest(requestForm, user)
 			if formError.IsEmpty() {
-				uadminDatabase := interfaces.NewUadminDatabase()
+				uadminDatabase := core.NewUadminDatabase()
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
 				db.Save(user)
@@ -97,8 +97,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				return
 			}
 		}
-		tr := interfaces.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
-		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("profile"), c, interfaces.FuncMap)
+		tr := core.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
+		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("profile"), c, core.FuncMap)
 	})
 }
 
@@ -109,7 +109,7 @@ func (b Blueprint) Init() {
 }
 
 var ConcreteBlueprint = Blueprint{
-	Blueprint: interfaces.Blueprint{
+	Blueprint: core.Blueprint{
 		Name:              "auth",
 		Description:       "blueprint for auth functionality",
 		MigrationRegistry: migrations.BMigrationRegistry,

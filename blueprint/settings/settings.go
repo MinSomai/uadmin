@@ -5,31 +5,31 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/settings/migrations"
 	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	settingsAdminPage := interfaces.NewGormAdminPage(
+	settingsAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
 	)
 	settingsAdminPage.PageName = "Settings"
 	settingsAdminPage.Slug = "setting"
 	settingsAdminPage.BlueprintName = "setting"
 	settingsAdminPage.Router = mainRouter
-	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(settingsAdminPage)
+	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(settingsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
-	settingmodelAdminPage := interfaces.NewGormAdminPage(
+	settingmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
 		func() (interface{}, interface{}) {return &settingmodel.Setting{}, &[]*settingmodel.Setting{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
 	)
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
@@ -49,12 +49,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
-	settingcategoriesmodelAdminPage := interfaces.NewGormAdminPage(
+	settingcategoriesmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
 		func() (interface{}, interface{}) {return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Name", "Icon"}
-			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			return form
 		},
 	)
@@ -69,12 +69,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	interfaces.ProjectModels.RegisterModel(func() interface{} {return &settingmodel.SettingCategory{}})
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &settingmodel.Setting{}})
+	core.ProjectModels.RegisterModel(func() interface{} {return &settingmodel.SettingCategory{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &settingmodel.Setting{}})
 }
 
 var ConcreteBlueprint = Blueprint{
-	interfaces.Blueprint{
+	core.Blueprint{
 		Name:              "settings",
 		Description:       "Settings blueprint responsible for wide-project settings",
 		MigrationRegistry: migrations.BMigrationRegistry,

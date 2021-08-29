@@ -7,7 +7,7 @@ import (
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	sessioninterfaces "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	user2 "github.com/uadmin/uadmin/blueprint/user"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -33,7 +33,7 @@ type SignupParamsForUadminAdmin struct {
 type DirectAuthForAdminProvider struct {
 }
 
-func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) *interfaces.User {
+func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) *core.User {
 	session := ap.GetSession(c)
 	if session != nil {
 		return session.GetUser()
@@ -47,11 +47,11 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	var user interfaces.User
-	db.Model(interfaces.User{}).Where(&interfaces.User{Username: json.SigninField}).First(&user)
+	var user core.User
+	db.Model(core.User{}).Where(&core.User{Username: json.SigninField}).First(&user)
 	if user.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
 		return
@@ -71,9 +71,9 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
-	cookieName := interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+	cookieName := core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err := c.Cookie(cookieName)
-	sessionDuration := time.Duration(interfaces.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
+	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
 	sessionExpirationTime := time.Now().Add(sessionDuration)
 	if cookie != "" {
 		sessionAdapter, _ = sessionAdapter.GetByKey(cookie)
@@ -83,7 +83,7 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	} else {
 		sessionAdapter = sessionAdapter.Create()
 		sessionAdapter.ExpiresOn(&sessionExpirationTime)
-		c.SetCookie(interfaces.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(interfaces.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, interfaces.CurrentConfig.D.Uadmin.SecureCookie, interfaces.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+		c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HttpOnlyCookie)
 	}
 	sessionAdapter.SetUser(&user)
 	sessionAdapter.Save()
@@ -122,13 +122,13 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	//	user.GeneratedOTPToVerify = ""
 	//	db.Save(&user)
 	//}
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	salt := utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
+	salt := utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass(json.Password, salt)
-	user := interfaces.User{
+	user := core.User{
 		Username:     json.Username,
 		Email: json.Email,
 		Password:     hashedPassword,
@@ -141,11 +141,11 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter = sessionAdapter.Create()
 	sessionAdapter.SetUser(&user)
-	sessionDuration := time.Duration(interfaces.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
+	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
 	sessionExpirationTime := time.Now().Add(sessionDuration)
 	sessionAdapter.ExpiresOn(&sessionExpirationTime)
 	sessionAdapter.Save()
-	c.SetCookie(interfaces.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(interfaces.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, interfaces.CurrentConfig.D.Uadmin.SecureCookie, interfaces.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+	c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HttpOnlyCookie)
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))
 }
 
@@ -153,7 +153,7 @@ func (ap *DirectAuthForAdminProvider) Logout(c *gin.Context) {
 	var cookie string
 	var err error
 	var cookieName string
-	cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err = c.Cookie(cookieName)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
@@ -179,16 +179,16 @@ func (ap *DirectAuthForAdminProvider) Logout(c *gin.Context) {
 		Path:     "/",
 		Domain:   c.Request.URL.Host,
 		SameSite: http.SameSiteDefaultMode,
-		Secure:   interfaces.CurrentConfig.D.Uadmin.SecureCookie,
-		HttpOnly: interfaces.CurrentConfig.D.Uadmin.HttpOnlyCookie,
-		Expires: timeInPast,
+		Secure:   core.CurrentConfig.D.Uadmin.SecureCookie,
+		HttpOnly: core.CurrentConfig.D.Uadmin.HttpOnlyCookie,
+		Expires:  timeInPast,
 	})
 	c.Status(http.StatusNoContent)
 }
 
 func (ap *DirectAuthForAdminProvider) IsAuthenticated(c *gin.Context) {
 	var cookieName string
-	cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err := c.Cookie(cookieName)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
@@ -212,13 +212,13 @@ func (ap *DirectAuthForAdminProvider) IsAuthenticated(c *gin.Context) {
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))
 }
 
-func getUserForUadminPanel(user *interfaces.User) *gin.H {
+func getUserForUadminPanel(user *core.User) *gin.H {
 	return &gin.H{"name": user.Username, "id": user.ID, "for-uadmin-panel": true}
 }
 
 func (ap *DirectAuthForAdminProvider) GetSession(c *gin.Context) sessioninterfaces.ISessionProvider {
 	var cookieName string
-	cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err := c.Cookie(cookieName)
 	if err != nil {
 		return nil

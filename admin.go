@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/miquella/ask"
 	"github.com/uadmin/uadmin/colors"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"log"
 	"os"
 	"strings"
@@ -17,7 +17,7 @@ func (c AdminCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("serve", &ServeAdminServer{})
@@ -59,7 +59,7 @@ func (command ServeAdminServer) Proceed(subaction string, args []string) error {
 	migrateCommand := MigrateCommand{}
 	err := migrateCommand.Proceed("determine-conflicts", []string{})
 	if err != nil {
-		interfaces.Trail(interfaces.CRITICAL, "Found problems with migrations")
+		core.Trail(core.CRITICAL, "Found problems with migrations")
 		err = ask.Print("Warning! Found problems with migrations.\n")
 		if err != nil {
 			return err
@@ -70,19 +70,19 @@ func (command ServeAdminServer) Proceed(subaction string, args []string) error {
 			if err != nil {
 				return err
 			}
-			if !interfaces.Contains([]string{"yes", "no"}, strings.ToLower(answer)) {
+			if !core.Contains([]string{"yes", "no"}, strings.ToLower(answer)) {
 				continue
 			}
 			break
 		}
 		if answer == "no" {
-			interfaces.Trail(interfaces.WARNING, "You decided to solve first migration problems, so see you next time!")
+			core.Trail(core.WARNING, "You decided to solve first migration problems, so see you next time!")
 			return nil
 		}
 	}
-	interfaces.Trail(interfaces.OK, "Server Started: http://%s:%d", interfaces.CurrentConfig.D.Admin.BindIP, interfaces.CurrentConfig.D.Admin.ListenPort)
+	core.Trail(core.OK, "Server Started: http://%s:%d", core.CurrentConfig.D.Admin.BindIP, core.CurrentConfig.D.Admin.ListenPort)
 	fmt.Println(welcomeMessage)
-	log.Println(appInstance.Router.Run(fmt.Sprintf("%s:%d", interfaces.CurrentConfig.D.Admin.BindIP, interfaces.CurrentConfig.D.Admin.ListenPort)))
+	log.Println(appInstance.Router.Run(fmt.Sprintf("%s:%d", core.CurrentConfig.D.Admin.BindIP, core.CurrentConfig.D.Admin.ListenPort)))
 	return nil
 }
 

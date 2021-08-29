@@ -7,7 +7,7 @@ import (
 	"github.com/miquella/ask"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"os"
 )
@@ -19,7 +19,7 @@ func (c SuperadminCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 	commandRegistry.addAction("create", &CreateSuperadmin{})
 	if len(os.Args) > 2 {
@@ -71,7 +71,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
 	if opts.FirstName == "" {
@@ -100,7 +100,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		}
 		_, err = govalidator.ValidateStruct(passwordValidationStruct)
 		if err != nil {
-			interfaces.Trail(interfaces.ERROR, fmt.Errorf("please try to to repeat password again"))
+			core.Trail(core.ERROR, fmt.Errorf("please try to to repeat password again"))
 			continue
 		}
 		break
@@ -111,7 +111,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
-	admin := interfaces.User{
+	admin := core.User{
 		FirstName:    opts.FirstName,
 		LastName:     opts.LastName,
 		Username:     opts.Username,
@@ -123,7 +123,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		IsPasswordUsable: true,
 	}
 	db.Create(&admin)
-	interfaces.Trail(interfaces.INFO, "Superuser created successfully")
+	core.Trail(core.INFO, "Superuser created successfully")
 	return nil
 }
 

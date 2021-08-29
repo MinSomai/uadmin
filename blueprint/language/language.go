@@ -4,35 +4,35 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/language/migrations"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"mime/multipart"
 	"strconv"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	languageAdminPage := interfaces.NewGormAdminPage(
+	languageAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
 	)
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
 	languageAdminPage.BlueprintName = "language"
 	languageAdminPage.Router = mainRouter
-	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(languageAdminPage)
+	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(languageAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))
 	}
-	languagemodelAdminPage := interfaces.NewGormAdminPage(
+	languagemodelAdminPage := core.NewGormAdminPage(
 		languageAdminPage,
-		func() (interface{}, interface{}) {return &interfaces.Language{}, &[]*interfaces.Language{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+		func() (interface{}, interface{}) {return &core.Language{}, &[]*core.Language{}},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"EnglishName", "Name", "Flag", "Code", "RTL", "Default", "Active", "AvailableInGui"}
-			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			defaultField, _ := form.FieldRegistry.GetByName("Default")
 			defaultField.Validators.AddValidator("only_one_default_language", func(i interface{}, o interface{}) error {
 				isDefault := i.(bool)
@@ -41,9 +41,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				}
 				d := o.(*multipart.Form)
 				ID := d.Value["ID"][0]
-				uadminDatabase := interfaces.NewUadminDatabase()
-				lang := &interfaces.Language{}
-				uadminDatabase.Db.Where(&interfaces.Language{Default: true}).First(lang)
+				uadminDatabase := core.NewUadminDatabase()
+				lang := &core.Language{}
+				uadminDatabase.Db.Where(&core.Language{Default: true}).First(lang)
 				if lang.ID != 0 && ID != strconv.Itoa(int(lang.ID)) {
 					return fmt.Errorf("only one default language could be configured")
 				}
@@ -64,11 +64,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.Language{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &core.Language{}})
 }
 
 var ConcreteBlueprint = Blueprint{
-	interfaces.Blueprint{
+	core.Blueprint{
 		Name:              "language",
 		Description:       "Language blueprint is responsible for managing languages used in the project",
 		MigrationRegistry: migrations.BMigrationRegistry,

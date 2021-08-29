@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"os"
 	"testing"
 )
@@ -15,14 +15,14 @@ type FsStorageTestSuite struct {
 
 func (suite *FsStorageTestSuite) SetupTest() {
 	uadmin.NewFullAppForTests()
-	err := os.Mkdir(interfaces.CurrentConfig.GetPathToUploadDirectory(), 0755)
+	err := os.Mkdir(core.CurrentConfig.GetPathToUploadDirectory(), 0755)
 	if err != nil {
 		assert.True(suite.T(), false, "Couldnt create directory for file uploading")
 	}
 }
 
 func (suite *FsStorageTestSuite) TearDownSuite() {
-	err := os.RemoveAll(interfaces.CurrentConfig.GetPathToUploadDirectory())
+	err := os.RemoveAll(core.CurrentConfig.GetPathToUploadDirectory())
 	if err != nil {
 		assert.True(suite.T(), false, fmt.Errorf("Couldnt remove directory for file uploading"))
 	}
@@ -30,8 +30,8 @@ func (suite *FsStorageTestSuite) TearDownSuite() {
 }
 
 func (suite *FsStorageTestSuite) TestFullFlow() {
-	fsStorage := interfaces.NewFsStorage()
-	uploadedFile, _ := fsStorage.Save(&interfaces.FileForStorage{
+	fsStorage := core.NewFsStorage()
+	uploadedFile, _ := fsStorage.Save(&core.FileForStorage{
 		Content: []byte("test"),
 		PatternForTheFile: "*.txt",
 		Filename: "uploaded.txt",

@@ -3,13 +3,13 @@ package forms
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"mime/multipart"
 	"testing"
 )
 
 type UsernameFormOptions struct {
-	interfaces.FieldFormOptions
+	core.FieldFormOptions
 }
 
 func NewTestForm2() *multipart.Form {
@@ -24,22 +24,22 @@ type FormTestSuite struct {
 }
 
 func (s *FormTestSuite) TestFormBuilder() {
-	fieldChoiceRegistry := interfaces.FieldChoiceRegistry{}
-	fieldChoiceRegistry.Choices = make([]*interfaces.FieldChoice, 0)
+	fieldChoiceRegistry := core.FieldChoiceRegistry{}
+	fieldChoiceRegistry.Choices = make([]*core.FieldChoice, 0)
 	formOptions := &UsernameFormOptions{
-		FieldFormOptions: interfaces.FieldFormOptions{
-			Name: "UsernameOptions",
-			Initial: "InitialUsername",
+		FieldFormOptions: core.FieldFormOptions{
+			Name:        "UsernameOptions",
+			Initial:     "InitialUsername",
 			DisplayName: "Display name",
-			Validators: interfaces.NewValidatorRegistry(),
-			Choices: &fieldChoiceRegistry,
-			HelpText: "help for username",
+			Validators:  core.NewValidatorRegistry(),
+			Choices:     &fieldChoiceRegistry,
+			HelpText:    "help for username",
 		},
 	}
-	interfaces.UadminFormCongirurableOptionInstance.AddFieldFormOptions(formOptions)
+	core.UadminFormCongirurableOptionInstance.AddFieldFormOptions(formOptions)
 	// initial=\"test\",displayname=\"uname\",validators=\"password-uadmin\",choices=UsernameChoices,helptext=\"HELPPPPPPPPPP\"
-	user := &interfaces.User{}
-	form1 := interfaces.NewFormFromModel(user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
+	user := &core.User{}
+	form1 := core.NewFormFromModel(user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
 	res := form1.Render()
 	assert.Contains(s.T(), res, "<form")
 	form2 := NewTestForm2()

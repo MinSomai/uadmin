@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"math/big"
 	"net/smtp"
 	"reflect"
@@ -113,15 +113,15 @@ var SentEmailsDuringTests = SentEmailsDuringTestsType{
 // @todo rework
 // SendEmail sends email using system configured variables
 func SendEmail(from string, to []string, cc []string, bcc []string, subject string, body string) error {
-	if !interfaces.CurrentConfig.InTests && (interfaces.CurrentConfig.D.Uadmin.EmailUsername == "" || interfaces.CurrentConfig.D.Uadmin.EmailPassword == "" || interfaces.CurrentConfig.D.Uadmin.EmailSmtpServer == "" || interfaces.CurrentConfig.D.Uadmin.EmailSmtpServerPort == 0) {
+	if !core.CurrentConfig.InTests && (core.CurrentConfig.D.Uadmin.EmailUsername == "" || core.CurrentConfig.D.Uadmin.EmailPassword == "" || core.CurrentConfig.D.Uadmin.EmailSmtpServer == "" || core.CurrentConfig.D.Uadmin.EmailSmtpServerPort == 0) {
 		errMsg := "Email not sent because email global variables are not set"
-		interfaces.Trail(interfaces.CRITICAL, errMsg)
+		core.Trail(core.CRITICAL, errMsg)
 		return fmt.Errorf(errMsg)
 	}
 
 	// Get the domain name of sender
 	domain := strings.Split(from, "@")
-	if !interfaces.CurrentConfig.InTests && len(domain) < 2 {
+	if !core.CurrentConfig.InTests && len(domain) < 2 {
 		return nil
 	}
 	domain[0] = strings.TrimSpace(domain[0])
@@ -145,14 +145,14 @@ func SendEmail(from string, to []string, cc []string, bcc []string, subject stri
 	to = append(to, cc...)
 	to = append(to, bcc...)
 
-	if !interfaces.CurrentConfig.InTests {
+	if !core.CurrentConfig.InTests {
 		go func() {
-			err := smtp.SendMail(fmt.Sprintf("%s:%d", interfaces.CurrentConfig.D.Uadmin.EmailSmtpServer, interfaces.CurrentConfig.D.Uadmin.EmailSmtpServerPort),
-				smtp.PlainAuth("", interfaces.CurrentConfig.D.Uadmin.EmailUsername, interfaces.CurrentConfig.D.Uadmin.EmailPassword, interfaces.CurrentConfig.D.Uadmin.EmailSmtpServer),
-				interfaces.CurrentConfig.D.Uadmin.EmailFrom, to, []byte(msg))
+			err := smtp.SendMail(fmt.Sprintf("%s:%d", core.CurrentConfig.D.Uadmin.EmailSmtpServer, core.CurrentConfig.D.Uadmin.EmailSmtpServerPort),
+				smtp.PlainAuth("", core.CurrentConfig.D.Uadmin.EmailUsername, core.CurrentConfig.D.Uadmin.EmailPassword, core.CurrentConfig.D.Uadmin.EmailSmtpServer),
+				core.CurrentConfig.D.Uadmin.EmailFrom, to, []byte(msg))
 
 			if err != nil {
-				interfaces.Trail(interfaces.CRITICAL, "Email was not sent. %s", err)
+				core.Trail(core.CRITICAL, "Email was not sent. %s", err)
 			}
 		}()
 	} else {

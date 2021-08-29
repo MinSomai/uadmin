@@ -3,7 +3,7 @@ package admin
 import (
 	"fmt"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"strconv"
 	"testing"
 )
@@ -13,9 +13,9 @@ type AdminSearchFieldTestSuite struct {
 }
 
 func (apts *AdminSearchFieldTestSuite) SetupTestData() {
-	uadminDatabase := interfaces.NewUadminDatabase()
-	for i := range interfaces.GenerateNumberSequence(201, 300) {
-		userModel := &interfaces.User{
+	uadminDatabase := core.NewUadminDatabase()
+	for i := range core.GenerateNumberSequence(201, 300) {
+		userModel := &core.User{
 			Email: fmt.Sprintf("admin_%d@example.com", i),
 			Username: "admin_" + strconv.Itoa(i),
 			FirstName: "firstname_" + strconv.Itoa(i),

@@ -2,11 +2,11 @@ package routing
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
 type BlueprintRouting struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 var ConcreteBlueprint BlueprintRouting
 var visited = false
@@ -19,10 +19,10 @@ func (b BlueprintRouting) InitRouter(mainRouter *gin.Engine, group *gin.RouterGr
 
 func init() {
 	ConcreteBlueprint = BlueprintRouting{
-		interfaces.Blueprint{
+		core.Blueprint{
 			Name:              "user",
 			Description:       "blueprint",
-			MigrationRegistry: interfaces.NewMigrationRegistry(),
+			MigrationRegistry: core.NewMigrationRegistry(),
 		},
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"io"
 	"mime/multipart"
 	"os"
@@ -27,16 +27,16 @@ func NewTestForm() *multipart.Form {
 }
 
 func (w *WidgetTestSuite) TestTextWidget() {
-	textWidget := &interfaces.TextWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	textWidget := &core.TextWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	textWidget.SetName("dsadas")
 	textWidget.SetValue("dsadas")
 	textWidget.SetRequired()
-	renderedWidget := textWidget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := textWidget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	err := textWidget.ProceedForm(form1, nil)
@@ -47,15 +47,15 @@ func (w *WidgetTestSuite) TestTextWidget() {
 }
 
 func (w *WidgetTestSuite) TestNumberWidget() {
-	widget := &interfaces.NumberWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.NumberWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"test"}
@@ -67,15 +67,15 @@ func (w *WidgetTestSuite) TestNumberWidget() {
 }
 
 func (w *WidgetTestSuite) TestEmailWidget() {
-	widget := &interfaces.EmailWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.EmailWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"test@example.com"}
@@ -84,15 +84,15 @@ func (w *WidgetTestSuite) TestEmailWidget() {
 }
 
 func (w *WidgetTestSuite) TestURLWidget() {
-	widget := &interfaces.URLWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.URLWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"example.com"}
@@ -101,14 +101,14 @@ func (w *WidgetTestSuite) TestURLWidget() {
 }
 
 func (w *WidgetTestSuite) TestPasswordWidget() {
-	widget := &interfaces.PasswordWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.PasswordWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "type=\"password\"")
 	widget.SetRequired()
 	form1 := NewTestForm()
@@ -118,15 +118,15 @@ func (w *WidgetTestSuite) TestPasswordWidget() {
 }
 
 func (w *WidgetTestSuite) TestHiddenWidget() {
-	widget := &interfaces.HiddenWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.HiddenWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas<>")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas&lt;&gt;\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasas"}
@@ -135,15 +135,15 @@ func (w *WidgetTestSuite) TestHiddenWidget() {
 }
 
 func (w *WidgetTestSuite) TestDateWidget() {
-	widget := &interfaces.DateWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.DateWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("11/01/2021")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "datetimepicker_dsadas")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"11/02/2021"}
@@ -152,15 +152,15 @@ func (w *WidgetTestSuite) TestDateWidget() {
 }
 
 func (w *WidgetTestSuite) TestDateTimeWidget() {
-	widget := &interfaces.DateTimeWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.DateTimeWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("11/02/2021 10:04")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"11/02/2021 10:04\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"11/02/2021 10:04"}
@@ -169,15 +169,15 @@ func (w *WidgetTestSuite) TestDateTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestTimeWidget() {
-	widget := &interfaces.TimeWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.TimeWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("15:05")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"15:05\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
@@ -186,15 +186,15 @@ func (w *WidgetTestSuite) TestTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestTextareaWidget() {
-	widget := &interfaces.TextareaWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.TextareaWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Equal(w.T(), renderedWidget, "<textarea name=\"dsadas\" test=\"test1\">dsadas</textarea>")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
@@ -203,15 +203,15 @@ func (w *WidgetTestSuite) TestTextareaWidget() {
 }
 
 func (w *WidgetTestSuite) TestCheckboxWidget() {
-	widget := &interfaces.CheckboxWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.CheckboxWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "checked=\"checked\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
@@ -220,25 +220,25 @@ func (w *WidgetTestSuite) TestCheckboxWidget() {
 }
 
 func (w *WidgetTestSuite) TestSelectWidget() {
-	widget := &interfaces.SelectWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.SelectWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	widget.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
-	widget.OptGroups["test"] = make([]*interfaces.SelectOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
+	widget.OptGroups = make(map[string][]*core.SelectOptGroup)
+	widget.OptGroups["test"] = make([]*core.SelectOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
@@ -250,25 +250,25 @@ func (w *WidgetTestSuite) TestSelectWidget() {
 }
 
 func (w *WidgetTestSuite) TestNullBooleanWidget() {
-	widget := &interfaces.NullBooleanWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.NullBooleanWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
-	widget.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
-	widget.OptGroups["test"] = make([]*interfaces.SelectOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
+	widget.OptGroups = make(map[string][]*core.SelectOptGroup)
+	widget.OptGroups["test"] = make([]*core.SelectOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test1",
 		Value: "yes",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test2",
 		Value: "no",
 	})
 	widget.SetName("dsadas")
 	widget.SetValue("yes")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas\" data-placeholder=\"Select\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
@@ -280,25 +280,25 @@ func (w *WidgetTestSuite) TestNullBooleanWidget() {
 }
 
 func (w *WidgetTestSuite) TestSelectMultipleWidget() {
-	widget := &interfaces.SelectMultipleWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.SelectMultipleWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue([]string{"dsadas"})
-	widget.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
-	widget.OptGroups["test"] = make([]*interfaces.SelectOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
+	widget.OptGroups = make(map[string][]*core.SelectOptGroup)
+	widget.OptGroups["test"] = make([]*core.SelectOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.SelectOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
@@ -310,27 +310,27 @@ func (w *WidgetTestSuite) TestSelectMultipleWidget() {
 }
 
 func (w *WidgetTestSuite) TestRadioSelectWidget() {
-	widget := &interfaces.RadioSelectWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.RadioSelectWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		Id: "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	widget.OptGroups = make(map[string][]*interfaces.RadioOptGroup)
-	widget.OptGroups["test"] = make([]*interfaces.RadioOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
+	widget.OptGroups = make(map[string][]*core.RadioOptGroup)
+	widget.OptGroups["test"] = make([]*core.RadioOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<li>test<ul id=\"test_0\">")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
@@ -342,27 +342,27 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 }
 
 func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
-	widget := &interfaces.CheckboxSelectMultipleWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.CheckboxSelectMultipleWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		Id: "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
 	widget.SetValue([]string{"dsadas"})
-	widget.OptGroups = make(map[string][]*interfaces.RadioOptGroup)
-	widget.OptGroups["test"] = make([]*interfaces.RadioOptGroup, 0)
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
+	widget.OptGroups = make(map[string][]*core.RadioOptGroup)
+	widget.OptGroups["test"] = make([]*core.RadioOptGroup, 0)
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test1",
 		Value: "test1",
 	})
-	widget.OptGroups["test"] = append(widget.OptGroups["test"], &interfaces.RadioOptGroup{
+	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<ul id=\"test\">\n  \n  \n  \n    <li>test<ul id=\"test_0\">")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
@@ -374,14 +374,14 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 }
 
 func (w *WidgetTestSuite) TestFileWidget() {
-	widget := &interfaces.FileWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.FileWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "type=\"file\"")
 	body := new(bytes.Buffer)
 
@@ -425,10 +425,10 @@ func (w *WidgetTestSuite) TestFileWidget() {
 }
 
 func (w *WidgetTestSuite) TestClearableFileWidget() {
-	widget := &interfaces.ClearableFileWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.ClearableFileWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		InitialText: "test",
 		Required: true,
@@ -437,22 +437,22 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 		InputText: "upload your image",
 	}
 	widget.SetName("dsadas")
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Equal(w.T(), renderedWidget, "<p class=\"file-upload\">test: <br>\nupload your image:\n    <input type=\"file\" name=\"dsadas\" test=\"test1\"></p>")
-	widget = &interfaces.ClearableFileWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget = &core.ClearableFileWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		InitialText: "test",
 		Required: true,
 		Id: "test",
 		ClearCheckboxLabel: "clear file",
 		InputText: "upload your image",
-		CurrentValue: &interfaces.URLValue{URL: "https://microsoft.com"},
+		CurrentValue: &core.URLValue{URL: "https://microsoft.com"},
 	}
 	widget.SetName("dsadas")
-	renderedWidget = widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget = widget.Render(core.NewFormRenderContext(), nil)
 	assert.Equal(w.T(), renderedWidget, "\n    <input type=\"file\" name=\"dsadas\" test=\"test1\">")
 	body := new(bytes.Buffer)
 
@@ -496,15 +496,15 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 }
 
 func (w *WidgetTestSuite) TestMultipleHiddenInputWidget() {
-	widget := &interfaces.MultipleInputHiddenWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.MultipleInputHiddenWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 	}
 	widget.SetName("dsadas")
 	widget.SetValue([]string{"dsadas", "test1"})
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadas", "test1"}
@@ -513,10 +513,10 @@ func (w *WidgetTestSuite) TestMultipleHiddenInputWidget() {
 }
 
 func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
-	widget := &interfaces.SplitDateTimeWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.SplitDateTimeWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		DateAttrs: map[string]string{"test": "test1"},
 		TimeAttrs: map[string]string{"test": "test1"},
@@ -526,7 +526,7 @@ func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
 	widget.SetName("dsadas")
 	nowTime := time.Now()
 	widget.SetValue(&nowTime)
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_date\"")
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_time\"")
 	form1 := NewTestForm()
@@ -537,10 +537,10 @@ func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
-	widget := &interfaces.SplitHiddenDateTimeWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.SplitHiddenDateTimeWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		DateAttrs: map[string]string{"test": "test1"},
 		TimeAttrs: map[string]string{"test": "test1"},
@@ -550,7 +550,7 @@ func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
 	widget.SetName("dsadas")
 	nowTime := time.Now()
 	widget.SetValue(&nowTime)
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_date\"")
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_time\"")
 	form1 := NewTestForm()
@@ -561,17 +561,17 @@ func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
 }
 
 func (w *WidgetTestSuite) TestSelectDateWidget() {
-	widget := &interfaces.SelectDateWidget{
-		Widget: interfaces.Widget{
-			Attrs: map[string]string{"test": "test1"},
-			BaseFuncMap: interfaces.FuncMap,
+	widget := &core.SelectDateWidget{
+		Widget: core.Widget{
+			Attrs:       map[string]string{"test": "test1"},
+			BaseFuncMap: core.FuncMap,
 		},
 		EmptyLabelString: "choose any",
 	}
 	widget.SetName("dsadas")
 	nowTime := time.Now()
 	widget.SetValue(&nowTime)
-	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
+	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas_month\"")
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas_day\"")
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas_year\"")

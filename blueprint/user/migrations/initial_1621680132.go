@@ -1,7 +1,7 @@
 package migrations
 
 import (
-    "github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
     "gorm.io/gorm"
 )
 
@@ -16,61 +16,61 @@ func (m initial_1621680132) GetId() int64 {
     return 1621680132
 }
 
-func (m initial_1621680132) Up(uadminDatabase *interfaces.UadminDatabase) error {
+func (m initial_1621680132) Up(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.AutoMigrate(interfaces.ContentType{})
+    err := db.AutoMigrate(core.ContentType{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(interfaces.UserGroup{})
+    err = db.AutoMigrate(core.UserGroup{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(interfaces.User{})
+    err = db.AutoMigrate(core.User{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(interfaces.Permission{})
+    err = db.AutoMigrate(core.Permission{})
     if err != nil {
         return err
     }
-    err = db.AutoMigrate(interfaces.OneTimeAction{})
+    err = db.AutoMigrate(core.OneTimeAction{})
     if err != nil {
         return err
     }
     return nil
 }
 
-func (m initial_1621680132) Down(uadminDatabase *interfaces.UadminDatabase) error {
+func (m initial_1621680132) Down(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.Migrator().DropTable(interfaces.Permission{})
+    err := db.Migrator().DropTable(core.Permission{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(interfaces.User{})
+    err = db.Migrator().DropTable(core.User{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(interfaces.UserGroup{})
+    err = db.Migrator().DropTable(core.UserGroup{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(interfaces.OneTimeAction{})
+    err = db.Migrator().DropTable(core.OneTimeAction{})
     if err != nil {
         return err
     }
-    err = db.Migrator().DropTable(interfaces.ContentType{})
+    err = db.Migrator().DropTable(core.ContentType{})
     if err != nil {
         return err
     }
-    var contentType interfaces.ContentType
+    var contentType core.ContentType
     stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&interfaces.OneTimeAction{})
-    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
+    stmt.Parse(&core.OneTimeAction{})
+    db.Model(&core.ContentType{}).Where(&core.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Unscoped().Delete(&contentType)
     stmt = &gorm.Statement{DB: db}
-    stmt.Parse(&interfaces.User{})
-    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
+    stmt.Parse(&core.User{})
+    db.Model(&core.ContentType{}).Where(&core.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Unscoped().Delete(&contentType)
     return nil
 }

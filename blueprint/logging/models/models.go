@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/preloaded"
 	"gorm.io/gorm"
 	"net/http"
@@ -106,16 +106,16 @@ func HumanizeAction(action Action) string {
 
 // Log !
 type Log struct {
-	ID        uint `gorm:"primarykey"`
-	ContentType interfaces.ContentType `uadminform:"ReadonlyField" uadmin:"list,search"`
+	ID            uint             `gorm:"primarykey"`
+	ContentType   core.ContentType `uadminform:"ReadonlyField" uadmin:"list,search"`
 	ContentTypeID uint
-	ModelPK uint `uadmin:"list,search" uadminform:"ReadonlyField"`
-	Action    Action    `uadminform:"ReadonlyField" uadmin:"list,search"`
-	Username  string    `uadminform:"ReadonlyField" uadmin:"list,search"`
-	Activity  string    `gorm:"type:longtext" uadminform:"ReadonlyTextareaFieldOptions" uadmin:"list,search"`
-	CreatedAt time.Time `uadminform:"DateTimeFieldOptions" uadmin:"list,search"`
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ModelPK       uint `uadmin:"list,search" uadminform:"ReadonlyField"`
+	Action        Action    `uadminform:"ReadonlyField" uadmin:"list,search"`
+	Username      string    `uadminform:"ReadonlyField" uadmin:"list,search"`
+	Activity      string    `gorm:"type:longtext" uadminform:"ReadonlyTextareaFieldOptions" uadmin:"list,search"`
+	CreatedAt     time.Time `uadminform:"DateTimeFieldOptions" uadmin:"list,search"`
+	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt `gorm:"index"`
 }
 
 func (l Log) String() string {
@@ -132,7 +132,7 @@ func (l *Log) Save() {
 }
 
 // ParseRecord !
-func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *interfaces.User, action Action, r *http.Request) (err error) {
+func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *core.User, action Action, r *http.Request) (err error) {
 	//modelName = strings.ToLower(modelName)
 	//model, _ := model2.NewModel(modelName, false)
 	//s, ok := model2.GetSchema(model.Interface())

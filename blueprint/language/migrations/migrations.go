@@ -1,13 +1,13 @@
 package migrations
 
 import (
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
-var BMigrationRegistry *interfaces.MigrationRegistry
+var BMigrationRegistry *core.MigrationRegistry
 
 func init() {
-    BMigrationRegistry = interfaces.NewMigrationRegistry()
+    BMigrationRegistry = core.NewMigrationRegistry()
     
     BMigrationRegistry.AddMigration(initial_1623083053{})
     

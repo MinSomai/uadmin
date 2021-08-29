@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"time"
 )
 
 func init() {
-	interfaces.PopulateTemplateContextForAdminPanel = func(ctx *gin.Context, context interfaces.IAdminContext, adminRequestParams *interfaces.AdminRequestParams) {
+	core.PopulateTemplateContextForAdminPanel = func(ctx *gin.Context, context core.IAdminContext, adminRequestParams *core.AdminRequestParams) {
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
-		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
+		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 		cookie, _ := ctx.Cookie(cookieName)
 		var session interfaces2.ISessionProvider
 		if cookie != "" {
@@ -21,9 +21,9 @@ func init() {
 		}
 		if adminRequestParams.CreateSession && session == nil {
 			session = sessionAdapter.Create()
-			expiresOn := time.Now().Add(time.Duration(interfaces.CurrentConfig.D.Uadmin.SessionDuration) * time.Second)
+			expiresOn := time.Now().Add(time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second)
 			session.ExpiresOn(&expiresOn)
-			ctx.SetCookie(interfaces.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(interfaces.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, interfaces.CurrentConfig.D.Uadmin.SecureCookie, interfaces.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+			ctx.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HttpOnlyCookie)
 			session.Save()
 		}
 		if adminRequestParams.GenerateCSRFToken {
@@ -44,17 +44,17 @@ func init() {
 		context.SetCurrentURL(ctx.Request.URL.Path)
 		context.SetCurrentQuery(ctx.Request.URL.RawQuery)
 		context.SetFullURL(ctx.Request.URL)
-		context.SetSiteName(interfaces.CurrentConfig.D.Uadmin.SiteName)
-		context.SetRootAdminURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
+		context.SetSiteName(core.CurrentConfig.D.Uadmin.SiteName)
+		context.SetRootAdminURL(core.CurrentConfig.D.Uadmin.RootAdminURL)
 		if session != nil {
 			context.SetSessionKey(session.GetKey())
 		}
-		context.SetRootURL(interfaces.CurrentConfig.D.Uadmin.RootAdminURL)
-		context.SetLanguage(interfaces.GetLanguage(ctx))
-		context.SetLogo(interfaces.CurrentConfig.D.Uadmin.Logo)
-		context.SetFavIcon(interfaces.CurrentConfig.D.Uadmin.FavIcon)
+		context.SetRootURL(core.CurrentConfig.D.Uadmin.RootAdminURL)
+		context.SetLanguage(core.GetLanguage(ctx))
+		context.SetLogo(core.CurrentConfig.D.Uadmin.Logo)
+		context.SetFavIcon(core.CurrentConfig.D.Uadmin.FavIcon)
 		if adminRequestParams.NeedAllLanguages {
-			context.SetLanguages(interfaces.GetActiveLanguages())
+			context.SetLanguages(core.GetActiveLanguages())
 		}
 		// context.SetDemo()
 		if session != nil {
@@ -66,8 +66,8 @@ func init() {
 				context.SetUserPermissionRegistry(user.BuildPermissionRegistry())
 			}
 		}
-		breadcrumbs := interfaces.NewAdminBreadCrumbsRegistry()
-		breadcrumbs.AddBreadCrumb(&interfaces.AdminBreadcrumb{Name: "Dashboard", Url: interfaces.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
+		breadcrumbs := core.NewAdminBreadCrumbsRegistry()
+		breadcrumbs.AddBreadCrumb(&core.AdminBreadcrumb{Name: "Dashboard", Url: core.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
 		context.SetBreadCrumbs(breadcrumbs)
 	}
 }

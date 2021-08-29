@@ -5,55 +5,55 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/approval/migrations"
 	"github.com/uadmin/uadmin/blueprint/approval/models"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"strconv"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	approvalAdminPage := interfaces.NewGormAdminPage(
+	approvalAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) {return nil, make([]interface{}, 0)},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
 	)
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
 	approvalAdminPage.BlueprintName = "approval"
 	approvalAdminPage.Router = mainRouter
-	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
+	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
 	}
-	approvalmodelAdminPage := interfaces.NewGormAdminPage(
+	approvalmodelAdminPage := core.NewGormAdminPage(
 		approvalAdminPage,
 		func() (interface{}, interface{}) {return &models.Approval{}, &[]*models.Approval{}},
-		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"ContentType", "ModelPK", "ColumnName", "OldValue", "NewValue", "NewValueDescription", "ChangedBy", "ChangeDate", "ApprovalAction", "ApprovalBy", "ApprovalDate"}
-			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			approvalField, _ := form.FieldRegistry.GetByName("ApprovalAction")
-			w := approvalField.FieldConfig.Widget.(*interfaces.SelectWidget)
-			w.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
-			w.OptGroups[""] = make([]*interfaces.SelectOptGroup, 0)
-			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+			w := approvalField.FieldConfig.Widget.(*core.SelectWidget)
+			w.OptGroups = make(map[string][]*core.SelectOptGroup)
+			w.OptGroups[""] = make([]*core.SelectOptGroup, 0)
+			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "unknown",
 				Value: "0",
 			})
-			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "approved",
 				Value: "1",
 			})
-			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "rejected",
 				Value: "2",
 			})
-			approvalField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *interfaces.Field) interface{} {
+			approvalField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *core.Field) interface{} {
 				a := m.(*models.Approval).ApprovalAction
 				return strconv.Itoa(int(a))
 			})
-			approvalField.SetUpField = func(w interfaces.IWidget, m interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
+			approvalField.SetUpField = func(w core.IWidget, m interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 				approvalM := m.(*models.Approval)
 				vI, _ := strconv.Atoi(v.(string))
 				approvalM.ApprovalAction = models.ApprovalAction(vI)
@@ -76,7 +76,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		if aD == nil {
 			return ""
 		}
-		return aD.Format(interfaces.CurrentConfig.D.Uadmin.DateTimeFormat)
+		return aD.Format(core.CurrentConfig.D.Uadmin.DateTimeFormat)
 	}
 	contentTypeListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ContentType")
 	contentTypeListDisplay.Populate = func(m interface{}) string {
@@ -84,7 +84,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	changeDateListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ChangeDate")
 	changeDateListDisplay.Populate = func(m interface{}) string {
-		return m.(*models.Approval).ChangeDate.Format(interfaces.CurrentConfig.D.Uadmin.DateTimeFormat)
+		return m.(*models.Approval).ChangeDate.Format(core.CurrentConfig.D.Uadmin.DateTimeFormat)
 	}
 	err = approvalAdminPage.SubPages.AddAdminPage(approvalmodelAdminPage)
 	if err != nil {
@@ -93,11 +93,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &models.Approval{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &models.Approval{}})
 }
 
 var ConcreteBlueprint = Blueprint{
-	interfaces.Blueprint{
+	core.Blueprint{
 		Name:              "approval",
 		Description:       "Approval blueprint is responsible for approving things in the project",
 		MigrationRegistry: migrations.BMigrationRegistry,

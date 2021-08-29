@@ -1,7 +1,7 @@
 package migrations
 
 import (
-    "github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
     "gorm.io/gorm"
 )
 
@@ -16,25 +16,25 @@ func (m initial_1623083053) GetId() int64 {
     return 1623083053
 }
 
-func (m initial_1623083053) Up(uadminDatabase *interfaces.UadminDatabase) error {
+func (m initial_1623083053) Up(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.AutoMigrate(interfaces.Language{})
+    err := db.AutoMigrate(core.Language{})
     if err != nil {
         return err
     }
     return nil
 }
 
-func (m initial_1623083053) Down(uadminDatabase *interfaces.UadminDatabase) error {
+func (m initial_1623083053) Down(uadminDatabase *core.UadminDatabase) error {
     db := uadminDatabase.Db
-    err := db.Migrator().DropTable(interfaces.Language{})
+    err := db.Migrator().DropTable(core.Language{})
     if err != nil {
         return err
     }
-    var contentType interfaces.ContentType
+    var contentType core.ContentType
     stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&interfaces.Language{})
-    db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}).First(&contentType)
+    stmt.Parse(&core.Language{})
+    db.Model(&core.ContentType{}).Where(&core.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}).First(&contentType)
     db.Unscoped().Delete(&contentType)
     return nil
 }

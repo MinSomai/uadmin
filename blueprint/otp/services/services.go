@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"image/png"
 	"os"
 
@@ -32,7 +32,7 @@ func GetOTP(seed string, digits int, algorithm string, skew uint, period uint) s
 
 	pass, err := totp.GenerateCodeCustom(seed, time.Now().UTC(), opts)
 	if err != nil {
-		interfaces.Trail(interfaces.ERROR, "Unable to generate OTP. %s", err)
+		core.Trail(core.ERROR, "Unable to generate OTP. %s", err)
 		return ""
 	}
 	return pass
@@ -51,18 +51,18 @@ func VerifyOTP(pass, seed string, digits int, algorithm string, skew uint, perio
 
 	valid, err := totp.ValidateCustom(pass, seed, time.Now().UTC(), opts)
 	if err != nil {
-		interfaces.Trail(interfaces.ERROR, "Unable to verify OTP. %s", err)
+		core.Trail(core.ERROR, "Unable to verify OTP. %s", err)
 		return false
 	}
 	return valid
 }
 
-func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *interfaces.User) (secret string, imagePath string) {
+func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *core.User) (secret string, imagePath string) {
 	algo := getOTPAlgorithm(strings.ToLower(algorithm))
 
 	opts := totp.GenerateOpts{
 		AccountName: user.Username,
-		Issuer:      interfaces.CurrentConfig.D.Uadmin.SiteName,
+		Issuer:      core.CurrentConfig.D.Uadmin.SiteName,
 		Algorithm:   algo,
 		Digits:      otp.Digits(digits),
 		Period:      period,
@@ -97,7 +97,7 @@ func getOTPAlgorithm(algorithm string) otp.Algorithm {
 	case "sha512":
 		algo = otp.AlgorithmSHA512
 	default:
-		interfaces.Trail(interfaces.WARNING, "getOTPAlgorithm: Unknown hash algorithm (%s). Defaulting to sha1", algorithm)
+		core.Trail(core.WARNING, "getOTPAlgorithm: Unknown hash algorithm (%s). Defaulting to sha1", algorithm)
 		return otp.AlgorithmSHA1
 	}
 	return algo

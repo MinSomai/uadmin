@@ -2,12 +2,12 @@ package interfaces
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"time"
 )
 
 type DbSession struct {
-	session *interfaces.Session
+	session *core.Session
 }
 
 func (s *DbSession) GetName() string {
@@ -18,7 +18,7 @@ func (s *DbSession) Set(name string, value string) {
 	s.session.SetData(name, value)
 }
 
-func (s *DbSession) SetUser(user *interfaces.User) {
+func (s *DbSession) SetUser(user *core.User) {
 	s.session.UserID = user.ID
 	s.session.User = *user
 }
@@ -39,7 +39,7 @@ func (s *DbSession) GetKey() string {
 	return s.session.Key
 }
 
-func (s *DbSession) GetUser() *interfaces.User {
+func (s *DbSession) GetUser() *core.User {
 	if s.session == nil {
 		return nil
 	}
@@ -47,10 +47,10 @@ func (s *DbSession) GetUser() *interfaces.User {
 }
 
 func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
-	var session interfaces.Session
-	db.Db.Model(&interfaces.Session{}).Where(&interfaces.Session{Key: sessionKey}).Preload("User").First(&session)
+	var session core.Session
+	db.Db.Model(&core.Session{}).Where(&core.Session{Key: sessionKey}).Preload("User").First(&session)
 	if session.ID == 0 {
 		return nil, fmt.Errorf("no session with key %s found", sessionKey)
 	}
@@ -61,7 +61,7 @@ func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
 
 func (s *DbSession) Create() ISessionProvider {
 	session := NewSession()
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
 	db.Db.Create(session)
 	return &DbSession{
@@ -70,9 +70,9 @@ func (s *DbSession) Create() ISessionProvider {
 }
 
 func (s *DbSession) Delete() bool {
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
-	db.Db.Unscoped().Delete(&interfaces.Session{}, s.session.ID)
+	db.Db.Unscoped().Delete(&core.Session{}, s.session.ID)
 	return db.Db.Error == nil
 }
 
@@ -81,7 +81,7 @@ func (s *DbSession) IsExpired() bool {
 }
 
 func (s *DbSession) Save() bool {
-	db := interfaces.NewUadminDatabase()
+	db := core.NewUadminDatabase()
 	defer db.Close()
 	res := db.Db.Save(s.session)
 	return res.Error == nil

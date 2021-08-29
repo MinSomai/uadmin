@@ -2,13 +2,13 @@ package models
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"strconv"
 	"time"
 )
 // SettingCategory is a category for system settings
 type SettingCategory struct {
-	interfaces.Model
+	core.Model
 	Name string `uadmin:"list"`
 	Icon string `uadminform:"ImageFormOptions" `
 }
@@ -78,7 +78,7 @@ func HumanizeDataType(dataType DataType) string {
 
 // Setting model stored system settings
 type Setting struct {
-	interfaces.Model
+	core.Model
 	Name         string `uadmin:"list,search" uadminform:"RequiredFieldOptions"`
 	Value        string `uadmin:"list"`
 	DefaultValue string `uadmin:"list"`

@@ -3,7 +3,7 @@ package object_query_builder
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"gorm.io/gorm"
 	"math"
 	"strconv"
@@ -13,254 +13,254 @@ import (
 
 type ObjectQueryBuilderTestSuite struct {
 	uadmin.UadminTestSuite
-	createdUser *interfaces.User
+	createdUser *core.User
 }
 
 func (suite *ObjectQueryBuilderTestSuite) SetupTest() {
 	suite.UadminTestSuite.SetupTest()
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	u := interfaces.User{Username: "dsadas", Email: "ffsdfsd@example.com"}
+	u := core.User{Username: "dsadas", Email: "ffsdfsd@example.com"}
 	db.Create(&u)
 	suite.createdUser = &u
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestExact() {
-	operator := interfaces.ExactGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsadas")
+	operator := core.ExactGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsadas")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsadaS")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsadaS")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIExact() {
-	operator := interfaces.IExactGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsadas")
+	operator := core.IExactGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsadas")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsadas")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsadas")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, uint(0))
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestContains() {
-	operator := interfaces.ContainsGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
+	operator := core.ContainsGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIContains() {
-	operator := interfaces.IContainsGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
+	operator := core.IContainsGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, uint(0))
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIn() {
-	operator := interfaces.InGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.InGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, []uint{suite.createdUser.ID})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, []uint{suite.createdUser.ID})
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestGt() {
-	operator := interfaces.GtGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.GtGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, -1)
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, -1)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestGte() {
-	operator := interfaces.GteGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.GteGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID)
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestLt() {
-	operator := interfaces.LtGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.LtGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID + 100)
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID + 100)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestLte() {
-	operator := interfaces.LteGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.LteGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID)
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestStartsWith() {
-	operator := interfaces.StartsWithGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
+	operator := core.StartsWithGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIStartsWith() {
-	operator := interfaces.IStartsWithGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
+	operator := core.IStartsWithGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "dsad")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Dsa")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, uint(0))
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestEndsWith() {
-	operator := interfaces.EndsWithGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "das")
+	operator := core.EndsWithGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "das")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Das")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Das")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIEndsWith() {
-	operator := interfaces.IEndsWithGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "das")
+	operator := core.IEndsWithGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "das")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Das")
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]}, "Das")
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, uint(0))
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestRange() {
-	operator := interfaces.RangeGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.RangeGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, []uint{suite.createdUser.ID - 1, suite.createdUser.ID + 100})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, []uint{suite.createdUser.ID - 1, suite.createdUser.ID + 100})
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestDate() {
-	operator := interfaces.DateGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	operator := core.DateGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},	suite.createdUser.CreatedAt.Round(0),
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},	suite.createdUser.CreatedAt.Round(0),
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Round(0).Add(-10 * 3600 * 24 * time.Second),
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, uint(0))
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["UpdatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["UpdatedAt"]},
 		suite.createdUser.CreatedAt.Round(0).Add(-10 * 3600 * 24 * time.Second),
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, uint(0))
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["UpdatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["UpdatedAt"]},
 		suite.createdUser.CreatedAt.Round(0),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -269,13 +269,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestDate() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestYear() {
-	operator := interfaces.YearGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.YearGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Year(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -283,13 +283,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestYear() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestMonth() {
-	operator := interfaces.MonthGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.MonthGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Month(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -297,13 +297,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestMonth() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestDay() {
-	operator := interfaces.DayGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.DayGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Day(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -311,14 +311,14 @@ func (suite *ObjectQueryBuilderTestSuite) TestDay() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestWeek() {
-	operator := interfaces.WeekGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.WeekGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	_, isoWeek := suite.createdUser.CreatedAt.ISOWeek()
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		isoWeek,
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -326,13 +326,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestWeek() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestWeekDay() {
-	operator := interfaces.WeekDayGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.WeekDayGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Weekday(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -340,13 +340,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestWeekDay() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestQuarter() {
-	operator := interfaces.QuarterGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.QuarterGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		math.Ceil(float64(suite.createdUser.CreatedAt.Month() / 3)),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -354,13 +354,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestQuarter() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestTime() {
-	operator := interfaces.TimeGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.TimeGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Format("15:04"),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -368,13 +368,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestTime() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestHour() {
-	operator := interfaces.HourGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.HourGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Hour(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -382,21 +382,21 @@ func (suite *ObjectQueryBuilderTestSuite) TestHour() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestRegex() {
-	operator := interfaces.RegexGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	operator := core.RegexGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
 		"^DSAdas$",
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
 		"^dsaDAS1111111111$",
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -405,21 +405,21 @@ func (suite *ObjectQueryBuilderTestSuite) TestRegex() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIRegex() {
-	operator := interfaces.IRegexGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	operator := core.IRegexGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
 		"^dsadas$",
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
-	uadminDatabase = interfaces.NewUadminDatabase()
-	gormOperatorContext = interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	uadminDatabase = core.NewUadminDatabase()
+	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["Username"]},
 		"^dsaDAS$",
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -428,13 +428,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestIRegex() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestMinute() {
-	operator := interfaces.MinuteGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.MinuteGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Minute(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -442,13 +442,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestMinute() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestSecond() {
-	operator := interfaces.SecondGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.SecondGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		suite.createdUser.CreatedAt.Second(),
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -456,13 +456,13 @@ func (suite *ObjectQueryBuilderTestSuite) TestSecond() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestIsNull() {
-	operator := interfaces.IsNullGormOperator{}
-	var u interfaces.User
-	uadminDatabase := interfaces.NewUadminDatabase()
+	operator := core.IsNullGormOperator{}
+	var u core.User
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
-	gormOperatorContext := interfaces.NewGormOperatorContext(interfaces.NewGormPersistenceStorage(uadminDatabase.Db), &interfaces.User{})
+	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &interfaces.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
 		false,
 	)
 	gormOperatorContext.Tx.First(&u)
@@ -470,27 +470,27 @@ func (suite *ObjectQueryBuilderTestSuite) TestIsNull() {
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestFilterGormModel() {
-	var u interfaces.User
+	var u core.User
 	createdSecond := suite.createdUser.CreatedAt.Second()
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
-	statement.Parse(&interfaces.User{})
-	interfaces.FilterGormModel(uadminDatabase.Adapter, interfaces.NewGormPersistenceStorage(uadminDatabase.Db), statement.Schema, []string{"CreatedAt__isnull=false", "CreatedAt__second=" + strconv.Itoa(createdSecond)}, &interfaces.User{})
+	statement.Parse(&core.User{})
+	core.FilterGormModel(uadminDatabase.Adapter, core.NewGormPersistenceStorage(uadminDatabase.Db), statement.Schema, []string{"CreatedAt__isnull=false", "CreatedAt__second=" + strconv.Itoa(createdSecond)}, &core.User{})
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
 
 func (suite *ObjectQueryBuilderTestSuite) TestFilterGormModelWithDependencies() {
-	var p interfaces.Permission
-	uadminDatabase := interfaces.NewUadminDatabase()
+	var p core.Permission
+	uadminDatabase := core.NewUadminDatabase()
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
-	statement.Parse(&interfaces.Permission{})
-	contentType := interfaces.ContentType{BlueprintName: "user11", ModelName: "user11"}
+	statement.Parse(&core.Permission{})
+	contentType := core.ContentType{BlueprintName: "user11", ModelName: "user11"}
 	uadminDatabase.Db.Create(&contentType)
-	permission := interfaces.Permission{ContentType: contentType, PermissionBits: interfaces.RevertPermBit}
+	permission := core.Permission{ContentType: contentType, PermissionBits: core.RevertPermBit}
 	uadminDatabase.Db.Create(&permission)
-	interfaces.FilterGormModel(uadminDatabase.Adapter, interfaces.NewGormPersistenceStorage(uadminDatabase.Db), statement.Schema, []string{"CreatedAt__isnull=false", "ContentType__ID__exact=" + strconv.Itoa(int(contentType.ID))}, &interfaces.Permission{})
+	core.FilterGormModel(uadminDatabase.Adapter, core.NewGormPersistenceStorage(uadminDatabase.Db), statement.Schema, []string{"CreatedAt__isnull=false", "ContentType__ID__exact=" + strconv.Itoa(int(contentType.ID))}, &core.Permission{})
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.First(&p)
 	assert.Equal(suite.T(), p.ContentTypeID, contentType.ID)

@@ -5,7 +5,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm"
 	"net/http"
@@ -159,7 +159,7 @@ func Run(t *testing.T, currentsuite suite.TestingSuite) {
 					downCommand := MigrateCommand{}
 					downCommand.Proceed("down", make([]string, 0))
 				} else {
-					uadminDatabase := interfaces.NewUadminDatabase()
+					uadminDatabase := core.NewUadminDatabase()
 					uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
 						method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
 						// return nil will commit the whole transaction
@@ -212,14 +212,14 @@ func runTests(t testing.TB, tests []testing.InternalTest) {
 
 func NewTestApp() *App {
 	a := App{}
-	a.DashboardAdminPanel = interfaces.NewDashboardAdminPanel()
-	interfaces.CurrentDashboardAdminPanel = a.DashboardAdminPanel
-	a.Config = interfaces.NewConfig("configs/" + "test" + ".yaml")
+	a.DashboardAdminPanel = core.NewDashboardAdminPanel()
+	core.CurrentDashboardAdminPanel = a.DashboardAdminPanel
+	a.Config = core.NewConfig("configs/" + "test" + ".yaml")
 	a.CommandRegistry = &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
-	a.BlueprintRegistry = interfaces.NewBlueprintRegistry()
-	a.Database = interfaces.NewDatabase(a.Config)
+	a.BlueprintRegistry = core.NewBlueprintRegistry()
+	a.Database = core.NewDatabase(a.Config)
 	a.Router = gin.Default()
 	a.Router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://foo.com"},
@@ -233,7 +233,7 @@ func NewTestApp() *App {
 		MaxAge: 12 * time.Hour,
 	}))
 	a.RegisterBaseCommands()
-	interfaces.CurrentDatabaseSettings = &interfaces.DatabaseSettings{
+	core.CurrentDatabaseSettings = &core.DatabaseSettings{
 		Default: a.Config.D.Db.Default,
 	}
 	StoreCurrentApp(&a)

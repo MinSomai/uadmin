@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
@@ -30,7 +30,7 @@ func (c MigrateCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("create", &CreateMigration{})
@@ -57,7 +57,7 @@ func (c MigrateCommand) GetHelpText() string {
 func prepareMigrationName(message string) string {
 	now := time.Now()
 	sec := now.Unix()
-	message = interfaces.AsciiRegex.ReplaceAllLiteralString(message, "")
+	message = core.AsciiRegex.ReplaceAllLiteralString(message, "")
 	if len(message) > 30 {
 		message = message[:30]
 	}
@@ -114,11 +114,11 @@ func (m {{.MigrationName}}) GetId() int64 {
     return {{.ConcreteMigrationId}}
 }
 
-func (m {{.MigrationName}}) Up(uadminDatabase *interfaces.UadminDatabase) error {
+func (m {{.MigrationName}}) Up(uadminDatabase *core.UadminDatabase) error {
     return nil
 }
 
-func (m {{.MigrationName}}) Down(uadminDatabase *interfaces.UadminDatabase) error {
+func (m {{.MigrationName}}) Down(uadminDatabase *core.UadminDatabase) error {
     return nil
 }
 
@@ -131,13 +131,13 @@ func (m {{.MigrationName}}) Deps() []string {
 	const migrationRegistryCreationTpl = `package migrations
 
 import (
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
-var BMigrationRegistry *interfaces.MigrationRegistry
+var BMigrationRegistry *core.MigrationRegistry
 
 func init() {
-    BMigrationRegistry = interfaces.NewMigrationRegistry()
+    BMigrationRegistry = core.NewMigrationRegistry()
     // placeholder to insert next migration
 }
 `
@@ -154,7 +154,7 @@ func init() {
 						dependenciesString[i] = fmt.Sprintf(`"%s"`, listOfConflictedMigrations[i])
 					}
 					migrationName := prepareMigrationName(strings.Join(listOfConflictedMigrations, "_"))
-					blueprintName := interfaces.GetBluePrintNameFromMigrationName(listOfConflictedMigrations[0])
+					blueprintName := core.GetBluePrintNameFromMigrationName(listOfConflictedMigrations[0])
 					dirPath := "blueprint/" + strings.ToLower(blueprintName) + "/migrations"
 					pathToBaseMigrationsFile := dirPath + "/migrations.go"
 					pathToConcreteMigrationsFile := dirPath + "/" + migrationName + ".go"
@@ -305,7 +305,7 @@ func (command CreateMigration) GetHelpText() string {
 }
 
 func ensureDatabaseIsReadyForMigrationsAndReadAllApplied() []Migration {
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	dbForMigrations := uadminDatabase.Db
 	err := dbForMigrations.AutoMigrate(Migration{})
@@ -332,7 +332,7 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 		if traverseMigrationResult.Node.IsApplied() {
 			continue
 		}
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		appliedMigration := Migration{}
 		uadminDatabase.Db.Where(
@@ -347,7 +347,7 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 		//} else {
 		db := uadminDatabase.Db
 		db.Transaction(func(tx *gorm.DB) error {
-			uadminDatabase1 := &interfaces.UadminDatabase{
+			uadminDatabase1 := &core.UadminDatabase{
 				Adapter: uadminDatabase.Adapter,
 				Db: tx,
 			}
@@ -394,7 +394,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 		}
 		migrationName := traverseMigrationResult.Node.GetMigration().GetName()
 		appliedMigration := Migration{}
-		uadminDatabase := interfaces.NewUadminDatabase()
+		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		result := uadminDatabase.Db.Where(
 			"migration_name = ?", migrationName,
@@ -417,7 +417,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 		//} else {
 		db := uadminDatabase.Db
 		db.Transaction(func(tx *gorm.DB) error {
-			uadminDatabase1 := &interfaces.UadminDatabase{
+			uadminDatabase1 := &core.UadminDatabase{
 				Adapter: uadminDatabase.Adapter,
 				Db: tx,
 			}
@@ -442,12 +442,12 @@ type DetermineConflictsMigration struct {
 func (command DetermineConflictsMigration) Proceed(subaction string, args []string) error {
 	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
 	isEverythingOk := true
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
 		if traverseMigrationResult.Error != nil {
 			isEverythingOk = false
-			interfaces.Trail(interfaces.WARNING, "Potential problems with migrations %s", traverseMigrationResult.Error.Error())
+			core.Trail(core.WARNING, "Potential problems with migrations %s", traverseMigrationResult.Error.Error())
 		}
 		appliedMigration := Migration{}
 		uadminDatabase.Db.Where(
@@ -457,7 +457,7 @@ func (command DetermineConflictsMigration) Proceed(subaction string, args []stri
 			continue
 		}
 		isEverythingOk = false
-		interfaces.Trail(interfaces.WARNING, "Not applied migration: %s", traverseMigrationResult.Node.GetMigration().GetName())
+		core.Trail(core.WARNING, "Not applied migration: %s", traverseMigrationResult.Node.GetMigration().GetName())
 	}
 	if !isEverythingOk {
 		return fmt.Errorf("determined some problems with migrations")

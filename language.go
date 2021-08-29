@@ -3,7 +3,7 @@ package uadmin
 import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"os"
 )
 
@@ -15,7 +15,7 @@ func (c LanguageCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
 	commandRegistry := &CommandRegistry{
-		Actions: make(map[string]interfaces.ICommand),
+		Actions: make(map[string]core.ICommand),
 	}
 
 	commandRegistry.addAction("add", &AddLanguageHandler{})
@@ -247,9 +247,9 @@ Please provide flag -c which is code of the language
 		{"Zhuang, Chuang", "Saɯ cueŋƅ, Saw cuengh", "za"},
 		{"Zulu", "isiZulu", "zu"},
 	}
-	uadminDatabase := interfaces.NewUadminDatabase()
+	uadminDatabase := core.NewUadminDatabase()
 	db := uadminDatabase.Db
-	languageExists := db.Model(&interfaces.Language{}).Where("code = ?", opts.Code).Limit(1).Find(&interfaces.Language{})
+	languageExists := db.Model(&core.Language{}).Where("code = ?", opts.Code).Limit(1).Find(&core.Language{})
 	if languageExists.RowsAffected > 0 {
 		return fmt.Errorf("language %s is already in the system", opts.Code)
 	}
@@ -259,7 +259,7 @@ Please provide flag -c which is code of the language
 			continue
 		}
 		found = true
-		l := interfaces.Language{
+		l := core.Language{
 			EnglishName: lang[0],
 			Name:        lang[1],
 			Code:        lang[2],

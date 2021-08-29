@@ -4,20 +4,20 @@ import (
 	"github.com/gin-gonic/gin"
 	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
 	"github.com/uadmin/uadmin/blueprint/sessions/migrations"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"github.com/uadmin/uadmin/utils"
 	"strings"
 )
 
 type Blueprint struct {
-	interfaces.Blueprint
+	core.Blueprint
 	SessionAdapterRegistry *interfaces2.SessionProviderRegistry
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	mainRouter.Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {
-			if !interfaces.CurrentConfig.RequiresCsrfCheck(c) {
+			if !core.CurrentConfig.RequiresCsrfCheck(c) {
 				c.Next()
 				return
 			}
@@ -39,12 +39,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					csrfTokenFromRequest = c.PostForm("csrf-token")
 				}
 			}
-			serverKey = c.Request.Header.Get("X-" + strings.ToUpper(interfaces.CurrentConfig.D.Uadmin.ApiCookieName))
+			serverKey = c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.ApiCookieName))
 			if serverKey == "" {
 				if c.Query("for-uadmin-panel") == "1" {
-					serverKey, _ = c.Cookie(interfaces.CurrentConfig.D.Uadmin.AdminCookieName)
+					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
 				} else {
-					serverKey, _ = c.Cookie(interfaces.CurrentConfig.D.Uadmin.ApiCookieName)
+					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.ApiCookieName)
 				}
 			}
 			defaultSessionAdapter, _ := b.SessionAdapterRegistry.GetDefaultAdapter()
@@ -77,7 +77,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Next()
 		}
 	}())
-	interfaces.FuncMap["CSRF"] = func(Key string) string {
+	core.FuncMap["CSRF"] = func(Key string) string {
 		sessionAdapter, _ := ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		session, _ := sessionAdapter.GetByKey(Key)
 		csrfToken, _ := session.Get("csrf_token")
@@ -87,11 +87,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 func (b Blueprint) Init() {
 	b.SessionAdapterRegistry.RegisterNewAdapter(&interfaces2.DbSession{}, true)
-	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.Session{}})
+	core.ProjectModels.RegisterModel(func() interface{}{return &core.Session{}})
 }
 
 var ConcreteBlueprint = Blueprint{
-	Blueprint: interfaces.Blueprint{
+	Blueprint: core.Blueprint{
 		Name:              "sessions",
 		Description:       "Sessions blueprint responsible to keep session data in database",
 		MigrationRegistry: migrations.BMigrationRegistry,

@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 )
 
 // ABTestType is the type of the AB testing: model or static
@@ -31,16 +31,16 @@ func HumanizeAbTestType(abTestType ABTestType) string {
 
 // ABTest is a model that stores an A/B test
 type ABTest struct {
-	interfaces.Model
-	Name        string `uadminform:"RequiredFieldOptions" uadmin:"list"`
-	Type        ABTestType `uadminform:"RequiredSelectFieldOptions" uadmin:"list"`
-	StaticPath  string `uadmin:"list"`
-	ContentType interfaces.ContentType `uadmin:"list" uadminform:"ContentTypeFieldOptions"`
+	core.Model
+	Name          string           `uadminform:"RequiredFieldOptions" uadmin:"list"`
+	Type          ABTestType       `uadminform:"RequiredSelectFieldOptions" uadmin:"list"`
+	StaticPath    string           `uadmin:"list"`
+	ContentType   core.ContentType `uadmin:"list" uadminform:"ContentTypeFieldOptions"`
 	ContentTypeID uint
-	Field       string `uadmin:"list" uadminform:"RequiredSelectFieldOptions"`
-	PrimaryKey  uint `uadmin:"list" gorm:"default:0"`
-	Active      bool `gorm:"default:false" uadmin:"list"`
-	Group       string `uadmin:"list"`
+	Field         string `uadmin:"list" uadminform:"RequiredSelectFieldOptions"`
+	PrimaryKey    uint `uadmin:"list" gorm:"default:0"`
+	Active        bool `gorm:"default:false" uadmin:"list"`
+	Group         string `uadmin:"list"`
 }
 
 func (m *ABTest) String() string {

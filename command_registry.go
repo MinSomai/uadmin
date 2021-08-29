@@ -2,15 +2,15 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/interfaces"
+	"github.com/uadmin/uadmin/core"
 	"strings"
 )
 
 type CommandRegistry struct {
-	Actions map[string]interfaces.ICommand
+	Actions map[string]core.ICommand
 }
 
-func (r CommandRegistry) addAction(name string, command interfaces.ICommand) {
+func (r CommandRegistry) addAction(name string, command core.ICommand) {
 	r.Actions[name] = command
 }
 
