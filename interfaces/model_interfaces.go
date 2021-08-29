@@ -20,7 +20,7 @@ type ProjectModelRegistry struct {
 
 func (pmr *ProjectModelRegistry) RegisterModel(generateModelI func() interface{}) {
 	model := generateModelI()
-	uadminDatabase := NewUadminDatabase()
+	uadminDatabase := NewUadminDatabaseWithoutConnection()
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
 	statement.Parse(model)
 	v := reflect.ValueOf(model)
@@ -29,7 +29,6 @@ func (pmr *ProjectModelRegistry) RegisterModel(generateModelI func() interface{}
 	}
 	modelName := v.Type().Name()
 	pmr.models[modelName] = &ModelDescription{Model: model, Statement: statement, GenerateModelI: generateModelI}
-	uadminDatabase.Close()
 }
 
 func (pmr *ProjectModelRegistry) Iterate() <- chan *ModelDescription {

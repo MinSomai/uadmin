@@ -1,16 +1,8 @@
 {{Include "header"}}
 {{Include "header-bar"}}
 <style type="text/css">
-    #model-actions {
-        width: 200px;
-        display: inline-block;
-    }
-    #action-form button.button {
-        display: inline-block;
-        margin-left: 10px;
-    }
-    #action-form action-description {
-        padding-left: 10px;
+    input[type="checkbox"].form-control {
+        height: auto;
     }
 </style>
 <div class="container-fluid main-content admin-page">
@@ -36,9 +28,11 @@
         {{$initialOrder := .InitialOrder }}
         <div class="col-xs-3 col-sm-4" style="padding:0px;">
             {{ if .PermissionForBlueprint.HasAddPermission }}
-            <a class="btn btn-primary search pull-right" href="{{.CurrentURL}}/new">
-                <i class="fa fa-plus"></i>
-            </a>
+                {{ if not .NoPermissionToAddNew }}
+                    <a class="btn btn-primary search pull-right" href="{{.CurrentURL}}/edit/new">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                {{ end }}
             {{ end }}
         </div>
         {{ if .AdminModelActionRegistry.IsThereAnyActions }}
@@ -77,7 +71,7 @@
                     <thead class="admin_font" >
                     <tr class="table-header capitalized">
                         <th class="checkbox-container">
-                            <input id="main_check" class="" type="checkbox">
+                            <input class="main_check" type="checkbox">
                         </th>
                         {{range .ListDisplay.GetAllFields}}
                             <th class="trigger_desc pointer" ><a href="{{ if .IsEligibleForOrdering }}?initialOrder={{$initialOrder}}&o={{.GetOrderingName $initialOrderList}}{{ end }}" class="camelcaseFix">{{.DisplayName}}</a>
@@ -92,23 +86,29 @@
                     <tbody>
                     {{$listDisplay := .ListDisplay}}
                     {{$currentURL := .CurrentURL}}
+                    {{$currentAdminContext := .CurrentAdminContext }}
                     {{range $iterateAdminObjects := .AdminFilterObjects.GetPaginated}}
                         <tr>
-                            <td onclick="$('#main_check').prop('checked', false);">
+                            <td onclick="$('.main_check').prop('checked', false);">
                                 <input type="hidden" value="{{ $iterateAdminObjects.Id }}" name="object_id"/>
                                 <input  class="item_check" type="checkbox" value="{{ $iterateAdminObjects.Id }}">
                             </td>
                             {{$i  := 0 }}
-                            {{ $form := $listDisplay.BuildFormForListEditable $iterateAdminObjects.Id $iterateAdminObjects.Model}}
+                            {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.Id $iterateAdminObjects.Model}}
                             {{range $field := $listDisplay.GetAllFields}}
                                 <td>
-                                    {{if eq $i 0}}<a href="{{$currentURL}}/{{$iterateAdminObjects.Id}}">{{ end }}
-                                    {{ $fieldExistsInTheForm := $form.ExistsField $field }}
-                                    {{ if $fieldExistsInTheForm }}
-                                        {{ $fieldEditable := $form.FieldRegistry.GetByName $field.Field.Name }}
-                                        {{ $fieldEditable.FieldConfig.Widget.Render }}
-                                    {{ else }}
-                                        {{ $field.GetValue $iterateAdminObjects.Model}}
+                                    {{if eq $i 0}}<a class="bold clickable Row_id no-style" href="{{$currentURL}}/edit/{{$iterateAdminObjects.Id}}">{{ end }}
+                                    {{ if $field.Field }}
+                                        {{ $fieldExistsInTheForm := $form.ExistsField $field }}
+                                        {{ if $fieldExistsInTheForm }}
+                                            {{ $fieldEditable := $form.FieldRegistry.GetByName $field.Field.Name }}
+                                            {{ $fieldEditable.FieldConfig.Widget.Render $iterateAdminObjects.RenderContext $field.Field }}
+                                        {{ else }}
+                                            {{ $field.GetValue $iterateAdminObjects.Model}}
+                                        {{ end }}
+                                    {{ end }}
+                                    {{ if not $field.Field }}
+                                    {{ $field.GetValue $iterateAdminObjects.Model}}
                                     {{ end }}
                                     {{if eq $i 0}}</a>{{ end }}
                                 </td>
@@ -173,11 +173,10 @@
 
     </div>
 </div>
-    {{Include "uadminjs"}}
 <script type="text/javascript">
-    $('#main_check').click(function(ev) {
+    $('.main_check').click(function(ev) {
         var status = $(ev.currentTarget).prop('checked');
-        $('.item_check').prop('checked', status);
+        $(ev.currentTarget).parent().parent().parent().parent().find('.item_check').prop('checked', status);
     });
     GET = (function(win, doc){
         var loc = win.location,

@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"reflect"
 	"strconv"
 	"strings"
 )
 
 type GormOperatorContext struct {
 	TableName string
-	Tx *gorm.DB
+	Tx IPersistenceStorage
 	Statement *gorm.Statement
 }
 // tx *gorm.DB, field *schema.Field
@@ -20,7 +21,7 @@ type IRegisterDbHandler interface {
 }
 
 type IGormOperator interface {
-	Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext
+	Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext
 	GetName() string
 	RegisterDbHandlers (registerDbHandler IRegisterDbHandler) error
 	TransformValue (value string) interface{}
@@ -41,7 +42,7 @@ func (ego *ExactGormOperator) TransformValue(value string) interface{} {
 	return value
 }
 
-func (ego *ExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *ExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	value1 := TransformValueForOperator(value)
 	adapter.Exact(context, field, value1)
 	return context
@@ -62,7 +63,7 @@ func (ego *IExactGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbH
 	return nil
 }
 
-func (ego *IExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *IExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	value1 := TransformValueForOperator(value)
 	adapter.IExact(context, field, value1)
 	return context
@@ -83,7 +84,7 @@ func (ego *ContainsGormOperator) RegisterDbHandlers(registerDbHandler IRegisterD
 	return nil
 }
 
-func (ego *ContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *ContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Contains(context, field, value)
 	return context
 }
@@ -103,7 +104,7 @@ func (ego *IContainsGormOperator) RegisterDbHandlers(registerDbHandler IRegister
 	return nil
 }
 
-func (ego *IContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *IContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.IContains(context, field, value)
 	return context
 }
@@ -123,7 +124,7 @@ func (ego *InGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHandl
 	return nil
 }
 
-func (ego *InGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *InGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.In(context, field, value)
 	return context
 }
@@ -143,7 +144,7 @@ func (ego *GtGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHandl
 	return nil
 }
 
-func (ego *GtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *GtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Gt(context, field, value)
 	return context
 }
@@ -163,7 +164,7 @@ func (ego *GteGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHand
 	return nil
 }
 
-func (ego *GteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *GteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Gte(context, field, value)
 	return context
 }
@@ -183,7 +184,7 @@ func (ego *LtGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHandl
 	return nil
 }
 
-func (ego *LtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *LtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Lt(context, field, value)
 	return context
 }
@@ -203,7 +204,7 @@ func (ego *LteGormOperator) GetName() string {
 	return "lte"
 }
 
-func (ego *LteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *LteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Lte(context, field, value)
 	return context
 }
@@ -223,7 +224,7 @@ func (ego *StartsWithGormOperator) GetName() string {
 	return "startswith"
 }
 
-func (ego *StartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *StartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.StartsWith(context, field, value)
 	return context
 }
@@ -243,7 +244,7 @@ func (ego *IStartsWithGormOperator) GetName() string {
 	return "istartswith"
 }
 
-func (ego *IStartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *IStartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.IStartsWith(context, field, value)
 	return context
 }
@@ -263,7 +264,7 @@ func (ego *EndsWithGormOperator) GetName() string {
 	return "endswith"
 }
 
-func (ego *EndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *EndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.EndsWith(context, field, value)
 	return context
 }
@@ -283,7 +284,7 @@ func (ego *IEndsWithGormOperator) RegisterDbHandlers(registerDbHandler IRegister
 	return nil
 }
 
-func (ego *IEndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *IEndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.IEndsWith(context, field, value)
 	return context
 }
@@ -303,7 +304,7 @@ func (ego *RangeGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHa
 	return nil
 }
 
-func (ego *RangeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *RangeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Range(context, field, value)
 	return context
 }
@@ -323,7 +324,7 @@ func (ego *DateGormOperator) GetName() string {
 	return "date"
 }
 
-func (ego *DateGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *DateGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Date(context, field, value)
 	return context
 }
@@ -343,7 +344,7 @@ func (ego *YearGormOperator) GetName() string {
 	return "year"
 }
 
-func (ego *YearGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *YearGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Year(context, field, value)
 	return context
 }
@@ -363,7 +364,7 @@ func (ego *MonthGormOperator) GetName() string {
 	return "month"
 }
 
-func (ego *MonthGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *MonthGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Month(context, field, value)
 	return context
 }
@@ -383,7 +384,7 @@ func (ego *DayGormOperator) GetName() string {
 	return "day"
 }
 
-func (ego *DayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *DayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Day(context, field, value)
 	return context
 }
@@ -403,7 +404,7 @@ func (ego *WeekGormOperator) GetName() string {
 	return "week"
 }
 
-func (ego *WeekGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *WeekGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Week(context, field, value)
 	return context
 }
@@ -423,7 +424,7 @@ func (ego *WeekDayGormOperator) GetName() string {
 	return "week_day"
 }
 
-func (ego *WeekDayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *WeekDayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.WeekDay(context, field, value)
 	return context
 }
@@ -443,7 +444,7 @@ func (ego *QuarterGormOperator) GetName() string {
 	return "quarter"
 }
 
-func (ego *QuarterGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *QuarterGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Quarter(context, field, value)
 	return context
 }
@@ -463,7 +464,7 @@ func (ego *TimeGormOperator) GetName() string {
 	return "time"
 }
 
-func (ego *TimeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *TimeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Time(context, field, value)
 	return context
 }
@@ -483,7 +484,7 @@ func (ego *HourGormOperator) GetName() string {
 	return "hour"
 }
 
-func (ego *HourGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *HourGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Hour(context, field, value)
 	return context
 }
@@ -503,7 +504,7 @@ func (ego *MinuteGormOperator) GetName() string {
 	return "minute"
 }
 
-func (ego *MinuteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *MinuteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Minute(context, field, value)
 	return context
 }
@@ -523,7 +524,7 @@ func (ego *SecondGormOperator) GetName() string {
 	return "second"
 }
 
-func (ego *SecondGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *SecondGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Second(context, field, value)
 	return context
 }
@@ -544,7 +545,7 @@ func (ego *IsNullGormOperator) GetName() string {
 	return "isnull"
 }
 
-func (ego *IsNullGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *IsNullGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.IsNull(context, field, value)
 	return context
 }
@@ -564,7 +565,7 @@ func (ego *RegexGormOperator) GetName() string {
 	return "regex"
 }
 
-func (ego *RegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *RegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.Regex(context, field, value)
 	return context
 }
@@ -584,7 +585,7 @@ func (ego *IRegexGormOperator) GetName() string {
 	return "iregex"
 }
 
-func (ego *IRegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *schema.Field, value interface{}) *GormOperatorContext {
+func (ego *IRegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext {
 	adapter.IRegex(context, field, value)
 	return context
 }
@@ -658,8 +659,8 @@ func init() {
 	ProjectGormOperatorRegistry.RegisterOperator(&IRegexGormOperator{})
 }
 
-func NewGormOperatorContext(db *gorm.DB, model interface{}) *GormOperatorContext {
-	statement := &gorm.Statement{DB: db}
+func NewGormOperatorContext(db IPersistenceStorage, model interface{}) *GormOperatorContext {
+	statement := &gorm.Statement{DB: db.(*GormPersistenceStorage).Db}
 	statement.Parse(model)
 	return &GormOperatorContext{
 		Tx: db,
@@ -668,15 +669,17 @@ func NewGormOperatorContext(db *gorm.DB, model interface{}) *GormOperatorContext
 	}
 }
 
-func FilterGormModel(adapter IDbAdapter, db *gorm.DB, schema1 *schema.Schema, filterString []string, model interface{}) *GormOperatorContext {
+func FilterGormModel(adapter IDbAdapter, db IPersistenceStorage, schema1 *schema.Schema, filterString []string, model interface{}) *GormOperatorContext {
 	context := NewGormOperatorContext(db, model)
 	context.Tx = db
+	gormModelV := reflect.Indirect(reflect.ValueOf(model))
 	for _, filter := range filterString {
 		filterParams := strings.Split(filter, "=")
 		filterName := filterParams[0]
 		filterValue := filterParams[1]
 		filterNameParams := strings.Split(filterName, "__")
 		field, _ := schema1.FieldsByName[filterNameParams[0]]
+		uadminField := NewUadminFieldFromGormField(gormModelV, field, nil, false)
 		if field.DBName == "" {
 			joinModelI := ProjectModels.GetModelByName(field.FieldType.Name())
 			relation := context.Statement.Schema.Relationships
@@ -710,12 +713,12 @@ func FilterGormModel(adapter IDbAdapter, db *gorm.DB, schema1 *schema.Schema, fi
 			}
 			filterRelation := strings.Replace(filter, field.Name + "__", "", 1)
 			//// uadminDatabase
-			FilterGormModel(adapter, context.Tx, field.Schema, []string{filterRelation}, joinModelI)
+			FilterGormModel(adapter, context.Tx, field.Schema, []string{filterRelation}, joinModelI.Model)
 			continue
 		}
 		operator, _ := ProjectGormOperatorRegistry.GetOperatorByName(filterNameParams[len(filterNameParams) - 1])
 		filterValueTransformed := operator.TransformValue(filterValue)
-		context = operator.Build(adapter, context, field, filterValueTransformed)
+		context = operator.Build(adapter, context, uadminField, filterValueTransformed)
 	}
 	return context
 }

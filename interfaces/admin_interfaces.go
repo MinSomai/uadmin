@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -98,10 +100,11 @@ func NewAdminRequestParamsFromGinContext(ctx *gin.Context) *AdminRequestParams {
 }
 
 type AdminActionPlacement struct {
-	DisplayToTheTop bool
-	DisplayToTheBottom bool
-	DisplayToTheRight bool
-	DisplayToTheLeft bool
+	DisplayOnEditPage bool
+	//DisplayToTheTop bool
+	//DisplayToTheBottom bool
+	//DisplayToTheRight bool
+	//DisplayToTheLeft bool
 	ShowOnTheListPage bool
 }
 
@@ -116,8 +119,8 @@ type AdminModelAction struct {
 	RedirectToRootModelPage bool
 	Placement *AdminActionPlacement
 	PermName CustomPermission
-	Handler func (adminPage *AdminPage, afo *AdminFilterObjects, ctx *gin.Context) (bool, int64)
-	IsDisabled func (afo *AdminFilterObjects, ctx *gin.Context) bool
+	Handler func (adminPage *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64)
+	IsDisabled func (afo IAdminFilterObjects, ctx *gin.Context) bool
 	SlugifiedActionName string
 	RequestMethod string
 	RequiresExtraSteps bool
@@ -140,10 +143,457 @@ func NewAdminModelAction(actionName string, placement *AdminActionPlacement) *Ad
 	}
 }
 
+type IPersistenceMigrator interface {
+	AutoMigrate(dst ...interface{}) error
+	CurrentDatabase() string
+	FullDataTypeOf(*schema.Field) clause.Expr
+	CreateTable(dst ...interface{}) error
+	DropTable(dst ...interface{}) error
+	HasTable(dst interface{}) bool
+	RenameTable(oldName interface{}, newName interface{}) error
+	AddColumn(dst interface{}, field string) error
+	DropColumn(dst interface{}, field string) error
+	AlterColumn(dst interface{}, field string) error
+	MigrateColumn(dst interface{}, field *schema.Field, columnType gorm.ColumnType) error
+	HasColumn(dst interface{}, field string) bool
+	RenameColumn(dst interface{}, oldName string, field string) error
+	ColumnTypes(dst interface{}) ([]gorm.ColumnType, error)
+	CreateView(name string, option gorm.ViewOption) error
+	DropView(name string) error
+	CreateConstraint(dst interface{}, name string) error
+	DropConstraint(dst interface{}, name string) error
+	HasConstraint(dst interface{}, name string) bool
+	CreateIndex(dst interface{}, name string) error
+	DropIndex(dst interface{}, name string) error
+	HasIndex(dst interface{}, name string) bool
+	RenameIndex(dst interface{}, oldName string, newName string) error
+}
+
+type IPersistenceAssociation interface {
+	Find(out interface{}, conds ...interface{}) error
+	Append(values ...interface{}) error
+	Replace(values ...interface{}) error
+	Delete(values ...interface{}) error
+	Clear() error
+	Count() (count int64)
+}
+
+type IPersistenceIterateRow interface {
+	Scan(dest ...interface{}) error
+	Err() error
+}
+
+type IPersistenceIterateRows interface {
+	Next() bool
+	NextResultSet() bool
+	Err() error
+	Columns() ([]string, error)
+	ColumnTypes() ([]*sql.ColumnType, error)
+	Scan(dest ...interface{}) error
+	Close() error
+}
+
+type IPersistenceStorage interface {
+	Association(column string) IPersistenceAssociation
+	Model(value interface{}) IPersistenceStorage
+	Clauses(conds ...clause.Expression) IPersistenceStorage
+	Table(name string, args ...interface{}) IPersistenceStorage
+	Distinct(args ...interface{}) IPersistenceStorage
+	Select(query interface{}, args ...interface{}) IPersistenceStorage
+	Omit(columns ...string) IPersistenceStorage
+	Where(query interface{}, args ...interface{}) IPersistenceStorage
+	Not(query interface{}, args ...interface{}) IPersistenceStorage
+	Or(query interface{}, args ...interface{}) IPersistenceStorage
+	Joins(query string, args ...interface{}) IPersistenceStorage
+	Group(name string) IPersistenceStorage
+	Having(query interface{}, args ...interface{}) IPersistenceStorage
+	Order(value interface{}) IPersistenceStorage
+	Limit(limit int) IPersistenceStorage
+	Offset(offset int) IPersistenceStorage
+	Scopes(funcs ...func(*gorm.DB) *gorm.DB) IPersistenceStorage
+	Preload(query string, args ...interface{}) IPersistenceStorage
+	Attrs(attrs ...interface{}) IPersistenceStorage
+	Assign(attrs ...interface{}) IPersistenceStorage
+	Unscoped() IPersistenceStorage
+	Raw(sql string, values ...interface{}) IPersistenceStorage
+	Migrator() IPersistenceMigrator
+	AutoMigrate(dst ...interface{}) error
+	Session(config *gorm.Session) IPersistenceStorage
+	WithContext(ctx context.Context) IPersistenceStorage
+	Debug() IPersistenceStorage
+	Set(key string, value interface{}) IPersistenceStorage
+	Get(key string) (interface{}, bool)
+	InstanceSet(key string, value interface{}) IPersistenceStorage
+	InstanceGet(key string) (interface{}, bool)
+	AddError(err error) error
+	DB() (*sql.DB, error)
+	SetupJoinTable(model interface{}, field string, joinTable interface{}) error
+	Use(plugin gorm.Plugin) error
+	Create(value interface{}) IPersistenceStorage
+	CreateInBatches(value interface{}, batchSize int) IPersistenceStorage
+	Save(value interface{}) IPersistenceStorage
+	First(dest interface{}, conds ...interface{}) IPersistenceStorage
+	Take(dest interface{}, conds ...interface{}) IPersistenceStorage
+	Last(dest interface{}, conds ...interface{}) IPersistenceStorage
+	Find(dest interface{}, conds ...interface{}) IPersistenceStorage
+	FindInBatches(dest interface{}, batchSize int, fc func(tx *gorm.DB, batch int) error) IPersistenceStorage
+	FirstOrInit(dest interface{}, conds ...interface{}) IPersistenceStorage
+	FirstOrCreate(dest interface{}, conds ...interface{}) IPersistenceStorage
+	Update(column string, value interface{}) IPersistenceStorage
+	Updates(values interface{}) IPersistenceStorage
+	UpdateColumn(column string, value interface{}) IPersistenceStorage
+	UpdateColumns(values interface{}) IPersistenceStorage
+	Delete(value interface{}, conds ...interface{}) IPersistenceStorage
+	Count(count *int64) IPersistenceStorage
+	Row() IPersistenceIterateRow
+	Rows() (IPersistenceIterateRows, error)
+	Scan(dest interface{}) IPersistenceStorage
+	Pluck(column string, dest interface{}) IPersistenceStorage
+	ScanRows(rows IPersistenceIterateRows, dest interface{}) error
+	Transaction(fc func(*gorm.DB) error, opts ...*sql.TxOptions) (err error)
+	Begin(opts ...*sql.TxOptions) IPersistenceStorage
+	Commit() IPersistenceStorage
+	Rollback() IPersistenceStorage
+	SavePoint(name string) IPersistenceStorage
+	RollbackTo(name string) IPersistenceStorage
+	Exec(sql string, values ...interface{}) IPersistenceStorage
+}
+
+
+type GormPersistenceStorage struct {
+	Db *gorm.DB
+}
+
+func NewGormPersistenceStorage(db *gorm.DB) *GormPersistenceStorage {
+	return &GormPersistenceStorage{Db: db}
+}
+
+func (gps *GormPersistenceStorage) Association(column string) IPersistenceAssociation {
+	return gps.Db.Association(column)
+}
+
+func (gps *GormPersistenceStorage) Model(value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Model(value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Clauses(conds ...clause.Expression) IPersistenceStorage {
+	gps.Db = gps.Db.Clauses(conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Table(name string, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Table(name, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Distinct(args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Distinct(args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Select(query interface{}, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Select(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Omit(columns ...string) IPersistenceStorage {
+	gps.Db = gps.Db.Omit(columns...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Where(query interface{}, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Where(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Not(query interface{}, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Not(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Or(query interface{}, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Or(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Joins(query string, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Joins(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Group(name string) IPersistenceStorage {
+	gps.Db = gps.Db.Group(name)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Having(query interface{}, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Having(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Order(value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Order(value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Limit(limit int) IPersistenceStorage {
+	gps.Db = gps.Db.Limit(limit)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Offset(offset int) IPersistenceStorage {
+	gps.Db = gps.Db.Offset(offset)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Scopes(funcs ...func(*gorm.DB) *gorm.DB) IPersistenceStorage {
+	gps.Db = gps.Db.Scopes(funcs...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Preload(query string, args ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Preload(query, args...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Attrs(attrs ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Attrs(attrs...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Assign(attrs ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Assign(attrs...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Unscoped() IPersistenceStorage {
+	gps.Db = gps.Db.Unscoped()
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Raw(sql string, values ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Raw(sql, values...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Migrator() IPersistenceMigrator {
+	return gps.Db.Migrator()
+}
+
+func (gps *GormPersistenceStorage) AutoMigrate(dst ...interface{}) error {
+
+	return gps.Db.AutoMigrate(dst...)
+}
+
+func (gps *GormPersistenceStorage) Session(config *gorm.Session) IPersistenceStorage {
+	gps.Db = gps.Db.Session(config)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) WithContext(ctx context.Context) IPersistenceStorage {
+	gps.Db = gps.Db.WithContext(ctx)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Debug() IPersistenceStorage {
+	gps.Db = gps.Db.Debug()
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Set(key string, value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Set(key, value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Get(key string) (interface{}, bool) {
+	return gps.Db.Get(key)
+}
+
+func (gps *GormPersistenceStorage) InstanceSet(key string, value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.InstanceSet(key, value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) InstanceGet(key string) (interface{}, bool) {
+	return gps.Db.InstanceGet(key)
+}
+
+func (gps *GormPersistenceStorage) AddError(err error) error {
+	return gps.Db.AddError(err)
+}
+
+func (gps *GormPersistenceStorage) DB() (*sql.DB, error) {
+	return gps.Db.DB()
+}
+
+func (gps *GormPersistenceStorage) SetupJoinTable(model interface{}, field string, joinTable interface{}) error {
+	return gps.Db.SetupJoinTable(model, field, joinTable)
+}
+
+func (gps *GormPersistenceStorage) Use(plugin gorm.Plugin) error {
+	return gps.Db.Use(plugin)
+}
+
+func (gps *GormPersistenceStorage) Create(value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Create(value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) CreateInBatches(value interface{}, batchSize int) IPersistenceStorage {
+	gps.Db = gps.Db.CreateInBatches(value, batchSize)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Save(value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Save(value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) First(dest interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.First(dest, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Take(dest interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Take(dest, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Last(dest interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Last(dest, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Find(dest interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Find(dest, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) FindInBatches(dest interface{}, batchSize int, fc func(tx *gorm.DB, batch int) error) IPersistenceStorage {
+	gps.Db = gps.Db.FindInBatches(dest, batchSize, fc)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) FirstOrInit(dest interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.FirstOrInit(dest, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) FirstOrCreate(dest interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.FirstOrCreate(dest, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Update(column string, value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Update(column, value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Updates(values interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Updates(values)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) UpdateColumn(column string, value interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.UpdateColumn(column, value)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) UpdateColumns(values interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.UpdateColumns(values)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Delete(value interface{}, conds ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Delete(value, conds...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Count(count *int64) IPersistenceStorage {
+	gps.Db = gps.Db.Count(count)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Row() IPersistenceIterateRow {
+	return gps.Db.Row()
+}
+
+func (gps *GormPersistenceStorage) Rows() (IPersistenceIterateRows, error) {
+	return gps.Db.Rows()
+}
+
+func (gps *GormPersistenceStorage) Scan(dest interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Scan(dest)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Pluck(column string, dest interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Pluck(column, dest)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) ScanRows(rows IPersistenceIterateRows, dest interface{}) error {
+	return gps.Db.ScanRows(rows.(*sql.Rows), dest)
+}
+
+func (gps *GormPersistenceStorage) Transaction(fc func(*gorm.DB) error, opts ...*sql.TxOptions) (err error) {
+	return gps.Db.Transaction(fc, opts...)
+}
+
+func (gps *GormPersistenceStorage) Begin(opts ...*sql.TxOptions) IPersistenceStorage {
+	gps.Db = gps.Db.Begin(opts...)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Commit() IPersistenceStorage {
+	gps.Db = gps.Db.Commit()
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Rollback() IPersistenceStorage {
+	gps.Db = gps.Db.Rollback()
+	return gps
+}
+
+func (gps *GormPersistenceStorage) SavePoint(name string) IPersistenceStorage {
+	gps.Db = gps.Db.SavePoint(name)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) RollbackTo(name string) IPersistenceStorage {
+	gps.Db = gps.Db.RollbackTo(name)
+	return gps
+}
+
+func (gps *GormPersistenceStorage) Exec(sql string, values ...interface{}) IPersistenceStorage {
+	gps.Db = gps.Db.Exec(sql, values)
+	return gps
+}
+
+type IAdminFilterObjects interface {
+	WithTransaction(handler func(afo1 IAdminFilterObjects) error)
+	LoadDataForModelById(Id interface{}, model interface{})
+	SaveModel(model interface{}) error
+	CreateNew(model interface{}) error
+	GetPaginated() <- chan *IterateAdminObjects
+	IterateThroughWholeQuerySet() <- chan *IterateAdminObjects
+	GetPaginatedQuerySet() IPersistenceStorage
+	GetFullQuerySet() IPersistenceStorage
+	SetFullQuerySet(IPersistenceStorage)
+	SetPaginatedQuerySet(IPersistenceStorage)
+	GetUadminDatabase() *UadminDatabase
+	GetCurrentModel() interface{}
+	GetInitialQuerySet() IPersistenceStorage
+	SetInitialQuerySet(IPersistenceStorage)
+	GenerateModelInterface() (interface{}, interface{})
+	RemoveModelPermanently(model interface{}) error
+}
+
 type AdminFilterObjects struct {
-	InitialGormQuerySet *gorm.DB
-	GormQuerySet *gorm.DB
-	PaginatedGormQuerySet *gorm.DB
+	InitialGormQuerySet IPersistenceStorage
+	GormQuerySet IPersistenceStorage
+	PaginatedGormQuerySet IPersistenceStorage
 	Model interface{}
 	UadminDatabase *UadminDatabase
 	GenerateModelI func() (interface{}, interface{})
@@ -152,9 +602,46 @@ type AdminFilterObjects struct {
 type IterateAdminObjects struct {
 	Model interface {}
 	Id uint
+	RenderContext *FormRenderContext
 }
 
-func (afo *AdminFilterObjects) WithTransaction(handler func(afo1 *AdminFilterObjects) error) {
+func (afo *AdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
+	return afo.PaginatedGormQuerySet
+}
+
+func (afo *AdminFilterObjects) GetFullQuerySet() IPersistenceStorage {
+	return afo.GormQuerySet
+}
+
+func (afo *AdminFilterObjects) SetFullQuerySet(storage IPersistenceStorage) {
+	afo.GormQuerySet = storage
+}
+
+func (afo *AdminFilterObjects) GenerateModelInterface() (interface{}, interface{}) {
+	return afo.GenerateModelI()
+}
+
+func (afo *AdminFilterObjects) GetInitialQuerySet() IPersistenceStorage {
+	return afo.InitialGormQuerySet
+}
+
+func (afo *AdminFilterObjects) SetInitialQuerySet(storage IPersistenceStorage) {
+	afo.InitialGormQuerySet = storage
+}
+
+func (afo *AdminFilterObjects) GetCurrentModel() interface{} {
+	return afo.Model
+}
+
+func (afo *AdminFilterObjects) GetUadminDatabase() *UadminDatabase {
+	return afo.UadminDatabase
+}
+
+func (afo *AdminFilterObjects) SetPaginatedQuerySet(storage IPersistenceStorage) {
+	afo.PaginatedGormQuerySet = storage
+}
+
+func (afo *AdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) {
 	afo.UadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
 		return handler(&AdminFilterObjects{UadminDatabase: &UadminDatabase{Db: tx}, GenerateModelI: afo.GenerateModelI})
 	})
@@ -162,11 +649,21 @@ func (afo *AdminFilterObjects) WithTransaction(handler func(afo1 *AdminFilterObj
 
 func (afo *AdminFilterObjects) LoadDataForModelById(Id interface{}, model interface{}) {
 	modelI, _ := afo.GenerateModelI()
-	afo.UadminDatabase.Db.Model(modelI).First(model, Id)
+	afo.UadminDatabase.Db.Model(modelI).Preload(clause.Associations).First(model, Id)
 }
 
 func (afo *AdminFilterObjects) SaveModel(model interface{}) error {
 	res := afo.UadminDatabase.Db.Save(model)
+	return res.Error
+}
+
+func (afo *AdminFilterObjects) CreateNew(model interface{}) error {
+	res := afo.UadminDatabase.Db.Model(model).Create(model)
+	return res.Error
+}
+
+func (afo *AdminFilterObjects) RemoveModelPermanently(model interface{}) error {
+	res := afo.UadminDatabase.Db.Unscoped().Delete(model)
 	return res.Error
 }
 
@@ -186,6 +683,7 @@ func (afo *AdminFilterObjects) GetPaginated() <- chan *IterateAdminObjects {
 			yieldV := &IterateAdminObjects{
 				Model: model,
 				Id: uint(IdN),
+				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
 		}
@@ -193,7 +691,7 @@ func (afo *AdminFilterObjects) GetPaginated() <- chan *IterateAdminObjects {
 	return chnl
 }
 
-func (afo *AdminFilterObjects) IterateThroughModelActionsSelected() <- chan *IterateAdminObjects {
+func (afo *AdminFilterObjects) IterateThroughWholeQuerySet() <- chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
 		defer close(chnl)
@@ -209,6 +707,7 @@ func (afo *AdminFilterObjects) IterateThroughModelActionsSelected() <- chan *Ite
 			yieldV := &IterateAdminObjects{
 				Model: model,
 				Id: uint(IdN),
+				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
 		}
@@ -217,11 +716,11 @@ func (afo *AdminFilterObjects) IterateThroughModelActionsSelected() <- chan *Ite
 }
 
 type ISortInterface interface {
-	Order(afo *AdminFilterObjects)
+	Order(afo IAdminFilterObjects)
 }
 
 type ISortBy interface {
-	Sort (afo *AdminFilterObjects, direction int)
+	Sort (afo IAdminFilterObjects, direction int)
 }
 
 type SortBy struct {
@@ -230,17 +729,30 @@ type SortBy struct {
 	Field *Field
 }
 
-func (sb *SortBy) Sort(afo *AdminFilterObjects, direction int) {
+func (sb *SortBy) Sort(afo IAdminFilterObjects, direction int) {
 	sortBy := sb.Field.DBName
 	if direction == -1 {
 		sortBy += " desc"
 	}
-	afo.PaginatedGormQuerySet = afo.PaginatedGormQuerySet.Order(sortBy)
+	afo.SetPaginatedQuerySet(afo.GetPaginatedQuerySet().Order(sortBy))
 }
 
 type ListDisplayRegistry struct {
 	ListDisplayFields map[string]*ListDisplay
 	MaxOrdering int
+	Prefix string
+	Placement string
+}
+
+func (ldr *ListDisplayRegistry) GetFieldsCount() int {
+	return len(ldr.ListDisplayFields)
+}
+
+func (ldr *ListDisplayRegistry) SetPrefix(prefix string) {
+	ldr.Prefix = prefix
+	for _, ld := range ldr.ListDisplayFields {
+		ld.SetPrefix(prefix)
+	}
 }
 
 func (ldr *ListDisplayRegistry) ClearAllFields() {
@@ -262,8 +774,12 @@ func (ldr *ListDisplayRegistry) AddField(ld *ListDisplay) {
 	ld.Ordering = ldr.MaxOrdering
 }
 
-func (ldr *ListDisplayRegistry) BuildFormForListEditable(ID uint, model interface{}) *FormListEditable {
-	return NewFormListEditableFromListDisplayRegistry(ID, model, ldr)
+func (ldr *ListDisplayRegistry) BuildFormForListEditable(adminContext IAdminContext, ID uint, model interface{}) *FormListEditable {
+	return NewFormListEditableFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
+}
+
+func (ldr *ListDisplayRegistry) BuildListEditableFormForNewModel(adminContext IAdminContext, ID string, model interface{}) *FormListEditable {
+	return NewFormListEditableForNewModelFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
 }
 
 func (ldr *ListDisplayRegistry) GetAllFields() <- chan *ListDisplay {
@@ -347,6 +863,11 @@ type ListDisplay struct {
 	Populate func (m interface{}) string
 	MethodName string
 	IsEditable bool
+	Prefix string
+}
+
+func (ld *ListDisplay) SetPrefix(prefix string) {
+	ld.Prefix = prefix
 }
 
 func (ld *ListDisplay) GetOrderingName(initialOrdering []string) string {
@@ -371,7 +892,11 @@ func (ld *ListDisplay) IsEligibleForOrdering() bool {
 	return ld.SortBy != nil
 }
 
-func (ld *ListDisplay) GetValue(m interface{}) string {
+func (ld *ListDisplay) GetValue(m interface{}, forExportP ...bool) string {
+	forExport := false
+	if len(forExportP) > 0 {
+		forExport = forExportP[0]
+	}
 	if ld.MethodName != "" {
 		values := reflect.ValueOf(m).MethodByName(ld.MethodName).Call([]reflect.Value{})
 		return values[0].String()
@@ -379,11 +904,17 @@ func (ld *ListDisplay) GetValue(m interface{}) string {
 	if ld.Populate != nil {
 		return ld.Populate(m)
 	}
+	if ld.Field.FieldConfig.Widget.GetPopulate() != nil {
+		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetPopulate()(m, ld.Field))
+	}
+	if ld.Field.FieldConfig.Widget.IsValueConfigured() {
+		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetValue())
+	}
 	gormModelV := reflect.Indirect(reflect.ValueOf(m))
-	if reflect.ValueOf(m).IsZero() || gormModelV.IsZero() || gormModelV.FieldByName(ld.Field.Name).IsZero() {
+	if reflect.ValueOf(m).IsZero() || gormModelV.IsZero() { // || gormModelV.FieldByName(ld.Field.Name).IsZero()
 		return ""
 	}
-	return TransformValueForListDisplay(gormModelV.FieldByName(ld.Field.Name).Interface())
+	return TransformValueForListDisplay(gormModelV.FieldByName(ld.Field.Name).Interface(), forExport)
 }
 
 func NewListDisplay(field *Field) *ListDisplay {
@@ -398,7 +929,7 @@ func NewListDisplay(field *Field) *ListDisplay {
 }
 
 type IListFilterInterface interface {
-	FilterQs (afo *AdminFilterObjects, filterString string)
+	FilterQs (afo IAdminFilterObjects, filterString string)
 }
 
 type ListFilter struct {
@@ -407,22 +938,22 @@ type ListFilter struct {
 	UrlFilteringParam string
 	OptionsToShow []*FieldChoice
 	FetchOptions func(m interface{}) []*FieldChoice
-	CustomFilterQs func(afo *AdminFilterObjects, filterString string)
+	CustomFilterQs func(afo IAdminFilterObjects, filterString string)
 	Template string
 	Ordering int
 }
 
-func (lf *ListFilter) FilterQs (afo *AdminFilterObjects, filterString string) {
+func (lf *ListFilter) FilterQs (afo IAdminFilterObjects, filterString string) {
 	if lf.CustomFilterQs != nil {
 		lf.CustomFilterQs(afo, filterString)
 	} else {
-		statement := &gorm.Statement{DB: afo.UadminDatabase.Db}
-		statement.Parse(afo.Model)
+		statement := &gorm.Statement{DB: afo.GetUadminDatabase().Db}
+		statement.Parse(afo.GetCurrentModel())
 		schema1 := statement.Schema
-		operatorContext := FilterGormModel(afo.UadminDatabase.Adapter, afo.GormQuerySet, schema1, []string{filterString}, afo.Model)
-		afo.GormQuerySet = operatorContext.Tx
-		operatorContext = FilterGormModel(afo.UadminDatabase.Adapter, afo.PaginatedGormQuerySet, schema1, []string{filterString}, afo.Model)
-		afo.PaginatedGormQuerySet = operatorContext.Tx
+		operatorContext := FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetFullQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
+		afo.SetFullQuerySet(operatorContext.Tx)
+		operatorContext = FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetPaginatedQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
+		afo.SetPaginatedQuerySet(operatorContext.Tx)
 	}
 }
 
@@ -497,26 +1028,26 @@ func (lfr *ListFilterRegistry) Add(lf *ListFilter) {
 }
 
 type ISearchFieldInterface interface {
-	Search (afo *AdminFilterObjects, searchString string)
+	Search (afo IAdminFilterObjects, searchString string)
 }
 
 type SearchField struct {
 	ISearchFieldInterface
-	Field *schema.Field
-	CustomSearch func(afo *AdminFilterObjects, searchString string)
+	Field *Field
+	CustomSearch func(afo IAdminFilterObjects, searchString string)
 }
 
-func (sf *SearchField) Search(afo *AdminFilterObjects, searchString string) {
+func (sf *SearchField) Search(afo IAdminFilterObjects, searchString string) {
 	if sf.CustomSearch != nil {
 		sf.CustomSearch(afo, searchString)
 	} else {
 		operator := ExactGormOperator{}
-		gormOperatorContext := NewGormOperatorContext(afo.GormQuerySet, afo.Model)
-		operator.Build(afo.UadminDatabase.Adapter, gormOperatorContext, sf.Field, searchString)
-		afo.GormQuerySet = gormOperatorContext.Tx
-		gormOperatorContext = NewGormOperatorContext(afo.PaginatedGormQuerySet, afo.Model)
-		operator.Build(afo.UadminDatabase.Adapter, gormOperatorContext, sf.Field, searchString)
-		afo.PaginatedGormQuerySet = gormOperatorContext.Tx
+		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString)
+		afo.SetFullQuerySet(gormOperatorContext.Tx)
+		gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString)
+		afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
 	}
 }
 
@@ -526,7 +1057,7 @@ var LimitPaginationType PaginationType = "limit"
 var CursorPaginationType PaginationType = "cursor"
 
 type IPaginationInterface interface {
-	Paginate (afo *AdminFilterObjects)
+	Paginate (afo IAdminFilterObjects)
 }
 
 type Paginator struct {
@@ -541,7 +1072,7 @@ type Paginator struct {
 	PaginationType PaginationType
 }
 
-func (p *Paginator) Paginate(afo *AdminFilterObjects) {
+func (p *Paginator) Paginate(afo IAdminFilterObjects) {
 
 }
 
@@ -553,7 +1084,7 @@ type DisplayFilterOption struct {
 
 type FilterOption struct {
 	FieldName string
-	FetchOptions func(afo *AdminFilterObjects) []*DisplayFilterOption
+	FetchOptions func(afo IAdminFilterObjects) []*DisplayFilterOption
 }
 
 type FilterOptionsRegistry struct {
@@ -583,12 +1114,12 @@ func NewFilterOption() *FilterOption {
 	return &FilterOption{}
 }
 
-func FetchOptionsFromGormModelFromDateTimeField(afo *AdminFilterObjects, filterOptionField string) []*DisplayFilterOption {
+func FetchOptionsFromGormModelFromDateTimeField(afo IAdminFilterObjects, filterOptionField string) []*DisplayFilterOption {
 	ret := make([]*DisplayFilterOption, 0)
 	uadminDatabase := NewUadminDatabase()
 	defer uadminDatabase.Close()
 	filterString := uadminDatabase.Adapter.GetStringToExtractYearFromField(filterOptionField)
-	rows, _ := afo.InitialGormQuerySet.Select(filterString + " as year, count(*) as total").Group(filterString).Rows()
+	rows, _ := afo.GetInitialQuerySet().Select(filterString + " as year, count(*) as total").Group(filterString).Rows()
 	var filterValue uint
 	var filterCount uint
 	for rows.Next() {
@@ -603,7 +1134,7 @@ func FetchOptionsFromGormModelFromDateTimeField(afo *AdminFilterObjects, filterO
 	if len(ret) < 2 {
 		ret = make([]*DisplayFilterOption, 0)
 		filterString := uadminDatabase.Adapter.GetStringToExtractMonthFromField(filterOptionField)
-		rows, _ := afo.InitialGormQuerySet.Select(filterString + " as month, count(*) as total").Group(filterString).Rows()
+		rows, _ := afo.GetInitialQuerySet().Select(filterString + " as month, count(*) as total").Group(filterString).Rows()
 		var filterValue uint
 		var filterCount uint
 		for rows.Next() {
@@ -621,3 +1152,114 @@ func FetchOptionsFromGormModelFromDateTimeField(afo *AdminFilterObjects, filterO
 }
 
 var CurrentAdminPageRegistry *AdminPageRegistry
+
+type AdminBreadcrumb struct {
+	Name string
+	Url string
+	IsActive bool
+	Icon string
+}
+
+type AdminBreadCrumbsRegistry struct {
+	BreadCrumbs []*AdminBreadcrumb
+}
+
+func (abcr *AdminBreadCrumbsRegistry) AddBreadCrumb(breadcrumb *AdminBreadcrumb) {
+	if len(abcr.BreadCrumbs) != 0 {
+		abcr.BreadCrumbs[0].IsActive = false
+	} else {
+		breadcrumb.IsActive = true
+	}
+	abcr.BreadCrumbs = append(abcr.BreadCrumbs, breadcrumb)
+}
+
+func (abcr *AdminBreadCrumbsRegistry) GetAll() <- chan *AdminBreadcrumb {
+	chnl := make(chan *AdminBreadcrumb)
+	go func() {
+		defer close(chnl)
+		for _, adminBreadcrumb := range abcr.BreadCrumbs {
+			chnl <- adminBreadcrumb
+		}
+	}()
+	return chnl
+}
+
+func NewAdminBreadCrumbsRegistry() *AdminBreadCrumbsRegistry {
+	ret := &AdminBreadCrumbsRegistry{BreadCrumbs: make([]*AdminBreadcrumb, 0)}
+	return ret
+}
+
+func NewListDisplayRegistry() *ListDisplayRegistry {
+	ret := &ListDisplayRegistry{
+		ListDisplayFields: make(map[string]*ListDisplay),
+	}
+	return ret
+}
+
+func NewListDisplayRegistryFromGormModelForInlines(modelI interface{}) *ListDisplayRegistry {
+	ret := &ListDisplayRegistry{
+		ListDisplayFields: make(map[string]*ListDisplay),
+	}
+	uadminDatabase := NewUadminDatabaseWithoutConnection()
+	stmt := &gorm.Statement{DB: uadminDatabase.Db}
+	stmt.Parse(modelI)
+	gormModelV := reflect.Indirect(reflect.ValueOf(modelI))
+	for _, field := range stmt.Schema.Fields {
+		uadminTag := field.Tag.Get("uadmin")
+		if !strings.Contains(uadminTag, "inline") && field.Name != "ID" {
+			continue
+		}
+		uadminField := NewUadminFieldFromGormField(gormModelV, field, nil, true)
+		ld := NewListDisplay(uadminField)
+		if field.Name != "ID" {
+			ld.IsEditable = true
+		}
+		ret.AddField(ld)
+	}
+	return ret
+}
+
+func NewListDisplayRegistryFromGormModel(modelI interface{}) *ListDisplayRegistry {
+	if modelI == nil {
+		return nil
+	}
+	ret := &ListDisplayRegistry{
+		ListDisplayFields: make(map[string]*ListDisplay),
+	}
+	uadminDatabase := NewUadminDatabaseWithoutConnection()
+	stmt := &gorm.Statement{DB: uadminDatabase.Db}
+	stmt.Parse(modelI)
+	gormModelV := reflect.Indirect(reflect.ValueOf(modelI))
+	for _, field := range stmt.Schema.Fields {
+		uadminTag := field.Tag.Get("uadmin")
+		if !strings.Contains(uadminTag, "list") && field.Name != "ID" {
+			continue
+		}
+		uadminField := NewUadminFieldFromGormField(gormModelV, field, nil, true)
+		ret.AddField(NewListDisplay(uadminField))
+	}
+	return ret
+}
+
+func NewSearchFieldRegistryFromGormModel(modelI interface{}) *SearchFieldRegistry {
+	if modelI == nil {
+		return nil
+	}
+	ret := &SearchFieldRegistry{Fields: make([]*SearchField, 0)}
+	uadminDatabase := NewUadminDatabaseWithoutConnection()
+	stmt := &gorm.Statement{DB: uadminDatabase.Db}
+	stmt.Parse(modelI)
+	gormModelV := reflect.Indirect(reflect.ValueOf(modelI))
+	for _, field := range stmt.Schema.Fields {
+		uadminTag := field.Tag.Get("uadmin")
+		if !strings.Contains(uadminTag, "search") && field.Name != "ID" {
+			continue
+		}
+		uadminField := NewUadminFieldFromGormField(gormModelV, field, nil, true)
+		searchField := &SearchField{
+			Field: uadminField,
+		}
+		ret.AddField(searchField)
+	}
+	return ret
+}

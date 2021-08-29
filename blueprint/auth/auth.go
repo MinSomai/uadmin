@@ -3,12 +3,12 @@ package auth
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/admin"
 	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
 	"github.com/uadmin/uadmin/blueprint/auth/migrations"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm/schema"
+	"net/http"
 )
 
 type Blueprint struct {
@@ -24,7 +24,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		adapterGroup.POST("/logout/", adapter.Logout)
 		adapterGroup.GET("/status/", adapter.IsAuthenticated)
 	}
-	admin.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
+	interfaces.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
@@ -34,7 +34,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c := &Context{}
 			adminRequestParams := interfaces.NewAdminRequestParams()
 			adminRequestParams.NeedAllLanguages = true
-			admin.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
+			interfaces.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
 			tr := interfaces.NewTemplateRenderer("Admin Login")
 			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("login"), c, interfaces.FuncMap)
@@ -46,15 +46,18 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 
 			c := &Context{}
-			admin.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
-			menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
+			interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+			menu := string(interfaces.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
 			c.Menu = menu
 			c.CurrentPath = ctx.Request.URL.Path
 			tr := interfaces.NewTemplateRenderer("Dashboard")
 			tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, interfaces.FuncMap)
 		}
 	}
-	mainRouter.GET(interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
+	if interfaces.CurrentConfig.GetUrlToUploadDirectory() != "" {
+		mainRouter.StaticFS(interfaces.CurrentConfig.GetUrlToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", interfaces.CurrentConfig.GetUrlToUploadDirectory())))
+	}
+	mainRouter.Any(interfaces.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
 		type Context struct {
 			interfaces.AdminContext
 			ID           uint
@@ -67,10 +70,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ChangesSaved bool
 			DBFields []*schema.Field
 			F *interfaces.Form
+			User *interfaces.User
 		}
 
 		c := &Context{}
-		admin.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
 		cookieName = interfaces.CurrentConfig.D.Uadmin.AdminCookieName
@@ -78,8 +82,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
 		form1 := interfaces.NewFormFromModelFromGinContext(c, user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
-		form1.TemplateName = interfaces.CurrentConfig.GetPathToTemplate("form/profile_form")
+		form1.TemplateName = "form/profile_form"
 		c.F = form1
+		c.User = user
 		if ctx.Request.Method == "POST" {
 			requestForm, _ := ctx.MultipartForm()
 			formError := form1.ProceedRequest(requestForm, user)
@@ -88,7 +93,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
 				db.Save(user)
-				ctx.Redirect(200, ctx.Request.URL.String())
+				ctx.Redirect(302, ctx.Request.URL.String())
 				return
 			}
 		}

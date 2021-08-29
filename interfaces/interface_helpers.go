@@ -1,6 +1,9 @@
 package interfaces
 
-import "net/url"
+import (
+	"net/url"
+	"reflect"
+)
 
 func Contains(s []string, e string) bool {
 	for _, a := range s {
@@ -40,4 +43,23 @@ func CloneNetUrl(url1 *url.URL) *url.URL {
 		RawFragment: url1.RawFragment,
 	}
 	return clonedUrl
+}
+
+func GetID(m reflect.Value) uint {
+	if m.Kind() == reflect.Ptr {
+		return uint(m.Elem().FieldByName("ID").Uint())
+	}
+	return uint(m.FieldByName("ID").Uint())
+}
+
+func Remove(items []string, item string) []string {
+	newitems := []string{}
+
+	for _, i := range items {
+		if i != item {
+			newitems = append(newitems, i)
+		}
+	}
+
+	return newitems
 }

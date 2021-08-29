@@ -24,25 +24,24 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type User struct {
 	Model
 
-	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" gorm:"uniqueIndex" json:"Username,omitempty" uadminform:"UsernameOptions"`
-	FirstName            string     `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
-	LastName             string     `protobuf:"bytes,3,opt,name=LastName,proto3" json:"LastName,omitempty"`
-	Password             string     `protobuf:"bytes,4,opt,name=Password,proto3" json:"Password,omitempty"`
-	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" gorm:"uniqueIndex" json:"Email,omitempty"`
-	Active               bool       `protobuf:"varint,6,opt,name=Active,proto3" json:"Active,omitempty"`
-	RemoteAccess         bool       `protobuf:"varint,8,opt,name=RemoteAccess,proto3" json:"RemoteAccess,omitempty"`
-	UserGroups           []UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_user_groups;foreignKey:ID;"`
-	Permissions           []Permission  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_permissions;foreignKey:ID;"`
-	Photo                string     `protobuf:"bytes,11,opt,name=Photo,proto3" json:"Photo,omitempty" uadminform:"UserPhotoOptions"`
-	LastLogin            *time.Time `protobuf:"bytes,12,opt,name=LastLogin,proto3" json:"LastLogin,omitempty" uadminform:"LastLoginOptions"`
-	ExpiresOn            *time.Time `protobuf:"bytes,13,opt,name=ExpiresOn,proto3" json:"ExpiresOn,omitempty" uadminform:"ExpiresOnOptions"`
+	Username             string     `protobuf:"bytes,1,opt,name=Username,proto3" gorm:"uniqueIndex;not null" json:"Username,omitempty" uadmin:"list,search" uadminform:"UsernameOptions"`
+	FirstName            string     `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty" gorm:"default:''" uadmin:"list,search"`
+	LastName             string     `protobuf:"bytes,3,opt,name=LastName,proto3" json:"LastName,omitempty" gorm:"default:''" uadmin:"list,search"`
+	Password             string     `protobuf:"bytes,4,opt,name=Password,proto3" json:"Password,omitempty" uadminform:"PasswordOptions" gorm:"default:''"`
+	IsPasswordUsable bool `gorm:"default:false"`
+	Email                string     `protobuf:"bytes,5,opt,name=Email,proto3" gorm:"uniqueIndex;not null" json:"Email,omitempty" uadmin:"list,search"`
+	Active               bool       `protobuf:"varint,6,opt,name=Active,proto3" json:"Active,omitempty" gorm:"default:false" uadmin:"list"`
+	IsStaff bool `json:"IsStaff,omitempty" gorm:"default:false"`
+	IsSuperUser bool `json:"IsSuperUser,omitempty" gorm:"default:false" uadmin:"list"`
+	UserGroups           []UserGroup  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_user_groups;foreignKey:ID;" uadminform:"ChooseFromSelectOptions"`
+	Permissions           []Permission  `protobuf:"bytes,9,opt,name=UserGroup,proto3" json:"UserGroup,omitempty" gorm:"many2many:user_permissions;foreignKey:ID;" uadminform:"ChooseFromSelectOptions"`
+	Photo                string     `protobuf:"bytes,11,opt,name=Photo,proto3" json:"Photo,omitempty" uadminform:"UserPhotoFormOptions" gorm:"default:''"`
+	LastLogin            *time.Time `protobuf:"bytes,12,opt,name=LastLogin,proto3" json:"LastLogin,omitempty" uadminform:"ReadonlyField" uadmin:"list"`
+	ExpiresOn            *time.Time `protobuf:"bytes,13,opt,name=ExpiresOn,proto3" json:"ExpiresOn,omitempty" uadminform:"ReadonlyField"`
 	GeneratedOTPToVerify string     `protobuf:"bytes,14,opt,name=GeneratedOTPToVerify,proto3" json:"GeneratedOTPToVerify,omitempty"`
 	OTPSeed              string     `protobuf:"bytes,15,opt,name=OTPSeed,proto3" json:"OTPSeed,omitempty"`
-	OTPRequired          bool     `protobuf:"bytes,15,opt,name=OTPRequired,proto3" json:"OTPRequired,omitempty" uadminform:"OTPRequiredOptions"`
+	OTPRequired          bool     `protobuf:"bytes,15,opt,name=OTPRequired,proto3" json:"OTPRequired,omitempty" uadminform:"OTPRequiredOptions" gorm:"default:false"`
 	Salt                 string     `protobuf:"bytes,16,opt,name=Salt,proto3" json:"Salt,omitempty"`
-	IsStaff bool `json:"IsStaff,omitempty"`
-	IsSuperUser bool `json:"IsSuperUser,omitempty"`
-	IsPasswordConfigured bool `gorm:"default:false"`
 }
 
 func (m *User) Reset()         { *m = User{} }
@@ -104,13 +103,6 @@ func (m *User) GetEmail() string {
 func (m *User) GetActive() bool {
 	if m != nil {
 		return m.Active
-	}
-	return false
-}
-
-func (m *User) GetRemoteAccess() bool {
-	if m != nil {
-		return m.RemoteAccess
 	}
 	return false
 }
@@ -231,9 +223,6 @@ func (m *User) Size() (n int) {
 		n += 1 + l + sovGeneratemodels(uint64(l))
 	}
 	if m.Active {
-		n += 2
-	}
-	if m.RemoteAccess {
 		n += 2
 	}
 	l = len(m.Photo)
@@ -584,8 +573,8 @@ func (u *User) VerifyOTP(pass string) bool {
 // UserGroup !
 type UserGroup struct {
 	Model
-	GroupName string `uadmin:"filter"`
-	Permissions []Permission `gorm:"foreignKey:ID;many2many:usergroup_permissions;"`
+	GroupName string `uadmin:"list" gorm:"uniqueIndex;not null"`
+	Permissions []Permission `gorm:"foreignKey:ID;many2many:usergroup_permissions;" uadminform:"ChooseFromSelectOptions"`
 }
 
 func (u UserGroup) String() string {
@@ -648,6 +637,11 @@ func (m *Permission) String() string {
 	return fmt.Sprintf("Permission name %s for content type %s", m.Name, m.ContentType.String())
 }
 
+func (m *Permission) ShortDescription() string {
+	permission := ProjectPermRegistry.GetPermissionName(m.PermissionBits)
+	return fmt.Sprintf("blueprint-%s-model-%s-%s", m.ContentType.BlueprintName, m.ContentType.ModelName, permission)
+}
+
 // HideInDashboard to return false and auto hide this from dashboard
 func (Permission) HideInDashboard() bool {
 	return true
@@ -674,7 +668,7 @@ type OneTimeAction struct {
 	ExpiresOn time.Time `gorm:"index"`
 	Code string `gorm:"uniqueIndex"`
 	ActionType OneTimeActionType
-	IsUsed bool
+	IsUsed bool `gorm:"default:false"`
 }
 
 func (m *OneTimeAction) String() string {

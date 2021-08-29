@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 	"math"
 	"reflect"
 	"strconv"
@@ -232,7 +231,7 @@ func (d *SqliteDialect) GetSqlDialectStrings() map[string]string {
 }
 
 // @todo analyze
-func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
+func (d *SqliteDialect) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 	// } else if strings.ToLower(Database.Type) == "postgresql" {
 	// 	if Database.Host == "" || Database.Host == "localhost" {
 	// 		Database.Host = "127.0.0.1"
@@ -304,12 +303,6 @@ func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 	// 		}
 	// 	}
 	// }
-	var alias string
-	if len(alias_) == 0 {
-		alias = "default"
-	} else {
-		alias = alias_[0]
-	}
 	var aliasDatabaseSettings *DBSettings
 	if alias == "default" {
 		aliasDatabaseSettings = CurrentDatabaseSettings.Default
@@ -320,11 +313,13 @@ func (d *SqliteDialect) GetDb(alias_ ...string) (*gorm.DB, error) {
 		db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 			DisableForeignKeyConstraintWhenMigrating: true,
+			DryRun: dryRun,
 		})
 	} else {
 		db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 			DisableForeignKeyConstraintWhenMigrating: true,
+			DryRun: dryRun,
 		})
 	}
 	//var db *gorm.DB
@@ -403,114 +398,114 @@ func (d *SqliteDialect) CreateDb() error {
 	return err
 }
 
-func (d *SqliteDialect) Exact(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) IExact(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE ? ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Contains(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) IContains(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) In(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) In(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s IN ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Gt(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s > ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Gte(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s >= ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Lt(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s < ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Lte(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s <= ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) StartsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE ?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) IStartsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE ?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) EndsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%? ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) IEndsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%? ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Date(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Date(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_cast_date(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Year(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Year(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	year := value.(int)
 	startOfTheYear := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
 	endOfTheYear := time.Date(year, time.December, 31, 23, 59, 59, 0, time.UTC)
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName), startOfTheYear, endOfTheYear)
 }
 
-func (d *SqliteDialect) Month(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Month(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('month', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Day(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Day(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Week(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Week(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('week', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) WeekDay(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('week_day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Quarter(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('quarter', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Hour(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('hour', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Minute(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('minute', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Second(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Second(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('second', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Regex(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s REGEX ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) IRegex(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s REGEX '(?i)' || ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) Time(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Time(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_cast_time(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
 }
 
-func (d *SqliteDialect) IsNull(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	isTruthyValue := IsTruthyValue(value)
 	isNull := " IS NULL "
 	if !isTruthyValue {
@@ -519,7 +514,7 @@ func (d *SqliteDialect) IsNull(operatorContext *GormOperatorContext, field *sche
 	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s %s ", operatorContext.TableName, field.DBName, isNull))
 }
 
-func (d *SqliteDialect) Range(operatorContext *GormOperatorContext, field *schema.Field, value interface{}) {
+func (d *SqliteDialect) Range(operatorContext *GormOperatorContext, field *Field, value interface{}) {
 	s := reflect.ValueOf(value)
 	var f interface{}
 	var second interface{}

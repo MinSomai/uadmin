@@ -97,3 +97,8 @@ li[role='presentation'] > a {
 li[role='presentation']:last-child > a {
   border-right-width: 1px !important;
 }
+
+.input-group input[type="checkbox"].form-control {
+    width: auto;
+    margin-left: 10px;
+}

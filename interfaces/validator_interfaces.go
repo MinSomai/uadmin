@@ -8,6 +8,12 @@ type ValidatorRegistry struct {
 	Validators map[string]IValidator
 }
 
+func NewValidatorRegistry() *ValidatorRegistry {
+	return &ValidatorRegistry{
+		Validators: make(map[string]IValidator),
+	}
+}
+
 func (vr *ValidatorRegistry) AddValidator(validatorName string, implementation IValidator) {
 	_, exists := vr.Validators[validatorName]
 	if exists {
@@ -23,6 +29,20 @@ func (vr *ValidatorRegistry) GetValidator(validatorName string) (IValidator, err
 		return nil, fmt.Errorf("no %s validator registered", validatorName)
 	}
 	return validator, nil
+}
+
+func (vr *ValidatorRegistry) GetAllValidators() <- chan IValidator{
+	chnl := make(chan IValidator)
+	go func() {
+		defer close(chnl)
+		if vr == nil || vr.Validators == nil {
+			return
+		}
+		for _, validator := range vr.Validators {
+			chnl <- validator
+		}
+	}()
+	return chnl
 }
 
 var UadminValidatorRegistry *ValidatorRegistry

@@ -13,6 +13,7 @@ type IStorageInterface interface {
 	Stats(filename string) (os.FileInfo, error)
 	Exists(filename string) (bool, error)
 	Delete(filename string) (bool, error)
+	GetUploadUrl() string
 }
 
 type FileForStorage struct {
@@ -22,6 +23,11 @@ type FileForStorage struct {
 }
 type FsStorage struct {
 	UploadPath string
+	UrlPath string
+}
+
+func (s *FsStorage) GetUploadUrl() string {
+	return s.UrlPath
 }
 
 func (s *FsStorage) Save(f *FileForStorage) (string, error) {
@@ -78,5 +84,5 @@ func (s *FsStorage) Delete(filename string) (bool, error) {
 }
 
 func NewFsStorage() IStorageInterface {
-	return &FsStorage{UploadPath: CurrentConfig.GetPathToUploadDirectory()}
+	return &FsStorage{UploadPath: CurrentConfig.GetPathToUploadDirectory(), UrlPath: CurrentConfig.GetUrlToUploadDirectory()}
 }

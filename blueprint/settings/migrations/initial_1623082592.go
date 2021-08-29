@@ -21,14 +21,6 @@ func (m initial_1623082592) Up(uadminDatabase *interfaces.UadminDatabase) error 
     db := uadminDatabase.Db
     db.AutoMigrate(models.SettingCategory{})
     db.AutoMigrate(models.Setting{})
-    stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&models.SettingCategory{})
-    contentType := &interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}
-    db.Create(contentType)
-    stmt = &gorm.Statement{DB: db}
-    stmt.Parse(&models.Setting{})
-    settingContentType := &interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}
-    db.Create(settingContentType)
     return nil
 }
 
@@ -46,11 +38,11 @@ func (m initial_1623082592) Down(uadminDatabase *interfaces.UadminDatabase) erro
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&models.SettingCategory{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}).First(&contentType)
-    db.Delete(&contentType)
+    db.Unscoped().Delete(&contentType)
     stmt = &gorm.Statement{DB: db}
     stmt.Parse(&models.Setting{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "settings", ModelName: stmt.Schema.Table}).First(&contentType)
-    db.Delete(&contentType)
+    db.Unscoped().Delete(&contentType)
     return nil
 }
 

@@ -182,14 +182,14 @@ func (suite *MigrationTestSuite) TestBuildTreeWithLoop() {
 	}
 }
 
-func (suite *MigrationTestSuite) TestBuildTreeWithTwoSameMigrationNames() {
-	blueprintRegistry := interfaces.NewBlueprintRegistry()
-	blueprintRegistry.Register(Blueprint1WithSameMigrationNames)
-	blueprintRegistry.Register(Blueprint2WithSameMigrationNames)
-	for res := range blueprintRegistry.TraverseMigrations() {
-		assert.True(suite.T(), strings.Contains(res.Error.Error(), "has been added to tree before"))
-	}
-}
+//func (suite *MigrationTestSuite) TestBuildTreeWithTwoSameMigrationNames() {
+//	blueprintRegistry := interfaces.NewBlueprintRegistry()
+//	blueprintRegistry.Register(Blueprint1WithSameMigrationNames)
+//	blueprintRegistry.Register(Blueprint2WithSameMigrationNames)
+//	for res := range blueprintRegistry.TraverseMigrations() {
+//		assert.True(suite.T(), strings.Contains(res.Error.Error(), "has been added to tree before"))
+//	}
+//}
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run

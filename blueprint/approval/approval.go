@@ -3,10 +3,10 @@ package approval
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/approval/migrations"
 	"github.com/uadmin/uadmin/blueprint/approval/models"
 	"github.com/uadmin/uadmin/interfaces"
+	"strconv"
 )
 
 type Blueprint struct {
@@ -14,74 +14,78 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	approvalAdminPage := admin.NewGormAdminPage(nil, func() (interface{}, interface{}) {return nil, make([]interface{}, 0)}, "")
+	approvalAdminPage := interfaces.NewGormAdminPage(
+		nil,
+		func() (interface{}, interface{}) {return nil, make([]interface{}, 0)},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+	)
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
 	approvalAdminPage.BlueprintName = "approval"
 	approvalAdminPage.Router = mainRouter
-	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
+	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
 	}
-	approvalmodelAdminPage := admin.NewGormAdminPage(approvalAdminPage, func() (interface{}, interface{}) {return &models.Approval{}, &[]*models.Approval{}}, "approval")
+	approvalmodelAdminPage := interfaces.NewGormAdminPage(
+		approvalAdminPage,
+		func() (interface{}, interface{}) {return &models.Approval{}, &[]*models.Approval{}},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+			fields := []string{"ContentType", "ModelPK", "ColumnName", "OldValue", "NewValue", "NewValueDescription", "ChangedBy", "ChangeDate", "ApprovalAction", "ApprovalBy", "ApprovalDate"}
+			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			approvalField, _ := form.FieldRegistry.GetByName("ApprovalAction")
+			w := approvalField.FieldConfig.Widget.(*interfaces.SelectWidget)
+			w.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
+			w.OptGroups[""] = make([]*interfaces.SelectOptGroup, 0)
+			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+				OptLabel: "unknown",
+				Value: "0",
+			})
+			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+				OptLabel: "approved",
+				Value: "1",
+			})
+			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+				OptLabel: "rejected",
+				Value: "2",
+			})
+			approvalField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *interfaces.Field) interface{} {
+				a := m.(*models.Approval).ApprovalAction
+				return strconv.Itoa(int(a))
+			})
+			approvalField.SetUpField = func(w interfaces.IWidget, m interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
+				approvalM := m.(*models.Approval)
+				vI, _ := strconv.Atoi(v.(string))
+				approvalM.ApprovalAction = models.ApprovalAction(vI)
+				return nil
+			}
+			return form
+		},
+	)
 	approvalmodelAdminPage.PageName = "Approval"
 	approvalmodelAdminPage.Slug = "approval"
 	approvalmodelAdminPage.BlueprintName = "approval"
 	approvalmodelAdminPage.Router = mainRouter
-	adminContext := &interfaces.AdminContext{}
-	approvalForm := interfaces.NewFormFromModelFromGinContext(adminContext, &models.Approval{}, make([]string, 0), []string{}, true, "")
-	approvalmodelAdminPage.Form = approvalForm
-	approvalActionField, _ := approvalForm.FieldRegistry.GetByName("ApprovalAction")
-	approvalActionListDisplay := interfaces.NewListDisplay(approvalActionField)
-	approvalmodelAdminPage.ListDisplay.AddField(approvalActionListDisplay)
+	approvalActionListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ApprovalAction")
 	approvalActionListDisplay.Populate = func(m interface{}) string {
 		return models.HumanizeApprovalAction(m.(*models.Approval).ApprovalAction)
 	}
-	approvalActionListDisplay.Ordering = 2
-	approvalByField, _ := approvalForm.FieldRegistry.GetByName("ApprovalBy")
-	approvalByListDisplay := interfaces.NewListDisplay(approvalByField)
-	approvalmodelAdminPage.ListDisplay.AddField(approvalByListDisplay)
-	approvalByListDisplay.Ordering = 3
-	approvalDateField, _ := approvalForm.FieldRegistry.GetByName("ApprovalDate")
-	approvalDateListDisplay := interfaces.NewListDisplay(approvalDateField)
-	approvalmodelAdminPage.ListDisplay.AddField(approvalDateListDisplay)
-	approvalDateListDisplay.Ordering = 4
-	modelNameField, _ := approvalForm.FieldRegistry.GetByName("ModelName")
-	modelNameListDisplay := interfaces.NewListDisplay(modelNameField)
-	modelNameListDisplay.Ordering = 5
-	approvalmodelAdminPage.ListDisplay.AddField(modelNameListDisplay)
-	modelPKField, _ := approvalForm.FieldRegistry.GetByName("ModelPK")
-	modelPKListDisplay := interfaces.NewListDisplay(modelPKField)
-	approvalmodelAdminPage.ListDisplay.AddField(modelPKListDisplay)
-	modelPKListDisplay.Ordering = 6
-	columnNameField, _ := approvalForm.FieldRegistry.GetByName("ColumnName")
-	columnNameListDisplay := interfaces.NewListDisplay(columnNameField)
-	columnNameListDisplay.Ordering = 7
-	approvalmodelAdminPage.ListDisplay.AddField(columnNameListDisplay)
-	oldValueField, _ := approvalForm.FieldRegistry.GetByName("OldValue")
-	oldValueListDisplay := interfaces.NewListDisplay(oldValueField)
-	oldValueListDisplay.Ordering = 8
-	approvalmodelAdminPage.ListDisplay.AddField(oldValueListDisplay)
-	newValueField, _ := approvalForm.FieldRegistry.GetByName("NewValue")
-	newValueListDisplay := interfaces.NewListDisplay(newValueField)
-	newValueListDisplay.Ordering = 9
-	approvalmodelAdminPage.ListDisplay.AddField(newValueListDisplay)
-	newValueDescriptionField, _ := approvalForm.FieldRegistry.GetByName("NewValueDescription")
-	newValueDescriptionFieldListDisplay := interfaces.NewListDisplay(newValueDescriptionField)
-	newValueDescriptionFieldListDisplay.Ordering = 10
-	approvalmodelAdminPage.ListDisplay.AddField(newValueDescriptionFieldListDisplay)
-	changedByField, _ := approvalForm.FieldRegistry.GetByName("ChangedBy")
-	changedByListDisplay := interfaces.NewListDisplay(changedByField)
-	changedByListDisplay.Ordering = 11
-	approvalmodelAdminPage.ListDisplay.AddField(changedByListDisplay)
-	changeDateField, _ := approvalForm.FieldRegistry.GetByName("ChangeDate")
-	changeDateListDisplay := interfaces.NewListDisplay(changeDateField)
-	changeDateListDisplay.Ordering = 12
-	approvalmodelAdminPage.ListDisplay.AddField(changeDateListDisplay)
-	viewRecordField, _ := approvalForm.FieldRegistry.GetByName("ViewRecord")
-	viewRecordListDisplay := interfaces.NewListDisplay(viewRecordField)
-	viewRecordListDisplay.Ordering = 13
-	approvalmodelAdminPage.ListDisplay.AddField(viewRecordListDisplay)
+	approvalDateListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ApprovalDate")
+	approvalDateListDisplay.Populate = func(m interface{}) string {
+		aD := m.(*models.Approval).ApprovalDate
+		if aD == nil {
+			return ""
+		}
+		return aD.Format(interfaces.CurrentConfig.D.Uadmin.DateTimeFormat)
+	}
+	contentTypeListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ContentType")
+	contentTypeListDisplay.Populate = func(m interface{}) string {
+		return m.(*models.Approval).ContentType.String()
+	}
+	changeDateListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ChangeDate")
+	changeDateListDisplay.Populate = func(m interface{}) string {
+		return m.(*models.Approval).ChangeDate.Format(interfaces.CurrentConfig.D.Uadmin.DateTimeFormat)
+	}
 	err = approvalAdminPage.SubPages.AddAdminPage(approvalmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))

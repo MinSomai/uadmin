@@ -88,7 +88,6 @@ type UadminAuthOptions struct {
 	MaxUsernameLength int `yaml:"max_username_length"`
 	MinPasswordLength int `yaml:"min_password_length"`
 	SaltLength int `yaml:"salt_length"`
-	Twofactor_auth_required_for_signin_adapters []string `yaml:"twofactor_auth_required_for_signin_adapters"`
 }
 
 type UadminAdminOptions struct {
@@ -147,11 +146,14 @@ type IFieldFormOptions interface {
 	GetName() string
 	GetInitial() interface{}
 	GetDisplayName() string
-	GetValidators() []IValidator
+	GetValidators() *ValidatorRegistry
 	GetChoices() *FieldChoiceRegistry
 	GetHelpText() string
 	GetWidgetType() string
 	GetReadOnly() bool
+	GetIsRequired() bool
+	GetWidgetPopulate() func(m interface{}, currentField *Field) interface{}
+	IsItFk() bool
 }
 
 // Info from config file
@@ -175,20 +177,15 @@ func (c *UadminConfig) GetPathToUploadDirectory() string {
 	return fmt.Sprintf("%s/%s", os.Getenv("UADMIN_PATH"), c.D.Uadmin.UploadPath)
 }
 
-func (c *UadminConfig) AddFieldFormOptions(formOptions IFieldFormOptions) {
-	c.FieldFormOptions[formOptions.GetName()] = formOptions
-}
-
-func (c *UadminConfig) GetFieldFormOptions(formOptionsName string) IFieldFormOptions {
-	ret, _ := c.FieldFormOptions[formOptionsName]
-	return ret
+func (c *UadminConfig) GetUrlToUploadDirectory() string {
+	return fmt.Sprintf("/%s", c.D.Uadmin.UploadPath)
 }
 
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type rawStuff UadminConfigurableConfig
 	raw := rawStuff{
 		Admin: &UadminAdminOptions{BindIP: "0.0.0.0"},
-		Auth: &UadminAuthOptions{SaltLength: 16, Twofactor_auth_required_for_signin_adapters: []string{}},
+		Auth: &UadminAuthOptions{SaltLength: 16},
 		Uadmin: &UadminConfigOptions{
 			Theme: "default",
 			SiteName: "uadmin",

@@ -5,7 +5,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"gorm.io/gorm"
@@ -152,9 +151,11 @@ func Run(t *testing.T, currentsuite suite.TestingSuite) {
 				appForTests.Config.InTests = true
 				utils.SentEmailsDuringTests.ClearTestEmails()
 				if appForTests.Config.D.Db.Default.Type == "sqlite" {
+					appInstance.BlueprintRegistry.ResetMigrationTree()
 					upCommand := MigrateCommand{}
 					upCommand.Proceed("up", make([]string, 0))
 					method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
+					appInstance.BlueprintRegistry.ResetMigrationTree()
 					downCommand := MigrateCommand{}
 					downCommand.Proceed("down", make([]string, 0))
 				} else {
@@ -211,8 +212,8 @@ func runTests(t testing.TB, tests []testing.InternalTest) {
 
 func NewTestApp() *App {
 	a := App{}
-	a.DashboardAdminPanel = admin.NewDashboardAdminPanel()
-	admin.CurrentDashboardAdminPanel = a.DashboardAdminPanel
+	a.DashboardAdminPanel = interfaces.NewDashboardAdminPanel()
+	interfaces.CurrentDashboardAdminPanel = a.DashboardAdminPanel
 	a.Config = interfaces.NewConfig("configs/" + "test" + ".yaml")
 	a.CommandRegistry = &CommandRegistry{
 		Actions: make(map[string]interfaces.ICommand),

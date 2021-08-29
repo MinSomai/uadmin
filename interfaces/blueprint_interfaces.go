@@ -29,6 +29,7 @@ type IBlueprintRegistry interface {
 	TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult
 	InitializeRouting(router *gin.Engine)
 	Initialize()
+	ResetMigrationTree()
 }
 
 type Blueprint struct {
@@ -60,6 +61,10 @@ func (b Blueprint) GetMigrationRegistry() IMigrationRegistry {
 type BlueprintRegistry struct {
 	RegisteredBlueprints map[string]IBlueprint
 	MigrationTree        IMigrationTree
+}
+
+func (r BlueprintRegistry) ResetMigrationTree() {
+	r.MigrationTree = NewMigrationTree()
 }
 
 func (r BlueprintRegistry) Iterate() <-chan IBlueprint {

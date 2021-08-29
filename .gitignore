@@ -25,3 +25,4 @@ uadmin.db
 # vendor/
 *.cover
 tests/blueprint/auth/media/*
+uploads/*

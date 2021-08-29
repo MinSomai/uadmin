@@ -12,10 +12,10 @@ type ABTestValue struct {
 	interfaces.Model
 	ABTest      ABTest
 	ABTestID    uint
-	Value       string `uadmin:"list_exclude"`
-	Active      bool
-	Impressions int
-	Clicks      int
+	Value       string `uadmin:"inline"`
+	Active      bool `gorm:"default:false" uadmin:"inline"`
+	Impressions int `uadmin:"inline" gorm:"default:0"`
+	Clicks      int `uadmin:"inline" gorm:"default:0"`
 }
 
 func (a *ABTestValue) String() string {
@@ -23,21 +23,15 @@ func (a *ABTestValue) String() string {
 }
 
 // ClickThroughRate returns the rate of click through of this value
-func (a *ABTestValue) ClickThroughRate() float64 {
+func (a *ABTestValue) ClickThroughRate() string {
 	if a.Impressions == 0 {
-		return 0.0
+		return "0.0"
 	}
-	return float64(a.Clicks) / float64(a.Impressions) * 100
-}
-
-// ClickThroughRate__Form__List shows the click through rate in form
-// and list views
-func (a ABTestValue) ClickThroughRate__Form__List() string {
-	return fmt.Sprintf("<b>%.2f%%</b>", a.ClickThroughRate())
+	return fmt.Sprintf("%.2f", float64(a.Clicks) / float64(a.Impressions) * 100)
 }
 
 // Preview__Form__List shows a preview of the AB test's value
-func (a ABTestValue) Preview__Form__List() string {
+func (a ABTestValue) PreviewFormList() string {
 	// Check if the value is a path to a file
 	if strings.HasPrefix(a.Value, "/") {
 		// Check the file type
@@ -52,9 +46,4 @@ func (a ABTestValue) Preview__Form__List() string {
 		}
 	}
 	return a.Value
-}
-
-// HideInDashboard to hide it from dashboard
-func (ABTestValue) HideInDashboard() bool {
-	return true
 }

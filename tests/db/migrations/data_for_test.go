@@ -2,7 +2,6 @@ package migrations
 
 import (
 	"github.com/uadmin/uadmin/interfaces"
-	"github.com/uadmin/uadmin/utils"
 )
 
 type initial_1621667392 struct {
@@ -22,7 +21,7 @@ func (m initial_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) error 
 }
 
 func (m initial_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
-	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	appliedMigrations = interfaces.Remove(appliedMigrations, m.GetName())
 	return nil
 }
 
@@ -47,7 +46,7 @@ func (m migration2_1621667393) Up(uadminDatabase *interfaces.UadminDatabase) err
 }
 
 func (m migration2_1621667393) Down(uadminDatabase *interfaces.UadminDatabase) error {
-	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	appliedMigrations = interfaces.Remove(appliedMigrations, m.GetName())
 	return nil
 }
 
@@ -72,7 +71,7 @@ func (m initialtest1_1621667392) Up(uadminDatabase *interfaces.UadminDatabase) e
 }
 
 func (m initialtest1_1621667392) Down(uadminDatabase *interfaces.UadminDatabase) error {
-	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	appliedMigrations = interfaces.Remove(appliedMigrations, m.GetName())
 	return nil
 }
 
@@ -97,7 +96,7 @@ func (m migration2test_1621667393) Up(uadminDatabase *interfaces.UadminDatabase)
 }
 
 func (m migration2test_1621667393) Down(uadminDatabase *interfaces.UadminDatabase) error {
-	appliedMigrations = utils.Remove(appliedMigrations, m.GetName())
+	appliedMigrations = interfaces.Remove(appliedMigrations, m.GetName())
 	return nil
 }
 

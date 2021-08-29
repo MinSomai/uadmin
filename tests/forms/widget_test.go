@@ -36,13 +36,13 @@ func (w *WidgetTestSuite) TestTextWidget() {
 	textWidget.SetName("dsadas")
 	textWidget.SetValue("dsadas")
 	textWidget.SetRequired()
-	renderedWidget := textWidget.Render()
+	renderedWidget := textWidget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
-	err := textWidget.ProceedForm(form1)
+	err := textWidget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"test"}
-	err = textWidget.ProceedForm(form1)
+	err = textWidget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -55,14 +55,14 @@ func (w *WidgetTestSuite) TestNumberWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"test"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"121"}
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -75,11 +75,11 @@ func (w *WidgetTestSuite) TestEmailWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"test@example.com"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -92,11 +92,11 @@ func (w *WidgetTestSuite) TestURLWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"example.com"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -108,12 +108,12 @@ func (w *WidgetTestSuite) TestPasswordWidget() {
 		},
 	}
 	widget.SetName("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "type=\"password\"")
 	widget.SetRequired()
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"12345678901234567890"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -126,11 +126,11 @@ func (w *WidgetTestSuite) TestHiddenWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas<>")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas&lt;&gt;\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasas"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -143,11 +143,11 @@ func (w *WidgetTestSuite) TestDateWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("11/01/2021")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "datetimepicker_dsadas")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"11/02/2021"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -160,11 +160,11 @@ func (w *WidgetTestSuite) TestDateTimeWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("11/02/2021 10:04")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"11/02/2021 10:04\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"11/02/2021 10:04"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -177,11 +177,11 @@ func (w *WidgetTestSuite) TestTimeWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("15:05")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"15:05\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -194,11 +194,11 @@ func (w *WidgetTestSuite) TestTextareaWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Equal(w.T(), renderedWidget, "<textarea name=\"dsadas\" test=\"test1\">dsadas</textarea>")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -211,11 +211,11 @@ func (w *WidgetTestSuite) TestCheckboxWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "checked=\"checked\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
-	widget.ProceedForm(form1)
+	widget.ProceedForm(form1, nil)
 	assert.True(w.T(), widget.GetOutputValue() == true)
 }
 
@@ -238,14 +238,14 @@ func (w *WidgetTestSuite) TestSelectWidget() {
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"10:04"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"dsadas"}
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -268,14 +268,14 @@ func (w *WidgetTestSuite) TestNullBooleanWidget() {
 	})
 	widget.SetName("dsadas")
 	widget.SetValue("yes")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas\" data-placeholder=\"Select\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"no"}
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -298,14 +298,14 @@ func (w *WidgetTestSuite) TestSelectMultipleWidget() {
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"test1"}
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -330,14 +330,14 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<li>test<ul id=\"test_0\">")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"test1"}
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -362,14 +362,14 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 		OptLabel: "test2",
 		Value: "dsadas",
 	})
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<ul id=\"test\">\n  \n  \n  \n    <li>test<ul id=\"test_0\">")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err != nil)
 	form1.Value["dsadas"] = []string{"test1"}
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -381,7 +381,7 @@ func (w *WidgetTestSuite) TestFileWidget() {
 		},
 	}
 	widget.SetName("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "type=\"file\"")
 	body := new(bytes.Buffer)
 
@@ -420,7 +420,7 @@ func (w *WidgetTestSuite) TestFileWidget() {
 		return
 	}
 	form1, _ := multipart.NewReader(bytes.NewReader(body.Bytes()), "foo").ReadForm(1000000)
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -437,7 +437,7 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 		InputText: "upload your image",
 	}
 	widget.SetName("dsadas")
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Equal(w.T(), renderedWidget, "<p class=\"file-upload\">test: <br>\nupload your image:\n    <input type=\"file\" name=\"dsadas\" test=\"test1\"></p>")
 	widget = &interfaces.ClearableFileWidget{
 		Widget: interfaces.Widget{
@@ -452,7 +452,7 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 		CurrentValue: &interfaces.URLValue{URL: "https://microsoft.com"},
 	}
 	widget.SetName("dsadas")
-	renderedWidget = widget.Render()
+	renderedWidget = widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Equal(w.T(), renderedWidget, "\n    <input type=\"file\" name=\"dsadas\" test=\"test1\">")
 	body := new(bytes.Buffer)
 
@@ -491,7 +491,7 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 		return
 	}
 	form1, _ := multipart.NewReader(bytes.NewReader(body.Bytes()), "foo").ReadForm(1000000)
-	err = widget.ProceedForm(form1)
+	err = widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -504,11 +504,11 @@ func (w *WidgetTestSuite) TestMultipleHiddenInputWidget() {
 	}
 	widget.SetName("dsadas")
 	widget.SetValue([]string{"dsadas", "test1"})
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "value=\"dsadas\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadas", "test1"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -526,13 +526,13 @@ func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
 	widget.SetName("dsadas")
 	nowTime := time.Now()
 	widget.SetValue(&nowTime)
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_date\"")
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_time\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas_date"] = []string{"Mon Jan 12"}
 	form1.Value["dsadas_time"] = []string{"10:20"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -550,13 +550,13 @@ func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
 	widget.SetName("dsadas")
 	nowTime := time.Now()
 	widget.SetValue(&nowTime)
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_date\"")
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas_time\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas_date"] = []string{"Mon Jan 12"}
 	form1.Value["dsadas_time"] = []string{"10:20"}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 
@@ -571,7 +571,7 @@ func (w *WidgetTestSuite) TestSelectDateWidget() {
 	widget.SetName("dsadas")
 	nowTime := time.Now()
 	widget.SetValue(&nowTime)
-	renderedWidget := widget.Render()
+	renderedWidget := widget.Render(interfaces.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas_month\"")
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas_day\"")
 	assert.Contains(w.T(), renderedWidget, "<select name=\"dsadas_year\"")
@@ -579,7 +579,7 @@ func (w *WidgetTestSuite) TestSelectDateWidget() {
 	form1.Value["dsadas_month"] = []string{"1"}
 	form1.Value["dsadas_day"] = []string{"1"}
 	form1.Value["dsadas_year"] = []string{strconv.Itoa(time.Now().Year())}
-	err := widget.ProceedForm(form1)
+	err := widget.ProceedForm(form1, nil)
 	assert.True(w.T(), err == nil)
 }
 

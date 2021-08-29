@@ -2,7 +2,6 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"os"
 )
@@ -49,9 +48,13 @@ func (command SyncContentTypes) Proceed(subaction string, args []string) error {
 	db := uadminDatabase.Db
 	var contentType interfaces.ContentType
 	var permission interfaces.Permission
-	for blueprintRootAdminPage := range admin.CurrentDashboardAdminPanel.AdminPages.GetAll() {
+	for blueprintRootAdminPage := range interfaces.CurrentDashboardAdminPanel.AdminPages.GetAll() {
 		interfaces.Trail(interfaces.INFO, "Sync content types for blueprint %s", blueprintRootAdminPage.BlueprintName)
 		for modelPage := range blueprintRootAdminPage.SubPages.GetAll() {
+			if modelPage.Model == nil {
+				continue
+			}
+			interfaces.Trail(interfaces.INFO, "Add content type for model %s - %s", modelPage.BlueprintName, modelPage.ModelName)
 			db.Model(&interfaces.ContentType{}).Where(
 				&interfaces.ContentType{BlueprintName: modelPage.BlueprintName, ModelName: modelPage.ModelName},
 			).First(&contentType)

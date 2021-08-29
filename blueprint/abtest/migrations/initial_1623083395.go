@@ -27,14 +27,6 @@ func (m initial_1623083395) Up(uadminDatabase *interfaces.UadminDatabase) error 
     if err != nil {
         return err
     }
-    stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&abtestmodel.ABTest{})
-    contentType := &interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}
-    db.Create(contentType)
-    stmt = &gorm.Statement{DB: db}
-    stmt.Parse(&abtestmodel.ABTestValue{})
-    contentType = &interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}
-    db.Create(contentType)
     return nil
 }
 
@@ -52,11 +44,11 @@ func (m initial_1623083395) Down(uadminDatabase *interfaces.UadminDatabase) erro
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&abtestmodel.ABTestValue{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}).First(&contentType)
-    db.Delete(&contentType)
+    db.Unscoped().Delete(&contentType)
     stmt = &gorm.Statement{DB: db}
     stmt.Parse(&abtestmodel.ABTest{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "abtest", ModelName: stmt.Schema.Table}).First(&contentType)
-    db.Delete(&contentType)
+    db.Unscoped().Delete(&contentType)
     return nil
 }
 

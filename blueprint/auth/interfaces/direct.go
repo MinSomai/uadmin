@@ -62,7 +62,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
 		return
 	}
-	if !user.IsPasswordConfigured {
+	if !user.IsPasswordUsable {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
 		return
 	}
@@ -71,7 +71,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
 		return
 	}
-	if interfaces.Contains(interfaces.CurrentConfig.D.Auth.Twofactor_auth_required_for_signin_adapters, ap.GetName()) {
+	if user.GeneratedOTPToVerify != "" {
 		if json.OTP == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "otp is required"})
 			return
@@ -145,7 +145,7 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 		Password:     hashedPassword,
 		Active:       true,
 		Salt: salt,
-		IsPasswordConfigured: true,
+		IsPasswordUsable: true,
 	}
 	db.Db.Create(&user)
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry

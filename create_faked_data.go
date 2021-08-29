@@ -36,20 +36,17 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 		}
 		uadminDatabase.Db.Create(&session)
 	}
-	for i := range interfaces.GenerateNumberSequence(1, 100) {
-		abTestModel := abtestmodel.ABTest{
-			Name: fmt.Sprintf("test_%d", i),
+	var contentTypes []*interfaces.ContentType
+	uadminDatabase.Db.Find(&contentTypes)
+	for _, contentType := range contentTypes {
+		logModel := logmodel.Log{
+			Username: "admin",
+			ContentTypeID: contentType.ID,
 		}
-		uadminDatabase.Db.Create(&abTestModel)
-		abTestValueModel := abtestmodel.ABTestValue{
-			ABTest: abTestModel,
-		}
-		uadminDatabase.Db.Create(&abTestValueModel)
-	}
-	for i := range interfaces.GenerateNumberSequence(1, 100) {
+		uadminDatabase.Db.Create(&logModel)
 		approvalModel := models.Approval{
-			ModelName: "user",
-			ModelPK: uint(i),
+			ContentTypeID: contentType.ID,
+			ModelPK: uint(1),
 			ColumnName: "Email",
 			OldValue: "admin@example.com",
 			NewValue: "admin1@example.com",
@@ -58,14 +55,18 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 			ChangeDate: time.Now(),
 		}
 		uadminDatabase.Db.Create(&approvalModel)
-	}
-	for i := range interfaces.GenerateNumberSequence(1, 100) {
-		logModel := logmodel.Log{
-			Username: "admin",
-			TableName: "user",
-			TableID: i,
+		abTestModel := abtestmodel.ABTest{
+			Name: "test_1",
+			ContentTypeID: contentType.ID,
 		}
-		uadminDatabase.Db.Create(&logModel)
+		uadminDatabase.Db.Create(&abTestModel)
+		for i := range interfaces.GenerateNumberSequence(0, 100) {
+			abTestValueModel := abtestmodel.ABTestValue{
+				ABTest: abTestModel,
+				Value: strconv.Itoa(i),
+			}
+			uadminDatabase.Db.Create(&abTestValueModel)
+		}
 	}
 	for i := range interfaces.GenerateNumberSequence(1, 20) {
 		groupModel := interfaces.UserGroup{

@@ -88,7 +88,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		Password:     hashedPassword,
 		Active:       false,
 		Salt: salt,
-		IsPasswordConfigured: true,
+		IsPasswordUsable: true,
 	}
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()
@@ -216,7 +216,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		Password:     hashedPassword,
 		Active:       false,
 		Salt: salt,
-		IsPasswordConfigured: true,
+		IsPasswordUsable: true,
 	}
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()

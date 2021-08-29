@@ -15,5 +15,51 @@
     <link rel="stylesheet" href="/static-inbuilt/uadmin/assets/css/form.css">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style type="text/css">
+        #model-actions {
+            width: 200px;
+            display: inline-block;
+        }
+        #action-form button.button {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        #action-form action-description {
+            padding-left: 10px;
+        }
+        ul.breadcrumbs {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        .breadcrumb-item {
+            list-style-type: none;
+            display: inline-block;
+        }
+        ul.breadcrumbs li:first-child {
+            margin-left: 10px;
+        }
+        ul.breadcrumbs li:after {
+            content: "/";
+            color: #555;
+            font-size: 30px;
+            vertical-align: middle;
+            margin: 0 5px;
+        }
+        ul.breadcrumbs li:last-child:after {
+            content: "";
+            color: #555;
+            font-size: 30px;
+            vertical-align: middle;
+            margin: 0;
+        }
+        .breadcrumb-item i {
+            margin-right: 5px;
+        }
+        .bold {
+             font-weight: 600;
+        }
+    </style>
+    {{Include "uadminjs"}}
 </head>
 <body{{if .Language.RTL}} dir="rtl"{{end}}>

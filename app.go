@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/admin"
+	_ "github.com/uadmin/uadmin/admin"
 	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
 	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
 	authblueprint "github.com/uadmin/uadmin/blueprint/auth"
@@ -13,7 +13,6 @@ import (
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	settingsblueprint "github.com/uadmin/uadmin/blueprint/settings"
 	userblueprint "github.com/uadmin/uadmin/blueprint/user"
-	"github.com/uadmin/uadmin/http"
 	"github.com/uadmin/uadmin/interfaces"
 	"io/fs"
 	nethttp "net/http"
@@ -28,7 +27,7 @@ type App struct {
 	Router            *gin.Engine
 	CommandRegistry   *CommandRegistry
 	BlueprintRegistry interfaces.IBlueprintRegistry
-	DashboardAdminPanel *admin.DashboardAdminPanel
+	DashboardAdminPanel *interfaces.DashboardAdminPanel
 }
 
 var appInstance *App
@@ -36,8 +35,8 @@ var appInstance *App
 func NewApp(environment string) *App {
 	if appInstance == nil {
 		a := App{}
-		a.DashboardAdminPanel = admin.NewDashboardAdminPanel()
-		admin.CurrentDashboardAdminPanel = a.DashboardAdminPanel
+		a.DashboardAdminPanel = interfaces.NewDashboardAdminPanel()
+		interfaces.CurrentDashboardAdminPanel = a.DashboardAdminPanel
 		a.Config = interfaces.NewConfig("configs/" + environment + ".yaml")
 		a.Config.TemplatesFS = templatesRoot
 		a.Config.LocalizationFS = localizationRoot
@@ -111,6 +110,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("admin", &AdminCommand{})
 	a.RegisterCommand("contenttype", &ContentTypeCommand{})
 	a.RegisterCommand("generate-fake-data", &CreateFakedDataCommand{})
+	a.RegisterCommand("language", &LanguageCommand{})
 }
 
 func (a App) ExecuteCommand() {
@@ -151,7 +151,6 @@ func (a App) TriggerCommandExecution(action string, subaction string, params []s
 
 func (a App) StartAdmin() {
 	// useradmin.RegisterAdminPart()
-	http.StartServer(a.Config)
 }
 
 func (a App) StartApi() {

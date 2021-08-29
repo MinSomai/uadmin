@@ -17,7 +17,6 @@ string Password = 4;
 string Email = 5;
 bool Active = 6;
 bool Admin = 7;
-bool RemoteAccess = 8;
 string UserGroup = 9;
 string Photo = 11;
 string LastLogin = 12;

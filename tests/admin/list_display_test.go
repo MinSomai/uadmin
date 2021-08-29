@@ -3,7 +3,6 @@ package admin
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"testing"
 )
@@ -14,7 +13,7 @@ type AdminListDisplayTestSuite struct {
 
 func (suite *AdminListDisplayTestSuite) TestListDisplay() {
 	userModel := &interfaces.User{Username: "admin", FirstName: "firstname", LastName: "lastname"}
-	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	listDisplayUsername, _ := adminUserPage.ListDisplay.GetFieldByDisplayName("Username")
 	assert.Equal(suite.T(), listDisplayUsername.GetValue(userModel), "admin")

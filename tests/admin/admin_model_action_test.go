@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"net/http"
 	"net/http/httptest"
@@ -22,14 +21,14 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 	uadminDatabase := interfaces.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.Create(userModel)
-	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	adminModelAction := interfaces.NewAdminModelAction(
 		"TurnSuperusersToNormalUsers", &interfaces.AdminActionPlacement{},
 	)
-	adminModelAction.Handler = func (ap *interfaces.AdminPage, afo *interfaces.AdminFilterObjects, ctx *gin.Context) (bool, int64) {
-		tx := afo.GormQuerySet.Update("IsSuperUser", false).Commit()
-		return tx.Error == nil, tx.RowsAffected
+	adminModelAction.Handler = func (ap *interfaces.AdminPage, afo interfaces.IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
+		tx := afo.GetFullQuerySet().Update("IsSuperUser", false).Commit()
+		return tx.(*interfaces.GormPersistenceStorage).Db.Error == nil, tx.(*interfaces.GormPersistenceStorage).Db.RowsAffected
 	}
 	adminUserPage.ModelActionsRegistry.AddModelAction(adminModelAction)
 	var jsonStr = []byte(fmt.Sprintf(`{"object_ids": "%d"}`, userModel.ID))

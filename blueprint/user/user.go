@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/admin"
 	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
 	"github.com/uadmin/uadmin/blueprint/user/migrations"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/utils"
 	"net/http"
+	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -47,7 +48,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			interfaces.AdminContext
 		}
 		c := &Context{}
-		admin.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 		tr := interfaces.NewTemplateRenderer("Reset Password")
 		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("resetpassword"), c, interfaces.FuncMap)
 	})
@@ -153,7 +154,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			return
 		}
 		oneTimeAction.User.Password = hashedPassword
-		oneTimeAction.User.IsPasswordConfigured = true
+		oneTimeAction.User.IsPasswordUsable = true
 		oneTimeAction.IsUsed = true
 		db.Save(&oneTimeAction.User)
 		db.Save(&oneTimeAction)
@@ -197,7 +198,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//}
 		hashedPassword, err = utils2.HashPass(json.Password, user.Salt)
 		user.Password = hashedPassword
-		user.IsPasswordConfigured = true
+		user.IsPasswordUsable = true
 		uadminDatabase := interfaces.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
@@ -240,7 +241,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 
 		c := &Context{}
-		admin.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
+		interfaces.PopulateTemplateContextForAdminPanel(ctx, c, interfaces.NewAdminRequestParams())
 		//
 		//if r.Form.Get("err_msg") != "" {
 		//	c.ErrMsg = r.Form.Get("err_msg")
@@ -252,47 +253,236 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		tr := interfaces.NewTemplateRenderer("Page not found")
 		tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("404"), c, interfaces.FuncMap)
 	})
-	usersAdminPage := admin.NewGormAdminPage(nil, func() (interface{}, interface{}) {return nil, nil}, "")
+	usersAdminPage := interfaces.NewGormAdminPage(
+		nil,
+		func() (interface{}, interface{}) {return nil, nil},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+	)
 	usersAdminPage.PageName = "Users"
 	usersAdminPage.Slug = "users"
 	usersAdminPage.BlueprintName = "user"
 	usersAdminPage.Router = mainRouter
-	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
+	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usermodelAdminPage := admin.NewGormAdminPage(usersAdminPage, func() (interface{}, interface{}) {return &interfaces.User{}, &[]*interfaces.User{}}, "user")
+	var usermodelAdminPage *interfaces.AdminPage
+	usermodelAdminPage = interfaces.NewGormAdminPage(
+		usersAdminPage,
+		func() (interface{}, interface{}) {return &interfaces.User{}, &[]*interfaces.User{}},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+			fields := []string{"Username", "FirstName", "LastName", "Email", "Active", "IsStaff", "IsSuperUser", "Password", "Photo", "LastLogin", "ExpiresOn"}
+			if ctx.GetUserObject().IsSuperUser {
+				fields = append(fields, "UserGroups")
+				fields = append(fields, "Permissions")
+			}
+			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			if ctx.GetUserObject().IsSuperUser {
+				usergroupsField, _ := form.FieldRegistry.GetByName("UserGroups")
+				usergroupsField.SetUpField = func(w interfaces.IWidget, modelI interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
+					model := modelI.(*interfaces.User)
+					vTmp := v.([]string)
+					var usergroup *interfaces.UserGroup
+					if model.ID != 0 {
+						afo.GetUadminDatabase().Db.Model(model).Association("UserGroups").Clear()
+						model.UserGroups = make([]interfaces.UserGroup, 0)
+					}
+					for _, ID := range vTmp {
+						afo.GetUadminDatabase().Db.First(&usergroup, ID)
+						if usergroup.ID != 0 {
+							model.UserGroups = append(model.UserGroups, *usergroup)
+						}
+						usergroup = nil
+					}
+					return nil
+				}
+				userGroupsWidget := usergroupsField.FieldConfig.Widget.(*interfaces.ChooseFromSelectWidget)
+				userGroupsWidget.AddNewLink = fmt.Sprintf("%s/%s/usergroup/edit/%s?_to_field=id&_popup=1", interfaces.CurrentConfig.D.Uadmin.RootAdminURL, usersAdminPage.Slug, "new")
+				userGroupsWidget.AddNewTitle = "Add another group"
+				userGroupsWidget.PopulateLeftSide = func()[]*interfaces.SelectOptGroup {
+					var groups []*interfaces.UserGroup
+					uadminDatabase := interfaces.NewUadminDatabase()
+					uadminDatabase.Db.Find(&groups)
+					ret := make([]*interfaces.SelectOptGroup, 0)
+					for _, group := range groups {
+						ret = append(ret, &interfaces.SelectOptGroup{
+							OptLabel: group.GroupName,
+							Value: group.ID,
+						})
+					}
+					uadminDatabase.Close()
+					return ret
+				}
+				userGroupsWidget.PopulateRightSide = func()[]*interfaces.SelectOptGroup {
+					ret := make([]*interfaces.SelectOptGroup, 0)
+					user := modelI.(*interfaces.User)
+					if user.ID != 0 {
+						var groups []*interfaces.UserGroup
+						uadminDatabase := interfaces.NewUadminDatabase()
+						uadminDatabase.Db.Model(user).Association("UserGroups").Find(&groups)
+						ret = make([]*interfaces.SelectOptGroup, 0)
+						for _, group := range groups {
+							ret = append(ret, &interfaces.SelectOptGroup{
+								OptLabel: group.GroupName,
+								Value:    group.ID,
+							})
+						}
+						uadminDatabase.Close()
+						return ret
+					} else {
+						formD := ctx.GetPostForm()
+						if formD != nil {
+							Ids := strings.Split(formD.Value["UserGroups"][0], ",")
+							IdI := make([]uint, 0)
+							for _, tmp := range Ids {
+								tmpI, _ := strconv.Atoi(tmp)
+								IdI = append(IdI, uint(tmpI))
+							}
+							if len(IdI) > 0 {
+								var groups []*interfaces.UserGroup
+								uadminDatabase := interfaces.NewUadminDatabase()
+								uadminDatabase.Db.Find(&groups, IdI)
+								ret = make([]*interfaces.SelectOptGroup, 0)
+								for _, group := range groups {
+									ret = append(ret, &interfaces.SelectOptGroup{
+										OptLabel: group.GroupName,
+										Value:    group.ID,
+									})
+								}
+								uadminDatabase.Close()
+								return ret
+							}
+						}
+					}
+					return ret
+				}
+				userGroupsWidget.LeftSelectTitle = "Available groups"
+				userGroupsWidget.LeftSelectHelp = "This is the list of available groups. You may choose some by selecting them in the box below and then clicking the \"Choose\" arrow between the two boxes."
+				userGroupsWidget.LeftSearchSelectHelp = "Type into this box to filter down the list of available groups."
+				userGroupsWidget.LeftHelpChooseAll = "Click to choose all groups at once."
+				userGroupsWidget.RightSelectTitle = "Chosen groups"
+				userGroupsWidget.RightSelectHelp = "This is the list of chosen groups. You may remove some by selecting them in the box below and then clicking the \"Remove\" arrow between the two boxes."
+				userGroupsWidget.RightSearchSelectHelp = ""
+				userGroupsWidget.RightHelpChooseAll = "Click to remove all chosen groups at once."
+				userGroupsWidget.HelpText = "The groups this user belongs to. A user will get all permissions granted to each of their groups. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+				permissionsField, _ := form.FieldRegistry.GetByName("Permissions")
+				permissionsField.SetUpField = func(w interfaces.IWidget, modelI interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
+					model := modelI.(*interfaces.User)
+					vTmp := v.([]string)
+					var permission *interfaces.Permission
+					if model.ID != 0 {
+						afo.GetUadminDatabase().Db.Model(model).Association("Permissions").Clear()
+						model.Permissions = make([]interfaces.Permission, 0)
+					}
+					for _, ID := range vTmp {
+						afo.GetUadminDatabase().Db.First(&permission, ID)
+						if permission.ID != 0 {
+							model.Permissions = append(model.Permissions, *permission)
+						}
+						permission = nil
+					}
+					return nil
+				}
+				permissionsWidget := permissionsField.FieldConfig.Widget.(*interfaces.ChooseFromSelectWidget)
+				permissionsWidget.PopulateLeftSide = func()[]*interfaces.SelectOptGroup {
+					var permissions []*interfaces.Permission
+					uadminDatabase := interfaces.NewUadminDatabase()
+					uadminDatabase.Db.Preload("ContentType").Find(&permissions)
+					ret := make([]*interfaces.SelectOptGroup, 0)
+					for _, permission := range permissions {
+						ret = append(ret, &interfaces.SelectOptGroup{
+							OptLabel: permission.ShortDescription(),
+							Value: permission.ID,
+						})
+					}
+					uadminDatabase.Close()
+					return ret
+				}
+				permissionsWidget.LeftSelectTitle = "Available user permissions"
+				permissionsWidget.LeftSelectHelp = "This is the list of available user permissions. You may choose some by selecting them in the box below and then clicking the \"Choose\" arrow between the two boxes."
+				permissionsWidget.LeftSearchSelectHelp = "Type into this box to filter down the list of available user permissions."
+				permissionsWidget.LeftHelpChooseAll = "Click to choose all user permissions at once."
+				permissionsWidget.RightSelectTitle = "Chosen user permissions"
+				permissionsWidget.RightSelectHelp = "This is the list of chosen user permissions. You may remove some by selecting them in the box below and then clicking the \"Remove\" arrow between the two boxes."
+				permissionsWidget.RightSearchSelectHelp = ""
+				permissionsWidget.RightHelpChooseAll = "Click to remove all chosen user permissions at once."
+				permissionsWidget.HelpText = "Specific permissions for this user. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+				permissionsWidget.PopulateRightSide = func()[]*interfaces.SelectOptGroup {
+					ret := make([]*interfaces.SelectOptGroup, 0)
+					user := modelI.(*interfaces.User)
+					if user.ID != 0 {
+						var permissions []*interfaces.Permission
+						uadminDatabase := interfaces.NewUadminDatabase()
+						uadminDatabase.Db.Model(user).Association("Permissions").Find(&permissions)
+						ret = make([]*interfaces.SelectOptGroup, 0)
+						for _, permission := range permissions {
+							ret = append(ret, &interfaces.SelectOptGroup{
+								OptLabel: permission.ShortDescription(),
+								Value:    permission.ID,
+							})
+						}
+						uadminDatabase.Close()
+						return ret
+					} else {
+						formD := ctx.GetPostForm()
+						if formD != nil {
+							Ids := strings.Split(formD.Value["Permissions"][0], ",")
+							IdI := make([]uint, 0)
+							for _, tmp := range Ids {
+								tmpI, _ := strconv.Atoi(tmp)
+								IdI = append(IdI, uint(tmpI))
+							}
+							var permissions []*interfaces.Permission
+							if len(IdI) > 0 {
+								uadminDatabase := interfaces.NewUadminDatabase()
+								uadminDatabase.Db.Preload("ContentType").Find(&permissions, IdI)
+								ret = make([]*interfaces.SelectOptGroup, 0)
+								for _, permission := range permissions {
+									ret = append(ret, &interfaces.SelectOptGroup{
+										OptLabel: permission.ShortDescription(),
+										Value:    permission.ID,
+									})
+								}
+								uadminDatabase.Close()
+								return ret
+							}
+						}
+					}
+					return ret
+				}
+			}
+			return form
+		},
+	)
+	usermodelAdminPage.SaveModel = func(modelI interface{}, ID uint, afo interfaces.IAdminFilterObjects) interface{} {
+		user := modelI.(*interfaces.User)
+		if user.Salt == "" && user.Password != "" {
+			user.Salt = utils.RandStringRunes(interfaces.CurrentConfig.D.Auth.SaltLength)
+		}
+		if ID != 0 {
+			userM := &interfaces.User{}
+			afo.GetUadminDatabase().Db.First(userM, ID)
+			if userM.Password != user.Password && user.Password != "" {
+				// hashedPassword, err := utils2.HashPass(password, salt)
+				hashedPassword, _ := utils2.HashPass(user.Password, user.Salt)
+				user.IsPasswordUsable = true
+				user.Password = hashedPassword
+			}
+		} else {
+			if user.Password != "" {
+				// hashedPassword, err := utils2.HashPass(password, salt)
+				hashedPassword, _ := utils2.HashPass(user.Password, user.Salt)
+				user.Password = hashedPassword
+				user.IsPasswordUsable = true
+			}
+		}
+		afo.GetUadminDatabase().Db.Save(user)
+		return user
+	}
 	usermodelAdminPage.PageName = "Users"
 	usermodelAdminPage.Slug = "user"
 	usermodelAdminPage.BlueprintName = "user"
 	usermodelAdminPage.Router = mainRouter
-	adminContext := &interfaces.AdminContext{}
-	userForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.User{}, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin"}, true, "")
-	usermodelAdminPage.Form = userForm
-	usermodelAdminPage.ListDisplay.ClearAllFields()
-	usernameField, _ := userForm.FieldRegistry.GetByName("Username")
-	usernameListDisplay := interfaces.NewListDisplay(usernameField)
-	usermodelAdminPage.ListDisplay.AddField(usernameListDisplay)
-	firstNameField, _ := userForm.FieldRegistry.GetByName("FirstName")
-	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(firstNameField))
-	lastNameField, _ := userForm.FieldRegistry.GetByName("LastName")
-	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(lastNameField))
-	emailField, _ := userForm.FieldRegistry.GetByName("Email")
-	emailListDisplay := interfaces.NewListDisplay(emailField)
-	usermodelAdminPage.ListDisplay.AddField(emailListDisplay)
-	photoField, _ := userForm.FieldRegistry.GetByName("Photo")
-	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(photoField))
-	lastLoginField, _ := userForm.FieldRegistry.GetByName("LastLogin")
-	usermodelAdminPage.ListDisplay.AddField(interfaces.NewListDisplay(lastLoginField))
-	uadminDatabase := interfaces.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	userModelDescription := interfaces.ProjectModels.GetModelFromInterface(&interfaces.User{})
-	statementUser := userModelDescription.Statement
-	fieldEmail, _ := statementUser.Schema.FieldsByDBName["email"]
-	searchField := &interfaces.SearchField{
-		Field: fieldEmail,
-	}
-	usermodelAdminPage.SearchFields = append(usermodelAdminPage.SearchFields, searchField)
 	listFilter := &interfaces.ListFilter{
 		UrlFilteringParam: "IsSuperUser__exact",
 		Title: "Is super user ?",
@@ -304,42 +494,113 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-	usergroupsAdminPage := admin.NewGormAdminPage(usersAdminPage, func() (interface{}, interface{}) {return &interfaces.UserGroup{}, &[]*interfaces.UserGroup{}}, "usergroup")
+	usergroupsAdminPage := interfaces.NewGormAdminPage(
+		usersAdminPage,
+		func() (interface{}, interface{}) {return &interfaces.UserGroup{}, &[]*interfaces.UserGroup{}},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+			fields := []string{"GroupName"}
+			if ctx.GetUserObject().IsSuperUser {
+				fields = append(fields, "Permissions")
+			}
+			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			if ctx.GetUserObject().IsSuperUser {
+				permissionsField, _ := form.FieldRegistry.GetByName("Permissions")
+				permissionsField.SetUpField = func(w interfaces.IWidget, modelI interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
+					model := modelI.(*interfaces.UserGroup)
+					vTmp := v.([]string)
+					var permission *interfaces.Permission
+					if model.ID != 0 {
+						afo.GetUadminDatabase().Db.Model(model).Association("Permissions").Clear()
+						model.Permissions = make([]interfaces.Permission, 0)
+					}
+					for _, ID := range vTmp {
+						afo.GetUadminDatabase().Db.First(&permission, ID)
+						if permission.ID != 0 {
+							model.Permissions = append(model.Permissions, *permission)
+						}
+						permission = nil
+					}
+					return nil
+				}
+				permissionsWidget := permissionsField.FieldConfig.Widget.(*interfaces.ChooseFromSelectWidget)
+				permissionsWidget.PopulateLeftSide = func()[]*interfaces.SelectOptGroup {
+					var permissions []*interfaces.Permission
+					uadminDatabase := interfaces.NewUadminDatabase()
+					uadminDatabase.Db.Preload("ContentType").Find(&permissions)
+					ret := make([]*interfaces.SelectOptGroup, 0)
+					for _, permission := range permissions {
+						ret = append(ret, &interfaces.SelectOptGroup{
+							OptLabel: permission.ShortDescription(),
+							Value: permission.ID,
+						})
+					}
+					uadminDatabase.Close()
+					return ret
+				}
+				permissionsWidget.LeftSelectTitle = "Available permissions"
+				permissionsWidget.LeftSelectHelp = "This is the list of available permissions. You may choose some by selecting them in the box below and then clicking the \"Choose\" arrow between the two boxes."
+				permissionsWidget.LeftSearchSelectHelp = "Type into this box to filter down the list of available user permissions."
+				permissionsWidget.LeftHelpChooseAll = "Click to choose all user permissions at once."
+				permissionsWidget.RightSelectTitle = "Chosen permissions"
+				permissionsWidget.RightSelectHelp = "This is the list of chosen permissions. You may remove some by selecting them in the box below and then clicking the \"Remove\" arrow between the two boxes."
+				permissionsWidget.RightSearchSelectHelp = ""
+				permissionsWidget.RightHelpChooseAll = "Click to remove all chosen permissions at once."
+				permissionsWidget.HelpText = "Specific permissions for this user. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+				permissionsWidget.PopulateRightSide = func()[]*interfaces.SelectOptGroup {
+					ret := make([]*interfaces.SelectOptGroup, 0)
+					user := modelI.(*interfaces.UserGroup)
+					if user.ID != 0 {
+						var permissions []*interfaces.Permission
+						uadminDatabase := interfaces.NewUadminDatabase()
+						uadminDatabase.Db.Model(user).Association("Permissions").Find(&permissions)
+						ret = make([]*interfaces.SelectOptGroup, 0)
+						for _, permission := range permissions {
+							ret = append(ret, &interfaces.SelectOptGroup{
+								OptLabel: permission.ShortDescription(),
+								Value:    permission.ID,
+							})
+						}
+						uadminDatabase.Close()
+						return ret
+					} else {
+						formD := ctx.GetPostForm()
+						if formD != nil {
+							Ids := strings.Split(formD.Value["Permissions"][0], ",")
+							IdI := make([]uint, 0)
+							for _, tmp := range Ids {
+								tmpI, _ := strconv.Atoi(tmp)
+								IdI = append(IdI, uint(tmpI))
+							}
+							var permissions []*interfaces.Permission
+							if len(IdI) > 0 {
+								uadminDatabase := interfaces.NewUadminDatabase()
+								uadminDatabase.Db.Preload("ContentType").Find(&permissions, IdI)
+								ret = make([]*interfaces.SelectOptGroup, 0)
+								for _, permission := range permissions {
+									ret = append(ret, &interfaces.SelectOptGroup{
+										OptLabel: permission.ShortDescription(),
+										Value:    permission.ID,
+									})
+								}
+								uadminDatabase.Close()
+								return ret
+							}
+						}
+					}
+					return ret
+				}
+			}
+			return form
+		},
+	)
 	usergroupsAdminPage.PageName = "User groups"
 	usergroupsAdminPage.Slug = "usergroup"
 	usergroupsAdminPage.BlueprintName = "user"
 	usergroupsAdminPage.Router = mainRouter
-	adminContext = &interfaces.AdminContext{}
-	userGroupForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.UserGroup{}, make([]string, 0), []string{}, true, "")
-	usergroupsAdminPage.ListDisplay.ClearAllFields()
-	usergroupsAdminPage.Form = userGroupForm
-	groupNameField, _ := userGroupForm.FieldRegistry.GetByName("GroupName")
-	groupNameListDisplay := interfaces.NewListDisplay(groupNameField)
-	usergroupsAdminPage.ListDisplay.AddField(groupNameListDisplay)
 	err = usersAdminPage.SubPages.AddAdminPage(usergroupsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
-}
-
-type UsernameFormOptions struct {
-	interfaces.FieldFormOptions
-}
-
-type UserPhotoOptions struct {
-	interfaces.FieldFormOptions
-}
-
-type OtpRequiredOptions struct {
-	interfaces.FieldFormOptions
-}
-
-type LastLoginOptions struct {
-	interfaces.FieldFormOptions
-}
-
-type ExpiresOnOptions struct {
-	interfaces.FieldFormOptions
 }
 
 func (b Blueprint) Init() {
@@ -347,47 +608,6 @@ func (b Blueprint) Init() {
 	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.User{}})
 	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.UserGroup{}})
 	interfaces.ProjectModels.RegisterModel(func() interface{}{return &interfaces.Permission{}})
-	fieldChoiceRegistry := interfaces.FieldChoiceRegistry{}
-	fieldChoiceRegistry.Choices = make([]*interfaces.FieldChoice, 0)
-	formOptions := &UsernameFormOptions{
-		FieldFormOptions: interfaces.FieldFormOptions{
-			Name: "UsernameOptions",
-			Initial: "InitialUsername",
-			DisplayName: "Username",
-			Validators: make([]interfaces.IValidator, 0),
-			Choices: &fieldChoiceRegistry,
-			HelpText: "help for username",
-		},
-	}
-	interfaces.CurrentConfig.AddFieldFormOptions(formOptions)
-	userPhotoOptions := &UserPhotoOptions{
-		FieldFormOptions: interfaces.FieldFormOptions{
-			Name: "UserPhotoOptions",
-			WidgetType: "image",
-		},
-	}
-	interfaces.CurrentConfig.AddFieldFormOptions(userPhotoOptions)
-	otpRequiredOptions := &OtpRequiredOptions{
-		FieldFormOptions: interfaces.FieldFormOptions{
-			Name: "OTPRequiredOptions",
-			WidgetType: "hidden",
-		},
-	}
-	interfaces.CurrentConfig.AddFieldFormOptions(otpRequiredOptions)
-	lastLoginOptions := &LastLoginOptions{
-		FieldFormOptions: interfaces.FieldFormOptions{
-			Name: "LastLoginOptions",
-			ReadOnly: true,
-		},
-	}
-	interfaces.CurrentConfig.AddFieldFormOptions(lastLoginOptions)
-	expiresOnOptions := &ExpiresOnOptions{
-		FieldFormOptions: interfaces.FieldFormOptions{
-			Name: "ExpiresOnOptions",
-			ReadOnly: true,
-		},
-	}
-	interfaces.CurrentConfig.AddFieldFormOptions(expiresOnOptions)
 
 	interfaces.UadminValidatorRegistry.AddValidator("username-unique", func (i interface{}, o interface{}) error {
 		uadminDatabase := interfaces.NewUadminDatabase()
@@ -453,6 +673,18 @@ func (b Blueprint) Init() {
 		validator, _ := interfaces.UadminValidatorRegistry.GetValidator("password-uadmin")
 		isValidPassword := validator(i, o)
 		return isValidPassword == nil
+	})
+	fsStorage := interfaces.NewFsStorage()
+	interfaces.UadminFormCongirurableOptionInstance.AddFieldFormOptions(&interfaces.FieldFormOptions{
+		WidgetType: "image",
+		Name: "UserPhotoFormOptions",
+		WidgetPopulate: func(m interface{}, currentField *interfaces.Field) interface{} {
+			photo := m.(*interfaces.User).Photo
+			if photo == "" {
+				return ""
+			}
+			return fmt.Sprintf("%s%s", fsStorage.GetUploadUrl(), photo)
+		},
 	})
 }
 

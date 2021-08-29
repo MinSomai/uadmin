@@ -8,8 +8,6 @@ auth:
   max_username_length: 40
   min_username_length: 8
   min_password_length: 8
-  twofactor_auth_required_for_signin_adapters:
-    - direct
 swagger:
   path_to_spec: configs/api-spec.yaml
   listen_port: 8082

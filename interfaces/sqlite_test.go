@@ -20,7 +20,6 @@ type UserTest struct {
 	Email        string
 	Active       bool
 	Admin        bool
-	RemoteAccess bool
 	Photo        string
 	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
 	LastLogin   *time.Time

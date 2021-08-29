@@ -3,10 +3,10 @@ package abtest
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/abtest/migrations"
 	abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
 	"github.com/uadmin/uadmin/interfaces"
+	"strconv"
 )
 
 type Blueprint struct {
@@ -14,77 +14,111 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	abTestAdminPage := admin.NewGormAdminPage(nil, func() (interface{}, interface{}) {return nil, nil}, "")
+	abTestAdminPage := interfaces.NewGormAdminPage(
+		nil,
+		func() (interface{}, interface{}) {return nil, nil},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+	)
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
 	abTestAdminPage.BlueprintName = "abtest"
 	abTestAdminPage.Router = mainRouter
-	// abTestAdminPage.ListHandler = templatecontext.BuildAdminHandlerForBlueprintfunc(abTestAdminPage.PageName)
-	//func (ctx *gin.Context) {
-	//	type Context struct {
-	//		templatecontext.AdminContext
-	//		Menu     string
-	//	}
-	//
-	//	c := &Context{}
-	//	templatecontext.PopulateTemplateContextForAdminPanel(ctx, c, templatecontext.NewAdminRequestParams())
-	//	menu := string(admin.CurrentDashboardAdminPanel.AdminPages.PreparePagesForTemplate(c.UserPermissionRegistry))
-	//	c.Menu = menu
-	//	tr := interfaces.NewTemplateRenderer("AB Tests")
-	//	tr.Render(ctx, interfaces.CurrentConfig.TemplatesFS, interfaces.CurrentConfig.GetPathToTemplate("home"), c, template.FuncMap)
-	//}
 
-	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(abTestAdminPage)
+	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(abTestAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
 	}
-	abtestmodelAdminPage := admin.NewGormAdminPage(abTestAdminPage, func() (interface{}, interface{}) {return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{}}, "abtest")
+	abtestmodelAdminPage := interfaces.NewGormAdminPage(
+		abTestAdminPage,
+		func() (interface{}, interface{}) {return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{}},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+			fields := []string{"ContentType", "Type", "Name", "Field", "PrimaryKey", "Active", "Group", "StaticPath"}
+			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			form.ExtraStatic.ExtraJS = append(form.ExtraStatic.ExtraJS, "/static-inbuilt/uadmin/assets/js/abtestformhandler.js")
+			typeField, _ := form.FieldRegistry.GetByName("Type")
+			w := typeField.FieldConfig.Widget.(*interfaces.SelectWidget)
+			w.OptGroups = make(map[string][]*interfaces.SelectOptGroup)
+			w.OptGroups[""] = make([]*interfaces.SelectOptGroup, 0)
+			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+				OptLabel: "unknown",
+				Value: "0",
+			})
+			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+				OptLabel: "static",
+				Value: "1",
+			})
+			w.OptGroups[""] = append(w.OptGroups[""], &interfaces.SelectOptGroup{
+				OptLabel: "model",
+				Value: "2",
+			})
+			typeField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *interfaces.Field) interface{} {
+				a := m.(*abtestmodel.ABTest).Type
+				return strconv.Itoa(int(a))
+			})
+			typeField.SetUpField = func(w interfaces.IWidget, m interface{}, v interface{}, afo interfaces.IAdminFilterObjects) error {
+				abTestM := m.(*abtestmodel.ABTest)
+				vI, _ := strconv.Atoi(v.(string))
+				abTestM.Type = abtestmodel.ABTestType(vI)
+				return nil
+			}
+			contentTypeField, _ := form.FieldRegistry.GetByName("ContentType")
+			w1 := contentTypeField.FieldConfig.Widget.(*interfaces.ContentTypeSelectorWidget)
+			w1.LoadFieldsOfAllModels = true
+			fieldField, _ := form.FieldRegistry.GetByName("Field")
+			w2 := fieldField.FieldConfig.Widget.(*interfaces.SelectWidget)
+			w2.SetAttr("data-initialized", "false")
+			w2.DontValidateForExistence = true
+			return form
+		},
+	)
 	abtestmodelAdminPage.PageName = "AB Tests"
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
 	abtestmodelAdminPage.Router = mainRouter
-	adminContext := &interfaces.AdminContext{}
-	abTestForm := interfaces.NewFormFromModelFromGinContext(adminContext, &abtestmodel.ABTest{}, make([]string, 0), []string{}, true, "")
-	abtestmodelAdminPage.Form = abTestForm
-	nameField, _ := abTestForm.FieldRegistry.GetByName("Name")
-	nameListDisplay := interfaces.NewListDisplay(nameField)
-	nameListDisplay.Ordering = 2
-	abtestmodelAdminPage.ListDisplay.AddField(nameListDisplay)
-	typeField, _ := abTestForm.FieldRegistry.GetByName("Type")
-	typeListDisplay := interfaces.NewListDisplay(typeField)
+	typeListDisplay, _ := abtestmodelAdminPage.ListDisplay.GetFieldByDisplayName("Type")
 	typeListDisplay.Populate = func(m interface{}) string {
 		return abtestmodel.HumanizeAbTestType(m.(*abtestmodel.ABTest).Type)
 	}
-	typeListDisplay.Ordering = 3
-	abtestmodelAdminPage.ListDisplay.AddField(typeListDisplay)
-	staticPathField, _ := abTestForm.FieldRegistry.GetByName("StaticPath")
-	staticPathListDisplay := interfaces.NewListDisplay(staticPathField)
-	staticPathListDisplay.Ordering = 4
-	abtestmodelAdminPage.ListDisplay.AddField(staticPathListDisplay)
-	modelNameField, _ := abTestForm.FieldRegistry.GetByName("ModelName")
-	modelNameListDisplay := interfaces.NewListDisplay(modelNameField)
-	modelNameListDisplay.Ordering = 5
-	abtestmodelAdminPage.ListDisplay.AddField(modelNameListDisplay)
-	fieldField, _ := abTestForm.FieldRegistry.GetByName("Field")
-	fieldListDisplay := interfaces.NewListDisplay(fieldField)
-	fieldListDisplay.Ordering = 6
-	abtestmodelAdminPage.ListDisplay.AddField(fieldListDisplay)
-	primaryKeyField, _ := abTestForm.FieldRegistry.GetByName("PrimaryKey")
-	primaryKeyListDisplay := interfaces.NewListDisplay(primaryKeyField)
-	primaryKeyListDisplay.Ordering = 7
-	abtestmodelAdminPage.ListDisplay.AddField(primaryKeyListDisplay)
-	activeField, _ := abTestForm.FieldRegistry.GetByName("Active")
-	activeListDisplay := interfaces.NewListDisplay(activeField)
-	activeListDisplay.Ordering = 8
-	abtestmodelAdminPage.ListDisplay.AddField(activeListDisplay)
-	groupField, _ := abTestForm.FieldRegistry.GetByName("Group")
-	groupListDisplay := interfaces.NewListDisplay(groupField)
-	groupListDisplay.Ordering = 9
-	abtestmodelAdminPage.ListDisplay.AddField(groupListDisplay)
-	resetABTestField, _ := abTestForm.FieldRegistry.GetByName("ResetABTest")
-	resetABTestListDisplay := interfaces.NewListDisplay(resetABTestField)
-	resetABTestListDisplay.Ordering = 10
-	abtestmodelAdminPage.ListDisplay.AddField(resetABTestListDisplay)
+	contentTypeListDisplay, _ := abtestmodelAdminPage.ListDisplay.GetFieldByDisplayName("ContentType")
+	contentTypeListDisplay.Populate = func(m interface{}) string {
+		return m.(*abtestmodel.ABTest).ContentType.String()
+	}
+	abTestValueInline := interfaces.NewAdminPageInline(
+		"AB Test Values",
+		interfaces.TabularInline, func(m interface{}) (interface{}, interface{}) {
+			if m != nil {
+				mO := m.(*abtestmodel.ABTest)
+				return &abtestmodel.ABTestValue{ABTestID: mO.ID}, &[]*abtestmodel.ABTestValue{}
+			}
+			return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{}
+		}, func(afo interfaces.IAdminFilterObjects, model interface{}, rp *interfaces.AdminRequestParams) interfaces.IAdminFilterObjects {
+			abTest := model.(*abtestmodel.ABTest)
+			var db *interfaces.UadminDatabase
+			if afo == nil {
+				db = interfaces.NewUadminDatabase()
+			} else {
+				db = afo.(*interfaces.AdminFilterObjects).UadminDatabase
+			}
+			return &interfaces.AdminFilterObjects{
+				GormQuerySet: interfaces.NewGormPersistenceStorage(db.Db.Model(&abtestmodel.ABTestValue{}).Where(&abtestmodel.ABTestValue{ABTestID: abTest.ID})),
+				Model: &abtestmodel.ABTestValue{},
+				UadminDatabase: db,
+				GenerateModelI: func() (interface{}, interface{}) {
+					return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{}
+				},
+			}
+		},
+	)
+	abTestValueInline.VerboseName = "AB Test Value"
+	abTestValueInline.ListDisplay.AddField(&interfaces.ListDisplay{
+		DisplayName: "Click through rate",
+		MethodName: "ClickThroughRate",
+	})
+	abTestValueInline.ListDisplay.AddField(&interfaces.ListDisplay{
+		DisplayName: "Preview",
+		MethodName: "PreviewFormList",
+	})
+	abtestmodelAdminPage.InlineRegistry.Add(abTestValueInline)
 	err = abTestAdminPage.SubPages.AddAdminPage(abtestmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))

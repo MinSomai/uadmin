@@ -1,0 +1,16 @@
+<div class="{{ .SelectorClass }}">
+    <h2>{{ .SelectTitle }}<span class="help help-tooltip help-icon" title="{{ .SelectHelp }}"></span></h2>
+    {{ if .SearchSelectHelp }}<p class="selector-filter"><label for="{{.Name}}"><span class="help-tooltip search-label-icon" title="{{ .SearchSelectHelp }}"></span></label> <input type="text" placeholder="Filter" id="{{.Name}}" class="filter-selector"></p>{{ end }}
+    <select {{ if .Multiple }}multiple{{ end }} name="{{.Name }}" data-placeholder="Select" class="{{ .SelectClass }} form-control" tabindex="2" {{Include "admin/widgets/attrs" }}>
+    {{ range $groupName, $groupChoices := .OptGroups }}
+    {{ if $groupName }}<optgroup label="{{ $groupName }}">{{end}}
+    {{ range $i, $option := $groupChoices }}
+    {{Include $option.OptionTemplateName $option }}
+    {{end}}
+    {{ if $groupName }}
+</optgroup>
+    {{end}}
+    {{end}}
+    </select>
+    <a title="{{ .HelpChooseAll }}" href="#" class="{{ .ChooseAllClass }} {{ if .ChooseAllIsActive }}active{{ end }}">{{ .ChooseAllText }}</a>
+</div>

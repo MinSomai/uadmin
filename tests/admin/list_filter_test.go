@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"gorm.io/gorm"
 	"strconv"
@@ -31,7 +30,7 @@ func (apts *AdminListFilterTestSuite) SetupTestData() {
 
 func (suite *AdminListFilterTestSuite) TestFiltering() {
 	suite.SetupTestData()
-	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	var users []interfaces.User
 	adminRequestParams := interfaces.NewAdminRequestParams()
@@ -44,7 +43,7 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 		UrlFilteringParam: "Username__exact",
 	}
 	adminUserPage.ListFilter.Add(listFilter)
-	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).PaginatedGormQuerySet.Find(&users)
+	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(&users)
 	assert.Equal(suite.T(), len(users), 1)
 }
 

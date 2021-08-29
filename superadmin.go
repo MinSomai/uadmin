@@ -117,11 +117,10 @@ Please provide flags -n and -e which are username and email of the user respecti
 		Username:     opts.Username,
 		Email: opts.Email,
 		Password:     hashedPassword,
-		RemoteAccess: true,
 		Active:       true,
 		IsSuperUser:    true,
 		Salt: salt,
-		IsPasswordConfigured: true,
+		IsPasswordUsable: true,
 	}
 	db.Create(&admin)
 	interfaces.Trail(interfaces.INFO, "Superuser created successfully")

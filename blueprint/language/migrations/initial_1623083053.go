@@ -22,10 +22,6 @@ func (m initial_1623083053) Up(uadminDatabase *interfaces.UadminDatabase) error 
     if err != nil {
         return err
     }
-    stmt := &gorm.Statement{DB: db}
-    stmt.Parse(&interfaces.Language{})
-    contentType := &interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}
-    db.Create(contentType)
     return nil
 }
 
@@ -39,7 +35,7 @@ func (m initial_1623083053) Down(uadminDatabase *interfaces.UadminDatabase) erro
     stmt := &gorm.Statement{DB: db}
     stmt.Parse(&interfaces.Language{})
     db.Model(&interfaces.ContentType{}).Where(&interfaces.ContentType{BlueprintName: "language", ModelName: stmt.Schema.Table}).First(&contentType)
-    db.Delete(&contentType)
+    db.Unscoped().Delete(&contentType)
     return nil
 }
 

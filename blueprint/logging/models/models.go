@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"github.com/uadmin/uadmin/interfaces"
 	"github.com/uadmin/uadmin/preloaded"
+	"gorm.io/gorm"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Action !
@@ -104,13 +106,16 @@ func HumanizeAction(action Action) string {
 
 // Log !
 type Log struct {
-	interfaces.Model
-	Username  string    `uadmin:"filter;read_only"`
-	Action    Action    `uadmin:"filter;read_only"`
-	TableName string    `uadmin:"filter;read_only"`
-	TableID   int       `uadmin:"filter;read_only"`
-	Activity  string    `uadmin:"code;read_only" gorm:"type:text"`
-	RollBack  string    `uadmin:"link;"`
+	ID        uint `gorm:"primarykey"`
+	ContentType interfaces.ContentType `uadminform:"ReadonlyField" uadmin:"list,search"`
+	ContentTypeID uint
+	ModelPK uint `uadmin:"list,search" uadminform:"ReadonlyField"`
+	Action    Action    `uadminform:"ReadonlyField" uadmin:"list,search"`
+	Username  string    `uadminform:"ReadonlyField" uadmin:"list,search"`
+	Activity  string    `gorm:"type:longtext" uadminform:"ReadonlyTextareaFieldOptions" uadmin:"list,search"`
+	CreatedAt time.Time `uadminform:"DateTimeFieldOptions" uadmin:"list,search"`
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func (l Log) String() string {
@@ -120,9 +125,9 @@ func (l Log) String() string {
 // Save !
 func (l *Log) Save() {
 	// database.Save(l)
-	if l.Action == l.Action.Modified() || l.Action == l.Action.Deleted() {
-		l.RollBack = preloaded.RootURL + "revertHandler/?log_id=" + fmt.Sprint(l.ID)
-	}
+	//if l.Action == l.Action.Modified() || l.Action == l.Action.Deleted() {
+	//	l.RollBack = preloaded.RootURL + "revertHandler/?log_id=" + fmt.Sprint(l.ID)
+	//}
 	// database.Save(l)
 }
 

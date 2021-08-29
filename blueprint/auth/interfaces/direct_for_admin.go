@@ -60,7 +60,7 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
 		return
 	}
-	if !user.IsPasswordConfigured {
+	if !user.IsPasswordUsable {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
 		return
 	}
@@ -134,7 +134,7 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 		Password:     hashedPassword,
 		Active:       true,
 		Salt: salt,
-		IsPasswordConfigured: true,
+		IsPasswordUsable: true,
 	}
 	db.Create(&user)
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry

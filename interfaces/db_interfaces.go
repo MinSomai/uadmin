@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/schema"
 	"reflect"
 	"text/template"
 )
@@ -29,39 +28,39 @@ type IDbAdapter interface {
 	Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB
 	ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error)
 	GetSqlDialectStrings() map[string]string
-	GetDb(alias_ ...string) (*gorm.DB, error)
+	GetDb(alias string, dryRun bool) (*gorm.DB, error)
 	CreateDb() error
 	Transaction(handler func()) error
 	GetStringToExtractYearFromField(filterOptionField string) string
 	GetStringToExtractMonthFromField(filterOptionField string) string
-	Exact(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	IExact(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Contains(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	IContains(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	In(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Gt(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Gte(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Lt(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Lte(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	StartsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	IStartsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	EndsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	IEndsWith(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Range(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Date(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Year(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Month(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Day(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Week(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	WeekDay(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Quarter(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Time(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Hour(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Minute(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Second(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	IsNull(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	Regex(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
-	IRegex(operatorContext *GormOperatorContext, field *schema.Field, value interface{})
+	Exact(operatorContext *GormOperatorContext, field *Field, value interface{})
+	IExact(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Contains(operatorContext *GormOperatorContext, field *Field, value interface{})
+	IContains(operatorContext *GormOperatorContext, field *Field, value interface{})
+	In(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Gt(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Gte(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Lt(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Lte(operatorContext *GormOperatorContext, field *Field, value interface{})
+	StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{})
+	IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{})
+	EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{})
+	IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Range(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Date(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Year(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Month(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Day(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Week(operatorContext *GormOperatorContext, field *Field, value interface{})
+	WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Quarter(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Time(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Hour(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Minute(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Second(operatorContext *GormOperatorContext, field *Field, value interface{})
+	IsNull(operatorContext *GormOperatorContext, field *Field, value interface{})
+	Regex(operatorContext *GormOperatorContext, field *Field, value interface{})
+	IRegex(operatorContext *GormOperatorContext, field *Field, value interface{})
 	BuildDeleteString(table string, cond string, values ...interface{}) *DeleteRowStructure
 }
 
@@ -86,7 +85,21 @@ func NewUadminDatabase(alias_ ...string) *UadminDatabase {
 	}
 	adapter := GetAdapterForDb(alias)
 	Db, _ = adapter.GetDb(
-		alias,
+		alias, false,
+	)
+	return &UadminDatabase{Db: Db, Adapter: adapter}
+}
+
+func NewUadminDatabaseWithoutConnection(alias_ ...string) *UadminDatabase {
+	var alias string
+	if len(alias_) == 0 {
+		alias = "default"
+	} else {
+		alias = alias_[0]
+	}
+	adapter := GetAdapterForDb(alias)
+	Db, _ = adapter.GetDb(
+		alias, true,
 	)
 	return &UadminDatabase{Db: Db, Adapter: adapter}
 }
@@ -147,7 +160,7 @@ func GetDB(alias_ ...string) *gorm.DB {
 	// Check if there is a database config file
 	dialect := GetAdapterForDb(alias)
 	Db, err = dialect.GetDb(
-		alias,
+		alias, false,
 	)
 	if err != nil {
 		Trail(ERROR, "unable to connect to DB. %s", err)

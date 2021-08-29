@@ -11,13 +11,13 @@ import (
 type Session struct {
 	Model
 	Key        string
-	User       User `uadmin:"filter"`
+	User       User
 	UserID     uint
 	LoginTime  time.Time
 	LastLogin  time.Time
-	Active     bool   `uadmin:"filter"`
-	IP         string `uadmin:"filter"`
-	PendingOTP bool   `uadmin:"filter"`
+	Active     bool   `gorm:"default:false"`
+	IP         string
+	PendingOTP bool
 	ExpiresOn  *time.Time
 	Data string `json:"data"`
 	_data map[string]string

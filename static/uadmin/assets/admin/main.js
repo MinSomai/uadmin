@@ -680,4 +680,136 @@ function notifyDemo() {
   }, 2000);
 }
 
-$("body").append('<script src="/static-inbuilt/uadmin/js/notify.min.js"></script>');
+$(document).ready(function() {
+  $('body').delegate('.available-select', 'change', function(ev) {
+    var select = $(ev.currentTarget);
+    console.log(select);
+    if (select.find('option:selected').length) {
+      select.parent().parent().parent().find('.selector-add').addClass('active');
+    } else {
+      select.parent().parent().parent().find('.selector-add').removeClass('active');
+    }
+  })
+  $('body').delegate('.chosen-select', 'change', function(ev) {
+    var select = $(ev.currentTarget);
+    if (select.find('option:selected').length) {
+      select.parent().parent().parent().find('.selector-remove').addClass('active');
+    } else {
+      select.parent().parent().parent().find('.selector-remove').removeClass('active');
+    }
+  })
+  $('body').delegate('.selector-add', 'click', function(ev) {
+    ev.preventDefault();
+    var control = $(ev.currentTarget);
+    var selectAvailable = control.parent().parent().prev();
+    var selectChosen = control.parent().parent().next();
+    var targetInput = selectAvailable.parent().parent().find(".target-input");
+    if (targetInput.val() == "") {
+      var valInputIds = [];
+    } else {
+      var valInputIds = targetInput.val().split(",");
+    }
+    selectAvailable.find('option:selected').map(function(_, opt) {
+      var newOpt = $(opt).clone().attr('selected', false);
+      selectChosen.find('select').append(newOpt);
+      valInputIds.push($(opt).val());
+      $(opt).remove();
+    });
+    control.removeClass('active');
+    targetInput.val(valInputIds.join(","));
+  });
+  $('body').delegate('.selector-remove', 'click', function(ev) {
+    ev.preventDefault();
+    var control = $(ev.currentTarget);
+    var selectAvailable = control.parent().parent().prev();
+    var targetInput = selectAvailable.parent().parent().find(".target-input");
+    if (targetInput.val() == "") {
+      var valInputIds = [];
+    } else {
+      var valInputIds = targetInput.val().split(",");
+    }
+
+    var selectChosen = control.parent().parent().next();
+    selectChosen.find('option:selected').map(function(_, opt) {
+      var newOpt = $(opt).clone().attr('selected', false);
+      selectAvailable.find('select').append(newOpt);
+      var index = valInputIds.indexOf($(opt).val());
+      if (index > -1) {
+        valInputIds.splice(index, 1);
+      }
+      $(opt).remove();
+    });
+    control.removeClass('active');
+    targetInput.val(valInputIds.join(","));
+  });
+  $('body').delegate('.selector-chooseall', 'click', function(ev) {
+    ev.preventDefault();
+    var control = $(ev.currentTarget);
+    var selectAvailable = control.prev();
+    var selectChosen = control.parent().parent().next().next();
+    var targetInput = control.parent().parent().parent().parent().find(".target-input");
+    if (targetInput.val() == "") {
+      var valInputIds = [];
+    } else {
+      var valInputIds = targetInput.val().split(",");
+    }
+    selectAvailable.find('option').map(function(_, opt) {
+      var newOpt = $(opt).clone().attr('selected', false);
+      selectChosen.find('select').append(newOpt);
+      valInputIds.push($(opt).val());
+      $(opt).remove();
+    });
+    control.removeClass('active');
+    targetInput.val(valInputIds.join(","));
+    control.parent().parent().parent().parent().find(".selector-clearall").addClass('active');
+  });
+  $('body').delegate('.selector-clearall', 'click', function(ev) {
+    ev.preventDefault();
+    var control = $(ev.currentTarget);
+    var selectChosen = control.prev();
+    var selectAvailable = control.parent().parent().prev().prev();
+    var targetInput = control.parent().parent().parent().parent().find(".target-input");
+    if (targetInput.val() == "") {
+      var valInputIds = [];
+    } else {
+      var valInputIds = targetInput.val().split(",");
+    }
+    selectChosen.find('option').map(function(_, opt) {
+      var newOpt = $(opt).clone().attr('selected', false);
+      selectAvailable.find('select').append(newOpt);
+      var index = valInputIds.indexOf($(opt).val());
+      if (index > -1) {
+        valInputIds.splice(index, 1);
+      }
+      $(opt).remove();
+    });
+    control.removeClass('active');
+    targetInput.val(valInputIds.join(","));
+    control.parent().parent().parent().parent().find(".selector-chooseall").addClass('active');
+  });
+  $('body').delegate('.filter-selector', 'keyup', function(ev) {
+    var control = $(ev.currentTarget);
+    var searchText = control.val().toLowerCase();
+    var select = control.parent().next();
+    select.find('option').map(function(_, opt) {
+      var optName = $(opt).text().toLowerCase();
+      if (optName.indexOf(searchText) !== -1) {
+        $(opt).show();
+      } else {
+        $(opt).hide();
+      }
+    });
+
+  });
+  $("body").append('<script src="/static-inbuilt/uadmin/js/notify.min.js"></script>');
+});
+
+$(document).ready(function() {
+  $('body').delegate('.add-related', 'click', function(ev) {
+    ev.preventDefault();
+    var name = $(ev.currentTarget).attr('href').replace(/[^a-zA-Z0-9]+/g, '');
+    var win = window.open($(ev.currentTarget).attr('href'), name, 'height=500,width=800,resizable=yes,scrollbars=yes');
+    win.focus();
+    return false;
+  });
+});

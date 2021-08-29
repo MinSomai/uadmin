@@ -72,6 +72,15 @@ func (ap *PermRegistry) AddPermission(permission CustomPermission, permissionBit
 	ap.PermNameBitInteger[permission] = permissionBit
 }
 
+func (ap *PermRegistry) GetPermissionName(permissionBit PermBitInteger) CustomPermission {
+	for permissionName, permissionBitTmp := range ap.PermNameBitInteger {
+		if permissionBitTmp == permissionBit {
+			return permissionName
+		}
+	}
+	return ""
+}
+
 func (ap *PermRegistry) GetPermissionBit(permission CustomPermission) PermBitInteger {
 	permissionBit, isRegistered := ap.PermNameBitInteger[permission]
 	if !isRegistered {

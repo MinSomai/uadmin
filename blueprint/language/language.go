@@ -3,9 +3,10 @@ package language
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/blueprint/language/migrations"
 	"github.com/uadmin/uadmin/interfaces"
+	"mime/multipart"
+	"strconv"
 )
 
 type Blueprint struct {
@@ -13,44 +14,49 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	languageAdminPage := admin.NewGormAdminPage(nil, func() (interface{}, interface{}) {return nil, nil}, "")
+	languageAdminPage := interfaces.NewGormAdminPage(
+		nil,
+		func() (interface{}, interface{}) {return nil, nil},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {return nil},
+	)
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
 	languageAdminPage.BlueprintName = "language"
 	languageAdminPage.Router = mainRouter
-	err := admin.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(languageAdminPage)
+	err := interfaces.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(languageAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))
 	}
-	languagemodelAdminPage := admin.NewGormAdminPage(languageAdminPage, func() (interface{}, interface{}) {return &interfaces.Language{}, &[]*interfaces.Language{}}, "language")
+	languagemodelAdminPage := interfaces.NewGormAdminPage(
+		languageAdminPage,
+		func() (interface{}, interface{}) {return &interfaces.Language{}, &[]*interfaces.Language{}},
+		func(modelI interface{}, ctx interfaces.IAdminContext) *interfaces.Form {
+			fields := []string{"EnglishName", "Name", "Flag", "Code", "RTL", "Default", "Active", "AvailableInGui"}
+			form := interfaces.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			defaultField, _ := form.FieldRegistry.GetByName("Default")
+			defaultField.Validators.AddValidator("only_one_default_language", func(i interface{}, o interface{}) error {
+				isDefault := i.(bool)
+				if !isDefault {
+					return nil
+				}
+				d := o.(*multipart.Form)
+				ID := d.Value["ID"][0]
+				uadminDatabase := interfaces.NewUadminDatabase()
+				lang := &interfaces.Language{}
+				uadminDatabase.Db.Where(&interfaces.Language{Default: true}).First(lang)
+				if lang.ID != 0 && ID != strconv.Itoa(int(lang.ID)) {
+					return fmt.Errorf("only one default language could be configured")
+				}
+				return nil
+			})
+			return form
+		},
+	)
 	languagemodelAdminPage.PageName = "Languages"
 	languagemodelAdminPage.Slug = "language"
 	languagemodelAdminPage.BlueprintName = "language"
 	languagemodelAdminPage.Router = mainRouter
-	adminContext := &interfaces.AdminContext{}
-	languageForm := interfaces.NewFormFromModelFromGinContext(adminContext, &interfaces.Language{}, make([]string, 0), []string{}, true, "")
-	languagemodelAdminPage.Form = languageForm
-	languagemodelAdminPage.ListDisplay.ClearAllFields()
-	codeField, _ := languageForm.FieldRegistry.GetByName("Code")
-	codeListDisplay := interfaces.NewListDisplay(codeField)
-	codeListDisplay.Ordering = 1
-	languagemodelAdminPage.ListDisplay.AddField(codeListDisplay)
-	nameField, _ := languageForm.FieldRegistry.GetByName("Name")
-	nameListDisplay := interfaces.NewListDisplay(nameField)
-	nameListDisplay.Ordering = 2
-	languagemodelAdminPage.ListDisplay.AddField(nameListDisplay)
-	englishNameField, _ := languageForm.FieldRegistry.GetByName("EnglishName")
-	englishNameListDisplay := interfaces.NewListDisplay(englishNameField)
-	englishNameListDisplay.Ordering = 3
-	languagemodelAdminPage.ListDisplay.AddField(englishNameListDisplay)
-	activeField, _ := languageForm.FieldRegistry.GetByName("Active")
-	activeListDisplay := interfaces.NewListDisplay(activeField)
-	activeListDisplay.Ordering = 4
-	languagemodelAdminPage.ListDisplay.AddField(activeListDisplay)
-	availableInGuiField, _ := languageForm.FieldRegistry.GetByName("AvailableInGui")
-	availableInGuiListDisplay := interfaces.NewListDisplay(availableInGuiField)
-	availableInGuiListDisplay.Ordering = 5
-	languagemodelAdminPage.ListDisplay.AddField(availableInGuiListDisplay)
+	languagemodelAdminPage.NoPermissionToAddNew = true
 	err = languageAdminPage.SubPages.AddAdminPage(languagemodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))

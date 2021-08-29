@@ -3,7 +3,6 @@ package admin
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"testing"
 	"time"
@@ -28,10 +27,10 @@ func (suite *FilterOptionTestSuite) TestFilterOptionByYear() {
 	userModel = &interfaces.User{Username: "admin3", Email: "admin3@example.com", FirstName: "firstname", LastName: "lastname", IsSuperUser: true}
 	userModel.CreatedAt = time.Now().Add((-1 * 12 * 86400 * 30) * time.Second)
 	uadminDatabase.Db.Create(userModel)
-	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	newFilterOption := interfaces.NewFilterOption()
-	newFilterOption.FetchOptions = func (afo *interfaces.AdminFilterObjects) []*interfaces.DisplayFilterOption {
+	newFilterOption.FetchOptions = func (afo interfaces.IAdminFilterObjects) []*interfaces.DisplayFilterOption {
 		return interfaces.FetchOptionsFromGormModelFromDateTimeField(afo, "created_at")
 	}
 	adminUserPage.FilterOptions.AddFilterOption(newFilterOption)
@@ -54,10 +53,10 @@ func (suite *FilterOptionTestSuite) TestFilterOptionByMonth() {
 	userModel = &interfaces.User{Username: "admin3", Email: "admin3@example.com", FirstName: "firstname", LastName: "lastname", IsSuperUser: true}
 	userModel.CreatedAt = time.Date(2020, time.April, 1, 0, 0, 0, 0, time.UTC)
 	uadminDatabase.Db.Create(userModel)
-	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	newFilterOption := interfaces.NewFilterOption()
-	newFilterOption.FetchOptions = func (afo *interfaces.AdminFilterObjects) []*interfaces.DisplayFilterOption {
+	newFilterOption.FetchOptions = func (afo interfaces.IAdminFilterObjects) []*interfaces.DisplayFilterOption {
 		return interfaces.FetchOptionsFromGormModelFromDateTimeField(afo, "created_at")
 	}
 	adminUserPage.FilterOptions = interfaces.NewFilterOptionsRegistry()

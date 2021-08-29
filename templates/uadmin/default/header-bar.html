@@ -2,13 +2,24 @@
     <div class="header-logo" style="display: block-inline;">
         <a href="{{.RootAdminURL}}">
             <img class="hvr-grow" style="max-height:40px" src="{{.Logo}}">
-            {{if .UserExists}}
-            <span class="admin_font fontwhite capitalized vertical-center bread_hide hidden-xs" >
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="no-style breadcrumb-item  active" ><i class="fa fa-home"></i> {{Tf "uadmin/system" .Language.Code "Dashboard"}} </span>
-          </span>
-            {{end}}
         </a>
     </div>
+    {{if .UserExists}}
+        <ul class="admin_font breadcrumbs fontwhite capitalized vertical-center hidden-xs">
+        {{ $breadcrumbNumber := 1 }}
+        {{ $language := .Language }}
+        {{ range $breadcrumb := .BreadCrumbs.GetAll }}
+            <li class="breadcrumb-item">
+            {{ if eq $breadcrumbNumber 1 }}
+            {{ end }}
+                <a href="{{ $breadcrumb.Url }}" class="no-style fontwhite">
+                  <span {{ if $breadcrumb.IsActive }}class="active"{{ end }}>{{ if $breadcrumb.Icon }}<i class="fa fa-{{ $breadcrumb.Icon }}"></i>{{ end }}{{Tf "uadmin/system" $language.Code $breadcrumb.Name }}</span>
+                </a>
+            {{ $breadcrumbNumber = (add $breadcrumbNumber 1) }}
+        {{ end }}
+            </li>
+        </ul>
+    {{end}}
     <div class="header-menu" style="display: block-inline;">
         {{if .UserExists}}
         <div class="admin-button ">

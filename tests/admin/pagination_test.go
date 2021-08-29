@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/admin"
 	"github.com/uadmin/uadmin/interfaces"
 	"strconv"
 	"testing"
@@ -30,14 +29,14 @@ func (apts *AdminPaginationTestSuite) SetupTestData() {
 
 func (suite *AdminPaginationTestSuite) TestPagination() {
 	suite.SetupTestData()
-	adminUserBlueprintPage, _ := admin.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	var users []interfaces.User
 	adminRequestParams := interfaces.NewAdminRequestParams()
-	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).PaginatedGormQuerySet.Find(&users)
+	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(&users)
 	assert.Equal(suite.T(), len(users), interfaces.CurrentConfig.D.Uadmin.AdminPerPage)
 	adminRequestParams.Paginator.Offset = 88
-	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).PaginatedGormQuerySet.Find(&users)
+	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(&users)
 	assert.Greater(suite.T(), len(users), interfaces.CurrentConfig.D.Uadmin.AdminPerPage)
 }
 

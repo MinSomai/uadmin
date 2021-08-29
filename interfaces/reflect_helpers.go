@@ -13,9 +13,13 @@ import (
 func SetUpStructField(structF reflect.Value, v interface{}) error {
 	switch structF.Kind() {
 	case reflect.Int:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Int8:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Int16:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Int32:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Int64:
 		v := v.(int64)
 		if !structF.OverflowInt(v) {
@@ -24,9 +28,13 @@ func SetUpStructField(structF reflect.Value, v interface{}) error {
 			return fmt.Errorf("can't set field with value %d", v)
 		}
 	case reflect.Uint:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Uint8:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Uint16:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Uint32:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Uint64:
 		v := v.(uint64)
 		if !structF.OverflowUint(v) {
@@ -35,12 +43,19 @@ func SetUpStructField(structF reflect.Value, v interface{}) error {
 			return fmt.Errorf("can't set field with value %d", v)
 		}
 	case reflect.Bool:
-		v := v.(string)
-		structF.SetBool(v != "")
+		vI := reflect.ValueOf(v)
+		switch vI.Kind() {
+		case reflect.String:
+			v := v.(string)
+			structF.SetBool(v != "")
+		case reflect.Bool:
+			structF.SetBool(v.(bool))
+		}
 	case reflect.String:
 		v := v.(string)
 		structF.SetString(v)
 	case reflect.Float32:
+		structF.Set(reflect.ValueOf(v))
 	case reflect.Float64:
 		v := v.(float64)
 		structF.SetFloat(v)
@@ -52,6 +67,9 @@ func SetUpStructField(structF reflect.Value, v interface{}) error {
 		case gorm.DeletedAt:
 			v := v.(gorm.DeletedAt)
 			structF.Set(reflect.ValueOf(v))
+		case ContentType:
+			v := v.(ContentType)
+			structF.Set(reflect.ValueOf(v))
 		}
 	}
 	return nil
@@ -59,23 +77,36 @@ func SetUpStructField(structF reflect.Value, v interface{}) error {
 
 func GetUadminFieldTypeFromGormField(gormField *schema.Field) UadminFieldType {
 	var t UadminFieldType
+	if gormField.PrimaryKey {
+		return PositiveIntegerUadminFieldType
+	}
 	switch gormField.FieldType.Kind() {
 	case reflect.Bool:
 		t = BooleanUadminFieldType
 	case reflect.Int:
-	case reflect.Int8:
-	case reflect.Int16:
-	case reflect.Int32:
-	case reflect.Int64:
-	case reflect.Uint:
-	case reflect.Uint8:
-	case reflect.Uint16:
-	case reflect.Uint32:
-	case reflect.Uint64:
 		t = IntegerUadminFieldType
+	case reflect.Int8:
+		t = IntegerUadminFieldType
+	case reflect.Int16:
+		t = IntegerUadminFieldType
+	case reflect.Int32:
+		t = IntegerUadminFieldType
+	case reflect.Int64:
+		t = BigIntegerUadminFieldType
+	case reflect.Uint:
+		t = PositiveIntegerUadminFieldType
+	case reflect.Uint8:
+		t = PositiveIntegerUadminFieldType
+	case reflect.Uint16:
+		t = PositiveIntegerUadminFieldType
+	case reflect.Uint32:
+		t = PositiveIntegerUadminFieldType
+	case reflect.Uint64:
+		t = PositiveBigIntegerUadminFieldType
 	case reflect.String:
 		t = TextUadminFieldType
 	case reflect.Float32:
+		t = FloatUadminFieldType
 	case reflect.Float64:
 		t = FloatUadminFieldType
 	case reflect.Struct:
@@ -141,6 +172,63 @@ func TransformValueForWidget(value interface{}) interface{} {
 			return value.(time.Time).Format(CurrentConfig.D.Uadmin.DateFormat)
 		case gorm.DeletedAt:
 			return value.(gorm.DeletedAt).Time.Format(CurrentConfig.D.Uadmin.DateFormat)
+		case ContentType:
+			ct := value.(ContentType)
+			return (&ct).String()
+		}
+		return ""
+	} else if r.Kind() == reflect.Ptr {
+		// @todo, handle pointer to time.Time
+		s := reflect.Indirect(reflect.ValueOf(value))
+		if !s.IsValid() {
+			return nil
+		}
+		switch s.Interface().(type) {
+		case time.Time:
+			return value.(*time.Time)
+		case ContentType:
+			ct := value.(ContentType)
+			return (&ct).String()
+		}
+	} else if typeString == "string" {
+		return value
+	} else if typeString == "int" {
+		return strconv.Itoa(value.(int))
+	} else if typeString == "uint" {
+		return fmt.Sprint(value.(uint))
+	} else if typeString == "Month" {
+		return strconv.Itoa(int(value.(time.Month)))
+	}
+	return value
+}
+
+func TransformDateTimeValueForWidget(value interface{}) interface{} {
+	r := reflect.TypeOf(value)
+	if value == nil {
+		return ""
+	}
+	var typeString string
+	if r.Kind() == reflect.Ptr {
+		typeString = r.Elem().Name()
+	} else {
+		typeString = r.Name()
+	}
+	if r.Kind() == reflect.Slice {
+		newSlice := make([]string, 0)
+		s := reflect.ValueOf(value)
+		for i := 0; i < s.Len(); i++ {
+			newSlice = append(newSlice, TransformValueForWidget(s.Index(i).Interface()).(string))
+		}
+		return newSlice
+	} else if r.Kind() == reflect.Bool {
+		return strconv.FormatBool(value.(bool))
+	} else if r.Kind() == reflect.Struct {
+		s := reflect.ValueOf(value)
+		switch s.Interface().(type) {
+		case time.Time:
+			return value.(time.Time).Format(CurrentConfig.D.Uadmin.DateTimeFormat)
+		case gorm.DeletedAt:
+			return value.(gorm.DeletedAt).Time.Format(CurrentConfig.D.Uadmin.DateTimeFormat)
 		}
 		return ""
 	} else if r.Kind() == reflect.Ptr {
@@ -220,7 +308,11 @@ func TransformValueForOperator(value interface{}) interface{} {
 	return value
 }
 
-func TransformValueForListDisplay(value interface{}) string {
+func TransformValueForListDisplay(value interface{}, forExportP ...bool) string {
+	forExport := false
+	if len(forExportP) > 0 {
+		forExport = forExportP[0]
+	}
 	r := reflect.TypeOf(value)
 	if value == nil {
 		return ""
@@ -239,7 +331,16 @@ func TransformValueForListDisplay(value interface{}) string {
 		}
 		return strings.Join(newSlice, ",")
 	} else if r.Kind() == reflect.Bool {
-		return strconv.FormatBool(value.(bool))
+		if !forExport {
+			v := value.(bool)
+			if v {
+				return "<i class=\"fa fa-check-circle\" aria-hidden=\"TRUE\" style=\"color:green;\"></i>"
+			} else {
+				return "<i class=\"fa fa-times-circle\" aria-hidden=\"TRUE\" style=\"color:red;\"></i>"
+			}
+		} else {
+			return strconv.FormatBool(value.(bool))
+		}
 	} else if r.Kind() == reflect.Struct {
 		s := reflect.ValueOf(value)
 		switch s.Interface().(type) {
@@ -261,6 +362,8 @@ func TransformValueForListDisplay(value interface{}) string {
 		}
 	} else if typeString == "string" {
 		return value.(string)
+	} else if typeString == "int64" {
+		return strconv.FormatInt(value.(int64), 10)
 	} else if typeString == "int" {
 		return strconv.Itoa(value.(int))
 	} else if typeString == "uint" {

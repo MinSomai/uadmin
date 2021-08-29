@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"mime/multipart"
 	"net/url"
 )
 
@@ -30,6 +31,14 @@ type IAdminContext interface {
 	SetUserPermissionRegistry(permRegistry *UserPermRegistry)
 	SetForm(form IForm)
 	SetCurrentQuery(currentQuery string)
+	SetBreadCrumbs(breadcrumbs *AdminBreadCrumbsRegistry)
+	GetSessionKey() string
+	SetID (ID uint)
+	GetID () uint
+	SetUserObject(u *User)
+	GetUserObject() *User
+	SetPostForm(formD *multipart.Form)
+	GetPostForm() *multipart.Form
 }
 
 type AdminContext struct {
@@ -49,12 +58,48 @@ type AdminContext struct {
 	RootAdminURL string
 	User string
 	UserExists bool
+	UserObject *User
 	Demo bool
 	UserPermissionRegistry *UserPermRegistry
 	CurrentURL string
 	CurrentQuery string
 	FullURL *url.URL
 	Form IForm
+	BreadCrumbs *AdminBreadCrumbsRegistry
+	ID uint
+	FormD *multipart.Form
+}
+
+func (c *AdminContext) SetID(ID uint) {
+	c.ID = ID
+}
+
+func (c *AdminContext) SetUserObject(u *User) {
+	c.UserObject = u
+}
+
+func (c *AdminContext) GetUserObject() *User {
+	return c.UserObject
+}
+
+func (c *AdminContext) SetPostForm(formD *multipart.Form) {
+	c.FormD = formD
+}
+
+func (c *AdminContext) GetPostForm() *multipart.Form {
+	return c.FormD
+}
+
+func (c *AdminContext) GetID() uint {
+	return c.ID
+}
+
+func (c *AdminContext) SetBreadCrumbs(breadcrumbs *AdminBreadCrumbsRegistry) {
+	c.BreadCrumbs = breadcrumbs
+}
+
+func (c *AdminContext) GetSessionKey() string {
+	return c.SessionKey
 }
 
 func (c *AdminContext) SetSiteName(siteName string) {

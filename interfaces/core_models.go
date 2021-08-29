@@ -2,14 +2,14 @@ package interfaces
 
 type Language struct {
 	Model
-	EnglishName    string `uadmin:"required;read_only;filter;search"`
-	Name           string `uadmin:"required;read_only;filter;search"`
-	Flag           string `uadmin:"image;list_exclude"`
-	Code           string `uadmin:"filter;read_only;list_exclude"`
-	RTL            bool   `uadmin:"list_exclude"`
-	Default        bool   `uadmin:"help:Set as the default language;list_exclude"`
-	Active         bool   `uadmin:"help:To show this in available languages;filter"`
-	AvailableInGui bool   `uadmin:"help:The App is available in this language;read_only"`
+	Code           string `gorm:"uniqueIndex;not null" uadminform:"ReadonlyField" uadmin:"list,search"`
+	Name           string `uadminform:"ReadonlyField" uadmin:"list,search"`
+	EnglishName    string `uadminform:"ReadonlyField" uadmin:"list,search"`
+	Active         bool   `gorm:"default:false" uadmin:"list"`
+	Flag           string `uadminform:"ImageFormOptions"`
+	RTL            bool   `gorm:"default:false"`
+	Default        bool   `gorm:"default:false"`
+	AvailableInGui bool   `gorm:"default:false" uadminform:"ReadonlyField" uadmin:"list"`
 }
 
 // String !
