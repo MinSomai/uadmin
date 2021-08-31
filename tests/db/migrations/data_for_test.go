@@ -334,7 +334,6 @@ func (m samenamemigration2_1621667392) Deps() []string {
 	return make([]string, 0)
 }
 
-
 var TestBlueprintMigrationRegistry *core.MigrationRegistry
 var Test1BlueprintMigrationRegistry *core.MigrationRegistry
 var TestBlueprint core.Blueprint
@@ -345,7 +344,6 @@ var BlueprintWithConflicts core.Blueprint
 
 var BlueprintWithNoMigrationsRegistry *core.MigrationRegistry
 var BlueprintWithNoMigrations core.Blueprint
-
 
 var BlueprintWithTwoSameDeps core.Blueprint
 

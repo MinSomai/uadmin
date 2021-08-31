@@ -9,8 +9,8 @@ import (
 )
 
 type ModelDescription struct {
-	Model interface{}
-	Statement *gorm.Statement
+	Model          interface{}
+	Statement      *gorm.Statement
 	GenerateModelI func() interface{}
 }
 
@@ -31,7 +31,7 @@ func (pmr *ProjectModelRegistry) RegisterModel(generateModelI func() interface{}
 	pmr.models[modelName] = &ModelDescription{Model: model, Statement: statement, GenerateModelI: generateModelI}
 }
 
-func (pmr *ProjectModelRegistry) Iterate() <- chan *ModelDescription {
+func (pmr *ProjectModelRegistry) Iterate() <-chan *ModelDescription {
 	chnl := make(chan *ModelDescription)
 	go func() {
 		defer close(chnl)
@@ -75,18 +75,18 @@ func ClearProjectModels() {
 }
 
 type RemovalTreeNode struct {
-	Model interface{}
+	Model            interface{}
 	ModelDescription *ModelDescription
-	Next []*RemovalTreeNode
-	Prev []*RemovalTreeNode
-	RawSQL []*DeleteRowStructure
-	Visited bool
-	Level int
+	Next             []*RemovalTreeNode
+	Prev             []*RemovalTreeNode
+	RawSQL           []*DeleteRowStructure
+	Visited          bool
+	Level            int
 }
 
 type RemovalTreeNodeStringified struct {
 	Explanation string
-	Level int
+	Level       int
 }
 
 type RemovalOrderList []*RemovalTreeNode
@@ -138,7 +138,7 @@ func (rtn *RemovalTreeNode) BuildDeletionTreeStringified(uadminDatabase *UadminD
 			for _, rawSQL := range removalTreeNode.RawSQL {
 				removalTreeStringified = append(removalTreeStringified, &RemovalTreeNodeStringified{
 					Explanation: fmt.Sprintf("Association with %s", rawSQL.Table),
-					Level: removalTreeNode.Level,
+					Level:       removalTreeNode.Level,
 				})
 			}
 		}
@@ -149,12 +149,12 @@ func (rtn *RemovalTreeNode) BuildDeletionTreeStringified(uadminDatabase *UadminD
 			url := fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, modelAdminPage.ParentPage.Slug, modelAdminPage.Slug)
 			removalTreeStringified = append(removalTreeStringified, &RemovalTreeNodeStringified{
 				Explanation: fmt.Sprintf("<a target='_blank' href='%s/%s'>%s</a>", url, Idv, reflect.ValueOf(removalTreeNode.Model).MethodByName("String").Call([]reflect.Value{})[0]),
-				Level: removalTreeNode.Level,
+				Level:       removalTreeNode.Level,
 			})
 		} else {
 			removalTreeStringified = append(removalTreeStringified, &RemovalTreeNodeStringified{
 				Explanation: fmt.Sprintf("%s", reflect.ValueOf(removalTreeNode.Model).MethodByName("String").Call([]reflect.Value{})[0]),
-				Level: removalTreeNode.Level,
+				Level:       removalTreeNode.Level,
 			})
 		}
 	}
@@ -170,12 +170,12 @@ func BuildRemovalTree(uadminDatabase *UadminDatabase, model interface{}, level .
 	}
 	modelInfo := ProjectModels.GetModelFromInterface(model)
 	removalTreeNode := &RemovalTreeNode{
-		Model: model,
-		Next: make([]*RemovalTreeNode, 0),
-		Prev: make([]*RemovalTreeNode, 0),
-		RawSQL: make([]*DeleteRowStructure, 0),
+		Model:            model,
+		Next:             make([]*RemovalTreeNode, 0),
+		Prev:             make([]*RemovalTreeNode, 0),
+		RawSQL:           make([]*DeleteRowStructure, 0),
 		ModelDescription: modelInfo,
-		Level: realLevel,
+		Level:            realLevel,
 	}
 	for modelDescription := range ProjectModels.Iterate() {
 		for _, relationShip := range modelDescription.Statement.Schema.Relationships.Relations {

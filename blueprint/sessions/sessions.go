@@ -87,7 +87,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 
 func (b Blueprint) Init() {
 	b.SessionAdapterRegistry.RegisterNewAdapter(&interfaces2.DbSession{}, true)
-	core.ProjectModels.RegisterModel(func() interface{}{return &core.Session{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &core.Session{} })
 }
 
 var ConcreteBlueprint = Blueprint{

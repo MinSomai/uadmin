@@ -15,8 +15,8 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingsAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
+		func() (interface{}, interface{}) { return nil, nil },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	settingsAdminPage.PageName = "Settings"
 	settingsAdminPage.Slug = "setting"
@@ -28,8 +28,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	settingmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
-		func() (interface{}, interface{}) {return &settingmodel.Setting{}, &[]*settingmodel.Setting{}},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
+		func() (interface{}, interface{}) { return &settingmodel.Setting{}, &[]*settingmodel.Setting{} },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
@@ -51,7 +51,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	settingcategoriesmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
-		func() (interface{}, interface{}) {return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}},
+		func() (interface{}, interface{}) {
+			return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
+		},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Name", "Icon"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -69,8 +71,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} {return &settingmodel.SettingCategory{}})
-	core.ProjectModels.RegisterModel(func() interface{}{return &settingmodel.Setting{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &settingmodel.SettingCategory{} })
+	core.ProjectModels.RegisterModel(func() interface{} { return &settingmodel.Setting{} })
 }
 
 var ConcreteBlueprint = Blueprint{

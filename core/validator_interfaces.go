@@ -23,7 +23,7 @@ func (vr *ValidatorRegistry) AddValidator(validatorName string, implementation I
 	vr.Validators[validatorName] = implementation
 }
 
-func (vr *ValidatorRegistry) GetValidator(validatorName string) (IValidator, error){
+func (vr *ValidatorRegistry) GetValidator(validatorName string) (IValidator, error) {
 	validator, exists := vr.Validators[validatorName]
 	if !exists {
 		return nil, fmt.Errorf("no %s validator registered", validatorName)
@@ -31,7 +31,7 @@ func (vr *ValidatorRegistry) GetValidator(validatorName string) (IValidator, err
 	return validator, nil
 }
 
-func (vr *ValidatorRegistry) GetAllValidators() <- chan IValidator{
+func (vr *ValidatorRegistry) GetAllValidators() <-chan IValidator {
 	chnl := make(chan IValidator)
 	go func() {
 		defer close(chnl)

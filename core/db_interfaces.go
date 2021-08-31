@@ -10,11 +10,11 @@ import (
 )
 
 type DeleteRowStructure struct {
-	SQL string
-	Values []interface{}
+	SQL         string
+	Values      []interface{}
 	Explanation string
-	Table string
-	Cond string
+	Table       string
+	Cond        string
 }
 
 type IDbAdapter interface {
@@ -67,7 +67,7 @@ type IDbAdapter interface {
 var Db *gorm.DB
 
 type UadminDatabase struct {
-	Db *gorm.DB
+	Db      *gorm.DB
 	Adapter IDbAdapter
 }
 
@@ -145,6 +145,7 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 type DatabaseSettings struct {
 	Default *DBSettings
 }
+
 var CurrentDatabaseSettings *DatabaseSettings
 
 // GetDB returns a pointer to the DB
@@ -169,8 +170,6 @@ func GetDB(alias_ ...string) *gorm.DB {
 	return Db
 }
 
-
-
 func GetAdapterForDb(alias_ ...string) IDbAdapter {
 	var databaseConfig *DBSettings
 	var alias string
@@ -184,4 +183,3 @@ func GetAdapterForDb(alias_ ...string) IDbAdapter {
 	}
 	return NewDbAdapter(Db, databaseConfig.Type)
 }
-

@@ -16,7 +16,7 @@ import (
 type MigrationTestSuite struct {
 	suite.Suite
 	app *uadmin.App
-	db *core.UadminDatabase
+	db  *core.UadminDatabase
 }
 
 func (suite *MigrationTestSuite) SetupTest() {
@@ -39,7 +39,6 @@ func (suite *MigrationTestSuite) TearDownSuite() {
 	}
 	uadmin.ClearTestApp()
 }
-
 
 func (suite *MigrationTestSuite) TestUpgradeDatabase() {
 	suite.app.BlueprintRegistry.Register(TestBlueprint)

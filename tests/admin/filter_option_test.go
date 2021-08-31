@@ -30,7 +30,7 @@ func (suite *FilterOptionTestSuite) TestFilterOptionByYear() {
 	adminUserBlueprintPage, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	newFilterOption := core.NewFilterOption()
-	newFilterOption.FetchOptions = func (afo core.IAdminFilterObjects) []*core.DisplayFilterOption {
+	newFilterOption.FetchOptions = func(afo core.IAdminFilterObjects) []*core.DisplayFilterOption {
 		return core.FetchOptionsFromGormModelFromDateTimeField(afo, "created_at")
 	}
 	adminUserPage.FilterOptions.AddFilterOption(newFilterOption)
@@ -56,7 +56,7 @@ func (suite *FilterOptionTestSuite) TestFilterOptionByMonth() {
 	adminUserBlueprintPage, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	newFilterOption := core.NewFilterOption()
-	newFilterOption.FetchOptions = func (afo core.IAdminFilterObjects) []*core.DisplayFilterOption {
+	newFilterOption.FetchOptions = func(afo core.IAdminFilterObjects) []*core.DisplayFilterOption {
 		return core.FetchOptionsFromGormModelFromDateTimeField(afo, "created_at")
 	}
 	adminUserPage.FilterOptions = core.NewFilterOptionsRegistry()

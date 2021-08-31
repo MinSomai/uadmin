@@ -21,8 +21,8 @@ import (
 var PopulateTemplateContextForAdminPanel func(ctx *gin.Context, context IAdminContext, adminRequestParams *AdminRequestParams)
 
 type DashboardAdminPanel struct {
-	AdminPages *AdminPageRegistry
-	ListHandler func (ctx *gin.Context)
+	AdminPages  *AdminPageRegistry
+	ListHandler func(ctx *gin.Context)
 }
 
 func (dap *DashboardAdminPanel) FindPageForGormModel(m interface{}) *AdminPage {
@@ -43,11 +43,11 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 		router.GET(CurrentConfig.D.Uadmin.RootAdminURL, dap.ListHandler)
 	}
 	for adminPage := range dap.AdminPages.GetAll() {
-		router.GET(fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug), func(pageTitle string, adminPageRegistry *AdminPageRegistry) func (ctx *gin.Context) {
+		router.GET(fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug), func(pageTitle string, adminPageRegistry *AdminPageRegistry) func(ctx *gin.Context) {
 			return func(ctx *gin.Context) {
 				type Context struct {
 					AdminContext
-					Menu string
+					Menu        string
 					CurrentPath string
 				}
 
@@ -64,27 +64,27 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 			if subPage.RegisteredHttpHandlers {
 				continue
 			}
-			router.Any(fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func (ctx *gin.Context) {
+			router.Any(fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					if adminPage.ListHandler != nil {
 						adminPage.ListHandler(ctx)
 					} else {
 						type Context struct {
 							AdminContext
-							AdminFilterObjects IAdminFilterObjects
-							ListDisplay *ListDisplayRegistry
-							PermissionForBlueprint *UserPerm
-							ListFilter *ListFilterRegistry
-							InitialOrder string
-							InitialOrderList []string
-							Search string
-							TotalRecords int64
-							TotalPages int64
-							ListEditableFormError bool
+							AdminFilterObjects       IAdminFilterObjects
+							ListDisplay              *ListDisplayRegistry
+							PermissionForBlueprint   *UserPerm
+							ListFilter               *ListFilterRegistry
+							InitialOrder             string
+							InitialOrderList         []string
+							Search                   string
+							TotalRecords             int64
+							TotalPages               int64
+							ListEditableFormError    bool
 							AdminModelActionRegistry *AdminModelActionRegistry
-							Message string
-							CurrentAdminContext IAdminContext
-							NoPermissionToAddNew bool
+							Message                  string
+							CurrentAdminContext      IAdminContext
+							NoPermissionToAddNew     bool
 						}
 
 						c := &Context{}
@@ -133,7 +133,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 					}
 				}
 			}(subPage))
-			router.POST(fmt.Sprintf("%s/%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug, "export"), func(adminPage *AdminPage) func (ctx *gin.Context) {
+			router.POST(fmt.Sprintf("%s/%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug, "export"), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					type Context struct {
 						AdminContext
@@ -176,22 +176,22 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 					ctx.Data(http.StatusOK, "application/octet-stream", b.Bytes())
 				}
 			}(subPage))
-			router.Any(fmt.Sprintf("%s/%s/%s/edit/:id", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func (ctx *gin.Context) {
+			router.Any(fmt.Sprintf("%s/%s/%s/edit/:id", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					id := ctx.Param("id")
 					type Context struct {
 						AdminContext
-						AdminModelActionRegistry *AdminModelActionRegistry
-						Message string
-						PermissionForBlueprint *UserPerm
-						Form *Form
-						Model interface{}
-						ID uint
-						IsNew bool
-						ListURL string
-						AdminPageInlineRegistry *AdminPageInlineRegistry
-						AdminRequestParams *AdminRequestParams
-						CurrentAdminContext IAdminContext
+						AdminModelActionRegistry    *AdminModelActionRegistry
+						Message                     string
+						PermissionForBlueprint      *UserPerm
+						Form                        *Form
+						Model                       interface{}
+						ID                          uint
+						IsNew                       bool
+						ListURL                     string
+						AdminPageInlineRegistry     *AdminPageInlineRegistry
+						AdminRequestParams          *AdminRequestParams
+						CurrentAdminContext         IAdminContext
 						ListEditableFormsForInlines *FormListEditableCollection
 					}
 
@@ -233,7 +233,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 						transactionerror := uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
 							afo := &AdminFilterObjects{UadminDatabase: &UadminDatabase{
 								Adapter: uadminDatabase.Adapter,
-								Db: tx,
+								Db:      tx,
 							}}
 							formError := form.ProceedRequest(requestForm, modelToSave, afo)
 							if formError.IsEmpty() {
@@ -247,7 +247,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 								for inline := range adminPage.InlineRegistry.GetAll() {
 									afo1 := &AdminFilterObjects{UadminDatabase: &UadminDatabase{
 										Adapter: uadminDatabase.Adapter,
-										Db: tx,
+										Db:      tx,
 									}}
 									inlineListEditableCollection, formError1 := inline.ProceedRequest(afo1, ctx, requestForm, modelToSave, adminRequestParams, c)
 									if formError1 != nil {
@@ -309,7 +309,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 				}
 			}(subPage))
 			for adminModelAction := range subPage.ModelActionsRegistry.GetAllModelActions() {
-				router.Any(fmt.Sprintf("%s/%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *AdminPage, slugifiedModelActionName string) func (ctx *gin.Context) {
+				router.Any(fmt.Sprintf("%s/%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *AdminPage, slugifiedModelActionName string) func(ctx *gin.Context) {
 					return func(ctx *gin.Context) {
 						adminPage.HandleModelAction(slugifiedModelActionName, ctx)
 					}
@@ -381,7 +381,7 @@ func init() {
 	)
 	removalModelAction.RequiresExtraSteps = true
 	removalModelAction.Description = "Delete users permanently"
-	removalModelAction.Handler = func (ap *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
+	removalModelAction.Handler = func(ap *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
 		removalPlan := make([]RemovalTreeList, 0)
 		removalConfirmed := ctx.PostForm("removal_confirmed")
 		afo.GetUadminDatabase().Db.Transaction(func(tx *gorm.DB) error {
@@ -413,8 +413,8 @@ func init() {
 			type Context struct {
 				AdminContext
 				RemovalPlan []RemovalTreeList
-				AdminPage *AdminPage
-				ObjectIds string
+				AdminPage   *AdminPage
+				ObjectIds   string
 			}
 			c := &Context{}
 			adminRequestParams := NewAdminRequestParams()
@@ -447,13 +447,13 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 	if modelI4 != nil {
 		form = NewFormFromModelFromGinContext(&AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
 		listDisplay = NewListDisplayRegistryFromGormModel(modelI4)
-		searchFieldRegistry =  NewSearchFieldRegistryFromGormModel(modelI4)
+		searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
 	}
 	return &AdminPage{
-		Form: form,
-		SubPages: NewAdminPageRegistry(),
+		Form:           form,
+		SubPages:       NewAdminPageRegistry(),
 		GenerateModelI: genModelI,
-		ParentPage: parentPage,
+		ParentPage:     parentPage,
 		GetQueryset: func(adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
 			db := uadminDatabase.Db
@@ -464,12 +464,12 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 			modelI2, _ := genModelI()
 			modelI3, _ := genModelI()
 			ret := &AdminFilterObjects{
-				InitialGormQuerySet: NewGormPersistenceStorage(db.Model(modelI)),
-				GormQuerySet: NewGormPersistenceStorage(db.Model(modelI1)),
+				InitialGormQuerySet:   NewGormPersistenceStorage(db.Model(modelI)),
+				GormQuerySet:          NewGormPersistenceStorage(db.Model(modelI1)),
 				PaginatedGormQuerySet: NewGormPersistenceStorage(db.Model(modelI2)),
-				Model: modelI3,
-				UadminDatabase: uadminDatabase,
-				GenerateModelI: genModelI,
+				Model:                 modelI3,
+				UadminDatabase:        uadminDatabase,
+				GenerateModelI:        genModelI,
 			}
 			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
 				url1, _ := url.Parse(adminRequestParams.RequestURL)
@@ -524,19 +524,19 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 			}
 			return ret
 		},
-		Model: modelI4,
-		ModelName: modelName,
-		Validators: NewValidatorRegistry(),
-		ExcludeFields: NewFieldRegistry(),
-		FieldsToShow: NewFieldRegistry(),
-		ModelActionsRegistry: NewAdminModelActionRegistry(),
-		InlineRegistry: NewAdminPageInlineRegistry(),
-		ListDisplay: listDisplay,
-		ListFilter: &ListFilterRegistry{ListFilter: make([]*ListFilter, 0)},
-		SearchFields: searchFieldRegistry,
-		Paginator: &Paginator{PerPage: CurrentConfig.D.Uadmin.AdminPerPage, ShowLastPageOnPreviousPage: true},
+		Model:                   modelI4,
+		ModelName:               modelName,
+		Validators:              NewValidatorRegistry(),
+		ExcludeFields:           NewFieldRegistry(),
+		FieldsToShow:            NewFieldRegistry(),
+		ModelActionsRegistry:    NewAdminModelActionRegistry(),
+		InlineRegistry:          NewAdminPageInlineRegistry(),
+		ListDisplay:             listDisplay,
+		ListFilter:              &ListFilterRegistry{ListFilter: make([]*ListFilter, 0)},
+		SearchFields:            searchFieldRegistry,
+		Paginator:               &Paginator{PerPage: CurrentConfig.D.Uadmin.AdminPerPage, ShowLastPageOnPreviousPage: true},
 		ActionsSelectionCounter: true,
-		FilterOptions: NewFilterOptionsRegistry(),
-		GenerateForm: generateForm,
+		FilterOptions:           NewFilterOptionsRegistry(),
+		GenerateForm:            generateForm,
 	}
 }

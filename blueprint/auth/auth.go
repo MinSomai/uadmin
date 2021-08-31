@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
 			type Context struct {
-				*core.AdminContext
+				core.AdminContext
 			}
 			c := &Context{}
 			adminRequestParams := core.NewAdminRequestParams()
@@ -40,8 +40,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("login"), c, core.FuncMap)
 		} else {
 			type Context struct {
-				*core.AdminContext
-				Menu     string
+				core.AdminContext
+				Menu        string
 				CurrentPath string
 			}
 
@@ -57,9 +57,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if core.CurrentConfig.GetUrlToUploadDirectory() != "" {
 		mainRouter.StaticFS(core.CurrentConfig.GetUrlToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetUrlToUploadDirectory())))
 	}
-	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
+	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile", func(ctx *gin.Context) {
 		type Context struct {
-			*core.AdminContext
+			core.AdminContext
 			ID           uint
 			Status       bool
 			IsUpdated    bool
@@ -68,9 +68,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			OTPImage     string
 			OTPRequired  bool
 			ChangesSaved bool
-			DBFields []*schema.Field
-			F *core.Form
-			User *core.User
+			DBFields     []*schema.Field
+			F            *core.Form
+			User         *core.User
 		}
 
 		c := &Context{}

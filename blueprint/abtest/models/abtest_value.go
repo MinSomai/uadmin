@@ -13,9 +13,9 @@ type ABTestValue struct {
 	ABTest      ABTest
 	ABTestID    uint
 	Value       string `uadmin:"inline"`
-	Active      bool `gorm:"default:false" uadmin:"inline"`
-	Impressions int `uadmin:"inline" gorm:"default:0"`
-	Clicks      int `uadmin:"inline" gorm:"default:0"`
+	Active      bool   `gorm:"default:false" uadmin:"inline"`
+	Impressions int    `uadmin:"inline" gorm:"default:0"`
+	Clicks      int    `uadmin:"inline" gorm:"default:0"`
 }
 
 func (a *ABTestValue) String() string {
@@ -27,7 +27,7 @@ func (a *ABTestValue) ClickThroughRate() string {
 	if a.Impressions == 0 {
 		return "0.0"
 	}
-	return fmt.Sprintf("%.2f", float64(a.Clicks) / float64(a.Impressions) * 100)
+	return fmt.Sprintf("%.2f", float64(a.Clicks)/float64(a.Impressions)*100)
 }
 
 // Preview__Form__List shows a preview of the AB test's value

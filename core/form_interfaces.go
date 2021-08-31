@@ -78,7 +78,7 @@ type IWidget interface {
 	SetAttr(attrName string, value string)
 	SetBaseFuncMap(baseFuncMap template.FuncMap)
 	InitializeAttrs()
-	SetFieldDisplayName (displayName string)
+	SetFieldDisplayName(displayName string)
 	SetReadonly(readonly bool)
 	GetValue() interface{}
 	ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error
@@ -132,27 +132,27 @@ const URLUadminFieldType UadminFieldType = "url"
 const UUIDUadminFieldType UadminFieldType = "uuid"
 
 type FieldConfig struct {
-	Widget IWidget
-	AutocompleteURL string
+	Widget                 IWidget
+	AutocompleteURL        string
 	DependsOnAnotherFields []string
 }
 
 type Field struct {
 	schema.Field
-	ReadOnly bool
+	ReadOnly        bool
 	UadminFieldType UadminFieldType
-	FieldConfig *FieldConfig
-	Required bool
-	DisplayName string
-	HelpText string
-	Choices *FieldChoiceRegistry
-	Validators *ValidatorRegistry
+	FieldConfig     *FieldConfig
+	Required        bool
+	DisplayName     string
+	HelpText        string
+	Choices         *FieldChoiceRegistry
+	Validators      *ValidatorRegistry
 	SortingDisabled bool
-	Populate func(field *Field, m interface{}) interface{}
-	Initial interface{}
-	WidgetType string
-	SetUpField func(w IWidget, modelI interface{}, v interface{}, afo IAdminFilterObjects) error
-	Ordering int
+	Populate        func(field *Field, m interface{}) interface{}
+	Initial         interface{}
+	WidgetType      string
+	SetUpField      func(w IWidget, modelI interface{}, v interface{}, afo IAdminFilterObjects) error
+	Ordering        int
 }
 
 func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) ValidationError {
@@ -179,7 +179,7 @@ func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) Valid
 type ValidationError []error
 
 type FieldRegistry struct {
-	Fields map[string]*Field
+	Fields      map[string]*Field
 	MaxOrdering int
 }
 
@@ -233,17 +233,17 @@ func NewFieldRegistry() *FieldRegistry {
 }
 
 type FieldFormOptions struct {
-	Name string
-	Initial interface{}
-	DisplayName string
-	Validators *ValidatorRegistry
-	Choices *FieldChoiceRegistry
-	HelpText string
-	WidgetType string
-	ReadOnly bool
-	Required bool
+	Name           string
+	Initial        interface{}
+	DisplayName    string
+	Validators     *ValidatorRegistry
+	Choices        *FieldChoiceRegistry
+	HelpText       string
+	WidgetType     string
+	ReadOnly       bool
+	Required       bool
 	WidgetPopulate func(m interface{}, currentField *Field) interface{}
-	IsFk bool
+	IsFk           bool
 }
 
 func (ffo *FieldFormOptions) GetName() string {
@@ -295,7 +295,7 @@ func (ffo *FieldFormOptions) GetIsRequired() bool {
 
 type ColumnSchema struct {
 	ShowLabel bool
-	Fields []*Field
+	Fields    []*Field
 }
 
 type FormRow struct {
@@ -327,19 +327,19 @@ func (tfr *GrouppedFieldsRegistry) AddGroup(grouppedFields *GrouppedFields) {
 }
 
 type GrouppedFields struct {
-	Rows []*FormRow
+	Rows            []*FormRow
 	ExtraCssClasses []string
-	Description string
-	Name string
+	Description     string
+	Name            string
 }
 
 type StaticFiles struct {
 	ExtraCSS []string
-	ExtraJS []string
+	ExtraJS  []string
 }
 
-type FormError struct{
-	FieldError map[string]ValidationError
+type FormError struct {
+	FieldError    map[string]ValidationError
 	GeneralErrors ValidationError
 }
 
@@ -361,7 +361,7 @@ func (e *FormError) GetErrorForField(fieldName string) ValidationError {
 
 func GetWidgetByWidgetType(widgetType string) IWidget {
 	var widget IWidget
-	switch(widgetType) {
+	switch widgetType {
 	case "image":
 		widget = &FileWidget{}
 		widget.SetAttr("accept", "image/*")
@@ -402,24 +402,24 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 }
 
 type Widget struct {
-	Attrs map[string]string
-	TemplateName string
-	Renderer ITemplateRenderer
-	Value interface{}
-	Name string
-	FieldDisplayName string
-	BaseFuncMap template.FuncMap
-	ReadOnly bool
+	Attrs             map[string]string
+	TemplateName      string
+	Renderer          ITemplateRenderer
+	Value             interface{}
+	Name              string
+	FieldDisplayName  string
+	BaseFuncMap       template.FuncMap
+	ReadOnly          bool
 	ShowOnlyHtmlInput bool
-	Required bool
-	OutputValue interface{}
-	ValidationErrors ValidationError
-	IsForAdmin bool
-	HelpText string
-	ValueChanged bool
-	Populate func(m interface{}, currentField *Field) interface{}
-	Prefix string
-	ValueConfigured bool
+	Required          bool
+	OutputValue       interface{}
+	ValidationErrors  ValidationError
+	IsForAdmin        bool
+	HelpText          string
+	ValueChanged      bool
+	Populate          func(m interface{}, currentField *Field) interface{}
+	Prefix            string
+	ValueConfigured   bool
 }
 
 func (w *Widget) SetValueConfigured() {
@@ -789,11 +789,11 @@ func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects)
 
 type URLWidget struct {
 	Widget
-	UrlValid bool
-	CurrentLabel string
-	Href string
-	Value string
-	ChangeLabel string
+	UrlValid                 bool
+	CurrentLabel             string
+	Href                     string
+	Value                    string
+	ChangeLabel              string
 	AppendHttpsAutomatically bool
 }
 
@@ -893,7 +893,7 @@ func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 		return nil
 	}
 	v, ok := form.Value[w.GetHtmlInputName()]
-	if (!w.Required) {
+	if !w.Required {
 		w.SetOutputValue("")
 		return nil
 	}
@@ -909,7 +909,6 @@ func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	w.SetOutputValue(v[0])
 	return nil
 }
-
 
 type HiddenWidget struct {
 	Widget
@@ -1217,22 +1216,22 @@ func (w *CheckboxWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 
 type SelectOptGroup struct {
 	OptLabel string
-	Value interface{}
+	Value    interface{}
 	Selected bool
-	Attrs map[string]string
+	Attrs    map[string]string
 }
 
 type SelectOptGroupStringified struct {
-	OptLabel string
-	Value string
-	Selected bool
+	OptLabel           string
+	Value              string
+	Selected           bool
 	OptionTemplateName string
-	Attrs map[string]string
+	Attrs              map[string]string
 }
 
 type SelectWidget struct {
 	Widget
-	OptGroups map[string][]*SelectOptGroup
+	OptGroups                map[string][]*SelectOptGroup
 	DontValidateForExistence bool
 }
 
@@ -1268,18 +1267,18 @@ func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext,
 				optionTemplateName = "admin/" + optionTemplateName
 			}
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
-				OptLabel: optGroup.OptLabel,
-				Value: value1,
-				Selected: value1 == value,
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           value1 == value,
 				OptionTemplateName: optionTemplateName,
-				Attrs: make(map[string]string),
+				Attrs:              make(map[string]string),
 			})
 		}
 	}
 	w.SetAttr("data-selected", value.(string))
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1327,7 +1326,7 @@ func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 
 type ContentTypeSelectorWidget struct {
 	Widget
-	OptGroups map[string][]*SelectOptGroup
+	OptGroups             map[string][]*SelectOptGroup
 	LoadFieldsOfAllModels bool
 }
 
@@ -1355,14 +1354,14 @@ func (w *ContentTypeSelectorWidget) PopulateSelectorOptions(afo IAdminFilterObje
 	}
 	defaultOption := &SelectOptGroup{
 		OptLabel: "Choose content type",
-		Value: "",
+		Value:    "",
 	}
 	w.OptGroups[""] = append(w.OptGroups[""], defaultOption)
 	for _, contentType := range contentTypes {
 		option := &SelectOptGroup{
 			OptLabel: contentType.String(),
-			Value: strconv.Itoa(int(contentType.ID)),
-			Attrs: make(map[string]string),
+			Value:    strconv.Itoa(int(contentType.ID)),
+			Attrs:    make(map[string]string),
 		}
 		option.Attrs["data-iden"] = fmt.Sprintf("%s:%s", contentType.BlueprintName, contentType.ModelName)
 		w.OptGroups[""] = append(w.OptGroups[""], option)
@@ -1384,11 +1383,11 @@ func (w *ContentTypeSelectorWidget) GetDataForRendering(formRenderContext *FormR
 				optionTemplateName = "admin/" + optionTemplateName
 			}
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
-				OptLabel: optGroup.OptLabel,
-				Value: value1,
-				Selected: value1 == value,
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           value1 == value,
 				OptionTemplateName: optionTemplateName,
-				Attrs: optGroup.Attrs,
+				Attrs:              optGroup.Attrs,
 			})
 		}
 	}
@@ -1416,7 +1415,7 @@ func (w *ContentTypeSelectorWidget) GetDataForRendering(formRenderContext *FormR
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 		"AllFields": allFields,
 	}
@@ -1474,11 +1473,11 @@ func (w *NullBooleanWidget) GetOptGroups() map[string][]*SelectOptGroup {
 		defaultOptGroups[""] = make([]*SelectOptGroup, 0)
 		defaultOptGroups[""] = append(defaultOptGroups[""], &SelectOptGroup{
 			OptLabel: "Yes",
-			Value: "yes",
+			Value:    "yes",
 		})
 		defaultOptGroups[""] = append(defaultOptGroups[""], &SelectOptGroup{
 			OptLabel: "No",
-			Value: "no",
+			Value:    "no",
 		})
 		return defaultOptGroups
 	}
@@ -1497,17 +1496,17 @@ func (w *NullBooleanWidget) GetDataForRendering(formRenderContext *FormRenderCon
 				optionTemplateName = "admin/" + optionTemplateName
 			}
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
-				OptLabel: optGroup.OptLabel,
-				Value: value1,
-				Selected: value1 == value,
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           value1 == value,
 				OptionTemplateName: optionTemplateName,
-				Attrs: make(map[string]string),
+				Attrs:              make(map[string]string),
 			})
 		}
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1584,17 +1583,17 @@ func (w *SelectMultipleWidget) GetDataForRendering(formRenderContext *FormRender
 				optionTemplateName = "admin/" + optionTemplateName
 			}
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
-				OptLabel: optGroup.OptLabel,
-				Value: value1,
-				Selected: Contains(value, value1),
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           Contains(value, value1),
 				OptionTemplateName: optionTemplateName,
-				Attrs: make(map[string]string),
+				Attrs:              make(map[string]string),
 			})
 		}
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1640,30 +1639,30 @@ func (w *SelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilte
 
 type RadioOptGroup struct {
 	OptLabel string
-	Value interface{}
+	Value    interface{}
 	Selected bool
-	Label string
+	Label    string
 }
 
 type RadioOptGroupStringified struct {
-	OptLabel string
-	Value string
-	Selected bool
+	OptLabel           string
+	Value              string
+	Selected           bool
 	OptionTemplateName string
-	WrapLabel bool
-	ForId string
-	Label string
-	Type string
-	Name string
-	Attrs map[string]string
-	FieldDisplayName string
-	ReadOnly bool
+	WrapLabel          bool
+	ForId              string
+	Label              string
+	Type               string
+	Name               string
+	Attrs              map[string]string
+	FieldDisplayName   string
+	ReadOnly           bool
 }
 
 type RadioSelectWidget struct {
 	Widget
 	OptGroups map[string][]*RadioOptGroup
-	Id string
+	Id        string
 	WrapLabel bool
 }
 
@@ -1698,22 +1697,22 @@ func (w *RadioSelectWidget) GetDataForRendering(formRenderContext *FormRenderCon
 				optionTemplateName = "admin/" + optionTemplateName
 			}
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &RadioOptGroupStringified{
-				OptLabel: optGroup.OptLabel,
-				Value: value1,
-				Selected: value == value1,
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           value == value1,
 				OptionTemplateName: optionTemplateName,
-				Label: optGroup.Label,
-				WrapLabel: w.WrapLabel,
-				ForId: w.Id,
-				Type: "radio",
-				Name: w.GetHtmlInputName(),
-				Attrs: w.Widget.GetAttrs(),
+				Label:              optGroup.Label,
+				WrapLabel:          w.WrapLabel,
+				ForId:              w.Id,
+				Type:               "radio",
+				Name:               w.GetHtmlInputName(),
+				Attrs:              w.Widget.GetAttrs(),
 			})
 		}
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(), "OptGroups": optGroupSstringified, "Id": w.Id,
+		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified, "Id": w.Id,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1760,7 +1759,7 @@ func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterOb
 type CheckboxSelectMultipleWidget struct {
 	Widget
 	OptGroups map[string][]*RadioOptGroup
-	Id string
+	Id        string
 	WrapLabel bool
 }
 
@@ -1795,22 +1794,22 @@ func (w *CheckboxSelectMultipleWidget) GetDataForRendering(formRenderContext *Fo
 				optionTemplateName = "admin/" + optionTemplateName
 			}
 			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &RadioOptGroupStringified{
-				OptLabel: optGroup.OptLabel,
-				Value: value1,
-				Selected: Contains(value, value1),
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           Contains(value, value1),
 				OptionTemplateName: optionTemplateName,
-				Label: optGroup.Label,
-				WrapLabel: w.WrapLabel,
-				ForId: w.Id,
-				Type: "checkbox",
-				Name: w.GetHtmlInputName(),
-				Attrs: w.Widget.GetAttrs(),
+				Label:              optGroup.Label,
+				WrapLabel:          w.WrapLabel,
+				ForId:              w.Id,
+				Type:               "checkbox",
+				Name:               w.GetHtmlInputName(),
+				Attrs:              w.Widget.GetAttrs(),
 			})
 		}
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(), "OptGroups": optGroupSstringified, "Id": w.Id,
+		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified, "Id": w.Id,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1856,9 +1855,9 @@ func (w *CheckboxSelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAd
 
 type FileWidget struct {
 	Widget
-	Storage IStorageInterface
+	Storage    IStorageInterface
 	UploadPath string
-	Multiple bool
+	Multiple   bool
 }
 
 func (w *FileWidget) GetWidgetType() WidgetType {
@@ -1903,7 +1902,7 @@ func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) 
 	if storage == nil {
 		storage = NewFsStorage()
 	}
-	ret  := make([]string, 0)
+	ret := make([]string, 0)
 	var filename string
 	for _, file := range files {
 		f, err := file.Open()
@@ -1916,9 +1915,9 @@ func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) 
 			return err
 		}
 		filename, err = storage.Save(&FileForStorage{
-			Content: bytecontent,
+			Content:           bytecontent,
 			PatternForTheFile: "*." + strings.Split(file.Filename, ".")[1],
-			Filename: file.Filename,
+			Filename:          file.Filename,
 		})
 		if err != nil {
 			return err
@@ -1931,7 +1930,7 @@ func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) 
 	}
 	if w.Multiple {
 		w.SetOutputValue(ret)
-	} else if len(ret)  > 0 {
+	} else if len(ret) > 0 {
 		w.SetOutputValue(ret[0])
 	} else {
 		w.SetOutputValue("")
@@ -1945,15 +1944,15 @@ type URLValue struct {
 
 type ClearableFileWidget struct {
 	Widget
-	InitialText string
-	CurrentValue *URLValue
-	Required bool
-	Id string
+	InitialText        string
+	CurrentValue       *URLValue
+	Required           bool
+	Id                 string
 	ClearCheckboxLabel string
-	InputText string
-	Storage IStorageInterface
-	UploadPath string
-	Multiple bool
+	InputText          string
+	Storage            IStorageInterface
+	UploadPath         string
+	Multiple           bool
 }
 
 func (w *ClearableFileWidget) GetWidgetType() WidgetType {
@@ -2010,7 +2009,7 @@ func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 	if storage == nil {
 		storage = NewFsStorage()
 	}
-	ret  := make([]string, 0)
+	ret := make([]string, 0)
 	var err error
 	var filename string
 	for _, file := range files {
@@ -2018,9 +2017,9 @@ func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 		bytecontent := make([]byte, file.Size)
 		_, err = f.Read(bytecontent)
 		filename, err = storage.Save(&FileForStorage{
-			Content: bytecontent,
+			Content:           bytecontent,
 			PatternForTheFile: "*." + strings.Split(file.Filename, ".")[1],
-			Filename: file.Filename,
+			Filename:          file.Filename,
 		})
 		if err != nil {
 			return err
@@ -2033,7 +2032,7 @@ func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 	}
 	if w.Multiple {
 		w.SetOutputValue(ret)
-	} else if len(ret)  > 0 {
+	} else if len(ret) > 0 {
 		w.SetOutputValue(ret[0])
 	} else {
 		w.SetOutputValue("")
@@ -2065,7 +2064,7 @@ func (w *MultipleInputHiddenWidget) Render(formRenderContext *FormRenderContext,
 	// spew.Dump("20", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(),
+		"Name":  w.GetHtmlInputName(),
 	}
 	data["Required"] = w.Required
 	data["Type"] = w.GetWidgetType()
@@ -2110,20 +2109,20 @@ func (w *MultipleInputHiddenWidget) ProceedForm(form *multipart.Form, afo IAdmin
 
 type ChooseFromSelectWidget struct {
 	Widget
-	PopulateLeftSide func()[]*SelectOptGroup
-	PopulateRightSide func()[]*SelectOptGroup
-	LeftSelectTitle string
-	LeftSelectHelp string
-	LeftHelpChooseAll string
-	LeftSearchSelectHelp string
-	LeftChooseAllText string
-	RightSelectTitle string
-	RightSelectHelp string
-	RightHelpChooseAll string
+	PopulateLeftSide      func() []*SelectOptGroup
+	PopulateRightSide     func() []*SelectOptGroup
+	LeftSelectTitle       string
+	LeftSelectHelp        string
+	LeftHelpChooseAll     string
+	LeftSearchSelectHelp  string
+	LeftChooseAllText     string
+	RightSelectTitle      string
+	RightSelectHelp       string
+	RightHelpChooseAll    string
 	RightSearchSelectHelp string
-	RightChooseAllText string
-	AddNewLink string
-	AddNewTitle string
+	RightChooseAllText    string
+	AddNewLink            string
+	AddNewTitle           string
 }
 
 func (w *ChooseFromSelectWidget) GetWidgetType() WidgetType {
@@ -2145,7 +2144,7 @@ func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, cu
 	// spew.Dump("21", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(),
+		"Name":  w.GetHtmlInputName(),
 	}
 	tmpOptions := w.PopulateLeftSide()
 	var leftSideOptions []*SelectOptGroup
@@ -2248,14 +2247,14 @@ func (w *ChooseFromSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFil
 
 type SplitDateTimeWidget struct {
 	Widget
-	DateAttrs map[string]string
-	TimeAttrs map[string]string
+	DateAttrs  map[string]string
+	TimeAttrs  map[string]string
 	DateFormat string
 	TimeFormat string
-	DateLabel string
-	TimeLabel string
-	DateValue string
-	TimeValue string
+	DateLabel  string
+	TimeLabel  string
+	DateValue  string
+	TimeValue  string
 }
 
 func (w *SplitDateTimeWidget) GetWidgetType() WidgetType {
@@ -2277,7 +2276,7 @@ func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, curre
 	// spew.Dump("23", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(),
+		"Name":  w.GetHtmlInputName(),
 	}
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
@@ -2336,12 +2335,12 @@ func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 	if w.ReadOnly {
 		return nil
 	}
-	vDate, ok := form.Value[w.GetHtmlInputName() + "_date"]
+	vDate, ok := form.Value[w.GetHtmlInputName()+"_date"]
 	if !ok {
 		return fmt.Errorf("no date has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DateValue = vDate[0]
-	vTime, ok := form.Value[w.GetHtmlInputName() + "_time"]
+	vTime, ok := form.Value[w.GetHtmlInputName()+"_time"]
 	if !ok {
 		return fmt.Errorf("no time has been submitted for field %s", w.FieldDisplayName)
 	}
@@ -2364,12 +2363,12 @@ func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 
 type SplitHiddenDateTimeWidget struct {
 	Widget
-	DateAttrs map[string]string
-	TimeAttrs map[string]string
+	DateAttrs  map[string]string
+	TimeAttrs  map[string]string
 	DateFormat string
 	TimeFormat string
-	DateValue string
-	TimeValue string
+	DateValue  string
+	TimeValue  string
 }
 
 func (w *SplitHiddenDateTimeWidget) GetWidgetType() WidgetType {
@@ -2391,7 +2390,7 @@ func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext,
 	// spew.Dump("24", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(),
+		"Name":  w.GetHtmlInputName(),
 	}
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
@@ -2440,12 +2439,12 @@ func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdmin
 	if w.ReadOnly {
 		return nil
 	}
-	vDate, ok := form.Value[w.GetHtmlInputName() + "_date"]
+	vDate, ok := form.Value[w.GetHtmlInputName()+"_date"]
 	if !ok {
 		return fmt.Errorf("no date has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DateValue = vDate[0]
-	vTime, ok := form.Value[w.GetHtmlInputName() + "_time"]
+	vTime, ok := form.Value[w.GetHtmlInputName()+"_time"]
 	if !ok {
 		return fmt.Errorf("no time has been submitted for field %s", w.FieldDisplayName)
 	}
@@ -2468,13 +2467,13 @@ func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdmin
 
 type SelectDateWidget struct {
 	Widget
-	Years []int
-	Months []*SelectOptGroup
-	EmptyLabel []*SelectOptGroup
+	Years            []int
+	Months           []*SelectOptGroup
+	EmptyLabel       []*SelectOptGroup
 	EmptyLabelString string
-	YearValue string
-	MonthValue string
-	DayValue string
+	YearValue        string
+	MonthValue       string
+	DayValue         string
 }
 
 func (w *SelectDateWidget) GetWidgetType() WidgetType {
@@ -2497,7 +2496,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	value := TransformValueForWidget(w.Value).(*time.Time)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name": w.GetHtmlInputName(),
+		"Name":  w.GetHtmlInputName(),
 	}
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
@@ -2526,7 +2525,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	if w.Years == nil {
 		initialYear := time.Now().Year()
 		w.Years = make([]int, 0)
-		for i := initialYear; i <= initialYear + 10; i++ {
+		for i := initialYear; i <= initialYear+10; i++ {
 			w.Years = append(w.Years, i)
 		}
 	}
@@ -2536,7 +2535,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	if w.EmptyLabel == nil {
 		noneValue := &SelectOptGroup{
 			OptLabel: w.EmptyLabelString,
-			Value: "",
+			Value:    "",
 		}
 		dayNoneValue = noneValue
 		yearNoneValue = noneValue
@@ -2564,14 +2563,14 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	for _, year := range w.Years {
 		yearChoices = append(yearChoices, &SelectOptGroup{
 			OptLabel: strconv.Itoa(year),
-			Value: strconv.Itoa(year),
+			Value:    strconv.Itoa(year),
 		})
 	}
 	var dayChoices []*SelectOptGroup
 	for i := 1; i < 32; i++ {
 		dayChoices = append(dayChoices, &SelectOptGroup{
 			OptLabel: strconv.Itoa(i),
-			Value: strconv.Itoa(i),
+			Value:    strconv.Itoa(i),
 		})
 		if !w.Required {
 			dayChoices = append(dayChoices, dayNoneValue)
@@ -2643,17 +2642,17 @@ func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 	if w.ReadOnly {
 		return nil
 	}
-	vYear, ok := form.Value[w.GetHtmlInputName() + "_year"]
+	vYear, ok := form.Value[w.GetHtmlInputName()+"_year"]
 	if !ok {
 		return fmt.Errorf("no year has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.YearValue = vYear[0]
-	vMonth, ok := form.Value[w.GetHtmlInputName() + "_month"]
+	vMonth, ok := form.Value[w.GetHtmlInputName()+"_month"]
 	if !ok {
 		return fmt.Errorf("no month has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.MonthValue = vMonth[0]
-	vDay, ok := form.Value[w.GetHtmlInputName() + "_day"]
+	vDay, ok := form.Value[w.GetHtmlInputName()+"_day"]
 	if !ok {
 		return fmt.Errorf("no month has been submitted for field %s", w.FieldDisplayName)
 	}
@@ -2681,72 +2680,72 @@ func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 func MakeMonthsSelect() []*SelectOptGroup {
 	ret := make([]*SelectOptGroup, 0)
 	ret = append(ret, &SelectOptGroup{
-		Value: "1",
+		Value:    "1",
 		OptLabel: "January",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "2",
+		Value:    "2",
 		OptLabel: "February",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "3",
+		Value:    "3",
 		OptLabel: "March",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "4",
+		Value:    "4",
 		OptLabel: "April",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "5",
+		Value:    "5",
 		OptLabel: "May",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "6",
+		Value:    "6",
 		OptLabel: "June",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "7",
+		Value:    "7",
 		OptLabel: "July",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "8",
+		Value:    "8",
 		OptLabel: "August",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "9",
+		Value:    "9",
 		OptLabel: "September",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "10",
+		Value:    "10",
 		OptLabel: "October",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "11",
+		Value:    "11",
 		OptLabel: "November",
 	})
 	ret = append(ret, &SelectOptGroup{
-		Value: "12",
+		Value:    "12",
 		OptLabel: "December",
 	})
 	return ret
 }
 
 type Form struct {
-	ExcludeFields IFieldRegistry
-	FieldsToShow IFieldRegistry
-	FieldRegistry IFieldRegistry
-	GroupsOfTheFields *GrouppedFieldsRegistry
-	TemplateName string
-	FormTitle string
-	Renderer ITemplateRenderer
-	RequestContext map[string]interface{}
-	ErrorMessage string
-	ExtraStatic *StaticFiles `json:"-"`
-	ForAdminPanel bool
-	FormError *FormError
+	ExcludeFields       IFieldRegistry
+	FieldsToShow        IFieldRegistry
+	FieldRegistry       IFieldRegistry
+	GroupsOfTheFields   *GrouppedFieldsRegistry
+	TemplateName        string
+	FormTitle           string
+	Renderer            ITemplateRenderer
+	RequestContext      map[string]interface{}
+	ErrorMessage        string
+	ExtraStatic         *StaticFiles `json:"-"`
+	ForAdminPanel       bool
+	FormError           *FormError
 	DontGenerateFormTag bool
-	Prefix string
-	RenderContext *FormRenderContext
+	Prefix              string
+	RenderContext       *FormRenderContext
 }
 
 func (f *Form) SetPrefix(prefix string) {
@@ -2757,8 +2756,8 @@ func (f *Form) SetPrefix(prefix string) {
 }
 
 func (f *Form) Render() string {
-	RenderFieldGroups := func(funcs1 template.FuncMap) func () string {
-		return func () string {
+	RenderFieldGroups := func(funcs1 template.FuncMap) func() string {
+		return func() string {
 			templateWriter := bytes.NewBuffer([]byte{})
 			ret := make([]string, 0)
 			for _, group := range f.GroupsOfTheFields.GrouppedFields {
@@ -2799,7 +2798,7 @@ func (f *Form) Render() string {
 		}
 		f.GroupsOfTheFields.GrouppedFields = grouppedFields
 	}
-	FieldValue := func (fieldName string, currentField *Field) interface{} {
+	FieldValue := func(fieldName string, currentField *Field) interface{} {
 		field, _ := f.FieldRegistry.GetByName(fieldName)
 		if field.FieldConfig.Widget.GetPopulate() != nil {
 			return field.FieldConfig.Widget.GetPopulate()(f.RenderContext.Model, currentField)
@@ -2832,7 +2831,7 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, afoP 
 		afo = afoP[0]
 	}
 	formError := &FormError{
-		FieldError: make(map[string]ValidationError),
+		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
@@ -2950,7 +2949,7 @@ func NewFormFromModel(gormModel interface{}, excludeFields []string, fieldsToSho
 			}
 		}
 		fieldToBeExcluded := Contains(excludeFields, field.Name)
-		if len(excludeFields) >0 && fieldToBeExcluded {
+		if len(excludeFields) > 0 && fieldToBeExcluded {
 			continue
 		}
 		uadminField := NewUadminFieldFromGormField(gormModelV, field, r, forAdmin)
@@ -2960,15 +2959,15 @@ func NewFormFromModel(gormModel interface{}, excludeFields []string, fieldsToSho
 	renderContext.Model = gormModel
 	form := &Form{
 		ExcludeFields: excludeFieldsRegistry,
-		FieldsToShow: fieldsToShowRegistry,
+		FieldsToShow:  fieldsToShowRegistry,
 		FieldRegistry: fieldRegistry,
-		Renderer: r,
+		Renderer:      r,
 		ExtraStatic: &StaticFiles{
 			ExtraCSS: make([]string, 0),
-			ExtraJS: make([]string, 0),
+			ExtraJS:  make([]string, 0),
 		},
 		FormError: &FormError{
-			FieldError: make(map[string]ValidationError),
+			FieldError:    make(map[string]ValidationError),
 			GeneralErrors: make(ValidationError, 0),
 		},
 		RenderContext: renderContext,
@@ -3016,15 +3015,14 @@ func NewFieldFromGormField(gormField *schema.Field, forcedWidgetType string) *Fi
 		widget.SetValue(gormField.DefaultValueInterface)
 	}
 	field := &Field{
-		Field: *gormField,
+		Field:           *gormField,
 		UadminFieldType: GetUadminFieldTypeFromGormField(gormField),
-		FieldConfig: &FieldConfig{Widget: widget},
-		Required: gormField.NotNull && !gormField.HasDefaultValue,
-		DisplayName: gormField.Name,
+		FieldConfig:     &FieldConfig{Widget: widget},
+		Required:        gormField.NotNull && !gormField.HasDefaultValue,
+		DisplayName:     gormField.Name,
 	}
 	return field
 }
-
 
 func GetWidgetFromUadminFieldTypeAndGormField(uadminFieldType UadminFieldType, gormField *schema.Field) IWidget {
 	var widget IWidget
@@ -3125,10 +3123,10 @@ func GetWidgetFromUadminFieldTypeAndGormField(uadminFieldType UadminFieldType, g
 }
 
 type FormListEditable struct {
-	FieldRegistry IFieldRegistry
-	Prefix string
+	FieldRegistry     IFieldRegistry
+	Prefix            string
 	FormRenderContext *FormRenderContext
-	FormError *FormError
+	FormError         *FormError
 }
 
 type InlineFormListEditableCollection map[string]*FormListEditable
@@ -3149,7 +3147,7 @@ func (flec *FormListEditableCollection) GetForInlineAndForModel(prefix string, I
 	return flec.InlineCollection[prefix][IdS]
 }
 
-func (flec *FormListEditableCollection) GetForInlineNew(prefix string) <- chan *FormListEditable {
+func (flec *FormListEditableCollection) GetForInlineNew(prefix string) <-chan *FormListEditable {
 	chnl := make(chan *FormListEditable)
 	go func() {
 		defer close(chnl)
@@ -3188,7 +3186,7 @@ func (f *FormListEditable) ExistsField(ld *ListDisplay) bool {
 
 func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interface{}) *FormError {
 	formError := &FormError{
-		FieldError: make(map[string]ValidationError),
+		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
@@ -3245,7 +3243,7 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 	}
 	ret.FormRenderContext = &FormRenderContext{Model: model}
 	ret.FormError = &FormError{
-		FieldError: make(map[string]ValidationError),
+		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
 	return ret
@@ -3271,7 +3269,7 @@ func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, pref
 	}
 	ret.FormRenderContext = &FormRenderContext{Model: model}
 	ret.FormError = &FormError{
-		FieldError: make(map[string]ValidationError),
+		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
 	return ret

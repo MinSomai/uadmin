@@ -32,9 +32,9 @@ func (suite *FsStorageTestSuite) TearDownSuite() {
 func (suite *FsStorageTestSuite) TestFullFlow() {
 	fsStorage := core.NewFsStorage()
 	uploadedFile, _ := fsStorage.Save(&core.FileForStorage{
-		Content: []byte("test"),
+		Content:           []byte("test"),
 		PatternForTheFile: "*.txt",
-		Filename: "uploaded.txt",
+		Filename:          "uploaded.txt",
 	})
 	assert.NotEmpty(suite.T(), uploadedFile)
 	fileContent, _ := fsStorage.Read(uploadedFile)

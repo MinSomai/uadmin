@@ -16,12 +16,12 @@ type ITemplateRenderer interface {
 }
 
 type IncludeContext struct {
-	SiteName    string
+	SiteName  string
 	PageTitle string
 }
 
 type TemplateRenderer struct {
-	funcMap template.FuncMap
+	funcMap   template.FuncMap
 	pageTitle string
 }
 
@@ -30,8 +30,8 @@ func (tr *TemplateRenderer) AddFuncMap(funcName string, concreteFunc interface{}
 }
 
 func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) {
-	Include := func(funcs1 template.FuncMap) func (templateName string, data1 ...interface{}) string {
-		return func (templateName string, data1 ...interface{}) string {
+	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) string {
+		return func(templateName string, data1 ...interface{}) string {
 			data2 := data
 			if len(data1) == 1 {
 				data2 = data1[0]
@@ -55,8 +55,8 @@ func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, da
 }
 
 func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) string {
-	Include := func(funcs1 template.FuncMap) func (templateName string, data1 ...interface{}) string {
-		return func (templateName string, data1 ...interface{}) string {
+	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) string {
+		return func(templateName string, data1 ...interface{}) string {
 			data2 := data
 			if len(data1) == 1 {
 				data2 = data1[0]
@@ -88,7 +88,6 @@ func NewTemplateRenderer(pageTitle string) ITemplateRenderer {
 	return &templateRenderer
 }
 
-
 // RenderHTML creates a new template and applies a parsed template to the specified
 // data object. For function, Tf is available by default and if you want to add functions
 //to your template, just add them to funcs which will add them to the template with their
@@ -103,7 +102,7 @@ func RenderHTML(ctx *gin.Context, fsys fs.FS, path string, data interface{}, bas
 	} else {
 		funcs1 = funcs[0]
 	}
-	for k,v := range baseFuncMap {
+	for k, v := range baseFuncMap {
 		funcs1[k] = v
 	}
 	//// Check for ABTesting cookie
@@ -119,7 +118,7 @@ func RenderHTML(ctx *gin.Context, fsys fs.FS, path string, data interface{}, bas
 	//}
 	templateNameParts := strings.Split(path, "/")
 	templateContent, _ := fs.ReadFile(fsys, path)
-	newT, err := template.New(templateNameParts[len(templateNameParts) - 1]).Funcs(funcs1).Parse(
+	newT, err := template.New(templateNameParts[len(templateNameParts)-1]).Funcs(funcs1).Parse(
 		string(templateContent),
 	)
 	if err != nil {
@@ -167,7 +166,7 @@ func RenderHTMLAsString(writer *bytes.Buffer, fsys fs.FS, path string, data inte
 	} else {
 		funcs1 = funcs[0]
 	}
-	for k,v := range baseFuncMap {
+	for k, v := range baseFuncMap {
 		funcs1[k] = v
 	}
 	//includeToKeep, includeToKeepExists := funcs1["IncludeToKeep"]
@@ -191,7 +190,7 @@ func RenderHTMLAsString(writer *bytes.Buffer, fsys fs.FS, path string, data inte
 	//}
 	templateNameParts := strings.Split(path, "/")
 	templateContent, _ := fs.ReadFile(fsys, path)
-	newT, err := template.New(templateNameParts[len(templateNameParts) - 1]).Funcs(funcs1).Parse(
+	newT, err := template.New(templateNameParts[len(templateNameParts)-1]).Funcs(funcs1).Parse(
 		string(templateContent),
 	)
 	if err != nil {
@@ -207,4 +206,3 @@ func RenderHTMLAsString(writer *bytes.Buffer, fsys fs.FS, path string, data inte
 	}
 	return nil
 }
-

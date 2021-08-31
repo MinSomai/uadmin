@@ -26,7 +26,7 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 	adminModelAction := core.NewAdminModelAction(
 		"TurnSuperusersToNormalUsers", &core.AdminActionPlacement{},
 	)
-	adminModelAction.Handler = func (ap *core.AdminPage, afo core.IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
+	adminModelAction.Handler = func(ap *core.AdminPage, afo core.IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
 		tx := afo.GetFullQuerySet().Update("IsSuperUser", false).Commit()
 		return tx.(*core.GormPersistenceStorage).Db.Error == nil, tx.(*core.GormPersistenceStorage).Db.RowsAffected
 	}
@@ -35,7 +35,7 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 	req, _ := http.NewRequest("POST", "/admin/users/user/turnsuperuserstonormalusers/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	for adminModelAction := range adminUserPage.ModelActionsRegistry.GetAllModelActions() {
-		suite.App.Router.Any(fmt.Sprintf("%s/%s/%s/%s/", core.CurrentConfig.D.Uadmin.RootAdminURL, "users", adminUserPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *core.AdminPage, slugifiedModelActionName string) func (ctx *gin.Context) {
+		suite.App.Router.Any(fmt.Sprintf("%s/%s/%s/%s/", core.CurrentConfig.D.Uadmin.RootAdminURL, "users", adminUserPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *core.AdminPage, slugifiedModelActionName string) func(ctx *gin.Context) {
 			return func(ctx *gin.Context) {
 				adminPage.HandleModelAction(slugifiedModelActionName, ctx)
 			}

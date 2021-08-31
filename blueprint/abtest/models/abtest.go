@@ -38,8 +38,8 @@ type ABTest struct {
 	ContentType   core.ContentType `uadmin:"list" uadminform:"ContentTypeFieldOptions"`
 	ContentTypeID uint
 	Field         string `uadmin:"list" uadminform:"RequiredSelectFieldOptions"`
-	PrimaryKey    uint `uadmin:"list" gorm:"default:0"`
-	Active        bool `gorm:"default:false" uadmin:"list"`
+	PrimaryKey    uint   `uadmin:"list" gorm:"default:0"`
+	Active        bool   `gorm:"default:false" uadmin:"list"`
 	Group         string `uadmin:"list"`
 }
 

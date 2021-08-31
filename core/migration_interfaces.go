@@ -52,12 +52,12 @@ func GetBluePrintNameFromMigrationName(migrationName string) string {
 }
 
 type MigrationNode struct {
-	Deps *list.List
-	Node IMigration
+	Deps     *list.List
+	Node     IMigration
 	Children *list.List
-	applied bool
-	isRoot bool
-	dummy bool
+	applied  bool
+	isRoot   bool
+	dummy    bool
 }
 
 func (n MigrationNode) IsDummy() bool {
@@ -161,12 +161,12 @@ func NewMigrationNode(dep IMigrationNode, node IMigration, child IMigrationNode)
 		childrenList.PushBack(child)
 	}
 	return &MigrationNode{
-		Deps: depsList,
-		Node: node,
+		Deps:     depsList,
+		Node:     node,
 		Children: childrenList,
-		applied: false,
-		dummy: false,
-		isRoot: false,
+		applied:  false,
+		dummy:    false,
+		isRoot:   false,
 	}
 }
 
@@ -176,14 +176,14 @@ func NewMigrationRootNode() IMigrationNode {
 		Node:     nil,
 		Children: list.New(),
 		applied:  false,
-		dummy: true,
-		isRoot: true,
+		dummy:    true,
+		isRoot:   true,
 	}
 }
 
 type MigrationTree struct {
-	Root  IMigrationNode
-	nodes map[string]IMigrationNode
+	Root      IMigrationNode
+	nodes     map[string]IMigrationNode
 	treeBuilt bool
 }
 
@@ -195,7 +195,7 @@ func (t MigrationTree) IsTreeBuilt() bool {
 	return t.treeBuilt
 }
 
-func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationNode, error){
+func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationNode, error) {
 	node, ok := t.nodes[migrationName]
 	if ok {
 		return node, nil
@@ -229,7 +229,7 @@ func (m MigrationList) Len() int { return len(m) }
 func (m MigrationList) Less(i, j int) bool {
 	return m[i].GetId() < m[j].GetId()
 }
-func (m MigrationList) Swap(i, j int){ m[i], m[j] = m[j], m[i] }
+func (m MigrationList) Swap(i, j int) { m[i], m[j] = m[j], m[i] }
 
 type MigrationDepList []string
 
@@ -237,7 +237,7 @@ func (m MigrationDepList) Len() int { return len(m) }
 func (m MigrationDepList) Less(i, j int) bool {
 	return i < j
 }
-func (m MigrationDepList) Swap(i, j int){ m[i], m[j] = m[j], m[i] }
+func (m MigrationDepList) Swap(i, j int) { m[i], m[j] = m[j], m[i] }
 
 type MigrationRegistry struct {
 	migrations map[string]IMigration

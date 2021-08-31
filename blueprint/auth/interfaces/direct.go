@@ -19,15 +19,15 @@ import (
 // Binding from JSON
 type LoginParams struct {
 	// SigninByField     string `form:"username" json:"username" xml:"username"  binding:"required"`
-	SigninField     string `form:"signinfield" json:"signinfield" xml:"signinfield"  binding:"required"`
-	Password string `form:"password" json:"password" xml:"password" binding:"required"`
-	OTP string `form:"otp" json:"otp" xml:"otp" binding:"omitempty"`
+	SigninField string `form:"signinfield" json:"signinfield" xml:"signinfield"  binding:"required"`
+	Password    string `form:"password" json:"password" xml:"password" binding:"required"`
+	OTP         string `form:"otp" json:"otp" xml:"otp" binding:"omitempty"`
 }
 
 type SignupParams struct {
-	Username string    `form:"username" json:"username" xml:"username"  binding:"required" valid:"username-unique"`
-	Email string    `form:"email" json:"email" xml:"email"  binding:"required" valid:"email,email-unique"`
-	Password string `form:"password" json:"password" xml:"password" binding:"required"`
+	Username          string `form:"username" json:"username" xml:"username"  binding:"required" valid:"username-unique"`
+	Email             string `form:"email" json:"email" xml:"email"  binding:"required" valid:"email,email-unique"`
+	Password          string `form:"password" json:"password" xml:"password" binding:"required"`
 	ConfirmedPassword string `form:"confirm_password" json:"confirm_password" xml:"confirm_password" binding:"required"`
 }
 
@@ -66,7 +66,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
 		return
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password + user.Salt))
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password+user.Salt))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
 		return
@@ -87,7 +87,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	cookieName := core.CurrentConfig.D.Uadmin.ApiCookieName
 	cookie, err := c.Cookie(cookieName)
-	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
+	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second
 	sessionExpirationTime := time.Now().Add(sessionDuration)
 	if cookie != "" {
 		sessionAdapter, _ = sessionAdapter.GetByKey(cookie)
@@ -114,7 +114,7 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 		return
 	}
 	passwordValidationStruct := &user2.PasswordValidationStruct{
-		Password: json.Password,
+		Password:          json.Password,
 		ConfirmedPassword: json.ConfirmedPassword,
 	}
 	_, err = govalidator.ValidateStruct(passwordValidationStruct)
@@ -140,11 +140,11 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass(json.Password, salt)
 	user := core.User{
-		Username:     json.Username,
-		Email: json.Email,
-		Password:     hashedPassword,
-		Active:       true,
-		Salt: salt,
+		Username:         json.Username,
+		Email:            json.Email,
+		Password:         hashedPassword,
+		Active:           true,
+		Salt:             salt,
 		IsPasswordUsable: true,
 	}
 	db.Db.Create(&user)
@@ -152,7 +152,7 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter = sessionAdapter.Create()
 	sessionAdapter.SetUser(&user)
-	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration)*time.Second
+	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second
 	sessionExpirationTime := time.Now().Add(sessionDuration)
 	sessionAdapter.ExpiresOn(&sessionExpirationTime)
 	sessionAdapter.Save()
@@ -182,7 +182,7 @@ func (ap *DirectAuthProvider) Logout(c *gin.Context) {
 		return
 	}
 	sessionAdapter.Delete()
-	timeInPast := time.Now().Add(-10*time.Minute)
+	timeInPast := time.Now().Add(-10 * time.Minute)
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     cookieName,
 		Value:    url.QueryEscape(""),

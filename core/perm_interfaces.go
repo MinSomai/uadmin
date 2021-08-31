@@ -7,12 +7,12 @@ import (
 
 type PermissionDescribed struct {
 	Name CustomPermission
-	Bit PermBitInteger
+	Bit  PermBitInteger
 }
 type IPermissionRegistry interface {
 	AddPermission(permission CustomPermission, permissionBit PermBitInteger)
 	GetPermissionBit(permission CustomPermission) PermBitInteger
-	GetAllPermissions() <- chan *PermissionDescribed
+	GetAllPermissions() <-chan *PermissionDescribed
 }
 
 type IUserPermissionRegistry interface {
@@ -23,7 +23,7 @@ type CustomPermission string
 
 type UserPermRegistry struct {
 	BlueprintPerm map[string]*UserPerm
-	IsSuperUser bool
+	IsSuperUser   bool
 }
 
 func getPermissionAliasForBlueprintAndModel(blueprintName string, modelName string) string {
@@ -63,7 +63,7 @@ type PermRegistry struct {
 	PermNameBitInteger map[CustomPermission]PermBitInteger
 }
 
-func (ap *PermRegistry) AddPermission(permission CustomPermission, permissionBit PermBitInteger){
+func (ap *PermRegistry) AddPermission(permission CustomPermission, permissionBit PermBitInteger) {
 	_, isRegistered := ap.PermNameBitInteger[permission]
 	if isRegistered {
 		Trail(WARNING, "you are overriding permission with name %s", permission)
@@ -89,7 +89,7 @@ func (ap *PermRegistry) GetPermissionBit(permission CustomPermission) PermBitInt
 	return permissionBit
 }
 
-func (ap *PermRegistry) GetAllPermissions() <- chan *PermissionDescribed {
+func (ap *PermRegistry) GetAllPermissions() <-chan *PermissionDescribed {
 	chnl := make(chan *PermissionDescribed)
 	go func() {
 		defer close(chnl)
@@ -102,7 +102,7 @@ func (ap *PermRegistry) GetAllPermissions() <- chan *PermissionDescribed {
 
 type UserPerm struct {
 	PermBitInteger PermBitInteger
-	IsSuperUser bool
+	IsSuperUser    bool
 }
 
 func (ap *UserPerm) DoesUserHaveRightFor(permissionName CustomPermission) bool {

@@ -17,13 +17,13 @@ type IStorageInterface interface {
 }
 
 type FileForStorage struct {
-	Content []byte
+	Content           []byte
 	PatternForTheFile string
-	Filename string
+	Filename          string
 }
 type FsStorage struct {
 	UploadPath string
-	UrlPath string
+	UrlPath    string
 }
 
 func (s *FsStorage) GetUploadUrl() string {

@@ -8,7 +8,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
 	"math"
 	"reflect"
 	"strconv"
@@ -311,15 +310,13 @@ func (d *SqliteDialect) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 	var err error
 	if CurrentConfig.D.Uadmin.DebugTests {
 		db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
 			DisableForeignKeyConstraintWhenMigrating: true,
-			DryRun: dryRun,
+			DryRun:                                   dryRun,
 		})
 	} else {
 		db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
 			DisableForeignKeyConstraintWhenMigrating: true,
-			DryRun: dryRun,
+			DryRun:                                   dryRun,
 		})
 	}
 	//var db *gorm.DB

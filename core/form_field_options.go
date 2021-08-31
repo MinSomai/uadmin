@@ -20,79 +20,79 @@ func init() {
 		Options: make(map[string]IFieldFormOptions),
 	}
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "RequiredSelectFieldOptions",
+		Name:       "RequiredSelectFieldOptions",
 		WidgetType: "select",
-		Required: true,
+		Required:   true,
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "ContentTypeFieldOptions",
+		Name:       "ContentTypeFieldOptions",
 		WidgetType: "contenttypeselector",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "SelectFieldOptions",
+		Name:       "SelectFieldOptions",
 		WidgetType: "select",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "ReadonlyTextareaFieldOptions",
+		Name:       "ReadonlyTextareaFieldOptions",
 		WidgetType: "textarea",
-		ReadOnly: true,
+		ReadOnly:   true,
 	})
 	fieldChoiceRegistry := FieldChoiceRegistry{}
 	fieldChoiceRegistry.Choices = make([]*FieldChoice, 0)
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "UsernameOptions",
-		Initial: "InitialUsername",
+		Name:        "UsernameOptions",
+		Initial:     "InitialUsername",
 		DisplayName: "Username",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "ImageFormOptions",
+		Name:       "ImageFormOptions",
 		WidgetType: "image",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "OTPRequiredOptions",
+		Name:       "OTPRequiredOptions",
 		WidgetType: "hidden",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "ReadonlyField",
+		Name:     "ReadonlyField",
 		ReadOnly: true,
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "PasswordOptions",
+		Name:       "PasswordOptions",
 		WidgetType: "password",
-		HelpText: "To reset password, clear the field and type a new password.",
+		HelpText:   "To reset password, clear the field and type a new password.",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "ChooseFromSelectOptions",
+		Name:       "ChooseFromSelectOptions",
 		WidgetType: "choose_from_select",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "DateTimeFieldOptions",
+		Name:       "DateTimeFieldOptions",
 		WidgetType: "datetime",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "DatetimeReadonlyFieldOptions",
+		Name:       "DatetimeReadonlyFieldOptions",
 		WidgetType: "datetime",
-		ReadOnly: true,
+		ReadOnly:   true,
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "RequiredFieldOptions",
+		Name:     "RequiredFieldOptions",
 		Required: true,
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "FkFieldOptions",
-		IsFk: true,
+		Name:       "FkFieldOptions",
+		IsFk:       true,
 		WidgetType: "fklink",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "FkReadonlyFieldOptions",
-		IsFk: true,
-		ReadOnly: true,
+		Name:       "FkReadonlyFieldOptions",
+		IsFk:       true,
+		ReadOnly:   true,
 		WidgetType: "fklink",
 	})
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
-		Name: "FkRequiredFieldOptions",
-		IsFk: true,
-		Required: true,
+		Name:       "FkRequiredFieldOptions",
+		IsFk:       true,
+		Required:   true,
 		WidgetType: "fklink",
 	})
 }

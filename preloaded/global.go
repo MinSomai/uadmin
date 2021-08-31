@@ -338,7 +338,6 @@ var MatchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 // langMapCache is a computer memory used for storage of frequently or recently used translations.
 var LangMapCache = map[string][]byte{}
 
-
 var Registered = false
 
 var HandlersRegistered = false
@@ -354,4 +353,3 @@ type ListData struct {
 
 // CKey is the standard key used in uAdmin for context keys
 type CKey string
-

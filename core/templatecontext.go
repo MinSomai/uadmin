@@ -6,7 +6,6 @@ import (
 )
 
 type IForm interface {
-
 }
 
 type IAdminContext interface {
@@ -33,8 +32,8 @@ type IAdminContext interface {
 	SetCurrentQuery(currentQuery string)
 	SetBreadCrumbs(breadcrumbs *AdminBreadCrumbsRegistry)
 	GetSessionKey() string
-	SetID (ID uint)
-	GetID () uint
+	SetID(ID uint)
+	GetID() uint
 	SetUserObject(u *User)
 	GetUserObject() *User
 	SetPostForm(formD *multipart.Form)
@@ -42,32 +41,32 @@ type IAdminContext interface {
 }
 
 type AdminContext struct {
-	Err         string
-	PageTitle string
-	ErrExists   bool
-	SiteName    string
-	Languages   []Language
-	RootURL     string
-	OTPRequired bool
-	Language    *Language
-	Username    string
-	Password    string
-	Logo        string
-	FavIcon     string
-	SessionKey string
-	RootAdminURL string
-	User string
-	UserExists bool
-	UserObject *User
-	Demo bool
+	Err                    string
+	PageTitle              string
+	ErrExists              bool
+	SiteName               string
+	Languages              []Language
+	RootURL                string
+	OTPRequired            bool
+	Language               *Language
+	Username               string
+	Password               string
+	Logo                   string
+	FavIcon                string
+	SessionKey             string
+	RootAdminURL           string
+	User                   string
+	UserExists             bool
+	UserObject             *User
+	Demo                   bool
 	UserPermissionRegistry *UserPermRegistry
-	CurrentURL string
-	CurrentQuery string
-	FullURL *url.URL
-	Form IForm
-	BreadCrumbs *AdminBreadCrumbsRegistry
-	ID uint
-	FormD *multipart.Form
+	CurrentURL             string
+	CurrentQuery           string
+	FullURL                *url.URL
+	Form                   IForm
+	BreadCrumbs            *AdminBreadCrumbsRegistry
+	ID                     uint
+	FormD                  *multipart.Form
 }
 
 func (c *AdminContext) SetID(ID uint) {
@@ -185,4 +184,3 @@ func (c *AdminContext) SetError(err string) {
 func (c *AdminContext) SetErrorExists() {
 	c.ErrExists = true
 }
-

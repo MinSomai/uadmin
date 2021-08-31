@@ -16,8 +16,8 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abTestAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
+		func() (interface{}, interface{}) { return nil, nil },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
@@ -30,7 +30,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	abtestmodelAdminPage := core.NewGormAdminPage(
 		abTestAdminPage,
-		func() (interface{}, interface{}) {return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{}},
+		func() (interface{}, interface{}) { return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{} },
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"ContentType", "Type", "Name", "Field", "PrimaryKey", "Active", "Group", "StaticPath"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -41,15 +41,15 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			w.OptGroups[""] = make([]*core.SelectOptGroup, 0)
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "unknown",
-				Value: "0",
+				Value:    "0",
 			})
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "static",
-				Value: "1",
+				Value:    "1",
 			})
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "model",
-				Value: "2",
+				Value:    "2",
 			})
 			typeField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *core.Field) interface{} {
 				a := m.(*abtestmodel.ABTest).Type
@@ -112,11 +112,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abTestValueInline.VerboseName = "AB Test Value"
 	abTestValueInline.ListDisplay.AddField(&core.ListDisplay{
 		DisplayName: "Click through rate",
-		MethodName: "ClickThroughRate",
+		MethodName:  "ClickThroughRate",
 	})
 	abTestValueInline.ListDisplay.AddField(&core.ListDisplay{
 		DisplayName: "Preview",
-		MethodName: "PreviewFormList",
+		MethodName:  "PreviewFormList",
 	})
 	abtestmodelAdminPage.InlineRegistry.Add(abTestValueInline)
 	err = abTestAdminPage.SubPages.AddAdminPage(abtestmodelAdminPage)
@@ -126,8 +126,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{}{return &abtestmodel.ABTestValue{}})
-	core.ProjectModels.RegisterModel(func() interface{}{return &abtestmodel.ABTest{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &abtestmodel.ABTestValue{} })
+	core.ProjectModels.RegisterModel(func() interface{} { return &abtestmodel.ABTest{} })
 }
 
 var ConcreteBlueprint = Blueprint{

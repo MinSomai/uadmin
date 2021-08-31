@@ -11,20 +11,21 @@ import (
 
 type GormOperatorContext struct {
 	TableName string
-	Tx IPersistenceStorage
+	Tx        IPersistenceStorage
 	Statement *gorm.Statement
 }
+
 // tx *gorm.DB, field *schema.Field
 
 type IRegisterDbHandler interface {
-	RegisterFunc (name string, impl interface{}, pure bool) error
+	RegisterFunc(name string, impl interface{}, pure bool) error
 }
 
 type IGormOperator interface {
 	Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}) *GormOperatorContext
 	GetName() string
-	RegisterDbHandlers (registerDbHandler IRegisterDbHandler) error
-	TransformValue (value string) interface{}
+	RegisterDbHandlers(registerDbHandler IRegisterDbHandler) error
+	TransformValue(value string) interface{}
 }
 
 type ExactGormOperator struct {
@@ -606,7 +607,7 @@ func (gor *GormOperatorRegistry) GetOperatorByName(operatorName string) (IGormOp
 	return operator, nil
 }
 
-func (gor *GormOperatorRegistry) GetAll() <- chan IGormOperator {
+func (gor *GormOperatorRegistry) GetAll() <-chan IGormOperator {
 	chnl := make(chan IGormOperator)
 	go func() {
 		defer close(chnl)
@@ -618,9 +619,9 @@ func (gor *GormOperatorRegistry) GetAll() <- chan IGormOperator {
 }
 
 type GormQueryBuilder struct {
-	FilterString []string
+	FilterString     []string
 	OperatorRegistry *GormOperatorRegistry
-	Model interface{}
+	Model            interface{}
 }
 
 var ProjectGormOperatorRegistry *GormOperatorRegistry
@@ -663,7 +664,7 @@ func NewGormOperatorContext(db IPersistenceStorage, model interface{}) *GormOper
 	statement := &gorm.Statement{DB: db.(*GormPersistenceStorage).Db}
 	statement.Parse(model)
 	return &GormOperatorContext{
-		Tx: db,
+		Tx:        db,
 		TableName: statement.Table,
 		Statement: statement,
 	}
@@ -711,12 +712,12 @@ func FilterGormModel(adapter IDbAdapter, db IPersistenceStorage, schema1 *schema
 					),
 				)
 			}
-			filterRelation := strings.Replace(filter, field.Name + "__", "", 1)
+			filterRelation := strings.Replace(filter, field.Name+"__", "", 1)
 			//// uadminDatabase
 			FilterGormModel(adapter, context.Tx, field.Schema, []string{filterRelation}, joinModelI.Model)
 			continue
 		}
-		operator, _ := ProjectGormOperatorRegistry.GetOperatorByName(filterNameParams[len(filterNameParams) - 1])
+		operator, _ := ProjectGormOperatorRegistry.GetOperatorByName(filterNameParams[len(filterNameParams)-1])
 		filterValueTransformed := operator.TransformValue(filterValue)
 		context = operator.Build(adapter, context, uadminField, filterValueTransformed)
 	}

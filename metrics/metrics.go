@@ -16,7 +16,6 @@ var SystemMetrics = false
 // UserMetrics enables the user metrics to be recorded
 var UserMetrics = false
 
-
 func getRRDTemplate(name string) (*rrd.RRD, error) {
 	tmpl := rrd.RRD{}
 	buf, err := ioutil.ReadFile("templates/uadmin/rrd/" + name + ".json")

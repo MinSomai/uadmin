@@ -3,8 +3,8 @@
 package core
 
 import (
-"fmt"
-"os"
+	"fmt"
+	"os"
 )
 
 func Syslogf(level int, msg string, a ...interface{}) error {
@@ -16,4 +16,3 @@ func Syslogf(level int, msg string, a ...interface{}) error {
 	f.Close()
 	return nil
 }
-

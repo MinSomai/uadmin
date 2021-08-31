@@ -11,7 +11,7 @@ func mul(n1 int, n2 int) int {
 }
 
 var FuncMap = template.FuncMap{
-	"Tf": Tf,
+	"Tf":  Tf,
 	"add": add,
 	"mul": mul,
 	//"CSRF": func() string {

@@ -48,7 +48,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	sessionAdapterRegistry := sessionsblueprint1.(sessionsblueprint.Blueprint).SessionAdapterRegistry
 	defaultAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	defaultAdapter = defaultAdapter.Create()
-	expiresOn := time.Now().Add(-5*time.Minute)
+	expiresOn := time.Now().Add(-5 * time.Minute)
 	defaultAdapter.ExpiresOn(&expiresOn)
 	defaultAdapter.Save()
 	// directProvider.
@@ -61,11 +61,11 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		return strings.Contains(w.Body.String(), "session expired")
 	})
 	expiresOn = time.Now()
-	expiresOn = expiresOn.Add(10*time.Minute)
+	expiresOn = expiresOn.Add(10 * time.Minute)
 	defaultAdapter.ExpiresOn(&expiresOn)
 	defaultAdapter.Save()
 	req.URL = &url.URL{
-		Path:"/auth/direct-for-admin/status/",
+		Path: "/auth/direct-for-admin/status/",
 	}
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "for-uadmin-panel")
@@ -82,12 +82,12 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
 	user := core.User{
-		FirstName:    "testuser-firstname",
-		LastName:     "testuser-lastname",
-		Username:     "test",
-		Password:     hashedPassword,
-		Active:       false,
-		Salt: salt,
+		FirstName:        "testuser-firstname",
+		LastName:         "testuser-lastname",
+		Username:         "test",
+		Password:         hashedPassword,
+		Active:           false,
+		Salt:             salt,
 		IsPasswordUsable: true,
 	}
 	uadminDatabase := core.NewUadminDatabase()
@@ -179,7 +179,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	sessionAdapterRegistry := sessionsblueprint1.(sessionsblueprint.Blueprint).SessionAdapterRegistry
 	defaultAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	defaultAdapter = defaultAdapter.Create()
-	expiresOn := time.Now().Add(-5*time.Minute)
+	expiresOn := time.Now().Add(-5 * time.Minute)
 	defaultAdapter.ExpiresOn(&expiresOn)
 	defaultAdapter.Save()
 	// directProvider.
@@ -192,7 +192,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		return strings.Contains(w.Body.String(), "session expired")
 	})
 	expiresOn = time.Now()
-	expiresOn = expiresOn.Add(10*time.Minute)
+	expiresOn = expiresOn.Add(10 * time.Minute)
 	defaultAdapter.ExpiresOn(&expiresOn)
 	defaultAdapter.Save()
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -210,12 +210,12 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
 	user := core.User{
-		FirstName:    "testuser-firstname",
-		LastName:     "testuser-lastname",
-		Username:     "test",
-		Password:     hashedPassword,
-		Active:       false,
-		Salt: salt,
+		FirstName:        "testuser-firstname",
+		LastName:         "testuser-lastname",
+		Username:         "test",
+		Password:         hashedPassword,
+		Active:           false,
+		Salt:             salt,
 		IsPasswordUsable: true,
 	}
 	uadminDatabase := core.NewUadminDatabase()
@@ -347,7 +347,6 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 		return strings.Contains(w.Header().Get("Set-Cookie"), "uadmin-admin=")
 	})
 }
-
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run

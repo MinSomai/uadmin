@@ -8,6 +8,7 @@ import (
 type BlueprintRouting struct {
 	core.Blueprint
 }
+
 var ConcreteBlueprint BlueprintRouting
 var visited = false
 

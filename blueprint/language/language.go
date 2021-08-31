@@ -16,8 +16,8 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	languageAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
+		func() (interface{}, interface{}) { return nil, nil },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	languagemodelAdminPage := core.NewGormAdminPage(
 		languageAdminPage,
-		func() (interface{}, interface{}) {return &core.Language{}, &[]*core.Language{}},
+		func() (interface{}, interface{}) { return &core.Language{}, &[]*core.Language{} },
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"EnglishName", "Name", "Flag", "Code", "RTL", "Default", "Active", "AvailableInGui"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -64,7 +64,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{}{return &core.Language{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &core.Language{} })
 }
 
 var ConcreteBlueprint = Blueprint{

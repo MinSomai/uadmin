@@ -14,7 +14,7 @@ func Contains(s []string, e string) bool {
 	return false
 }
 
-func GenerateNumberSequence(start int, stop int) <- chan int {
+func GenerateNumberSequence(start int, stop int) <-chan int {
 	chnl := make(chan int)
 	go func() {
 		i := start
@@ -32,14 +32,14 @@ func GenerateNumberSequence(start int, stop int) <- chan int {
 
 func CloneNetUrl(url1 *url.URL) *url.URL {
 	clonedUrl := &url.URL{
-		Scheme: url1.Scheme,
-		Opaque: url1.Opaque,
-		Host: url1.Host,
-		Path: url1.Path,
-		RawPath: url1.RawPath,
-		ForceQuery: url1.ForceQuery,
-		RawQuery: url1.RawQuery,
-		Fragment: url1.Fragment,
+		Scheme:      url1.Scheme,
+		Opaque:      url1.Opaque,
+		Host:        url1.Host,
+		Path:        url1.Path,
+		RawPath:     url1.RawPath,
+		ForceQuery:  url1.ForceQuery,
+		RawQuery:    url1.RawQuery,
+		Fragment:    url1.Fragment,
 		RawFragment: url1.RawFragment,
 	}
 	return clonedUrl

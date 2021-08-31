@@ -19,17 +19,17 @@ import (
 
 type AdminRequestPaginator struct {
 	PerPage int
-	Offset int
+	Offset  int
 }
 
 type AdminRequestParams struct {
-	CreateSession bool
+	CreateSession     bool
 	GenerateCSRFToken bool
-	NeedAllLanguages bool
-	Paginator *AdminRequestPaginator
-	RequestURL string
-	Search string
-	Ordering []string
+	NeedAllLanguages  bool
+	Paginator         *AdminRequestPaginator
+	RequestURL        string
+	Search            string
+	Ordering          []string
 }
 
 func (arp *AdminRequestParams) GetOrdering() string {
@@ -38,24 +38,24 @@ func (arp *AdminRequestParams) GetOrdering() string {
 
 func NewAdminRequestParams() *AdminRequestParams {
 	return &AdminRequestParams{
-		CreateSession: true,
+		CreateSession:     true,
 		GenerateCSRFToken: true,
-		NeedAllLanguages: false,
-		Paginator: &AdminRequestPaginator{},
+		NeedAllLanguages:  false,
+		Paginator:         &AdminRequestPaginator{},
 	}
 }
 
 func NewAdminRequestParamsFromGinContext(ctx *gin.Context) *AdminRequestParams {
 	ret := &AdminRequestParams{
-		CreateSession: true,
+		CreateSession:     true,
 		GenerateCSRFToken: true,
-		NeedAllLanguages: false,
-		Paginator: &AdminRequestPaginator{},
+		NeedAllLanguages:  false,
+		Paginator:         &AdminRequestPaginator{},
 	}
 	if ctx.Query("perpage") != "" {
 		perPage, _ := strconv.Atoi(ctx.Query("perpage"))
 		ret.Paginator.PerPage = perPage
- 	} else {
+	} else {
 		ret.Paginator.PerPage = CurrentConfig.D.Uadmin.AdminPerPage
 	}
 	if ctx.Query("offset") != "" {
@@ -112,17 +112,17 @@ type IAdminModelActionInterface interface {
 }
 
 type AdminModelAction struct {
-	ActionName string
-	Description string
-	ShowFutureChanges bool
+	ActionName              string
+	Description             string
+	ShowFutureChanges       bool
 	RedirectToRootModelPage bool
-	Placement *AdminActionPlacement
-	PermName CustomPermission
-	Handler func (adminPage *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64)
-	IsDisabled func (afo IAdminFilterObjects, ctx *gin.Context) bool
-	SlugifiedActionName string
-	RequestMethod string
-	RequiresExtraSteps bool
+	Placement               *AdminActionPlacement
+	PermName                CustomPermission
+	Handler                 func(adminPage *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64)
+	IsDisabled              func(afo IAdminFilterObjects, ctx *gin.Context) bool
+	SlugifiedActionName     string
+	RequestMethod           string
+	RequiresExtraSteps      bool
 }
 
 func prepareAdminModelActionName(adminModelAction string) string {
@@ -135,10 +135,10 @@ func prepareAdminModelActionName(adminModelAction string) string {
 func NewAdminModelAction(actionName string, placement *AdminActionPlacement) *AdminModelAction {
 	return &AdminModelAction{
 		RedirectToRootModelPage: true,
-		ActionName: actionName,
-		Placement: placement,
-		SlugifiedActionName: prepareAdminModelActionName(actionName),
-		RequestMethod: "POST",
+		ActionName:              actionName,
+		Placement:               placement,
+		SlugifiedActionName:     prepareAdminModelActionName(actionName),
+		RequestMethod:           "POST",
 	}
 }
 
@@ -257,7 +257,6 @@ type IPersistenceStorage interface {
 	RollbackTo(name string) IPersistenceStorage
 	Exec(sql string, values ...interface{}) IPersistenceStorage
 }
-
 
 type GormPersistenceStorage struct {
 	Db *gorm.DB
@@ -575,8 +574,8 @@ type IAdminFilterObjects interface {
 	LoadDataForModelById(Id interface{}, model interface{})
 	SaveModel(model interface{}) error
 	CreateNew(model interface{}) error
-	GetPaginated() <- chan *IterateAdminObjects
-	IterateThroughWholeQuerySet() <- chan *IterateAdminObjects
+	GetPaginated() <-chan *IterateAdminObjects
+	IterateThroughWholeQuerySet() <-chan *IterateAdminObjects
 	GetPaginatedQuerySet() IPersistenceStorage
 	GetFullQuerySet() IPersistenceStorage
 	SetFullQuerySet(IPersistenceStorage)
@@ -590,17 +589,17 @@ type IAdminFilterObjects interface {
 }
 
 type AdminFilterObjects struct {
-	InitialGormQuerySet IPersistenceStorage
-	GormQuerySet IPersistenceStorage
+	InitialGormQuerySet   IPersistenceStorage
+	GormQuerySet          IPersistenceStorage
 	PaginatedGormQuerySet IPersistenceStorage
-	Model interface{}
-	UadminDatabase *UadminDatabase
-	GenerateModelI func() (interface{}, interface{})
+	Model                 interface{}
+	UadminDatabase        *UadminDatabase
+	GenerateModelI        func() (interface{}, interface{})
 }
 
 type IterateAdminObjects struct {
-	Model interface {}
-	Id uint
+	Model         interface{}
+	Id            uint
 	RenderContext *FormRenderContext
 }
 
@@ -666,7 +665,7 @@ func (afo *AdminFilterObjects) RemoveModelPermanently(model interface{}) error {
 	return res.Error
 }
 
-func (afo *AdminFilterObjects) GetPaginated() <- chan *IterateAdminObjects {
+func (afo *AdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
 		defer close(chnl)
@@ -680,8 +679,8 @@ func (afo *AdminFilterObjects) GetPaginated() <- chan *IterateAdminObjects {
 			Id := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
 			IdN, _ := strconv.Atoi(Id.(string))
 			yieldV := &IterateAdminObjects{
-				Model: model,
-				Id: uint(IdN),
+				Model:         model,
+				Id:            uint(IdN),
 				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
@@ -690,7 +689,7 @@ func (afo *AdminFilterObjects) GetPaginated() <- chan *IterateAdminObjects {
 	return chnl
 }
 
-func (afo *AdminFilterObjects) IterateThroughWholeQuerySet() <- chan *IterateAdminObjects {
+func (afo *AdminFilterObjects) IterateThroughWholeQuerySet() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
 		defer close(chnl)
@@ -704,8 +703,8 @@ func (afo *AdminFilterObjects) IterateThroughWholeQuerySet() <- chan *IterateAdm
 			Id := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
 			IdN, _ := strconv.Atoi(Id.(string))
 			yieldV := &IterateAdminObjects{
-				Model: model,
-				Id: uint(IdN),
+				Model:         model,
+				Id:            uint(IdN),
 				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
@@ -719,12 +718,12 @@ type ISortInterface interface {
 }
 
 type ISortBy interface {
-	Sort (afo IAdminFilterObjects, direction int)
+	Sort(afo IAdminFilterObjects, direction int)
 }
 
 type SortBy struct {
 	Direction int // -1 descending order, 1 ascending order
-	Field *Field
+	Field     *Field
 }
 
 func (sb *SortBy) Sort(afo IAdminFilterObjects, direction int) {
@@ -737,9 +736,9 @@ func (sb *SortBy) Sort(afo IAdminFilterObjects, direction int) {
 
 type ListDisplayRegistry struct {
 	ListDisplayFields map[string]*ListDisplay
-	MaxOrdering int
-	Prefix string
-	Placement string
+	MaxOrdering       int
+	Prefix            string
+	Placement         string
 }
 
 func (ldr *ListDisplayRegistry) GetFieldsCount() int {
@@ -768,7 +767,7 @@ func (ldr *ListDisplayRegistry) IsThereAnyEditable() bool {
 }
 func (ldr *ListDisplayRegistry) AddField(ld *ListDisplay) {
 	ldr.ListDisplayFields[ld.DisplayName] = ld
-	ldr.MaxOrdering = int(math.Max(float64(ldr.MaxOrdering + 1), float64(ld.Ordering + 1)))
+	ldr.MaxOrdering = int(math.Max(float64(ldr.MaxOrdering+1), float64(ld.Ordering+1)))
 	ld.Ordering = ldr.MaxOrdering
 }
 
@@ -780,7 +779,7 @@ func (ldr *ListDisplayRegistry) BuildListEditableFormForNewModel(adminContext IA
 	return NewFormListEditableForNewModelFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
 }
 
-func (ldr *ListDisplayRegistry) GetAllFields() <- chan *ListDisplay {
+func (ldr *ListDisplayRegistry) GetAllFields() <-chan *ListDisplay {
 	chnl := make(chan *ListDisplay)
 	go func() {
 		defer close(chnl)
@@ -821,7 +820,7 @@ func (amar *AdminModelActionRegistry) IsThereAnyActions() bool {
 	return len(amar.AdminModelActions) > 0
 }
 
-func (amar *AdminModelActionRegistry) GetAllModelActions() <- chan *AdminModelAction {
+func (amar *AdminModelActionRegistry) GetAllModelActions() <-chan *AdminModelAction {
 	chnl := make(chan *AdminModelAction)
 	go func() {
 		defer close(chnl)
@@ -848,19 +847,19 @@ func (amar *AdminModelActionRegistry) GetModelActionByName(actionName string) (*
 }
 
 type IListDisplayInterface interface {
-	GetValue (m interface{}) string
+	GetValue(m interface{}) string
 }
 
 type ListDisplay struct {
 	DisplayName string
-	Field *Field
-	ChangeLink bool
-	Ordering int
-	SortBy *SortBy
-	Populate func (m interface{}) string
-	MethodName string
-	IsEditable bool
-	Prefix string
+	Field       *Field
+	ChangeLink  bool
+	Ordering    int
+	SortBy      *SortBy
+	Populate    func(m interface{}) string
+	MethodName  string
+	IsEditable  bool
+	Prefix      string
 }
 
 func (ld *ListDisplay) SetPrefix(prefix string) {
@@ -926,20 +925,20 @@ func NewListDisplay(field *Field) *ListDisplay {
 }
 
 type IListFilterInterface interface {
-	FilterQs (afo IAdminFilterObjects, filterString string)
+	FilterQs(afo IAdminFilterObjects, filterString string)
 }
 
 type ListFilter struct {
-	Title string
+	Title             string
 	UrlFilteringParam string
-	OptionsToShow []*FieldChoice
-	FetchOptions func(m interface{}) []*FieldChoice
-	CustomFilterQs func(afo IAdminFilterObjects, filterString string)
-	Template string
-	Ordering int
+	OptionsToShow     []*FieldChoice
+	FetchOptions      func(m interface{}) []*FieldChoice
+	CustomFilterQs    func(afo IAdminFilterObjects, filterString string)
+	Template          string
+	Ordering          int
 }
 
-func (lf *ListFilter) FilterQs (afo IAdminFilterObjects, filterString string) {
+func (lf *ListFilter) FilterQs(afo IAdminFilterObjects, filterString string) {
 	if lf.CustomFilterQs != nil {
 		lf.CustomFilterQs(afo, filterString)
 	} else {
@@ -953,7 +952,7 @@ func (lf *ListFilter) FilterQs (afo IAdminFilterObjects, filterString string) {
 	}
 }
 
-func (lf *ListFilter) IsItActive (fullUrl *url.URL) bool {
+func (lf *ListFilter) IsItActive(fullUrl *url.URL) bool {
 	return strings.Contains(fullUrl.String(), lf.UrlFilteringParam)
 }
 
@@ -989,17 +988,15 @@ type ListFilterRegistry struct {
 	ListFilter []*ListFilter
 }
 
-type ListFilterList [] *ListFilter
+type ListFilterList []*ListFilter
 
 func (apl ListFilterList) Len() int { return len(apl) }
 func (apl ListFilterList) Less(i, j int) bool {
 	return apl[i].Ordering < apl[j].Ordering
 }
-func (apl ListFilterList) Swap(i, j int){ apl[i], apl[j] = apl[j], apl[i] }
+func (apl ListFilterList) Swap(i, j int) { apl[i], apl[j] = apl[j], apl[i] }
 
-
-
-func (lfr *ListFilterRegistry) Iterate() <- chan *ListFilter {
+func (lfr *ListFilterRegistry) Iterate() <-chan *ListFilter {
 	chnl := make(chan *ListFilter)
 	go func() {
 		lfList := make(ListFilterList, 0)
@@ -1024,11 +1021,11 @@ func (lfr *ListFilterRegistry) Add(lf *ListFilter) {
 }
 
 type ISearchFieldInterface interface {
-	Search (afo IAdminFilterObjects, searchString string)
+	Search(afo IAdminFilterObjects, searchString string)
 }
 
 type SearchField struct {
-	Field *Field
+	Field        *Field
 	CustomSearch func(afo IAdminFilterObjects, searchString string)
 }
 
@@ -1052,18 +1049,18 @@ var LimitPaginationType PaginationType = "limit"
 var CursorPaginationType PaginationType = "cursor"
 
 type IPaginationInterface interface {
-	Paginate (afo IAdminFilterObjects)
+	Paginate(afo IAdminFilterObjects)
 }
 
 type Paginator struct {
-	PerPage int
-	AllowEmptyFirstPage bool
+	PerPage                    int
+	AllowEmptyFirstPage        bool
 	ShowLastPageOnPreviousPage bool
-	Count int
-	NumPages int
-	Offset int
-	Template string
-	PaginationType PaginationType
+	Count                      int
+	NumPages                   int
+	Offset                     int
+	Template                   string
+	PaginationType             PaginationType
 }
 
 func (p *Paginator) Paginate(afo IAdminFilterObjects) {
@@ -1073,11 +1070,11 @@ func (p *Paginator) Paginate(afo IAdminFilterObjects) {
 type DisplayFilterOption struct {
 	FilterField string
 	FilterValue string
-	DisplayAs string
+	DisplayAs   string
 }
 
 type FilterOption struct {
-	FieldName string
+	FieldName    string
 	FetchOptions func(afo IAdminFilterObjects) []*DisplayFilterOption
 }
 
@@ -1089,7 +1086,7 @@ func (for1 *FilterOptionsRegistry) AddFilterOption(fo *FilterOption) {
 	for1.FilterOption = append(for1.FilterOption, fo)
 }
 
-func (for1 *FilterOptionsRegistry) GetAll() <- chan *FilterOption {
+func (for1 *FilterOptionsRegistry) GetAll() <-chan *FilterOption {
 	chnl := make(chan *FilterOption)
 	go func() {
 		defer close(chnl)
@@ -1122,7 +1119,7 @@ func FetchOptionsFromGormModelFromDateTimeField(afo IAdminFilterObjects, filterO
 		ret = append(ret, &DisplayFilterOption{
 			FilterField: filterOptionField,
 			FilterValue: filterString,
-			DisplayAs: filterString,
+			DisplayAs:   filterString,
 		})
 	}
 	if len(ret) < 2 {
@@ -1138,7 +1135,7 @@ func FetchOptionsFromGormModelFromDateTimeField(afo IAdminFilterObjects, filterO
 			ret = append(ret, &DisplayFilterOption{
 				FilterField: filterOptionField,
 				FilterValue: filterString,
-				DisplayAs: time.Month(filteredMonth).String(),
+				DisplayAs:   time.Month(filteredMonth).String(),
 			})
 		}
 	}
@@ -1148,10 +1145,10 @@ func FetchOptionsFromGormModelFromDateTimeField(afo IAdminFilterObjects, filterO
 var CurrentAdminPageRegistry *AdminPageRegistry
 
 type AdminBreadcrumb struct {
-	Name string
-	Url string
+	Name     string
+	Url      string
 	IsActive bool
-	Icon string
+	Icon     string
 }
 
 type AdminBreadCrumbsRegistry struct {
@@ -1167,7 +1164,7 @@ func (abcr *AdminBreadCrumbsRegistry) AddBreadCrumb(breadcrumb *AdminBreadcrumb)
 	abcr.BreadCrumbs = append(abcr.BreadCrumbs, breadcrumb)
 }
 
-func (abcr *AdminBreadCrumbsRegistry) GetAll() <- chan *AdminBreadcrumb {
+func (abcr *AdminBreadCrumbsRegistry) GetAll() <-chan *AdminBreadcrumb {
 	chnl := make(chan *AdminBreadcrumb)
 	go func() {
 		defer close(chnl)

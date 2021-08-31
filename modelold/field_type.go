@@ -97,5 +97,3 @@ func (FieldType) Link() FieldType {
 func (FieldType) Password() FieldType {
 	return 19
 }
-
-

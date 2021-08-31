@@ -133,7 +133,7 @@ func (suite *ObjectQueryBuilderTestSuite) TestLt() {
 	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
-	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID + 100)
+	operator.Build(uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["ID"]}, suite.createdUser.ID+100)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
 }
@@ -234,7 +234,7 @@ func (suite *ObjectQueryBuilderTestSuite) TestDate() {
 	uadminDatabase := core.NewUadminDatabase()
 	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
-		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},	suite.createdUser.CreatedAt.Round(0),
+		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]}, suite.createdUser.CreatedAt.Round(0),
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
@@ -243,7 +243,7 @@ func (suite *ObjectQueryBuilderTestSuite) TestDate() {
 	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
 		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
-		suite.createdUser.CreatedAt.Round(0).Add(-10 * 3600 * 24 * time.Second),
+		suite.createdUser.CreatedAt.Round(0).Add(-10*3600*24*time.Second),
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
@@ -252,7 +252,7 @@ func (suite *ObjectQueryBuilderTestSuite) TestDate() {
 	gormOperatorContext = core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
 		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["UpdatedAt"]},
-		suite.createdUser.CreatedAt.Round(0).Add(-10 * 3600 * 24 * time.Second),
+		suite.createdUser.CreatedAt.Round(0).Add(-10*3600*24*time.Second),
 	)
 	gormOperatorContext.Tx.First(&u)
 	uadminDatabase.Close()
@@ -347,7 +347,7 @@ func (suite *ObjectQueryBuilderTestSuite) TestQuarter() {
 	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(uadminDatabase.Db), &core.User{})
 	operator.Build(
 		uadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
-		math.Ceil(float64(suite.createdUser.CreatedAt.Month() / 3)),
+		math.Ceil(float64(suite.createdUser.CreatedAt.Month()/3)),
 	)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)
@@ -495,7 +495,6 @@ func (suite *ObjectQueryBuilderTestSuite) TestFilterGormModelWithDependencies() 
 	uadminDatabase.Db.First(&p)
 	assert.Equal(suite.T(), p.ContentTypeID, contentType.ID)
 }
-
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run

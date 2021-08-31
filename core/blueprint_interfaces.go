@@ -25,16 +25,16 @@ type IBlueprintRegistry interface {
 	GetByName(name string) (IBlueprint, error)
 	Register(blueprint IBlueprint)
 	GetMigrationTree() IMigrationTree
-	TraverseMigrations() <- chan *TraverseMigrationResult
-	TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult
+	TraverseMigrations() <-chan *TraverseMigrationResult
+	TraverseMigrationsDownTo(downToMigration string) <-chan *TraverseMigrationResult
 	InitializeRouting(router *gin.Engine)
 	Initialize()
 	ResetMigrationTree()
 }
 
 type Blueprint struct {
-	Name string
-	Description string
+	Name              string
+	Description       string
 	MigrationRegistry IMigrationRegistry
 }
 
@@ -235,7 +235,7 @@ func (r BlueprintRegistry) buildMigrationTree(chnl chan *TraverseMigrationResult
 	return true
 }
 
-func (r BlueprintRegistry) TraverseMigrations() <- chan *TraverseMigrationResult {
+func (r BlueprintRegistry) TraverseMigrations() <-chan *TraverseMigrationResult {
 	chnl := make(chan *TraverseMigrationResult)
 	go func() {
 		defer close(chnl)
@@ -280,28 +280,28 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 		routergroup := router.Group("/" + blueprint.GetName())
 		blueprint.InitRouter(router, routergroup)
 	}
-	router.GET( "/ping", func(c *gin.Context) {
+	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
-	router.POST( "/testcsrf", func(c *gin.Context) {
+	router.POST("/testcsrf", func(c *gin.Context) {
 		c.String(200, "csrf token test passed")
 	})
-	router.POST( "/ignorecsrfcheck", func(c *gin.Context) {
+	router.POST("/ignorecsrfcheck", func(c *gin.Context) {
 		c.String(200, "csrf token test passed")
 	})
 }
 
 func (r BlueprintRegistry) Initialize() {
 	ClearProjectModels()
-	ProjectModels.RegisterModel(func() interface{}{return &ContentType{}})
+	ProjectModels.RegisterModel(func() interface{} { return &ContentType{} })
 	for blueprint := range r.Iterate() {
 		blueprint.Init()
 	}
 }
 
-func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- chan *TraverseMigrationResult {
+func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <-chan *TraverseMigrationResult {
 	// @todo, fix this implementation
 	chnl := make(chan *TraverseMigrationResult)
 	go func() {
@@ -356,6 +356,6 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <- c
 func NewBlueprintRegistry() IBlueprintRegistry {
 	return &BlueprintRegistry{
 		RegisteredBlueprints: make(map[string]IBlueprint),
-		MigrationTree: NewMigrationTree(),
+		MigrationTree:        NewMigrationTree(),
 	}
 }

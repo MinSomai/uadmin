@@ -41,10 +41,10 @@ func GenerateBase32(length int) string {
 }
 
 type SentEmail struct {
-	From string
-	To []string
+	From    string
+	To      []string
 	Subject string
-	CC []string
+	CC      []string
 	Message []byte
 }
 
@@ -54,10 +54,10 @@ type SentEmailsDuringTestsType struct {
 
 func (se *SentEmailsDuringTestsType) AddSentEmail(from string, to []string, subject string, CC []string, message []byte) {
 	se.SentEmails = append(se.SentEmails, SentEmail{
-		From: from,
-		To: to,
+		From:    from,
+		To:      to,
 		Subject: subject,
-		CC: CC,
+		CC:      CC,
 		Message: message,
 	})
 }

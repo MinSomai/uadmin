@@ -15,8 +15,8 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	logAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) {return nil, nil},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
+		func() (interface{}, interface{}) { return nil, nil },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	logAdminPage.PageName = "Logs"
 	logAdminPage.Slug = "log"
@@ -28,7 +28,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	logmodelAdminPage := core.NewGormAdminPage(
 		logAdminPage,
-		func() (interface{}, interface{}) {return &logmodel.Log{}, &[]*logmodel.Log{}},
+		func() (interface{}, interface{}) { return &logmodel.Log{}, &[]*logmodel.Log{} },
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Username", "Action", "Activity", "CreatedAt", "ContentType", "ModelPK"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -72,7 +72,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} {return &logmodel.Log{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &logmodel.Log{} })
 }
 
 var ConcreteBlueprint = Blueprint{

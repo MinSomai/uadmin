@@ -47,8 +47,11 @@ func GetActiveLanguages() []Language {
 
 // DefaultLang is the default language of the system.
 var defaultLang *Language
+
 type translationLoaded map[string]string
+
 var langMapCache map[string]translationLoaded
+
 const translateMe = "Translate me ---> "
 
 // @todo, redo
@@ -136,4 +139,3 @@ func Translate(c *gin.Context, raw string, lang string, args ...bool) string {
 	}
 	return ""
 }
-

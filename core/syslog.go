@@ -3,7 +3,7 @@
 package core
 
 import (
-"log/syslog"
+	"log/syslog"
 )
 
 var syslogMap = map[int]syslog.Priority{
@@ -31,4 +31,3 @@ func Syslogf(level int, msg string, a ...interface{}) {
 	}
 	logger.Printf(msg, a...)
 }
-

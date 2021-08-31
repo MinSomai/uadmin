@@ -13,4 +13,3 @@ func TestGenerateCSRFToken(t *testing.T) {
 	tokenunmasked := UnmaskCSRFToken(tokenmasked)
 	assert.Equal(t, tokenunmasked, token)
 }
-

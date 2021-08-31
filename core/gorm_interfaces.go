@@ -18,7 +18,7 @@ func (m *Model) GetID() uint {
 type ContentType struct {
 	Model
 	BlueprintName string `sql:"unique_index:idx_contenttype_content_type"`
-	ModelName string `sql:"unique_index:idx_contenttype_content_type"`
+	ModelName     string `sql:"unique_index:idx_contenttype_content_type"`
 }
 
 func (ct *ContentType) String() string {

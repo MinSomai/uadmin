@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 )
+
 // SettingCategory is a category for system settings
 type SettingCategory struct {
 	core.Model
@@ -79,10 +80,10 @@ func HumanizeDataType(dataType DataType) string {
 // Setting model stored system settings
 type Setting struct {
 	core.Model
-	Name         string `uadmin:"list,search" uadminform:"RequiredFieldOptions"`
-	Value        string `uadmin:"list"`
-	DefaultValue string `uadmin:"list"`
-	DataType     DataType `uadmin:"list,search"`
+	Name         string          `uadmin:"list,search" uadminform:"RequiredFieldOptions"`
+	Value        string          `uadmin:"list"`
+	DefaultValue string          `uadmin:"list"`
+	DataType     DataType        `uadmin:"list,search"`
 	Help         string          `uadmin:"list,search" sql:"type:text;"`
 	Category     SettingCategory `uadmin:"list,search" uadminform:"FkRequiredFieldOptions"`
 	CategoryID   uint

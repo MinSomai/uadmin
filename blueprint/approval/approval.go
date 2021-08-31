@@ -16,8 +16,8 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	approvalAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) {return nil, make([]interface{}, 0)},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {return nil},
+		func() (interface{}, interface{}) { return nil, make([]interface{}, 0) },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	approvalmodelAdminPage := core.NewGormAdminPage(
 		approvalAdminPage,
-		func() (interface{}, interface{}) {return &models.Approval{}, &[]*models.Approval{}},
+		func() (interface{}, interface{}) { return &models.Approval{}, &[]*models.Approval{} },
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"ContentType", "ModelPK", "ColumnName", "OldValue", "NewValue", "NewValueDescription", "ChangedBy", "ChangeDate", "ApprovalAction", "ApprovalBy", "ApprovalDate"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -39,15 +39,15 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			w.OptGroups[""] = make([]*core.SelectOptGroup, 0)
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "unknown",
-				Value: "0",
+				Value:    "0",
 			})
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "approved",
-				Value: "1",
+				Value:    "1",
 			})
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "rejected",
-				Value: "2",
+				Value:    "2",
 			})
 			approvalField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *core.Field) interface{} {
 				a := m.(*models.Approval).ApprovalAction
@@ -93,7 +93,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{}{return &models.Approval{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &models.Approval{} })
 }
 
 var ConcreteBlueprint = Blueprint{

@@ -109,7 +109,7 @@ type Log struct {
 	ID            uint             `gorm:"primarykey"`
 	ContentType   core.ContentType `uadminform:"ReadonlyField" uadmin:"list,search"`
 	ContentTypeID uint
-	ModelPK       uint `uadmin:"list,search" uadminform:"ReadonlyField"`
+	ModelPK       uint      `uadmin:"list,search" uadminform:"ReadonlyField"`
 	Action        Action    `uadminform:"ReadonlyField" uadmin:"list,search"`
 	Username      string    `uadminform:"ReadonlyField" uadmin:"list,search"`
 	Activity      string    `gorm:"type:longtext" uadminform:"ReadonlyTextareaFieldOptions" uadmin:"list,search"`

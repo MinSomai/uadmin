@@ -48,7 +48,7 @@ func MaskCSRFToken(token string) string {
 	for i, _ := range token {
 		tokenIndex := bytes.IndexByte(csrfAlphabet, token[i])
 		maskIndex := bytes.IndexByte(csrfAlphabet, mask[i])
-		cipher = cipher + string(csrfAlphabet[(tokenIndex + maskIndex) % len(csrfAlphabet)])
+		cipher = cipher + string(csrfAlphabet[(tokenIndex+maskIndex)%len(csrfAlphabet)])
 	}
 	return mask + cipher
 }
@@ -61,9 +61,9 @@ func UnmaskCSRFToken(token string) string {
 		tokenIndex := bytes.IndexByte(csrfAlphabet, tokenpart[i])
 		maskIndex := bytes.IndexByte(csrfAlphabet, maskpart[i])
 		if tokenIndex >= maskIndex {
-			ret = ret + string(csrfAlphabet[tokenIndex - maskIndex])
+			ret = ret + string(csrfAlphabet[tokenIndex-maskIndex])
 		} else {
-			ret = ret + string(csrfAlphabet[len(csrfAlphabet) + ( tokenIndex - maskIndex )])
+			ret = ret + string(csrfAlphabet[len(csrfAlphabet)+(tokenIndex-maskIndex)])
 		}
 	}
 	return ret

@@ -22,7 +22,7 @@ func (apl AdminPagesList) Less(i, j int) bool {
 	}
 	return apl[i].Ordering < apl[j].Ordering
 }
-func (apl AdminPagesList) Swap(i, j int){ apl[i], apl[j] = apl[j], apl[i] }
+func (apl AdminPagesList) Swap(i, j int) { apl[i], apl[j] = apl[j], apl[i] }
 
 type AdminPageRegistry struct {
 	AdminPages map[string]*AdminPage
@@ -56,7 +56,7 @@ func (apr *AdminPageRegistry) GetByModelName(modelName string) *AdminPage {
 	return nil
 }
 
-func (apr *AdminPageRegistry) GetBySlug(slug string) (*AdminPage, error){
+func (apr *AdminPageRegistry) GetBySlug(slug string) (*AdminPage, error) {
 	adminPage, ok := apr.AdminPages[slug]
 	if !ok {
 		return nil, fmt.Errorf("No admin page with alias %s", slug)
@@ -64,12 +64,12 @@ func (apr *AdminPageRegistry) GetBySlug(slug string) (*AdminPage, error){
 	return adminPage, nil
 }
 
-func (apr *AdminPageRegistry) AddAdminPage(adminPage *AdminPage) error{
+func (apr *AdminPageRegistry) AddAdminPage(adminPage *AdminPage) error {
 	apr.AdminPages[adminPage.Slug] = adminPage
 	return nil
 }
 
-func (apr *AdminPageRegistry) GetAll() <- chan *AdminPage{
+func (apr *AdminPageRegistry) GetAll() <-chan *AdminPage {
 	chnl := make(chan *AdminPage)
 	go func() {
 		defer close(chnl)
@@ -121,58 +121,58 @@ func (apr *AdminPageRegistry) PreparePagesForTemplate(permRegistry *UserPermRegi
 }
 
 type AdminPage struct {
-	Model interface{} `json:"-"`
-	GenerateModelI func() (interface{}, interface{}) `json:"-"`
-	GenerateForm func(modelI interface{}, ctx IAdminContext) *Form `json:"-"`
-	GetQueryset func(*AdminPage, *AdminRequestParams) IAdminFilterObjects `json:"-"`
-	ModelActionsRegistry *AdminModelActionRegistry `json:"-"`
-	FilterOptions *FilterOptionsRegistry `json:"-"`
-	ActionsSelectionCounter bool `json:"-"`
-	BlueprintName string
-	EmptyValueDisplay string `json:"-"`
-	ExcludeFields IFieldRegistry `json:"-"`
-	FieldsToShow IFieldRegistry `json:"-"`
-	Form *Form `json:"-"`
-	ShowAllFields bool `json:"-"`
-	Validators *ValidatorRegistry `json:"-"`
-	InlineRegistry *AdminPageInlineRegistry `json:"-"`
-	ListDisplay *ListDisplayRegistry `json:"-"`
-	ListFilter *ListFilterRegistry `json:"-"`
-	MaxShowAll int `json:"-"`
-	PreserveFilters bool `json:"-"`
-	SaveAndContinue bool `json:"-"`
-	SaveOnTop bool `json:"-"`
-	SearchFields *SearchFieldRegistry `json:"-"`
-	ShowFullResultCount bool `json:"-"`
-	ViewOnSite bool `json:"-"`
-	ListTemplate string `json:"-"`
-	AddTemplate string `json:"-"`
-	EditTemplate string `json:"-"`
-	DeleteConfirmationTemplate string `json:"-"`
-	DeleteSelectedConfirmationTemplate string `json:"-"`
-	ObjectHistoryTemplate string `json:"-"`
-	PopupResponseTemplate string `json:"-"`
-	Paginator *Paginator `json:"-"`
-	SubPages *AdminPageRegistry `json:"-"`
-	Ordering int
-	PageName string
-	ModelName string
-	Slug string
-	ToolTip string
-	Icon string
-	ListHandler func (ctx *gin.Context) `json:"-"`
-	EditHandler func (ctx *gin.Context) `json:"-"`
-	AddHandler func (ctx *gin.Context) `json:"-"`
-	DeleteHandler func (ctx *gin.Context) `json:"-"`
-	Router *gin.Engine `json:"-"`
-	ParentPage *AdminPage `json:"-"`
-	SaveModel func(modelI interface{}, ID uint, afo IAdminFilterObjects) interface{} `json:"-"`
-	RegisteredHttpHandlers bool
-	NoPermissionToAddNew bool
+	Model                              interface{}                                               `json:"-"`
+	GenerateModelI                     func() (interface{}, interface{})                         `json:"-"`
+	GenerateForm                       func(modelI interface{}, ctx IAdminContext) *Form         `json:"-"`
+	GetQueryset                        func(*AdminPage, *AdminRequestParams) IAdminFilterObjects `json:"-"`
+	ModelActionsRegistry               *AdminModelActionRegistry                                 `json:"-"`
+	FilterOptions                      *FilterOptionsRegistry                                    `json:"-"`
+	ActionsSelectionCounter            bool                                                      `json:"-"`
+	BlueprintName                      string
+	EmptyValueDisplay                  string                   `json:"-"`
+	ExcludeFields                      IFieldRegistry           `json:"-"`
+	FieldsToShow                       IFieldRegistry           `json:"-"`
+	Form                               *Form                    `json:"-"`
+	ShowAllFields                      bool                     `json:"-"`
+	Validators                         *ValidatorRegistry       `json:"-"`
+	InlineRegistry                     *AdminPageInlineRegistry `json:"-"`
+	ListDisplay                        *ListDisplayRegistry     `json:"-"`
+	ListFilter                         *ListFilterRegistry      `json:"-"`
+	MaxShowAll                         int                      `json:"-"`
+	PreserveFilters                    bool                     `json:"-"`
+	SaveAndContinue                    bool                     `json:"-"`
+	SaveOnTop                          bool                     `json:"-"`
+	SearchFields                       *SearchFieldRegistry     `json:"-"`
+	ShowFullResultCount                bool                     `json:"-"`
+	ViewOnSite                         bool                     `json:"-"`
+	ListTemplate                       string                   `json:"-"`
+	AddTemplate                        string                   `json:"-"`
+	EditTemplate                       string                   `json:"-"`
+	DeleteConfirmationTemplate         string                   `json:"-"`
+	DeleteSelectedConfirmationTemplate string                   `json:"-"`
+	ObjectHistoryTemplate              string                   `json:"-"`
+	PopupResponseTemplate              string                   `json:"-"`
+	Paginator                          *Paginator               `json:"-"`
+	SubPages                           *AdminPageRegistry       `json:"-"`
+	Ordering                           int
+	PageName                           string
+	ModelName                          string
+	Slug                               string
+	ToolTip                            string
+	Icon                               string
+	ListHandler                        func(ctx *gin.Context)                                                 `json:"-"`
+	EditHandler                        func(ctx *gin.Context)                                                 `json:"-"`
+	AddHandler                         func(ctx *gin.Context)                                                 `json:"-"`
+	DeleteHandler                      func(ctx *gin.Context)                                                 `json:"-"`
+	Router                             *gin.Engine                                                            `json:"-"`
+	ParentPage                         *AdminPage                                                             `json:"-"`
+	SaveModel                          func(modelI interface{}, ID uint, afo IAdminFilterObjects) interface{} `json:"-"`
+	RegisteredHttpHandlers             bool
+	NoPermissionToAddNew               bool
 }
 
 type ModelActionRequestParams struct {
-	ObjectIds string `form:"object_ids" json:"object_ids" xml:"object_ids"  binding:"required"`
+	ObjectIds     string `form:"object_ids" json:"object_ids" xml:"object_ids"  binding:"required"`
 	RealObjectIds []uint
 }
 
@@ -195,7 +195,7 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 			return
 		}
 	}
-	objectIds := strings.Split(json.ObjectIds,",")
+	objectIds := strings.Split(json.ObjectIds, ",")
 	objectUintIds := make([]uint, 0)
 	for _, objectId := range objectIds {
 		idV, err := strconv.Atoi(objectId)
@@ -243,35 +243,35 @@ func init() {
 }
 
 type AdminPageInline struct {
-	Ordering int
-	GenerateModelI func(m interface{}) (interface{}, interface{})
-	GetQueryset func(afo IAdminFilterObjects, model interface{}, rp *AdminRequestParams) IAdminFilterObjects
-	Actions *AdminModelActionRegistry
+	Ordering          int
+	GenerateModelI    func(m interface{}) (interface{}, interface{})
+	GetQueryset       func(afo IAdminFilterObjects, model interface{}, rp *AdminRequestParams) IAdminFilterObjects
+	Actions           *AdminModelActionRegistry
 	EmptyValueDisplay string
-	ExcludeFields IFieldRegistry
-	FieldsToShow IFieldRegistry
-	ShowAllFields bool
-	Validators *ValidatorRegistry
-	Classes []string
-	Extra int
-	MaxNum int
-	MinNum int
-	VerboseName string
+	ExcludeFields     IFieldRegistry
+	FieldsToShow      IFieldRegistry
+	ShowAllFields     bool
+	Validators        *ValidatorRegistry
+	Classes           []string
+	Extra             int
+	MaxNum            int
+	MinNum            int
+	VerboseName       string
 	VerboseNamePlural string
-	ShowChangeLink bool
-	Template string
-	ContentType *ContentType
-	Permission CustomPermission
-	InlineType InlineType
-	Prefix string
-	ListDisplay *ListDisplayRegistry `json:"-"`
+	ShowChangeLink    bool
+	Template          string
+	ContentType       *ContentType
+	Permission        CustomPermission
+	InlineType        InlineType
+	Prefix            string
+	ListDisplay       *ListDisplayRegistry `json:"-"`
 }
 
 func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) string {
 	type Context struct {
 		AdminContext
 		AdminContextInitial IAdminContext
-		Inline *AdminPageInline
+		Inline              *AdminPageInline
 	}
 	c := &Context{}
 	c.AdminContextInitial = adminContext
@@ -299,7 +299,7 @@ func (api *AdminPageInline) GetInlineId() string {
 	return PrepareStringToBeUsedForHtmlId(api.VerboseNamePlural)
 }
 
-func (api *AdminPageInline) GetAll(model interface{}, rp *AdminRequestParams) <- chan *IterateAdminObjects {
+func (api *AdminPageInline) GetAll(model interface{}, rp *AdminRequestParams) <-chan *IterateAdminObjects {
 	qs := api.GetQueryset(nil, model, rp)
 	return qs.IterateThroughWholeQuerySet()
 }
@@ -332,11 +332,11 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 		}
 		removalError = nil
 		form = nil
-		inlineId := strings.TrimPrefix(fieldName, firstEditableField.Prefix + "-")
-		inlineId = strings.TrimSuffix(inlineId, "-" + firstEditableField.Field.FieldConfig.Widget.GetHtmlInputName())
+		inlineId := strings.TrimPrefix(fieldName, firstEditableField.Prefix+"-")
+		inlineId = strings.TrimSuffix(inlineId, "-"+firstEditableField.Field.FieldConfig.Widget.GetHtmlInputName())
 		realInlineId := strings.Split(inlineId, "_")
 		modelI, _ := api.GenerateModelI(model)
-		inlineIdToRemove := f.Value[firstEditableField.Prefix + "-" + "object_id-to-remove-" + realInlineId[0]]
+		inlineIdToRemove := f.Value[firstEditableField.Prefix+"-"+"object_id-to-remove-"+realInlineId[0]]
 		isNew := false
 		if !strings.Contains(inlineId, "new") {
 			IDI, _ := strconv.Atoi(realInlineId[0])
@@ -354,7 +354,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 		if len(inlineIdToRemove) > 0 {
 			if removalError != nil {
 				form.FormError = &FormError{
-					FieldError: make(map[string]ValidationError),
+					FieldError:    make(map[string]ValidationError),
 					GeneralErrors: make(ValidationError, 0),
 				}
 				form.FormError.AddGeneralError(removalError)
@@ -399,15 +399,15 @@ func NewAdminPageInline(
 	ld := NewListDisplayRegistryFromGormModelForInlines(modelI)
 	ld.SetPrefix(PrepareStringToBeUsedForHtmlId(inlineIden))
 	ret := &AdminPageInline{
-		Actions: NewAdminModelActionRegistry(),
-		ExcludeFields: NewFieldRegistry(),
-		FieldsToShow: NewFieldRegistry(),
-		Validators: NewValidatorRegistry(),
-		Classes: make([]string, 0),
-		InlineType: inlineType,
-		ListDisplay: ld,
-		GenerateModelI: generateModelI,
-		GetQueryset: getQuerySet,
+		Actions:           NewAdminModelActionRegistry(),
+		ExcludeFields:     NewFieldRegistry(),
+		FieldsToShow:      NewFieldRegistry(),
+		Validators:        NewValidatorRegistry(),
+		Classes:           make([]string, 0),
+		InlineType:        inlineType,
+		ListDisplay:       ld,
+		GenerateModelI:    generateModelI,
+		GetQueryset:       getQuerySet,
 		VerboseNamePlural: inlineIden,
 	}
 	return ret
@@ -427,7 +427,7 @@ func (apir *AdminPageInlineRegistry) Add(pageInline *AdminPageInline) {
 	apir.Inlines = append(apir.Inlines, pageInline)
 }
 
-func (apir *AdminPageInlineRegistry) GetAll() <- chan *AdminPageInline {
+func (apir *AdminPageInlineRegistry) GetAll() <-chan *AdminPageInline {
 	chnl := make(chan *AdminPageInline)
 	go func() {
 		defer close(chnl)
@@ -439,7 +439,7 @@ func (apir *AdminPageInlineRegistry) GetAll() <- chan *AdminPageInline {
 }
 
 func NewAdminPageInlineRegistry() *AdminPageInlineRegistry {
-	return &AdminPageInlineRegistry {
+	return &AdminPageInlineRegistry{
 		Inlines: make([]*AdminPageInline, 0),
 	}
 }
@@ -448,7 +448,7 @@ type SearchFieldRegistry struct {
 	Fields []*SearchField
 }
 
-func (sfr *SearchFieldRegistry) GetAll() <- chan *SearchField {
+func (sfr *SearchFieldRegistry) GetAll() <-chan *SearchField {
 	chnl := make(chan *SearchField)
 	go func() {
 		defer close(chnl)

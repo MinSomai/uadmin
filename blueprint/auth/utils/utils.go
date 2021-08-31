@@ -16,4 +16,3 @@ func HashPass(pass string, salt string) (string, error) {
 	}
 	return string(hash), nil
 }
-

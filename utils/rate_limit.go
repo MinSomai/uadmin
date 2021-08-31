@@ -29,4 +29,3 @@ func CheckRateLimit(r *http.Request) bool {
 	RateLimitLock.Unlock()
 	return RateLimitMap[ip] <= now
 }
-

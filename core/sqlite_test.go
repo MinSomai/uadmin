@@ -13,14 +13,14 @@ import (
 // User !
 type UserTest struct {
 	gorm.Model
-	Username     string
-	FirstName    string
-	LastName     string
-	Password     string
-	Email        string
-	Active       bool
-	Admin        bool
-	Photo        string
+	Username  string
+	FirstName string
+	LastName  string
+	Password  string
+	Email     string
+	Active    bool
+	Admin     bool
+	Photo     string
 	//Language     []Language `gorm:"many2many:user_languages" listExclude:"true"`
 	LastLogin   *time.Time
 	ExpiresOn   *time.Time

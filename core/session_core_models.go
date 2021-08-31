@@ -15,12 +15,12 @@ type Session struct {
 	UserID     uint
 	LoginTime  time.Time
 	LastLogin  time.Time
-	Active     bool   `gorm:"default:false"`
+	Active     bool `gorm:"default:false"`
 	IP         string
 	PendingOTP bool
 	ExpiresOn  *time.Time
-	Data string `json:"data"`
-	_data map[string]string
+	Data       string `json:"data"`
+	_data      map[string]string
 }
 
 // String return string
@@ -115,7 +115,6 @@ func (s *Session) SetData(name string, value string) error {
 	s._data[name] = value
 	return nil
 }
-
 
 // HideInDashboard to return false and auto hide this from dashboard
 func (Session) HideInDashboard() bool {

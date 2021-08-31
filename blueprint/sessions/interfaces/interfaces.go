@@ -25,7 +25,7 @@ type ISessionProvider interface {
 
 type SessionProviderRegistry struct {
 	registeredSessionAdapters map[string]ISessionProvider
-	defaultAdapter string
+	defaultAdapter            string
 }
 
 func (r *SessionProviderRegistry) RegisterNewAdapter(adapter ISessionProvider, defaultAdapter bool) {
@@ -56,14 +56,14 @@ func (r *SessionProviderRegistry) GetDefaultAdapter() (ISessionProvider, error) 
 func NewSessionRegistry() *SessionProviderRegistry {
 	return &SessionProviderRegistry{
 		registeredSessionAdapters: make(map[string]ISessionProvider),
-		defaultAdapter: "",
+		defaultAdapter:            "",
 	}
 }
 
 func NewSession() *core.Session {
 	key := services.GenerateBase64(24)
 	return &core.Session{
-		Key: key,
+		Key:  key,
 		Data: "{}",
 	}
 }

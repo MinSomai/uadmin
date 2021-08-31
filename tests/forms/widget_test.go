@@ -232,11 +232,11 @@ func (w *WidgetTestSuite) TestSelectWidget() {
 	widget.OptGroups["test"] = make([]*core.SelectOptGroup, 0)
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test1",
-		Value: "test1",
+		Value:    "test1",
 	})
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test2",
-		Value: "dsadas",
+		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas\"")
@@ -260,11 +260,11 @@ func (w *WidgetTestSuite) TestNullBooleanWidget() {
 	widget.OptGroups["test"] = make([]*core.SelectOptGroup, 0)
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test1",
-		Value: "yes",
+		Value:    "yes",
 	})
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test2",
-		Value: "no",
+		Value:    "no",
 	})
 	widget.SetName("dsadas")
 	widget.SetValue("yes")
@@ -292,11 +292,11 @@ func (w *WidgetTestSuite) TestSelectMultipleWidget() {
 	widget.OptGroups["test"] = make([]*core.SelectOptGroup, 0)
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test1",
-		Value: "test1",
+		Value:    "test1",
 	})
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.SelectOptGroup{
 		OptLabel: "test2",
-		Value: "dsadas",
+		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "name=\"dsadas\"")
@@ -315,7 +315,7 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		Id: "test",
+		Id:        "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
@@ -324,11 +324,11 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 	widget.OptGroups["test"] = make([]*core.RadioOptGroup, 0)
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test1",
-		Value: "test1",
+		Value:    "test1",
 	})
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test2",
-		Value: "dsadas",
+		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<li>test<ul id=\"test_0\">")
@@ -347,7 +347,7 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		Id: "test",
+		Id:        "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
@@ -356,11 +356,11 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 	widget.OptGroups["test"] = make([]*core.RadioOptGroup, 0)
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test1",
-		Value: "test1",
+		Value:    "test1",
 	})
 	widget.OptGroups["test"] = append(widget.OptGroups["test"], &core.RadioOptGroup{
 		OptLabel: "test2",
-		Value: "dsadas",
+		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
 	assert.Contains(w.T(), renderedWidget, "<ul id=\"test\">\n  \n  \n  \n    <li>test<ul id=\"test_0\">")
@@ -430,11 +430,11 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		InitialText: "test",
-		Required: true,
-		Id: "test",
+		InitialText:        "test",
+		Required:           true,
+		Id:                 "test",
 		ClearCheckboxLabel: "clear file",
-		InputText: "upload your image",
+		InputText:          "upload your image",
 	}
 	widget.SetName("dsadas")
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
@@ -444,12 +444,12 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		InitialText: "test",
-		Required: true,
-		Id: "test",
+		InitialText:        "test",
+		Required:           true,
+		Id:                 "test",
 		ClearCheckboxLabel: "clear file",
-		InputText: "upload your image",
-		CurrentValue: &core.URLValue{URL: "https://microsoft.com"},
+		InputText:          "upload your image",
+		CurrentValue:       &core.URLValue{URL: "https://microsoft.com"},
 	}
 	widget.SetName("dsadas")
 	renderedWidget = widget.Render(core.NewFormRenderContext(), nil)
@@ -518,8 +518,8 @@ func (w *WidgetTestSuite) TestSplitDateTimeWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		DateAttrs: map[string]string{"test": "test1"},
-		TimeAttrs: map[string]string{"test": "test1"},
+		DateAttrs:  map[string]string{"test": "test1"},
+		TimeAttrs:  map[string]string{"test": "test1"},
 		TimeFormat: "15:04",
 		DateFormat: "Mon Jan _2",
 	}
@@ -542,8 +542,8 @@ func (w *WidgetTestSuite) TestSplitHiddenDateTimeWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		DateAttrs: map[string]string{"test": "test1"},
-		TimeAttrs: map[string]string{"test": "test1"},
+		DateAttrs:  map[string]string{"test": "test1"},
+		TimeAttrs:  map[string]string{"test": "test1"},
 		TimeFormat: "15:04",
 		DateFormat: "Mon Jan _2",
 	}

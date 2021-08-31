@@ -19,7 +19,7 @@ func (ap *TokenWithExpirationAuthProvider) Signin(c *gin.Context) {
 func (ap *TokenWithExpirationAuthProvider) Signup(c *gin.Context) {
 }
 
-func (ap *TokenWithExpirationAuthProvider) Logout(c *gin.Context){
+func (ap *TokenWithExpirationAuthProvider) Logout(c *gin.Context) {
 }
 
 func (ap *TokenWithExpirationAuthProvider) IsAuthenticated(c *gin.Context) {

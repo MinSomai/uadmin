@@ -39,10 +39,10 @@ type Approval struct {
 	ApprovalDate        *time.Time       `uadmin:"list" uadminform:"DatetimeReadonlyFieldOptions"`
 	ContentType         core.ContentType `uadmin:"list" uadminform:"ReadonlyField"`
 	ContentTypeID       uint
-	ModelPK             uint   `uadmin:"list" uadminform:"ReadonlyField" gorm:"default:0"`
-	ColumnName          string `uadmin:"list" uadminform:"ReadonlyField"`
-	OldValue            string `uadmin:"list" uadminform:"ReadonlyField"`
-	NewValue            string `uadmin:"list"`
+	ModelPK             uint      `uadmin:"list" uadminform:"ReadonlyField" gorm:"default:0"`
+	ColumnName          string    `uadmin:"list" uadminform:"ReadonlyField"`
+	OldValue            string    `uadmin:"list" uadminform:"ReadonlyField"`
+	NewValue            string    `uadmin:"list"`
 	NewValueDescription string    `uadmin:"list" uadminform:"ReadonlyField"`
 	ChangedBy           string    `uadmin:"list" uadminform:"ReadonlyField"`
 	ChangeDate          time.Time `uadmin:"list" uadminform:"DatetimeReadonlyFieldOptions"`

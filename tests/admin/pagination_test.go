@@ -17,10 +17,10 @@ func (apts *AdminPaginationTestSuite) SetupTestData() {
 	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(1, 100) {
 		userModel := &core.User{
-			Email: fmt.Sprintf("admin_%d@example.com", i),
-			Username: "admin_" + strconv.Itoa(i),
+			Email:     fmt.Sprintf("admin_%d@example.com", i),
+			Username:  "admin_" + strconv.Itoa(i),
 			FirstName: "firstname_" + strconv.Itoa(i),
-			LastName: "lastname_" + strconv.Itoa(i),
+			LastName:  "lastname_" + strconv.Itoa(i),
 		}
 		uadminDatabase.Db.Create(&userModel)
 	}

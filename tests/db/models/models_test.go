@@ -22,10 +22,10 @@ func (s *BuildRemovalTreeTestSuite) SetupTest() {
 	uadminDatabase.Db.AutoMigrate(&UserContentType{})
 	uadminDatabase.Db.AutoMigrate(&OneTimeActionContentType{})
 	uadminDatabase.Db.AutoMigrate(&SessionContentType{})
-	core.ProjectModels.RegisterModel(func() interface{} {return &SessionContentType{}})
-	core.ProjectModels.RegisterModel(func() interface{} {return &OneTimeActionContentType{}})
-	core.ProjectModels.RegisterModel(func() interface{} {return &UserContentType{}})
-	core.ProjectModels.RegisterModel(func() interface{} {return &UserGroupContentType{}})
+	core.ProjectModels.RegisterModel(func() interface{} { return &SessionContentType{} })
+	core.ProjectModels.RegisterModel(func() interface{} { return &OneTimeActionContentType{} })
+	core.ProjectModels.RegisterModel(func() interface{} { return &UserContentType{} })
+	core.ProjectModels.RegisterModel(func() interface{} { return &UserGroupContentType{} })
 }
 
 func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *core.UadminDatabase) {
@@ -151,7 +151,6 @@ func (s *BuildRemovalTreeTestSuite) TestRemoval() {
 	uadminDatabase.Db.Model(&SessionContentType{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
 }
-
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run

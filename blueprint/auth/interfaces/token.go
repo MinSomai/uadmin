@@ -19,7 +19,7 @@ func (ap *TokenAuthProvider) Signin(c *gin.Context) {
 func (ap *TokenAuthProvider) Signup(c *gin.Context) {
 }
 
-func (ap *TokenAuthProvider) Logout(c *gin.Context){
+func (ap *TokenAuthProvider) Logout(c *gin.Context) {
 }
 
 func (ap *TokenAuthProvider) IsAuthenticated(c *gin.Context) {

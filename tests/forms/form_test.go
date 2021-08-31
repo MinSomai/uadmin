@@ -58,5 +58,3 @@ func (s *FormTestSuite) TestFormBuilder() {
 func TestForm(t *testing.T) {
 	uadmin.Run(t, new(FormTestSuite))
 }
-
-
