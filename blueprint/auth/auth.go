@@ -40,7 +40,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("login"), c, core.FuncMap)
 		} else {
 			type Context struct {
-				core.AdminContext
+				*core.AdminContext
 				Menu     string
 				CurrentPath string
 			}
@@ -59,7 +59,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL + "/profile", func(ctx *gin.Context) {
 		type Context struct {
-			core.AdminContext
+			*core.AdminContext
 			ID           uint
 			Status       bool
 			IsUpdated    bool

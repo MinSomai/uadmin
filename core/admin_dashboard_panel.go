@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	excelize1 "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -147,7 +147,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 					defer rows.Close()
 					db := NewUadminDatabase()
 					defer db.Close()
-					f := excelize.NewFile()
+					f := excelize1.NewFile()
 					i := 1
 					currentColumn := 'A'
 					for listDisplay := range adminPage.ListDisplay.GetAllFields() {
