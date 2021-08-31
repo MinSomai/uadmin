@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		userSession := defaultAdapter.GetSession(ctx)
 		if userSession == nil || userSession.GetUser().ID == 0 {
 			type Context struct {
-				core.AdminContext
+				*core.AdminContext
 			}
 			c := &Context{}
 			adminRequestParams := core.NewAdminRequestParams()

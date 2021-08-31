@@ -12,8 +12,7 @@ func TestEmbeddingTemplates(t *testing.T) {
 	t1, _ := template.ParseFS(app.Config.TemplatesFS, "templates/test.html")
 	templateBuffer := &bytes.Buffer{}
 	t1.Execute(templateBuffer, struct {
-		Title    string
+		Title string
 	}{Title: "test"})
 	assert.Contains(t, templateBuffer.String(), "test")
 }
-

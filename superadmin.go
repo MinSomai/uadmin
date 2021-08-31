@@ -14,6 +14,7 @@ import (
 
 type SuperadminCommand struct {
 }
+
 func (c SuperadminCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
@@ -43,10 +44,10 @@ func (c SuperadminCommand) GetHelpText() string {
 }
 
 type SuperadminCommandOptions struct {
-	Username string `short:"n" required:"true" description:"Username" valid:"username-uadmin,username-unique"`
-	Email string `short:"e" required:"true" description:"Email'" valid:"email,email-unique"`
+	Username  string `short:"n" required:"true" description:"Username" valid:"username-uadmin,username-unique"`
+	Email     string `short:"e" required:"true" description:"Email'" valid:"email,email-unique"`
 	FirstName string `short:"f" required:"false" description:"First name'"`
-	LastName string `short:"l" required:"false" description:"Last name'"`
+	LastName  string `short:"l" required:"false" description:"Last name'"`
 }
 
 type CreateSuperadmin struct {
@@ -95,7 +96,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 			return err
 		}
 		passwordValidationStruct := &userblueprint.PasswordValidationStruct{
-			Password: password,
+			Password:          password,
 			ConfirmedPassword: confirmpassword,
 		}
 		_, err = govalidator.ValidateStruct(passwordValidationStruct)
@@ -112,14 +113,14 @@ Please provide flags -n and -e which are username and email of the user respecti
 		return err
 	}
 	admin := core.User{
-		FirstName:    opts.FirstName,
-		LastName:     opts.LastName,
-		Username:     opts.Username,
-		Email: opts.Email,
-		Password:     hashedPassword,
-		Active:       true,
-		IsSuperUser:    true,
-		Salt: salt,
+		FirstName:        opts.FirstName,
+		LastName:         opts.LastName,
+		Username:         opts.Username,
+		Email:            opts.Email,
+		Password:         hashedPassword,
+		Active:           true,
+		IsSuperUser:      true,
+		Salt:             salt,
 		IsPasswordUsable: true,
 	}
 	db.Create(&admin)

@@ -31,6 +31,8 @@ UADMIN_GITHUB:=github.com/uadmin/uadmin
 UADMIN_GITHUB_VERSION:=$(UADMIN_GITHUB)/version.Version=${VERSION}
 BUILD_TAGS?=$(TAGS)
 
+include .mk/check.mk
+include .mk/contrib.mk
 include .mk/proto.mk
 include .mk/tests.mk
 

@@ -13,6 +13,7 @@ import (
 
 type OpenApiCommand struct {
 }
+
 func (c OpenApiCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string

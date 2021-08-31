@@ -12,6 +12,7 @@ import (
 
 type AdminCommand struct {
 }
+
 func (c AdminCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
@@ -89,4 +90,3 @@ func (command ServeAdminServer) Proceed(subaction string, args []string) error {
 func (command ServeAdminServer) GetHelpText() string {
 	return "Serve your admin panel"
 }
-

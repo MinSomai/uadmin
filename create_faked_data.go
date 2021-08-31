@@ -17,20 +17,20 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(1, 100) {
 		userModel := &core.User{
-			Email: fmt.Sprintf("admin_%d@example.com", i),
-			Username: "admin_" + strconv.Itoa(i),
+			Email:     fmt.Sprintf("admin_%d@example.com", i),
+			Username:  "admin_" + strconv.Itoa(i),
 			FirstName: "firstname_" + strconv.Itoa(i),
-			LastName: "lastname_" + strconv.Itoa(i),
+			LastName:  "lastname_" + strconv.Itoa(i),
 		}
 		uadminDatabase.Db.Create(&userModel)
 		oneTimeAction := &core.OneTimeAction{
-			User: *userModel,
+			User:      *userModel,
 			ExpiresOn: time.Now(),
-			Code: strconv.Itoa(i),
+			Code:      strconv.Itoa(i),
 		}
 		uadminDatabase.Db.Create(&oneTimeAction)
 		session := &core.Session{
-			User: *userModel,
+			User:      *userModel,
 			LoginTime: time.Now(),
 			LastLogin: time.Now(),
 		}
@@ -40,30 +40,30 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 	uadminDatabase.Db.Find(&contentTypes)
 	for _, contentType := range contentTypes {
 		logModel := logmodel.Log{
-			Username: "admin",
+			Username:      "admin",
 			ContentTypeID: contentType.ID,
 		}
 		uadminDatabase.Db.Create(&logModel)
 		approvalModel := models.Approval{
-			ContentTypeID: contentType.ID,
-			ModelPK: uint(1),
-			ColumnName: "Email",
-			OldValue: "admin@example.com",
-			NewValue: "admin1@example.com",
+			ContentTypeID:       contentType.ID,
+			ModelPK:             uint(1),
+			ColumnName:          "Email",
+			OldValue:            "admin@example.com",
+			NewValue:            "admin1@example.com",
 			NewValueDescription: "changing email",
-			ChangedBy: "superuser",
-			ChangeDate: time.Now(),
+			ChangedBy:           "superuser",
+			ChangeDate:          time.Now(),
 		}
 		uadminDatabase.Db.Create(&approvalModel)
 		abTestModel := abtestmodel.ABTest{
-			Name: "test_1",
+			Name:          "test_1",
 			ContentTypeID: contentType.ID,
 		}
 		uadminDatabase.Db.Create(&abTestModel)
 		for i := range core.GenerateNumberSequence(0, 100) {
 			abTestValueModel := abtestmodel.ABTestValue{
 				ABTest: abTestModel,
-				Value: strconv.Itoa(i),
+				Value:  strconv.Itoa(i),
 			}
 			uadminDatabase.Db.Create(&abTestValueModel)
 		}

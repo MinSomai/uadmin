@@ -26,3 +26,4 @@ uadmin.db
 *.cover
 tests/blueprint/auth/media/*
 uploads/*
+lint.json

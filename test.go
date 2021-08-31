@@ -266,6 +266,7 @@ func NewFullAppForTests() *App {
 	StoreCurrentApp(a)
 	return a
 }
+
 //type UadminTestSuite struct {
 //	suite.Suite
 //}

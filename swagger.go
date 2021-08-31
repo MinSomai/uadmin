@@ -11,6 +11,7 @@ import (
 
 type SwaggerCommand struct {
 }
+
 func (c SwaggerCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string

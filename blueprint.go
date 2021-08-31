@@ -13,6 +13,7 @@ import (
 
 type BlueprintCommand struct {
 }
+
 func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
@@ -44,7 +45,7 @@ func (c BlueprintCommand) GetHelpText() string {
 
 type CreateBlueprintOptions struct {
 	Message string `short:"m" required:"true" description:"Describe what is this migration for"`
-	Name string `short:"n" required:"true" description:"Blueprint you'd like to create migration for'"`
+	Name    string `short:"n" required:"true" description:"Blueprint you'd like to create migration for'"`
 }
 
 type CreateBlueprint struct {
@@ -106,17 +107,17 @@ var ConcreteBlueprint = Blueprint{
 `
 	var blueprintTplBuffer bytes.Buffer
 	blueprintTpl := template.Must(template.New("blueprintmain").Parse(blueprint))
-	tplData := struct{
-		Name string
+	tplData := struct {
+		Name    string
 		Message string
 	}{
-		Name: name,
+		Name:    name,
 		Message: strings.ReplaceAll(core.AsciiRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
 	}
 	if err = blueprintTpl.Execute(&blueprintTplBuffer, tplData); err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile(dirPath + "/" + name + ".go", blueprintTplBuffer.Bytes(), 0755)
+	err = ioutil.WriteFile(dirPath+"/"+name+".go", blueprintTplBuffer.Bytes(), 0755)
 	if err != nil {
 		panic(err)
 	}

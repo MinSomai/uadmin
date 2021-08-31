@@ -24,7 +24,7 @@ func (r CommandRegistry) runAction(command string, subaction string, args []stri
 	return action.Proceed(subaction, args)
 }
 
-func (r CommandRegistry) MakeHelpText() string{
+func (r CommandRegistry) MakeHelpText() string {
 	var helpParts []string
 	var i int = 1
 	for action, handler := range r.Actions {

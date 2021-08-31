@@ -20,12 +20,12 @@ import (
 type Migration struct {
 	gorm.Model
 	MigrationName string `gorm:"index:migration_migration_name,unique"`
-	AppliedAt  time.Time
+	AppliedAt     time.Time
 }
 
 type MigrateCommand struct {
-
 }
+
 func (c MigrateCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
@@ -67,9 +67,9 @@ func prepareMigrationName(message string) string {
 }
 
 type CreateMigrationOptions struct {
-	Message string `short:"m" description:"Describe what is this migration for"`
+	Message   string `short:"m" description:"Describe what is this migration for"`
 	Blueprint string `short:"b" description:"Blueprint you'd like to create migration for"`
-	MergeMode bool `long:"merge" description:"Merge conflicted migrations"`
+	MergeMode bool   `long:"merge" description:"Merge conflicted migrations"`
 }
 
 type CreateMigration struct {
@@ -144,7 +144,7 @@ func init() {
 	if opts.MergeMode {
 		for true {
 			for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrations() {
-				if traverseMigrationResult.Error != nil && strings.Contains(traverseMigrationResult.Error.Error(), "Found two or more migrations with no children from the same blueprint"){
+				if traverseMigrationResult.Error != nil && strings.Contains(traverseMigrationResult.Error.Error(), "Found two or more migrations with no children from the same blueprint") {
 					r := regexp.MustCompile(`Set\{(.*?)\}`)
 					conflictedMigrations := r.FindStringSubmatch(traverseMigrationResult.Error.Error())[1]
 					listOfConflictedMigrations := strings.Split(conflictedMigrations, ",")
@@ -162,16 +162,16 @@ func init() {
 					now := time.Now()
 					sec := now.Unix()
 					concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
-					concreteData := struct{
-						MigrationName string
+					concreteData := struct {
+						MigrationName       string
 						ConcreteMigrationId string
-						Dependencies string
-						BlueprintName string
+						Dependencies        string
+						BlueprintName       string
 					}{
-						MigrationName: migrationName,
+						MigrationName:       migrationName,
 						ConcreteMigrationId: strconv.Itoa(int(sec)),
-						Dependencies: "{" + strings.Join(dependenciesString, ",") + "}",
-						BlueprintName: blueprintName,
+						Dependencies:        "{" + strings.Join(dependenciesString, ",") + "}",
+						BlueprintName:       blueprintName,
 					}
 					if err = concreteTpl.Execute(&concreteTplBuffer, concreteData); err != nil {
 						panic(err)
@@ -181,7 +181,7 @@ func init() {
 						panic(err)
 					}
 					integrateMigrationIntoRegistryTpl := template.Must(template.New("integratemigrationintoregistry").Parse(initializeMigrationRegistryTpl))
-					integrateMigrationIntoRegistryData := struct{
+					integrateMigrationIntoRegistryData := struct {
 						MigrationName string
 					}{
 						MigrationName: migrationName,
@@ -197,7 +197,7 @@ func init() {
 					newContents := strings.Replace(
 						string(read),
 						"// placeholder to insert next migration",
-						integrateMigrationIntoRegistryTplBuffer.String() + "\n    // placeholder to insert next migration", -1)
+						integrateMigrationIntoRegistryTplBuffer.String()+"\n    // placeholder to insert next migration", -1)
 					err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(newContents), 0755)
 					if err != nil {
 						panic(err)
@@ -248,16 +248,16 @@ func init() {
 		now := time.Now()
 		sec := now.Unix()
 		concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
-		concreteData := struct{
-			MigrationName string
+		concreteData := struct {
+			MigrationName       string
 			ConcreteMigrationId string
-			Dependencies string
-			BlueprintName string
+			Dependencies        string
+			BlueprintName       string
 		}{
-			MigrationName: migrationName,
+			MigrationName:       migrationName,
 			ConcreteMigrationId: strconv.Itoa(int(sec)),
-			Dependencies: "",
-			BlueprintName: opts.Blueprint,
+			Dependencies:        "",
+			BlueprintName:       opts.Blueprint,
 		}
 		if lastMigrationId > 0 {
 			concreteData.Dependencies = "{" + fmt.Sprintf(`"%s.%s"`, opts.Blueprint, strconv.Itoa(lastMigrationId)) + "}"
@@ -270,7 +270,7 @@ func init() {
 			panic(err)
 		}
 		integrateMigrationIntoRegistryTpl := template.Must(template.New("integratemigrationintoregistry").Parse(initializeMigrationRegistryTpl))
-		integrateMigrationIntoRegistryData := struct{
+		integrateMigrationIntoRegistryData := struct {
 			MigrationName string
 		}{
 			MigrationName: migrationName,
@@ -286,7 +286,7 @@ func init() {
 		newContents := strings.Replace(
 			string(read),
 			"// placeholder to insert next migration",
-			integrateMigrationIntoRegistryTplBuffer.String() + "\n    // placeholder to insert next migration", -1)
+			integrateMigrationIntoRegistryTplBuffer.String()+"\n    // placeholder to insert next migration", -1)
 		err = ioutil.WriteFile(pathToBaseMigrationsFile, []byte(newContents), 0755)
 		if err != nil {
 			panic(err)
@@ -349,7 +349,7 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 		db.Transaction(func(tx *gorm.DB) error {
 			uadminDatabase1 := &core.UadminDatabase{
 				Adapter: uadminDatabase.Adapter,
-				Db: tx,
+				Db:      tx,
 			}
 			res := traverseMigrationResult.Node.Apply(uadminDatabase1)
 			if res == nil {
@@ -419,7 +419,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 		db.Transaction(func(tx *gorm.DB) error {
 			uadminDatabase1 := &core.UadminDatabase{
 				Adapter: uadminDatabase.Adapter,
-				Db: tx,
+				Db:      tx,
 			}
 			res := traverseMigrationResult.Node.Downgrade(uadminDatabase1)
 			if res == nil {
@@ -427,7 +427,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 			}
 			return res
 		})
-//		}
+		//		}
 	}
 	return nil
 }

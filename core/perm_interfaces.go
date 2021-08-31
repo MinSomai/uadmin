@@ -60,7 +60,6 @@ func (upr *UserPermRegistry) IsThereAnyPermissionForBlueprint(blueprintName stri
 }
 
 type PermRegistry struct {
-	IPermissionRegistry
 	PermNameBitInteger map[CustomPermission]PermBitInteger
 }
 
@@ -102,7 +101,6 @@ func (ap *PermRegistry) GetAllPermissions() <- chan *PermissionDescribed {
 }
 
 type UserPerm struct {
-	IUserPermissionRegistry
 	PermBitInteger PermBitInteger
 	IsSuperUser bool
 }

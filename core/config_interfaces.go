@@ -134,7 +134,6 @@ type IFieldChoiceRegistryInterface interface {
 }
 
 type FieldChoiceRegistry struct {
-	IFieldChoiceRegistryInterface
 	Choices []*FieldChoice
 }
 

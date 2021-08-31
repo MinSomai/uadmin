@@ -138,7 +138,7 @@ Please provide what do you want to do ?
 			fmt.Println(err)
 		}
 	} else {
-		err := a.CommandRegistry.runAction(action,"", make([]string, 0))
+		err := a.CommandRegistry.runAction(action, "", make([]string, 0))
 		if err != nil {
 			fmt.Println(err)
 		}

@@ -27,6 +27,7 @@ type IFieldRegistry interface {
 
 type WidgetType string
 
+const UnknownInputWidgetType WidgetType = "unknown"
 const TextInputWidgetType WidgetType = "text"
 const NumberInputWidgetType WidgetType = "number"
 const EmailInputWidgetType WidgetType = "email"
@@ -178,7 +179,6 @@ func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) Valid
 type ValidationError []error
 
 type FieldRegistry struct {
-	IFieldRegistry
 	Fields map[string]*Field
 	MaxOrdering int
 }
@@ -233,7 +233,6 @@ func NewFieldRegistry() *FieldRegistry {
 }
 
 type FieldFormOptions struct {
-	IFieldFormOptions
 	Name string
 	Initial interface{}
 	DisplayName string
@@ -309,7 +308,6 @@ type IGrouppedFieldsRegistry interface {
 }
 
 type GrouppedFieldsRegistry struct {
-	IGrouppedFieldsRegistry
 	GrouppedFields map[string]*GrouppedFields
 }
 
@@ -404,7 +402,6 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 }
 
 type Widget struct {
-	IWidget
 	Attrs map[string]string
 	TemplateName string
 	Renderer ITemplateRenderer
@@ -506,6 +503,14 @@ func (w *Widget) SetFieldDisplayName(fieldDisplayName string) {
 
 func (w *Widget) SetReadonly(readonly bool) {
 	w.ReadOnly = readonly
+}
+
+func (w *Widget) GetWidgetType() WidgetType {
+	return UnknownInputWidgetType
+}
+
+func (w *Widget) GetTemplateName() string {
+	return ""
 }
 
 func (w *Widget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {

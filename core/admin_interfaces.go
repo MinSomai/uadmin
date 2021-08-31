@@ -112,7 +112,6 @@ type IAdminModelActionInterface interface {
 }
 
 type AdminModelAction struct {
-	IAdminModelActionInterface
 	ActionName string
 	Description string
 	ShowFutureChanges bool
@@ -724,7 +723,6 @@ type ISortBy interface {
 }
 
 type SortBy struct {
-	ISortBy
 	Direction int // -1 descending order, 1 ascending order
 	Field *Field
 }
@@ -854,7 +852,6 @@ type IListDisplayInterface interface {
 }
 
 type ListDisplay struct {
-	IListDisplayInterface
 	DisplayName string
 	Field *Field
 	ChangeLink bool
@@ -933,7 +930,6 @@ type IListFilterInterface interface {
 }
 
 type ListFilter struct {
-	IListFilterInterface
 	Title string
 	UrlFilteringParam string
 	OptionsToShow []*FieldChoice
@@ -1032,7 +1028,6 @@ type ISearchFieldInterface interface {
 }
 
 type SearchField struct {
-	ISearchFieldInterface
 	Field *Field
 	CustomSearch func(afo IAdminFilterObjects, searchString string)
 }
@@ -1061,7 +1056,6 @@ type IPaginationInterface interface {
 }
 
 type Paginator struct {
-	IPaginationInterface
 	PerPage int
 	AllowEmptyFirstPage bool
 	ShowLastPageOnPreviousPage bool
