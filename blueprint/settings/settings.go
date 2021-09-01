@@ -29,12 +29,16 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
 		func() (interface{}, interface{}) { return &settingmodel.Setting{}, &[]*settingmodel.Setting{} },
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
+			return nil
+		},
 	)
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
 	settingmodelAdminPage.BlueprintName = "setting"
 	settingmodelAdminPage.Router = mainRouter
+	settingmodelAdminPage.NoPermissionToEdit = true
+	settingmodelAdminPage.NoPermissionToAddNew = true
 	dataTypeListDisplay, _ := settingmodelAdminPage.ListDisplay.GetFieldByDisplayName("DataType")
 	dataTypeListDisplay.Populate = func(m interface{}) string {
 		return settingmodel.HumanizeDataType(m.(*settingmodel.Setting).DataType)

@@ -395,123 +395,283 @@ func (d *SqliteDialect) CreateDb() error {
 	return err
 }
 
-func (d *SqliteDialect) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE ? ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE ? ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) In(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s IN ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) In(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s IN ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s > ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s > ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s >= ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s >= ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s < ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s < ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s <= ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s <= ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE ?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE ? || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE ?%% ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE ? || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%? ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s LIKE %%? ESCAPE '\\' ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? ESCAPE '\\' ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Date(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_cast_date(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Date(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_cast_date(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Year(operatorContext *GormOperatorContext, field *Field, value interface{}) {
+func (d *SqliteDialect) Year(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName)
 	year := value.(int)
 	startOfTheYear := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
 	endOfTheYear := time.Date(year, time.December, 31, 23, 59, 59, 0, time.UTC)
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName), startOfTheYear, endOfTheYear)
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, startOfTheYear, endOfTheYear)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, startOfTheYear, endOfTheYear)
+	}
 }
 
-func (d *SqliteDialect) Month(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('month', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Month(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('month', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Day(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Day(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Week(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('week', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Week(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('week', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('week_day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('week_day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('quarter', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('quarter', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('hour', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('hour', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('minute', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('minute', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Second(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_extract('second', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_extract('second', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s REGEX ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s REGEX ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s REGEX '(?i)' || ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" %s.%s REGEX '(?i)' || ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) Time(operatorContext *GormOperatorContext, field *Field, value interface{}) {
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" uadmin_datetime_cast_time(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName), value)
+func (d *SqliteDialect) Time(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
+	query := fmt.Sprintf(" uadmin_datetime_cast_time(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	args := value
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, args)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, args)
+	}
 }
 
-func (d *SqliteDialect) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}) {
+func (d *SqliteDialect) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
 	isTruthyValue := IsTruthyValue(value)
 	isNull := " IS NULL "
 	if !isTruthyValue {
 		isNull = " IS NOT NULL "
 	}
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s %s ", operatorContext.TableName, field.DBName, isNull))
+	query := fmt.Sprintf(" %s.%s %s ", operatorContext.TableName, field.DBName, isNull)
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query)
+	}
 }
 
-func (d *SqliteDialect) Range(operatorContext *GormOperatorContext, field *Field, value interface{}) {
+func (d *SqliteDialect) Range(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool) {
 	s := reflect.ValueOf(value)
 	var f interface{}
 	var second interface{}
@@ -523,7 +683,12 @@ func (d *SqliteDialect) Range(operatorContext *GormOperatorContext, field *Field
 			break
 		}
 	}
-	operatorContext.Tx = operatorContext.Tx.Where(fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName), f, second)
+	query := fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName)
+	if forSearching {
+		operatorContext.Tx = operatorContext.Tx.Or(query, f, second)
+	} else {
+		operatorContext.Tx = operatorContext.Tx.Where(query, f, second)
+	}
 }
 
 func (d *SqliteDialect) BuildDeleteString(table string, cond string, values ...interface{}) *DeleteRowStructure {

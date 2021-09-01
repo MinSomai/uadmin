@@ -29,6 +29,7 @@ type WidgetType string
 
 const UnknownInputWidgetType WidgetType = "unknown"
 const TextInputWidgetType WidgetType = "text"
+const DynamicInputWidgetType WidgetType = "dynamic"
 const NumberInputWidgetType WidgetType = "number"
 const EmailInputWidgetType WidgetType = "email"
 const URLInputWidgetType WidgetType = "url"
@@ -369,6 +370,8 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 		widget = &HiddenWidget{}
 	case "password":
 		widget = &PasswordWidget{}
+	case "dynamic":
+		widget = &DynamicWidget{}
 	case "choose_from_select":
 		widget = &ChooseFromSelectWidget{}
 	case "fklink":
@@ -631,6 +634,64 @@ func (tw *TextWidget) Render(formRenderContext *FormRenderContext, currentField 
 	data["Type"] = tw.GetWidgetType()
 	data["ShowOnlyHtmlInput"] = tw.ShowOnlyHTMLInput
 	return RenderWidget(tw.Renderer, tw.GetTemplateName(), data, tw.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
+}
+
+type DynamicWidget struct {
+	Widget
+	GetRealWidget func(formRenderContext *FormRenderContext, currentField *Field) IWidget
+	GetRealWidgetForFormProceeding func(form *multipart.Form, afo IAdminFilterObjects) IWidget
+}
+
+func (tw *DynamicWidget) GetWidgetType() WidgetType {
+	return DynamicInputWidgetType
+}
+
+func (tw *DynamicWidget) GetTemplateName() string {
+	panic("shouldn't be called")
+}
+
+func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+	realWidget := tw.GetRealWidget(formRenderContext, currentField)
+	if tw.IsForAdmin {
+		realWidget.RenderForAdmin()
+	}
+	if tw.Populate != nil {
+		realWidget.SetPopulate(tw.Populate)
+	}
+	if tw.Required {
+		realWidget.SetRequired()
+	}
+	if tw.HelpText != "" {
+		realWidget.SetHelpText(tw.HelpText)
+	}
+	realWidget.RenderUsingRenderer(tw.Renderer)
+	realWidget.SetFieldDisplayName(tw.FieldDisplayName)
+	if !realWidget.IsValueConfigured() {
+		realWidget.SetValue(tw.Value)
+	}
+	return realWidget.Render(formRenderContext, currentField)
+}
+
+func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+	realWidget := tw.GetRealWidgetForFormProceeding(form, afo)
+	if tw.IsForAdmin {
+		realWidget.RenderForAdmin()
+	}
+	if tw.Populate != nil {
+		realWidget.SetPopulate(tw.Populate)
+	}
+	if tw.Required {
+		realWidget.SetRequired()
+	}
+	if tw.HelpText != "" {
+		realWidget.SetHelpText(tw.HelpText)
+	}
+	realWidget.RenderUsingRenderer(tw.Renderer)
+	realWidget.SetFieldDisplayName(tw.FieldDisplayName)
+	if !realWidget.IsValueConfigured() {
+		realWidget.SetValue(tw.Value)
+	}
+	return realWidget.ProceedForm(form, afo)
 }
 
 type FkLinkWidget struct {

@@ -2,8 +2,10 @@ package admin
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"github.com/uadmin/uadmin"
 	"github.com/uadmin/uadmin/core"
+	"gorm.io/gorm"
 	"strconv"
 	"testing"
 )
@@ -27,19 +29,18 @@ func (suite *AdminSearchFieldTestSuite) SetupTestData() {
 }
 
 func (suite *AdminSearchFieldTestSuite) TestFiltering() {
-	// @todo, uncomment when fix search by different fields in the admin
-	//suite.SetupTestData()
-	//adminUserBlueprintPage, _ := interfaces.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
-	//adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
-	//var users []interfaces.User
-	//adminRequestParams := interfaces.NewAdminRequestParams()
-	//uadminDatabase := interfaces.NewUadminDatabase()
-	//defer uadminDatabase.Close()
-	//statement := &gorm.Statement{DB: uadminDatabase.Db}
-	//statement.Parse(&interfaces.User{})
-	//adminRequestParams.Search = "admin_202@example.com"
-	//adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GormQuerySet.Find(&users)
-	//assert.Equal(suite.T(), len(users), 1)
+	suite.SetupTestData()
+	adminUserBlueprintPage, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
+	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
+	var users []core.User
+	adminRequestParams := core.NewAdminRequestParams()
+	uadminDatabase := core.NewUadminDatabase()
+	defer uadminDatabase.Close()
+	statement := &gorm.Statement{DB: uadminDatabase.Db}
+	statement.Parse(&core.User{})
+	adminRequestParams.Search = "admin_202@example.com"
+	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetFullQuerySet().Find(&users)
+	assert.Equal(suite.T(), len(users), 1)
 }
 
 // In order for 'go test' to run this suite, we need to create

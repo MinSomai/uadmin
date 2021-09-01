@@ -87,7 +87,7 @@ type Setting struct {
 	Help         string          `uadmin:"list,search" sql:"type:text;"`
 	Category     SettingCategory `uadmin:"list,search" uadminform:"FkRequiredFieldOptions"`
 	CategoryID   uint
-	Code         string `uadmin:"search" uadminform:"RequiredFieldOptions"`
+	Code         string `uadmin:"search" uadminform:"ReadonlyField"`
 }
 
 func (s *Setting) String() string {

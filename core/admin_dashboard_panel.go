@@ -85,6 +85,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							Message                  string
 							CurrentAdminContext      IAdminContext
 							NoPermissionToAddNew     bool
+							NoPermissionToEdit       bool
 						}
 
 						c := &Context{}
@@ -92,6 +93,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 						PopulateTemplateContextForAdminPanel(ctx, c, NewAdminRequestParams())
 						c.Message = ctx.Query("message")
+						c.NoPermissionToEdit = adminPage.NoPermissionToEdit
 						c.PermissionForBlueprint = c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
 						c.AdminFilterObjects = adminPage.GetQueryset(adminPage, adminRequestParams)
 						c.AdminModelActionRegistry = adminPage.ModelActionsRegistry
@@ -196,7 +198,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					}
 
 					c := &Context{}
-					c.ListURL = fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug)
+					c.ListURL = fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)
 					c.PageTitle = adminPage.ModelName
 					c.CurrentAdminContext = c
 					c.ListEditableFormsForInlines = NewFormListEditableCollection()
@@ -482,9 +484,19 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				}
 			}
 			if adminRequestParams != nil && adminRequestParams.Search != "" {
-				for filter := range adminPage.SearchFields.GetAll() {
-					filter.Search(ret, adminRequestParams.Search)
+				searchFilterObjects := &AdminFilterObjects{
+					InitialGormQuerySet:   NewGormPersistenceStorage(db),
+					GormQuerySet:          NewGormPersistenceStorage(db),
+					PaginatedGormQuerySet: NewGormPersistenceStorage(db),
+					Model:                 modelI3,
+					UadminDatabase:        uadminDatabase,
+					GenerateModelI:        genModelI,
 				}
+				for filter := range adminPage.SearchFields.GetAll() {
+					filter.Search(searchFilterObjects, adminRequestParams.Search)
+				}
+				ret.SetPaginatedQuerySet(ret.GetPaginatedQuerySet().Where(searchFilterObjects.GetPaginatedQuerySet().GetCurrentDB()))
+				ret.SetFullQuerySet(ret.GetFullQuerySet().Where(searchFilterObjects.GetFullQuerySet().GetCurrentDB()))
 			}
 			if adminRequestParams != nil && adminRequestParams.Paginator.PerPage > 0 {
 				perPage = adminRequestParams.Paginator.PerPage

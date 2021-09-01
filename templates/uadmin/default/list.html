@@ -87,17 +87,18 @@
                     {{$listDisplay := .ListDisplay}}
                     {{$currentURL := .CurrentURL}}
                     {{$currentAdminContext := .CurrentAdminContext }}
+                    {{$noPermissionToEdit := .NoPermissionToEdit }}
                     {{range $iterateAdminObjects := .AdminFilterObjects.GetPaginated}}
                         <tr>
                             <td onclick="$('.main_check').prop('checked', false);">
-                                <input type="hidden" value="{{ $iterateAdminObjects.Id }}" name="object_id"/>
-                                <input  class="item_check" type="checkbox" value="{{ $iterateAdminObjects.Id }}">
+                                <input type="hidden" value="{{ $iterateAdminObjects.ID }}" name="object_id"/>
+                                <input  class="item_check" type="checkbox" value="{{ $iterateAdminObjects.ID }}">
                             </td>
                             {{$i  := 0 }}
-                            {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.Id $iterateAdminObjects.Model}}
+                            {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.ID $iterateAdminObjects.Model}}
                             {{range $field := $listDisplay.GetAllFields}}
                                 <td>
-                                    {{if eq $i 0}}<a class="bold clickable Row_id no-style" href="{{$currentURL}}/edit/{{$iterateAdminObjects.Id}}">{{ end }}
+                                    {{if eq $i 0}}{{ if not $noPermissionToEdit }}<a class="bold clickable Row_id no-style" href="{{$currentURL}}/edit/{{$iterateAdminObjects.ID}}">{{ end }}{{ end }}
                                     {{ if $field.Field }}
                                         {{ $fieldExistsInTheForm := $form.ExistsField $field }}
                                         {{ if $fieldExistsInTheForm }}
@@ -110,7 +111,7 @@
                                     {{ if not $field.Field }}
                                     {{ $field.GetValue $iterateAdminObjects.Model}}
                                     {{ end }}
-                                    {{if eq $i 0}}</a>{{ end }}
+                                    {{if eq $i 0}}{{ if not $noPermissionToEdit }}</a>{{ end }}{{ end }}
                                 </td>
                                 {{ $i = (add $i 1) }}
                             {{end}}

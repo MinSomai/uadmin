@@ -256,6 +256,7 @@ type IPersistenceStorage interface {
 	SavePoint(name string) IPersistenceStorage
 	RollbackTo(name string) IPersistenceStorage
 	Exec(sql string, values ...interface{}) IPersistenceStorage
+	GetCurrentDB() *gorm.DB
 }
 
 type GormPersistenceStorage struct {
@@ -278,6 +279,10 @@ func (gps *GormPersistenceStorage) Model(value interface{}) IPersistenceStorage 
 func (gps *GormPersistenceStorage) Clauses(conds ...clause.Expression) IPersistenceStorage {
 	gps.Db = gps.Db.Clauses(conds...)
 	return gps
+}
+
+func (gps *GormPersistenceStorage) GetCurrentDB() *gorm.DB {
+	return gps.Db
 }
 
 func (gps *GormPersistenceStorage) Table(name string, args ...interface{}) IPersistenceStorage {
@@ -1033,12 +1038,12 @@ func (sf *SearchField) Search(afo IAdminFilterObjects, searchString string) {
 	if sf.CustomSearch != nil {
 		sf.CustomSearch(afo, searchString)
 	} else {
-		operator := ExactGormOperator{}
+		operator := IContainsGormOperator{}
 		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
-		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString)
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, true)
 		afo.SetFullQuerySet(gormOperatorContext.Tx)
 		gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
-		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString)
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, true)
 		afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
 	}
 }

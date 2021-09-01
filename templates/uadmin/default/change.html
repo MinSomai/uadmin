@@ -164,7 +164,7 @@
                 <div>
                     {{ if .ID }}
                     <div class="col-sm-4 col-xs-2">
-                        <button onclick="$('#delete-object-form').submit()" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;Delete object</button>
+                        <button onclick="$('#delete-object-form').submit(); return false;" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;Delete object</button>
                     </div>
                     {{ end }}
                 </div>

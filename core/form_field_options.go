@@ -95,4 +95,8 @@ func init() {
 		Required:   true,
 		WidgetType: "fklink",
 	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:       "DynamicTypeFieldOptions",
+		WidgetType: "dynamic",
+	})
 }
