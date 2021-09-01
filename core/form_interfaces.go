@@ -1710,7 +1710,7 @@ func (w *RadioSelectWidget) GetDataForRendering(formRenderContext *FormRenderCon
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified, "ID": w.ID,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified, "Id": w.ID,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1807,7 +1807,7 @@ func (w *CheckboxSelectMultipleWidget) GetDataForRendering(formRenderContext *Fo
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified, "ID": w.ID,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified, "Id": w.ID,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1995,7 +1995,7 @@ func (w *ClearableFileWidget) Render(formRenderContext *FormRenderContext, curre
 	data["InitialText"] = w.InitialText
 	data["CurrentValue"] = w.CurrentValue
 	data["Required"] = w.Required
-	data["ID"] = w.ID
+	data["Id"] = w.ID
 	data["ClearCheckboxLabel"] = w.ClearCheckboxLabel
 	data["InputText"] = w.InputText
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)

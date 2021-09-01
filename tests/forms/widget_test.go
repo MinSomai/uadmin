@@ -331,7 +331,7 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
-	assert.Contains(w.T(), renderedWidget, "for=\"test\"")
+	assert.Contains(w.T(), renderedWidget, "<li>test<ul id=\"test_0\">")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
 	err := widget.ProceedForm(form1, nil)
@@ -363,7 +363,7 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
-	assert.Contains(w.T(), renderedWidget, "for=\"test\"")
+	assert.Contains(w.T(), renderedWidget, "<ul id=\"test\">\n  \n  \n  \n    <li>test<ul id=\"test_0\">")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
 	err := widget.ProceedForm(form1, nil)
