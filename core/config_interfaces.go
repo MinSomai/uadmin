@@ -35,8 +35,8 @@ type UadminConfigOptions struct {
 	EmailFrom              string `yaml:"email_from"`
 	EmailUsername          string `yaml:"email_username"`
 	EmailPassword          string `yaml:"email_password"`
-	EmailSmtpServer        string `yaml:"email_smtp_server"`
-	EmailSmtpServerPort    int    `yaml:"email_smtp_server_port"`
+	EmailSMTPServer        string `yaml:"email_smtp_server"`
+	EmailSMTPServerPort    int    `yaml:"email_smtp_server_port"`
 	RootURL                string `yaml:"root_url"`
 	RootAdminURL           string `yaml:"root_admin_url"`
 	OTPAlgorithm           string `yaml:"otp_algorithm"`
@@ -62,11 +62,11 @@ type UadminConfigOptions struct {
 	Logo                   string `yaml:"logo"`
 	FavIcon                string `yaml:"fav_icon"`
 	AdminCookieName        string `yaml:"admin_cookie_name"`
-	ApiCookieName          string `yaml:"api_cookie_name"`
+	APICookieName          string `yaml:"api_cookie_name"`
 	SessionDuration        int64  `yaml:"session_duration"`
 	SecureCookie           bool   `yaml:"secure_cookie"`
-	HttpOnlyCookie         bool   `yaml:"http_only_cookie"`
-	DirectApiSigninByField string `yaml:"direct_api_signin_by_field"`
+	HTTPOnlyCookie         bool   `yaml:"http_only_cookie"`
+	DirectAPISigninByField string `yaml:"direct_api_signin_by_field"`
 	DebugTests             bool   `yaml:"debug_tests"`
 	PoweredOnSite          string `yaml:"powered_on_site"`
 	ForgotCodeExpiration   int    `yaml:"forgot_code_expiration"`
@@ -83,7 +83,7 @@ type UadminDbOptions struct {
 }
 
 type UadminAuthOptions struct {
-	JWT_SECRET_TOKEN  string `yaml:"jwt_secret_token"`
+	JwtSecretToken  string `yaml:"jwt_secret_token"`
 	MinUsernameLength int    `yaml:"min_username_length"`
 	MaxUsernameLength int    `yaml:"max_username_length"`
 	MinPasswordLength int    `yaml:"min_password_length"`
@@ -98,7 +98,7 @@ type UadminAdminOptions struct {
 	BindIP string `yaml:"bind_ip"`
 }
 
-type UadminApiOptions struct {
+type UadminAPIOptions struct {
 	ListenPort int `yaml:"listen_port"`
 	SSL        struct {
 		ListenPort int `yaml:"listen_port"`
@@ -111,7 +111,7 @@ type UadminSwaggerOptions struct {
 		ListenPort int `yaml:"listen_port"`
 	} `yaml:"ssl"`
 	PathToSpec          string `yaml:"path_to_spec"`
-	ApiEditorListenPort int    `yaml:"api_editor_listen_port"`
+	APIEditorListenPort int    `yaml:"api_editor_listen_port"`
 }
 
 type UadminConfigurableConfig struct {
@@ -120,7 +120,7 @@ type UadminConfigurableConfig struct {
 	Db      *UadminDbOptions      `yaml:"db"`
 	Auth    *UadminAuthOptions    `yaml:"auth"`
 	Admin   *UadminAdminOptions   `yaml:"admin"`
-	Api     *UadminApiOptions     `yaml:"api"`
+	API     *UadminAPIOptions     `yaml:"api"`
 	Swagger *UadminSwaggerOptions `yaml:"swagger"`
 }
 
@@ -157,7 +157,7 @@ type IFieldFormOptions interface {
 
 // Info from config file
 type UadminConfig struct {
-	ApiSpec                   *loads.Document
+	APISpec                   *loads.Document
 	D                         *UadminConfigurableConfig
 	TemplatesFS               embed.FS
 	LocalizationFS            embed.FS
@@ -176,7 +176,7 @@ func (c *UadminConfig) GetPathToUploadDirectory() string {
 	return fmt.Sprintf("%s/%s", os.Getenv("UADMIN_PATH"), c.D.Uadmin.UploadPath)
 }
 
-func (c *UadminConfig) GetUrlToUploadDirectory() string {
+func (c *UadminConfig) GetURLToUploadDirectory() string {
 	return fmt.Sprintf("/%s", c.D.Uadmin.UploadPath)
 }
 
@@ -229,11 +229,11 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			Logo:                   "/static-inbuilt/uadmin/logo.png",
 			FavIcon:                "/static-inbuilt/uadmin/favicon.ico",
 			AdminCookieName:        "uadmin-admin",
-			ApiCookieName:          "uadmin-api",
+			APICookieName:          "uadmin-api",
 			SessionDuration:        3600,
 			SecureCookie:           false,
-			HttpOnlyCookie:         true,
-			DirectApiSigninByField: "username",
+			HTTPOnlyCookie:         true,
+			DirectAPISigninByField: "username",
 			DebugTests:             false,
 			ForgotCodeExpiration:   10,
 			DateFormat:             "01/_2/2006",

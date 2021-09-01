@@ -9,6 +9,6 @@ var BMigrationRegistry *core.MigrationRegistry
 func init() {
 	BMigrationRegistry = core.NewMigrationRegistry()
 
-	BMigrationRegistry.AddMigration(initial_1623082009{})
+	BMigrationRegistry.AddMigration(initial1623082009{})
 	// placeholder to insert next migration
 }

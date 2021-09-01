@@ -11,10 +11,10 @@ import (
 	"os"
 )
 
-type OpenApiCommand struct {
+type OpenAPICommand struct {
 }
 
-func (c OpenApiCommand) Proceed(subaction string, args []string) error {
+func (c OpenAPICommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
 	var isCorrectActionPassed bool = false
@@ -22,7 +22,7 @@ func (c OpenApiCommand) Proceed(subaction string, args []string) error {
 		Actions: make(map[string]core.ICommand),
 	}
 
-	commandRegistry.addAction("editor", &ServeOpenApiEditorCommand{})
+	commandRegistry.addAction("editor", &ServeOpenAPIEditorCommand{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
 		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
@@ -39,14 +39,14 @@ Please provide what do you want to do ?
 	return commandRegistry.runAction(subaction, "", args)
 }
 
-func (c OpenApiCommand) GetHelpText() string {
+func (c OpenAPICommand) GetHelpText() string {
 	return "Manage your open api schema"
 }
 
-type ServeOpenApiEditorCommand struct {
+type ServeOpenAPIEditorCommand struct {
 }
 
-func (command ServeOpenApiEditorCommand) Proceed(subaction string, args []string) error {
+func (command ServeOpenAPIEditorCommand) Proceed(subaction string, args []string) error {
 	// Hello world, the web server
 
 	editorHandler := func(w http.ResponseWriter, req *http.Request) {
@@ -79,10 +79,10 @@ func (command ServeOpenApiEditorCommand) Proceed(subaction string, args []string
 	http.HandleFunc("/", editorHandler)
 	http.HandleFunc("/spec", specHandler)
 	fmt.Printf("Please open following url in browser http://localhost:8083/?saveToFileEndpoint=/spec\n")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", appInstance.Config.D.Swagger.ApiEditorListenPort), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", appInstance.Config.D.Swagger.APIEditorListenPort), nil))
 	return nil
 }
 
-func (command ServeOpenApiEditorCommand) GetHelpText() string {
+func (command ServeOpenAPIEditorCommand) GetHelpText() string {
 	return "Provide a way to edit your project openapi spec"
 }

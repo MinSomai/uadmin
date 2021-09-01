@@ -11,10 +11,10 @@ import (
 )
 
 type AdminListFilterTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
-func (apts *AdminListFilterTestSuite) SetupTestData() {
+func (suite *AdminListFilterTestSuite) SetupTestData() {
 	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(101, 200) {
 		userModel := &core.User{
@@ -40,7 +40,7 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
 	statement.Parse(&core.User{})
 	listFilter := &core.ListFilter{
-		UrlFilteringParam: "Username__exact",
+		URLFilteringParam: "Username__exact",
 	}
 	adminUserPage.ListFilter.Add(listFilter)
 	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(&users)

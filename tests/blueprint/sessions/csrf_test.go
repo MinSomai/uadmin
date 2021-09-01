@@ -13,7 +13,7 @@ import (
 )
 
 type CsrfTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {

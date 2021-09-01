@@ -113,7 +113,7 @@ var SentEmailsDuringTests = SentEmailsDuringTestsType{
 // @todo rework
 // SendEmail sends email using system configured variables
 func SendEmail(from string, to []string, cc []string, bcc []string, subject string, body string) error {
-	if !core.CurrentConfig.InTests && (core.CurrentConfig.D.Uadmin.EmailUsername == "" || core.CurrentConfig.D.Uadmin.EmailPassword == "" || core.CurrentConfig.D.Uadmin.EmailSmtpServer == "" || core.CurrentConfig.D.Uadmin.EmailSmtpServerPort == 0) {
+	if !core.CurrentConfig.InTests && (core.CurrentConfig.D.Uadmin.EmailUsername == "" || core.CurrentConfig.D.Uadmin.EmailPassword == "" || core.CurrentConfig.D.Uadmin.EmailSMTPServer == "" || core.CurrentConfig.D.Uadmin.EmailSMTPServerPort == 0) {
 		errMsg := "Email not sent because email global variables are not set"
 		core.Trail(core.CRITICAL, errMsg)
 		return fmt.Errorf(errMsg)
@@ -147,8 +147,8 @@ func SendEmail(from string, to []string, cc []string, bcc []string, subject stri
 
 	if !core.CurrentConfig.InTests {
 		go func() {
-			err := smtp.SendMail(fmt.Sprintf("%s:%d", core.CurrentConfig.D.Uadmin.EmailSmtpServer, core.CurrentConfig.D.Uadmin.EmailSmtpServerPort),
-				smtp.PlainAuth("", core.CurrentConfig.D.Uadmin.EmailUsername, core.CurrentConfig.D.Uadmin.EmailPassword, core.CurrentConfig.D.Uadmin.EmailSmtpServer),
+			err := smtp.SendMail(fmt.Sprintf("%s:%d", core.CurrentConfig.D.Uadmin.EmailSMTPServer, core.CurrentConfig.D.Uadmin.EmailSMTPServerPort),
+				smtp.PlainAuth("", core.CurrentConfig.D.Uadmin.EmailUsername, core.CurrentConfig.D.Uadmin.EmailPassword, core.CurrentConfig.D.Uadmin.EmailSMTPServer),
 				core.CurrentConfig.D.Uadmin.EmailFrom, to, []byte(msg))
 
 			if err != nil {

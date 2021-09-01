@@ -10,7 +10,7 @@ import (
 )
 
 type FsStorageTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (suite *FsStorageTestSuite) SetupTest() {

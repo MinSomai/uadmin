@@ -26,10 +26,10 @@ func (r CommandRegistry) runAction(command string, subaction string, args []stri
 
 func (r CommandRegistry) MakeHelpText() string {
 	var helpParts []string
-	var i int = 1
+	var i = 1
 	for action, handler := range r.Actions {
 		helpParts = append(helpParts, fmt.Sprintf("%d. %s - %s", i, action, handler.GetHelpText()))
-		i += 1
+		i++
 	}
 	return strings.Join(helpParts, "\n")
 }

@@ -54,8 +54,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("home"), c, core.FuncMap)
 		}
 	}
-	if core.CurrentConfig.GetUrlToUploadDirectory() != "" {
-		mainRouter.StaticFS(core.CurrentConfig.GetUrlToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetUrlToUploadDirectory())))
+	if core.CurrentConfig.GetURLToUploadDirectory() != "" {
+		mainRouter.StaticFS(core.CurrentConfig.GetURLToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetURLToUploadDirectory())))
 	}
 	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile", func(ctx *gin.Context) {
 		type Context struct {

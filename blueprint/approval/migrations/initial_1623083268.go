@@ -6,18 +6,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type initial_1623083268 struct {
+type initial1623083268 struct {
 }
 
-func (m initial_1623083268) GetName() string {
+func (m initial1623083268) GetName() string {
 	return "approval.1623083268"
 }
 
-func (m initial_1623083268) GetId() int64 {
+func (m initial1623083268) GetID() int64 {
 	return 1623083268
 }
 
-func (m initial_1623083268) Up(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623083268) Up(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.AutoMigrate(models.Approval{})
 	if err != nil {
@@ -26,7 +26,7 @@ func (m initial_1623083268) Up(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623083268) Down(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623083268) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.Migrator().DropTable(models.Approval{})
 	if err != nil {
@@ -40,6 +40,6 @@ func (m initial_1623083268) Down(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623083268) Deps() []string {
+func (m initial1623083268) Deps() []string {
 	return make([]string, 0)
 }

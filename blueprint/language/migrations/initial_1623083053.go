@@ -5,18 +5,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type initial_1623083053 struct {
+type initial1623083053 struct {
 }
 
-func (m initial_1623083053) GetName() string {
+func (m initial1623083053) GetName() string {
 	return "language.1623083053"
 }
 
-func (m initial_1623083053) GetId() int64 {
+func (m initial1623083053) GetID() int64 {
 	return 1623083053
 }
 
-func (m initial_1623083053) Up(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623083053) Up(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.AutoMigrate(core.Language{})
 	if err != nil {
@@ -25,7 +25,7 @@ func (m initial_1623083053) Up(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623083053) Down(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623083053) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.Migrator().DropTable(core.Language{})
 	if err != nil {
@@ -39,6 +39,6 @@ func (m initial_1623083053) Down(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623083053) Deps() []string {
+func (m initial1623083053) Deps() []string {
 	return make([]string, 0)
 }

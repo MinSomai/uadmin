@@ -18,17 +18,17 @@ import (
 	"time"
 )
 
-type UadminTestSuite struct {
+type TestSuite struct {
 	suite.Suite
 	App *App
 }
 
-func (suite *UadminTestSuite) SetupTest() {
+func (suite *TestSuite) SetupTest() {
 	app := NewFullAppForTests()
 	suite.App = app
 }
 
-func (suite *UadminTestSuite) TearDownSuite() {
+func (suite *TestSuite) TearDownSuite() {
 	ClearTestApp()
 }
 
@@ -262,7 +262,7 @@ func NewFullAppForTests() *App {
 	}
 	a := NewApp("test")
 	appForTests = a
-	// appForTests.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
+	// appForTests.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
 	StoreCurrentApp(a)
 	return a
 }

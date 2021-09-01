@@ -48,7 +48,7 @@ type ServeSwaggerServer struct {
 }
 
 func (command ServeSwaggerServer) Proceed(subaction string, args []string) error {
-	appInstance.Config.ApiSpec = core.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
+	appInstance.Config.APISpec = core.NewSwaggerSpec(appInstance.Config.D.Swagger.PathToSpec)
 	commandToExecute := exec.Command(
 		"swagger", "serve", "--flavor=swagger", "--no-open",
 		fmt.Sprintf("--port=%d", appInstance.Config.D.Swagger.ListenPort), appInstance.Config.D.Swagger.PathToSpec,

@@ -39,12 +39,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					csrfTokenFromRequest = c.PostForm("csrf-token")
 				}
 			}
-			serverKey = c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.ApiCookieName))
+			serverKey = c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.APICookieName))
 			if serverKey == "" {
 				if c.Query("for-uadmin-panel") == "1" {
 					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
 				} else {
-					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.ApiCookieName)
+					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.APICookieName)
 				}
 			}
 			defaultSessionAdapter, _ := b.SessionAdapterRegistry.GetDefaultAdapter()

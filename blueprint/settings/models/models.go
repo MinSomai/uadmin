@@ -90,8 +90,8 @@ type Setting struct {
 	Code         string `uadmin:"search" uadminform:"RequiredFieldOptions"`
 }
 
-func (m *Setting) String() string {
-	return fmt.Sprintf("Setting %s", m.Name)
+func (s *Setting) String() string {
+	return fmt.Sprintf("Setting %s", s.Name)
 }
 
 // Save overides save

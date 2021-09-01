@@ -8,7 +8,7 @@ import (
 )
 
 type AdminListDisplayTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (suite *AdminListDisplayTestSuite) TestListDisplay() {

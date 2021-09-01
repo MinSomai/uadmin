@@ -11,7 +11,7 @@ import (
 )
 
 type SessionTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (s *SessionTestSuite) TestSavingSession() {

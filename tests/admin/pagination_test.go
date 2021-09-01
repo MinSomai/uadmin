@@ -10,10 +10,10 @@ import (
 )
 
 type AdminPaginationTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
-func (apts *AdminPaginationTestSuite) SetupTestData() {
+func (suite *AdminPaginationTestSuite) SetupTestData() {
 	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(1, 100) {
 		userModel := &core.User{

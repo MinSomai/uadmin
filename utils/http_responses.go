@@ -2,14 +2,14 @@ package utils
 
 import "github.com/gin-gonic/gin"
 
-func ApiNoMethodFound() gin.H {
+func APINoMethodFound() gin.H {
 	return gin.H{"error": "invalid_action"}
 }
 
-func ApiBadResponse(error string) gin.H {
+func APIBadResponse(error string) gin.H {
 	return gin.H{"error": error}
 }
 
-func ApiSuccessResp() gin.H {
+func APISuccessResp() gin.H {
 	return gin.H{"status": true}
 }

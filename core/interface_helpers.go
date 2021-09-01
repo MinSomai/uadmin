@@ -24,14 +24,14 @@ func GenerateNumberSequence(start int, stop int) <-chan int {
 				close(chnl)
 				break
 			}
-			i += 1
+			i++
 		}
 	}()
 	return chnl
 }
 
-func CloneNetUrl(url1 *url.URL) *url.URL {
-	clonedUrl := &url.URL{
+func CloneNetURL(url1 *url.URL) *url.URL {
+	clonedURL := &url.URL{
 		Scheme:      url1.Scheme,
 		Opaque:      url1.Opaque,
 		Host:        url1.Host,
@@ -42,7 +42,7 @@ func CloneNetUrl(url1 *url.URL) *url.URL {
 		Fragment:    url1.Fragment,
 		RawFragment: url1.RawFragment,
 	}
-	return clonedUrl
+	return clonedURL
 }
 
 func GetID(m reflect.Value) uint {

@@ -126,7 +126,7 @@ type AdminModelAction struct {
 }
 
 func prepareAdminModelActionName(adminModelAction string) string {
-	slugifiedAdminModelAction := AsciiRegex.ReplaceAllLiteralString(adminModelAction, "")
+	slugifiedAdminModelAction := ASCIIRegex.ReplaceAllLiteralString(adminModelAction, "")
 	slugifiedAdminModelAction = strings.Replace(strings.ToLower(slugifiedAdminModelAction), " ", "_", -1)
 	slugifiedAdminModelAction = strings.Replace(strings.ToLower(slugifiedAdminModelAction), ".", "_", -1)
 	return slugifiedAdminModelAction
@@ -571,7 +571,7 @@ func (gps *GormPersistenceStorage) Exec(sql string, values ...interface{}) IPers
 
 type IAdminFilterObjects interface {
 	WithTransaction(handler func(afo1 IAdminFilterObjects) error)
-	LoadDataForModelById(Id interface{}, model interface{})
+	LoadDataForModelByID(ID interface{}, model interface{})
 	SaveModel(model interface{}) error
 	CreateNew(model interface{}) error
 	GetPaginated() <-chan *IterateAdminObjects
@@ -599,7 +599,7 @@ type AdminFilterObjects struct {
 
 type IterateAdminObjects struct {
 	Model         interface{}
-	Id            uint
+	ID            uint
 	RenderContext *FormRenderContext
 }
 
@@ -645,9 +645,9 @@ func (afo *AdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObj
 	})
 }
 
-func (afo *AdminFilterObjects) LoadDataForModelById(Id interface{}, model interface{}) {
+func (afo *AdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
 	modelI, _ := afo.GenerateModelI()
-	afo.UadminDatabase.Db.Model(modelI).Preload(clause.Associations).First(model, Id)
+	afo.UadminDatabase.Db.Model(modelI).Preload(clause.Associations).First(model, ID)
 }
 
 func (afo *AdminFilterObjects) SaveModel(model interface{}) error {
@@ -676,11 +676,11 @@ func (afo *AdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
 			gormModelV := reflect.Indirect(reflect.ValueOf(model))
-			Id := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
-			IdN, _ := strconv.Atoi(Id.(string))
+			ID := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
+			IDN, _ := strconv.Atoi(ID.(string))
 			yieldV := &IterateAdminObjects{
 				Model:         model,
-				Id:            uint(IdN),
+				ID:            uint(IDN),
 				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
@@ -700,11 +700,11 @@ func (afo *AdminFilterObjects) IterateThroughWholeQuerySet() <-chan *IterateAdmi
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
 			gormModelV := reflect.Indirect(reflect.ValueOf(model))
-			Id := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
-			IdN, _ := strconv.Atoi(Id.(string))
+			ID := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
+			IDN, _ := strconv.Atoi(ID.(string))
 			yieldV := &IterateAdminObjects{
 				Model:         model,
-				Id:            uint(IdN),
+				ID:            uint(IDN),
 				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
@@ -930,7 +930,7 @@ type IListFilterInterface interface {
 
 type ListFilter struct {
 	Title             string
-	UrlFilteringParam string
+	URLFilteringParam string
 	OptionsToShow     []*FieldChoice
 	FetchOptions      func(m interface{}) []*FieldChoice
 	CustomFilterQs    func(afo IAdminFilterObjects, filterString string)
@@ -952,21 +952,21 @@ func (lf *ListFilter) FilterQs(afo IAdminFilterObjects, filterString string) {
 	}
 }
 
-func (lf *ListFilter) IsItActive(fullUrl *url.URL) bool {
-	return strings.Contains(fullUrl.String(), lf.UrlFilteringParam)
+func (lf *ListFilter) IsItActive(fullURL *url.URL) bool {
+	return strings.Contains(fullURL.String(), lf.URLFilteringParam)
 }
 
-func (lf *ListFilter) GetURLToClearFilter(fullUrl *url.URL) string {
-	clonedUrl := CloneNetUrl(fullUrl)
-	qs := clonedUrl.Query()
-	qs.Del(lf.UrlFilteringParam)
-	clonedUrl.RawQuery = qs.Encode()
-	return clonedUrl.String()
+func (lf *ListFilter) GetURLToClearFilter(fullURL *url.URL) string {
+	clonedURL := CloneNetURL(fullURL)
+	qs := clonedURL.Query()
+	qs.Del(lf.URLFilteringParam)
+	clonedURL.RawQuery = qs.Encode()
+	return clonedURL.String()
 }
 
-func (lf *ListFilter) IsThatOptionActive(option *FieldChoice, fullUrl *url.URL) bool {
-	qs := fullUrl.Query()
-	value := qs.Get(lf.UrlFilteringParam)
+func (lf *ListFilter) IsThatOptionActive(option *FieldChoice, fullURL *url.URL) bool {
+	qs := fullURL.Query()
+	value := qs.Get(lf.URLFilteringParam)
 	if value != "" {
 		optionValue := TransformValueForListDisplay(option.Value)
 		if optionValue == value {
@@ -976,12 +976,12 @@ func (lf *ListFilter) IsThatOptionActive(option *FieldChoice, fullUrl *url.URL) 
 	return false
 }
 
-func (lf *ListFilter) GetURLForOption(option *FieldChoice, fullUrl *url.URL) string {
-	clonedUrl := CloneNetUrl(fullUrl)
-	qs := clonedUrl.Query()
-	qs.Set(lf.UrlFilteringParam, TransformValueForListDisplay(option.Value))
-	clonedUrl.RawQuery = qs.Encode()
-	return clonedUrl.String()
+func (lf *ListFilter) GetURLForOption(option *FieldChoice, fullURL *url.URL) string {
+	clonedURL := CloneNetURL(fullURL)
+	qs := clonedURL.Query()
+	qs.Set(lf.URLFilteringParam, TransformValueForListDisplay(option.Value))
+	clonedURL.RawQuery = qs.Encode()
+	return clonedURL.String()
 }
 
 type ListFilterRegistry struct {
@@ -1146,7 +1146,7 @@ var CurrentAdminPageRegistry *AdminPageRegistry
 
 type AdminBreadcrumb struct {
 	Name     string
-	Url      string
+	URL      string
 	IsActive bool
 	Icon     string
 }

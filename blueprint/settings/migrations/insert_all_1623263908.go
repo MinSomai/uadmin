@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-type insert_all_1623263908 struct {
+type insertall1623263908 struct {
 }
 
-func (m insert_all_1623263908) GetName() string {
+func (m insertall1623263908) GetName() string {
 	return "settings.1623263908"
 }
 
-func (m insert_all_1623263908) GetId() int64 {
+func (m insertall1623263908) GetID() int64 {
 	return 1623263908
 }
 
-func (m insert_all_1623263908) Up(uadminDatabase *core.UadminDatabase) error {
+func (m insertall1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 	// Check if the uAdmin category is not there and add it
 	db := uadminDatabase.Db
 	var uadminSettingcategory settingmodel.SettingCategory
@@ -122,14 +122,14 @@ func (m insert_all_1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 		},
 		{
 			Name:         "Email SMTP Server",
-			Value:        core.CurrentConfig.D.Uadmin.EmailSmtpServer,
+			Value:        core.CurrentConfig.D.Uadmin.EmailSMTPServer,
 			DefaultValue: "",
 			DataType:     t.String(),
 			Help:         "sets the name of the SMTP Server in an email",
 		},
 		{
 			Name:         "Email SMTP Server Port",
-			Value:        fmt.Sprint(core.CurrentConfig.D.Uadmin.EmailSmtpServerPort),
+			Value:        fmt.Sprint(core.CurrentConfig.D.Uadmin.EmailSMTPServerPort),
 			DefaultValue: "0",
 			DataType:     t.Integer(),
 			Help:         "sets the port number of an SMTP Server in an email",
@@ -518,12 +518,12 @@ func (m insert_all_1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m insert_all_1623263908) Down(uadminDatabase *core.UadminDatabase) error {
+func (m insertall1623263908) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	db.Unscoped().Where("1 = 1").Delete(&settingmodel.Setting{})
 	return nil
 }
 
-func (m insert_all_1623263908) Deps() []string {
+func (m insertall1623263908) Deps() []string {
 	return []string{"settings.1623082592"}
 }

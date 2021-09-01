@@ -13,7 +13,7 @@ import (
 )
 
 type AdminModelActionTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (suite *AdminModelActionTestSuite) TestAdminModelAction() {

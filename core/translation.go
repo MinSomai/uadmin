@@ -108,11 +108,9 @@ func Tf(path string, lang string, term string, args ...interface{}) string {
 			langMap[term] = translateMe + term
 			Trail(WARNING, "Unknown term %s", term)
 			return translateMe + term
-		} else {
-			langMap[term] = term
-			return term
 		}
-	} else {
+		langMap[term] = term
+		return term
 	}
 	return term
 }

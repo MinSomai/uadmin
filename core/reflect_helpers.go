@@ -335,12 +335,10 @@ func TransformValueForListDisplay(value interface{}, forExportP ...bool) string 
 			v := value.(bool)
 			if v {
 				return "<i class=\"fa fa-check-circle\" aria-hidden=\"TRUE\" style=\"color:green;\"></i>"
-			} else {
-				return "<i class=\"fa fa-times-circle\" aria-hidden=\"TRUE\" style=\"color:red;\"></i>"
 			}
-		} else {
-			return strconv.FormatBool(value.(bool))
+			return "<i class=\"fa fa-times-circle\" aria-hidden=\"TRUE\" style=\"color:red;\"></i>"
 		}
+		return strconv.FormatBool(value.(bool))
 	} else if r.Kind() == reflect.Struct {
 		s := reflect.ValueOf(value)
 		switch s.Interface().(type) {

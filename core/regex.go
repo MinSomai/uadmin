@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-var AsciiRegex = regexp.MustCompile("[[:^ascii:]]")
+var ASCIIRegex = regexp.MustCompile("[[:^ascii:]]")
 
-func PrepareStringToBeUsedForHtmlId(text string) string {
-	text = AsciiRegex.ReplaceAllLiteralString(text, "")
+func PrepareStringToBeUsedForHTMLID(text string) string {
+	text = ASCIIRegex.ReplaceAllLiteralString(text, "")
 	if len(text) > 30 {
 		text = text[:30]
 	}

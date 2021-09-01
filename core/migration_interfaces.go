@@ -17,7 +17,7 @@ type IMigration interface {
 	Up(uadminDatabase *UadminDatabase) error
 	Down(uadminDatabase *UadminDatabase) error
 	GetName() string
-	GetId() int64
+	GetID() int64
 	Deps() []string
 }
 
@@ -199,9 +199,8 @@ func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationN
 	node, ok := t.nodes[migrationName]
 	if ok {
 		return node, nil
-	} else {
-		return nil, fmt.Errorf("No node with name %s has been found", migrationName)
 	}
+	return nil, fmt.Errorf("No node with name %s has been found", migrationName)
 }
 
 func (t MigrationTree) AddNode(node IMigrationNode) error {
@@ -227,7 +226,7 @@ type MigrationList []IMigration
 
 func (m MigrationList) Len() int { return len(m) }
 func (m MigrationList) Less(i, j int) bool {
-	return m[i].GetId() < m[j].GetId()
+	return m[i].GetID() < m[j].GetID()
 }
 func (m MigrationList) Swap(i, j int) { m[i], m[j] = m[j], m[i] }
 
@@ -251,9 +250,8 @@ func (r MigrationRegistry) GetByName(migrationName string) (IMigration, error) {
 	migration, ok := r.migrations[migrationName]
 	if ok {
 		return migration, nil
-	} else {
-		return nil, fmt.Errorf("No migration with name %s exists", migrationName)
 	}
+	return nil, fmt.Errorf("No migration with name %s exists", migrationName)
 }
 
 func (r MigrationRegistry) GetSortedMigrations() MigrationList {
@@ -261,7 +259,7 @@ func (r MigrationRegistry) GetSortedMigrations() MigrationList {
 	i := 0
 	for _, migration := range r.migrations {
 		sortedMigrations[i] = migration
-		i += 1
+		i++
 	}
 	sort.Sort(sortedMigrations)
 	return sortedMigrations

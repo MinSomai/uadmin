@@ -22,12 +22,12 @@ type IDbAdapter interface {
 	Quote(name interface{}) string
 	LikeOperator() string
 	ToString() string
-	GetLastInsertId()
-	buildClauses(clause_interfaces []clause.Interface)
+	GetLastInsertID()
+	buildClauses(clauseInterfaces []clause.Interface)
 	QuoteTableName(tableName string) string
 	Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB
 	ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error)
-	GetSqlDialectStrings() map[string]string
+	GetSQLDialectStrings() map[string]string
 	GetDb(alias string, dryRun bool) (*gorm.DB, error)
 	CreateDb() error
 	Transaction(handler func()) error
@@ -76,12 +76,12 @@ func (uad *UadminDatabase) Close() {
 	db.Close()
 }
 
-func NewUadminDatabase(alias_ ...string) *UadminDatabase {
+func NewUadminDatabase(alias1 ...string) *UadminDatabase {
 	var alias string
-	if len(alias_) == 0 {
+	if len(alias1) == 0 {
 		alias = "default"
 	} else {
-		alias = alias_[0]
+		alias = alias1[0]
 	}
 	adapter := GetAdapterForDb(alias)
 	Db, _ = adapter.GetDb(
@@ -90,12 +90,12 @@ func NewUadminDatabase(alias_ ...string) *UadminDatabase {
 	return &UadminDatabase{Db: Db, Adapter: adapter}
 }
 
-func NewUadminDatabaseWithoutConnection(alias_ ...string) *UadminDatabase {
+func NewUadminDatabaseWithoutConnection(alias1 ...string) *UadminDatabase {
 	var alias string
-	if len(alias_) == 0 {
+	if len(alias1) == 0 {
 		alias = "default"
 	} else {
-		alias = alias_[0]
+		alias = alias1[0]
 	}
 	adapter := GetAdapterForDb(alias)
 	Db, _ = adapter.GetDb(
@@ -149,12 +149,12 @@ type DatabaseSettings struct {
 var CurrentDatabaseSettings *DatabaseSettings
 
 // GetDB returns a pointer to the DB
-func GetDB(alias_ ...string) *gorm.DB {
+func GetDB(alias1 ...string) *gorm.DB {
 	var alias string
-	if len(alias_) == 0 {
+	if len(alias1) == 0 {
 		alias = "default"
 	} else {
-		alias = alias_[0]
+		alias = alias1[0]
 	}
 	var err error
 
@@ -170,13 +170,13 @@ func GetDB(alias_ ...string) *gorm.DB {
 	return Db
 }
 
-func GetAdapterForDb(alias_ ...string) IDbAdapter {
+func GetAdapterForDb(alias1 ...string) IDbAdapter {
 	var databaseConfig *DBSettings
 	var alias string
-	if len(alias_) == 0 {
+	if len(alias1) == 0 {
 		alias = "default"
 	} else {
-		alias = alias_[0]
+		alias = alias1[0]
 	}
 	if alias == "default" {
 		databaseConfig = CurrentDatabaseSettings.Default

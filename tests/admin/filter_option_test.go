@@ -9,7 +9,7 @@ import (
 )
 
 type FilterOptionTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (suite *FilterOptionTestSuite) TestFilterOptionByYear() {

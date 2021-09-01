@@ -66,7 +66,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 	if err != nil {
 		return err
 	}
-	name := core.AsciiRegex.ReplaceAllLiteralString(opts.Name, "")
+	name := core.ASCIIRegex.ReplaceAllLiteralString(opts.Name, "")
 	bluePrintPath := "blueprint/" + strings.ToLower(name)
 	if _, err := os.Stat(bluePrintPath); os.IsExist(err) {
 		panic(fmt.Sprintf("Blueprint %s does exist", name))
@@ -112,7 +112,7 @@ var ConcreteBlueprint = Blueprint{
 		Message string
 	}{
 		Name:    name,
-		Message: strings.ReplaceAll(core.AsciiRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
+		Message: strings.ReplaceAll(core.ASCIIRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
 	}
 	if err = blueprintTpl.Execute(&blueprintTplBuffer, tplData); err != nil {
 		panic(err)

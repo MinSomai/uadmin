@@ -29,9 +29,8 @@ func (r *AuthProviderRegistry) GetAdapter(name string) (IAuthProvider, error) {
 	adapter, ok := r.registeredAdapters[name]
 	if ok {
 		return adapter, nil
-	} else {
-		return nil, fmt.Errorf("adapter with name %s not found", name)
 	}
+	return nil, fmt.Errorf("adapter with name %s not found", name)
 }
 
 func (r *AuthProviderRegistry) Iterate() <-chan IAuthProvider {

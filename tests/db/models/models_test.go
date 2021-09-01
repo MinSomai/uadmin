@@ -10,12 +10,12 @@ import (
 )
 
 type BuildRemovalTreeTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 	ContentType *core.ContentType
 }
 
 func (s *BuildRemovalTreeTestSuite) SetupTest() {
-	s.UadminTestSuite.SetupTest()
+	s.TestSuite.SetupTest()
 	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	uadminDatabase.Db.AutoMigrate(&UserGroupContentType{})
@@ -64,7 +64,7 @@ func (s *BuildRemovalTreeTestSuite) TearDownSuite() {
 	uadminDatabase.Db.Migrator().DropTable(&OneTimeActionContentType{})
 	uadminDatabase.Db.Migrator().DropTable(&SessionContentType{})
 	uadminDatabase.Close()
-	s.UadminTestSuite.TearDownSuite()
+	s.TestSuite.TearDownSuite()
 }
 
 type UserGroupContentType struct {

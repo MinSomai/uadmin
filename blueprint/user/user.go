@@ -77,7 +77,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		template1, err := template.ParseFS(core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("email/forgot"))
 		if err != nil {
 			core.Trail(core.ERROR, "RenderHTML unable to parse %s. %s", core.CurrentConfig.GetPathToTemplate("email/forgot"), err)
-			ctx.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
+			ctx.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 			return
 		}
 		type Context struct {
@@ -105,7 +105,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		c.URL = link
 		err = template1.Execute(templateWriter, c)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
+			ctx.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 			core.Trail(core.ERROR, "RenderHTML unable to parse %s. %s", core.CurrentConfig.GetPathToTemplate("email/forgot"), err)
 			return
 		}
@@ -328,29 +328,28 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 						}
 						uadminDatabase.Close()
 						return ret
-					} else {
-						formD := ctx.GetPostForm()
-						if formD != nil {
-							Ids := strings.Split(formD.Value["UserGroups"][0], ",")
-							IdI := make([]uint, 0)
-							for _, tmp := range Ids {
-								tmpI, _ := strconv.Atoi(tmp)
-								IdI = append(IdI, uint(tmpI))
+					}
+					formD := ctx.GetPostForm()
+					if formD != nil {
+						Ids := strings.Split(formD.Value["UserGroups"][0], ",")
+						IDI := make([]uint, 0)
+						for _, tmp := range Ids {
+							tmpI, _ := strconv.Atoi(tmp)
+							IDI = append(IDI, uint(tmpI))
+						}
+						if len(IDI) > 0 {
+							var groups []*core.UserGroup
+							uadminDatabase := core.NewUadminDatabase()
+							uadminDatabase.Db.Find(&groups, IDI)
+							ret = make([]*core.SelectOptGroup, 0)
+							for _, group := range groups {
+								ret = append(ret, &core.SelectOptGroup{
+									OptLabel: group.GroupName,
+									Value:    group.ID,
+								})
 							}
-							if len(IdI) > 0 {
-								var groups []*core.UserGroup
-								uadminDatabase := core.NewUadminDatabase()
-								uadminDatabase.Db.Find(&groups, IdI)
-								ret = make([]*core.SelectOptGroup, 0)
-								for _, group := range groups {
-									ret = append(ret, &core.SelectOptGroup{
-										OptLabel: group.GroupName,
-										Value:    group.ID,
-									})
-								}
-								uadminDatabase.Close()
-								return ret
-							}
+							uadminDatabase.Close()
+							return ret
 						}
 					}
 					return ret
@@ -422,29 +421,28 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 						}
 						uadminDatabase.Close()
 						return ret
-					} else {
-						formD := ctx.GetPostForm()
-						if formD != nil {
-							Ids := strings.Split(formD.Value["Permissions"][0], ",")
-							IdI := make([]uint, 0)
-							for _, tmp := range Ids {
-								tmpI, _ := strconv.Atoi(tmp)
-								IdI = append(IdI, uint(tmpI))
+					}
+					formD := ctx.GetPostForm()
+					if formD != nil {
+						Ids := strings.Split(formD.Value["Permissions"][0], ",")
+						IDI := make([]uint, 0)
+						for _, tmp := range Ids {
+							tmpI, _ := strconv.Atoi(tmp)
+							IDI = append(IDI, uint(tmpI))
+						}
+						var permissions []*core.Permission
+						if len(IDI) > 0 {
+							uadminDatabase := core.NewUadminDatabase()
+							uadminDatabase.Db.Preload("ContentType").Find(&permissions, IDI)
+							ret = make([]*core.SelectOptGroup, 0)
+							for _, permission := range permissions {
+								ret = append(ret, &core.SelectOptGroup{
+									OptLabel: permission.ShortDescription(),
+									Value:    permission.ID,
+								})
 							}
-							var permissions []*core.Permission
-							if len(IdI) > 0 {
-								uadminDatabase := core.NewUadminDatabase()
-								uadminDatabase.Db.Preload("ContentType").Find(&permissions, IdI)
-								ret = make([]*core.SelectOptGroup, 0)
-								for _, permission := range permissions {
-									ret = append(ret, &core.SelectOptGroup{
-										OptLabel: permission.ShortDescription(),
-										Value:    permission.ID,
-									})
-								}
-								uadminDatabase.Close()
-								return ret
-							}
+							uadminDatabase.Close()
+							return ret
 						}
 					}
 					return ret
@@ -483,7 +481,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usermodelAdminPage.BlueprintName = "user"
 	usermodelAdminPage.Router = mainRouter
 	listFilter := &core.ListFilter{
-		UrlFilteringParam: "IsSuperUser__exact",
+		URLFilteringParam: "IsSuperUser__exact",
 		Title:             "Is super user ?",
 	}
 	listFilter.OptionsToShow = append(listFilter.OptionsToShow, &core.FieldChoice{DisplayAs: "Yes", Value: true})
@@ -561,29 +559,28 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 						}
 						uadminDatabase.Close()
 						return ret
-					} else {
-						formD := ctx.GetPostForm()
-						if formD != nil {
-							Ids := strings.Split(formD.Value["Permissions"][0], ",")
-							IdI := make([]uint, 0)
-							for _, tmp := range Ids {
-								tmpI, _ := strconv.Atoi(tmp)
-								IdI = append(IdI, uint(tmpI))
+					}
+					formD := ctx.GetPostForm()
+					if formD != nil {
+						Ids := strings.Split(formD.Value["Permissions"][0], ",")
+						IDI := make([]uint, 0)
+						for _, tmp := range Ids {
+							tmpI, _ := strconv.Atoi(tmp)
+							IDI = append(IDI, uint(tmpI))
+						}
+						var permissions []*core.Permission
+						if len(IDI) > 0 {
+							uadminDatabase := core.NewUadminDatabase()
+							uadminDatabase.Db.Preload("ContentType").Find(&permissions, IDI)
+							ret = make([]*core.SelectOptGroup, 0)
+							for _, permission := range permissions {
+								ret = append(ret, &core.SelectOptGroup{
+									OptLabel: permission.ShortDescription(),
+									Value:    permission.ID,
+								})
 							}
-							var permissions []*core.Permission
-							if len(IdI) > 0 {
-								uadminDatabase := core.NewUadminDatabase()
-								uadminDatabase.Db.Preload("ContentType").Find(&permissions, IdI)
-								ret = make([]*core.SelectOptGroup, 0)
-								for _, permission := range permissions {
-									ret = append(ret, &core.SelectOptGroup{
-										OptLabel: permission.ShortDescription(),
-										Value:    permission.ID,
-									})
-								}
-								uadminDatabase.Close()
-								return ret
-							}
+							uadminDatabase.Close()
+							return ret
 						}
 					}
 					return ret
@@ -682,7 +679,7 @@ func (b Blueprint) Init() {
 			if photo == "" {
 				return ""
 			}
-			return fmt.Sprintf("%s%s", fsStorage.GetUploadUrl(), photo)
+			return fmt.Sprintf("%s%s", fsStorage.GetUploadURL(), photo)
 		},
 	})
 }

@@ -38,7 +38,7 @@ func (dap *DashboardAdminPanel) FindPageForGormModel(m interface{}) *AdminPage {
 	return nil
 }
 
-func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
+func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 	if dap.ListHandler != nil {
 		router.GET(CurrentConfig.D.Uadmin.RootAdminURL, dap.ListHandler)
 	}
@@ -61,7 +61,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 			}
 		}(adminPage.PageName, adminPage.SubPages))
 		for subPage := range adminPage.SubPages.GetAll() {
-			if subPage.RegisteredHttpHandlers {
+			if subPage.RegisteredHTTPHandlers {
 				continue
 			}
 			router.Any(fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
@@ -95,17 +95,17 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 						c.PermissionForBlueprint = c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
 						c.AdminFilterObjects = adminPage.GetQueryset(adminPage, adminRequestParams)
 						c.AdminModelActionRegistry = adminPage.ModelActionsRegistry
-						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, Url: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
+						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, IsActive: true})
 						if ctx.Request.Method == "POST" {
 							c.AdminFilterObjects.WithTransaction(func(afo1 IAdminFilterObjects) error {
 								postForm, _ := ctx.MultipartForm()
 								ids := postForm.Value["object_id"]
-								for _, objectId := range ids {
+								for _, objectID := range ids {
 									objectModel, _ := c.AdminFilterObjects.GenerateModelInterface()
-									IDInt, _ := strconv.Atoi(objectId)
+									IDInt, _ := strconv.Atoi(objectID)
 									IDUint := uint(IDInt)
-									afo1.LoadDataForModelById(IDUint, objectModel)
+									afo1.LoadDataForModelByID(IDUint, objectModel)
 									modelI, _ := c.AdminFilterObjects.GenerateModelInterface()
 									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", IDUint, modelI, adminPage.ListDisplay)
 									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel)
@@ -152,9 +152,9 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 					currentColumn := 'A'
 					for listDisplay := range adminPage.ListDisplay.GetAllFields() {
 						f.SetCellValue("Sheet1", fmt.Sprintf("%c%d", currentColumn, i), listDisplay.DisplayName)
-						currentColumn += 1
+						currentColumn++
 					}
-					i += 1
+					i++
 					for rows.Next() {
 						model, _ := adminFilterObjects.GenerateModelInterface()
 						db.Db.ScanRows(rows.(*sql.Rows), model)
@@ -162,9 +162,9 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 						currentColumn = 'A'
 						for listDisplay := range adminPage.ListDisplay.GetAllFields() {
 							f.SetCellValue("Sheet1", fmt.Sprintf("%c%d", currentColumn, i), listDisplay.GetValue(model, true))
-							currentColumn += 1
+							currentColumn++
 						}
-						i += 1
+						i++
 					}
 
 					//f.SetCellValue("Sheet1", "B2", 100)
@@ -287,13 +287,13 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 								continue
 							}
 							for iterateAdminObjects := range inline.GetAll(c.Model, c.AdminRequestParams) {
-								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.Id, iterateAdminObjects.Model)
-								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, strconv.Itoa(int(iterateAdminObjects.Id)), listEditable)
+								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.ID, iterateAdminObjects.Model)
+								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, strconv.Itoa(int(iterateAdminObjects.ID)), listEditable)
 							}
 						}
 					}
-					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, Url: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
-					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, Url: fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)})
+					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
+					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, URL: fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)})
 					if id != "new" {
 						values := reflect.ValueOf(modelI).MethodByName("String").Call([]reflect.Value{})
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{IsActive: true, Name: values[0].String()})
@@ -324,7 +324,7 @@ func (dap *DashboardAdminPanel) RegisterHttpHandlers(router *gin.Engine) {
 					}(subPage, pageInline, inlineAdminModelAction.SlugifiedActionName))
 				}
 			}
-			subPage.RegisteredHttpHandlers = true
+			subPage.RegisteredHTTPHandlers = true
 		}
 	}
 }
@@ -401,13 +401,13 @@ func init() {
 			if removalConfirmed != "" {
 				truncateLastPartOfPath := regexp.MustCompile("/[^/]+/?$")
 				newPath := truncateLastPartOfPath.ReplaceAll([]byte(ctx.Request.URL.RawPath), []byte(""))
-				clonedUrl := CloneNetUrl(ctx.Request.URL)
-				clonedUrl.RawPath = string(newPath)
-				clonedUrl.Path = string(newPath)
-				query := clonedUrl.Query()
+				clonedURL := CloneNetURL(ctx.Request.URL)
+				clonedURL.RawPath = string(newPath)
+				clonedURL.Path = string(newPath)
+				query := clonedURL.Query()
 				query.Set("message", "Objects were removed succesfully")
-				clonedUrl.RawQuery = query.Encode()
-				ctx.Redirect(http.StatusFound, clonedUrl.String())
+				clonedURL.RawQuery = query.Encode()
+				ctx.Redirect(http.StatusFound, clonedURL.String())
 				return nil
 			}
 			type Context struct {
@@ -475,9 +475,9 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				url1, _ := url.Parse(adminRequestParams.RequestURL)
 				queryParams, _ := url.ParseQuery(url1.RawQuery)
 				for filter := range adminPage.ListFilter.Iterate() {
-					filterValue := queryParams.Get(filter.UrlFilteringParam)
+					filterValue := queryParams.Get(filter.URLFilteringParam)
 					if filterValue != "" {
-						filter.FilterQs(ret, fmt.Sprintf("%s=%s", filter.UrlFilteringParam, filterValue))
+						filter.FilterQs(ret, fmt.Sprintf("%s=%s", filter.URLFilteringParam, filterValue))
 					}
 				}
 			}

@@ -83,7 +83,7 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	} else {
 		sessionAdapter = sessionAdapter.Create()
 		sessionAdapter.ExpiresOn(&sessionExpirationTime)
-		c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+		c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
 	}
 	sessionAdapter.SetUser(&user)
 	sessionAdapter.Save()
@@ -145,7 +145,7 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	sessionExpirationTime := time.Now().Add(sessionDuration)
 	sessionAdapter.ExpiresOn(&sessionExpirationTime)
 	sessionAdapter.Save()
-	c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+	c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))
 }
 
@@ -156,18 +156,18 @@ func (ap *DirectAuthForAdminProvider) Logout(c *gin.Context) {
 	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err = c.Cookie(cookieName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 		return
 	}
 	if cookie == "" {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse("empty cookie passed"))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse("empty cookie passed"))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter, err = sessionAdapter.GetByKey(cookie)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 		return
 	}
 	sessionAdapter.Delete()
@@ -180,7 +180,7 @@ func (ap *DirectAuthForAdminProvider) Logout(c *gin.Context) {
 		Domain:   c.Request.URL.Host,
 		SameSite: http.SameSiteDefaultMode,
 		Secure:   core.CurrentConfig.D.Uadmin.SecureCookie,
-		HttpOnly: core.CurrentConfig.D.Uadmin.HttpOnlyCookie,
+		HttpOnly: core.CurrentConfig.D.Uadmin.HTTPOnlyCookie,
 		Expires:  timeInPast,
 	})
 	c.Status(http.StatusNoContent)
@@ -191,22 +191,22 @@ func (ap *DirectAuthForAdminProvider) IsAuthenticated(c *gin.Context) {
 	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err := c.Cookie(cookieName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 		return
 	}
 	if cookie == "" {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse("empty cookie passed"))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse("empty cookie passed"))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter, err = sessionAdapter.GetByKey(cookie)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 		return
 	}
 	if !sessionAdapter.IsExpired() {
-		c.JSON(http.StatusBadRequest, utils.ApiBadResponse("session expired"))
+		c.JSON(http.StatusBadRequest, utils.APIBadResponse("session expired"))
 		return
 	}
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))

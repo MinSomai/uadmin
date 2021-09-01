@@ -20,7 +20,7 @@ func NewTestForm2() *multipart.Form {
 }
 
 type FormTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (s *FormTestSuite) TestFormBuilder() {

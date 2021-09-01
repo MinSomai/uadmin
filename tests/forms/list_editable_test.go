@@ -16,7 +16,7 @@ func NewTestForm1() *multipart.Form {
 }
 
 type ListEditableFormTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (s *ListEditableFormTestSuite) TestFormBuilder() {

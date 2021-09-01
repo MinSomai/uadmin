@@ -4,18 +4,18 @@ import (
 	"github.com/uadmin/uadmin/core"
 )
 
-type create_all_1623263607 struct {
+type createall1623263607 struct {
 }
 
-func (m create_all_1623263607) GetName() string {
+func (m createall1623263607) GetName() string {
 	return "language.1623263607"
 }
 
-func (m create_all_1623263607) GetId() int64 {
+func (m createall1623263607) GetID() int64 {
 	return 1623263607
 }
 
-func (m create_all_1623263607) Up(uadminDatabase *core.UadminDatabase) error {
+func (m createall1623263607) Up(uadminDatabase *core.UadminDatabase) error {
 	langs := [][]string{
 		{"English", "English", "en"},
 	}
@@ -38,12 +38,12 @@ func (m create_all_1623263607) Up(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m create_all_1623263607) Down(uadminDatabase *core.UadminDatabase) error {
+func (m createall1623263607) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	db.Unscoped().Where("1 = 1").Delete(&core.Language{Code: "en"})
 	return nil
 }
 
-func (m create_all_1623263607) Deps() []string {
+func (m createall1623263607) Deps() []string {
 	return []string{"language.1623083053"}
 }

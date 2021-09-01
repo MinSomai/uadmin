@@ -167,7 +167,7 @@ type AdminPage struct {
 	Router                             *gin.Engine                                                            `json:"-"`
 	ParentPage                         *AdminPage                                                             `json:"-"`
 	SaveModel                          func(modelI interface{}, ID uint, afo IAdminFilterObjects) interface{} `json:"-"`
-	RegisteredHttpHandlers             bool
+	RegisteredHTTPHandlers             bool
 	NoPermissionToAddNew               bool
 }
 
@@ -197,8 +197,8 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 	}
 	objectIds := strings.Split(json.ObjectIds, ",")
 	objectUintIds := make([]uint, 0)
-	for _, objectId := range objectIds {
-		idV, err := strconv.Atoi(objectId)
+	for _, objectID := range objectIds {
+		idV, err := strconv.Atoi(objectID)
 		if err == nil {
 			objectUintIds = append(objectUintIds, uint(idV))
 		}
@@ -295,8 +295,8 @@ func (api *AdminPageInline) GetFormIdenForNewItems() string {
 	return fmt.Sprintf("example-%s", api.Prefix)
 }
 
-func (api *AdminPageInline) GetInlineId() string {
-	return PrepareStringToBeUsedForHtmlId(api.VerboseNamePlural)
+func (api *AdminPageInline) GetInlineID() string {
+	return PrepareStringToBeUsedForHTMLID(api.VerboseNamePlural)
 }
 
 func (api *AdminPageInline) GetAll(model interface{}, rp *AdminRequestParams) <-chan *IterateAdminObjects {
@@ -320,8 +320,8 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 	var form *FormListEditable
 	err := false
 	var removalError error
-	for fieldName, _ := range f.Value {
-		if !strings.HasSuffix(fieldName, firstEditableField.Field.FieldConfig.Widget.GetHtmlInputName()) {
+	for fieldName := range f.Value {
+		if !strings.HasSuffix(fieldName, firstEditableField.Field.FieldConfig.Widget.GetHTMLInputName()) {
 			continue
 		}
 		if !strings.HasPrefix(fieldName, firstEditableField.Prefix) {
@@ -332,26 +332,26 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 		}
 		removalError = nil
 		form = nil
-		inlineId := strings.TrimPrefix(fieldName, firstEditableField.Prefix+"-")
-		inlineId = strings.TrimSuffix(inlineId, "-"+firstEditableField.Field.FieldConfig.Widget.GetHtmlInputName())
-		realInlineId := strings.Split(inlineId, "_")
+		inlineID := strings.TrimPrefix(fieldName, firstEditableField.Prefix+"-")
+		inlineID = strings.TrimSuffix(inlineID, "-"+firstEditableField.Field.FieldConfig.Widget.GetHTMLInputName())
+		realInlineID := strings.Split(inlineID, "_")
 		modelI, _ := api.GenerateModelI(model)
-		inlineIdToRemove := f.Value[firstEditableField.Prefix+"-"+"object_id-to-remove-"+realInlineId[0]]
+		inlineIDToRemove := f.Value[firstEditableField.Prefix+"-"+"object_id-to-remove-"+realInlineID[0]]
 		isNew := false
-		if !strings.Contains(inlineId, "new") {
-			IDI, _ := strconv.Atoi(realInlineId[0])
-			qs.LoadDataForModelById(uint(IDI), modelI)
+		if !strings.Contains(inlineID, "new") {
+			IDI, _ := strconv.Atoi(realInlineID[0])
+			qs.LoadDataForModelByID(uint(IDI), modelI)
 			form = api.ListDisplay.BuildFormForListEditable(adminContext, uint(IDI), modelI)
-			collection[realInlineId[0]] = form
-			if len(inlineIdToRemove) > 0 {
+			collection[realInlineID[0]] = form
+			if len(inlineIDToRemove) > 0 {
 				removalError = qs.RemoveModelPermanently(modelI)
 			}
 		} else {
-			form = api.ListDisplay.BuildListEditableFormForNewModel(adminContext, realInlineId[0], modelI)
-			collection[realInlineId[0]] = form
+			form = api.ListDisplay.BuildListEditableFormForNewModel(adminContext, realInlineID[0], modelI)
+			collection[realInlineID[0]] = form
 			isNew = true
 		}
-		if len(inlineIdToRemove) > 0 {
+		if len(inlineIDToRemove) > 0 {
 			if removalError != nil {
 				form.FormError = &FormError{
 					FieldError:    make(map[string]ValidationError),
@@ -397,7 +397,7 @@ func NewAdminPageInline(
 ) *AdminPageInline {
 	modelI, _ := generateModelI(nil)
 	ld := NewListDisplayRegistryFromGormModelForInlines(modelI)
-	ld.SetPrefix(PrepareStringToBeUsedForHtmlId(inlineIden))
+	ld.SetPrefix(PrepareStringToBeUsedForHTMLID(inlineIden))
 	ret := &AdminPageInline{
 		Actions:           NewAdminModelActionRegistry(),
 		ExcludeFields:     NewFieldRegistry(),

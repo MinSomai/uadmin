@@ -49,25 +49,25 @@ func (d *SqliteDialect) ToString() string {
 	return d.Statement.SQL.String()
 }
 
-func (d *SqliteDialect) GetLastInsertId() {
-	var last_insert_id_func string
+func (d *SqliteDialect) GetLastInsertID() {
+	var lastInsertIDFunc string
 	if d.DbType == "sqlite" {
-		last_insert_id_func = "last_insert_rowid()"
+		lastInsertIDFunc = "last_insert_rowid()"
 	} else {
-		last_insert_id_func = "LAST_INSERT_ID()"
+		lastInsertIDFunc = "LAST_INSERT_ID()"
 	}
-	clause_interfaces := []clause.Interface{clause.Select{
+	clauseInterfaces := []clause.Interface{clause.Select{
 		Expression: clause.Expr{
-			SQL: last_insert_id_func + " AS lastid",
+			SQL: lastInsertIDFunc + " AS lastid",
 		},
 	},
 	}
-	d.buildClauses(clause_interfaces)
+	d.buildClauses(clauseInterfaces)
 }
 
-func (d *SqliteDialect) buildClauses(clause_interfaces []clause.Interface) {
+func (d *SqliteDialect) buildClauses(clauseInterfaces []clause.Interface) {
 	var buildNames []string
-	for _, c := range clause_interfaces {
+	for _, c := range clauseInterfaces {
 		buildNames = append(buildNames, c.Name())
 		d.Statement.AddClause(c)
 	}
@@ -198,7 +198,7 @@ func (d *SqliteDialect) ReadRows(db *gorm.DB, customSchema bool, SQL string, m i
 }
 
 // @todo analyze
-func (d *SqliteDialect) GetSqlDialectStrings() map[string]string {
+func (d *SqliteDialect) GetSQLDialectStrings() map[string]string {
 	// var sqlDialect = map[string]map[string]string{
 	// 	"mysql": {
 	// 		"createM2MTable": "CREATE TABLE `{TABLE1}_{TABLE2}` (`table1_id` int(10) unsigned NOT NULL, `table2_id` int(10) unsigned NOT NULL, PRIMARY KEY (`table1_id`,`table2_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
@@ -531,7 +531,7 @@ func (d *SqliteDialect) BuildDeleteString(table string, cond string, values ...i
 	return deleteRowStructure
 }
 
-func sqlite_uadmin_datetime_parse(dt string, tz_name string, conn_tzname string) *time.Time {
+func sqliteUadminDatetimeParse(dt string, tzName string, connTzname string) *time.Time {
 	if dt == "" {
 		return nil
 	}
@@ -539,8 +539,8 @@ func sqlite_uadmin_datetime_parse(dt string, tz_name string, conn_tzname string)
 	return &ret
 }
 
-func sqlite_uadmin_datetime_cast_date(dt string, tz_name string, conn_tzname string) string {
-	dtTmp := sqlite_uadmin_datetime_parse(dt, tz_name, conn_tzname)
+func sqliteUadminDatetimeCastDate(dt string, tzName string, connTzname string) string {
+	dtTmp := sqliteUadminDatetimeParse(dt, tzName, connTzname)
 	if dtTmp == nil {
 		return ""
 	}
@@ -548,8 +548,8 @@ func sqlite_uadmin_datetime_cast_date(dt string, tz_name string, conn_tzname str
 	return res
 }
 
-func sqlite_uadmin_datetime_cast_time(dt string, tz_name string, conn_tzname string) string {
-	dtTmp := sqlite_uadmin_datetime_parse(dt, tz_name, conn_tzname)
+func sqliteUadminDatetimeCastTime(dt string, tzName string, connTzname string) string {
+	dtTmp := sqliteUadminDatetimeParse(dt, tzName, connTzname)
 	if dtTmp == nil {
 		return ""
 	}
@@ -562,8 +562,8 @@ func sqlite_uadmin_datetime_cast_time(dt string, tz_name string, conn_tzname str
 //	return regex.Find([]byte(re_string)) != nil
 //}
 
-func sqlite_uadmin_datetime_extract(extract string, dt string, tz_name string, conn_tzname string) string {
-	dtTmp := sqlite_uadmin_datetime_parse(dt, tz_name, conn_tzname)
+func sqliteUadminDatetimeExtract(extract string, dt string, tzName string, connTzname string) string {
+	dtTmp := sqliteUadminDatetimeParse(dt, tzName, connTzname)
 	if dtTmp == nil {
 		return ""
 	}
@@ -599,13 +599,13 @@ func init() {
 	sql.Register("UadminSqliteDriver", &sqlite3.SQLiteDriver{
 		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
 			var err error
-			if err = conn.RegisterFunc("uadmin_datetime_cast_date", sqlite_uadmin_datetime_cast_date, true); err != nil {
+			if err = conn.RegisterFunc("uadmin_datetime_cast_date", sqliteUadminDatetimeCastDate, true); err != nil {
 				return err
 			}
-			if err = conn.RegisterFunc("uadmin_datetime_extract", sqlite_uadmin_datetime_extract, true); err != nil {
+			if err = conn.RegisterFunc("uadmin_datetime_extract", sqliteUadminDatetimeExtract, true); err != nil {
 				return err
 			}
-			if err = conn.RegisterFunc("uadmin_datetime_time", sqlite_uadmin_datetime_cast_time, true); err != nil {
+			if err = conn.RegisterFunc("uadmin_datetime_time", sqliteUadminDatetimeCastTime, true); err != nil {
 				return err
 			}
 			for operator := range ProjectGormOperatorRegistry.GetAll() {

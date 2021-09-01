@@ -64,7 +64,7 @@ func NewFormRenderContext() *FormRenderContext {
 
 type WidgetData map[string]interface{}
 type IWidget interface {
-	IdForLabel(model interface{}, F *Field) string
+	IDForLabel(model interface{}, F *Field) string
 	GetWidgetType() WidgetType
 	GetAttrs() map[string]string
 	GetTemplateName() string
@@ -83,7 +83,7 @@ type IWidget interface {
 	GetValue() interface{}
 	ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error
 	SetRequired()
-	SetShowOnlyHtmlInput()
+	SetShowOnlyHTMLInput()
 	SetOutputValue(v interface{})
 	GetOutputValue() interface{}
 	SetErrors(validationErrors ValidationError)
@@ -92,7 +92,7 @@ type IWidget interface {
 	IsValueChanged() bool
 	SetPopulate(func(m interface{}, currentField *Field) interface{})
 	SetPrefix(prefix string)
-	GetHtmlInputName() string
+	GetHTMLInputName() string
 	GetPopulate() func(m interface{}, currentField *Field) interface{}
 	IsReadOnly() bool
 	IsValueConfigured() bool
@@ -117,8 +117,8 @@ const ForeignKeyUadminFieldType UadminFieldType = "foreignkey"
 const ImageFieldUadminFieldType UadminFieldType = "imagefield"
 const IntegerUadminFieldType UadminFieldType = "integer"
 const UintUadminFieldType UadminFieldType = "uint"
-const IpAddressUadminFieldType UadminFieldType = "ipaddress"
-const GenericIpAddressUadminFieldType UadminFieldType = "genericipaddress"
+const IPAddressUadminFieldType UadminFieldType = "ipaddress"
+const GenericIPAddressUadminFieldType UadminFieldType = "genericipaddress"
 const ManyToManyUadminFieldType UadminFieldType = "manytomany"
 const NullBooleanUadminFieldType UadminFieldType = "nullboolean"
 const PositiveBigIntegerUadminFieldType UadminFieldType = "positivebiginteger"
@@ -328,7 +328,7 @@ func (tfr *GrouppedFieldsRegistry) AddGroup(grouppedFields *GrouppedFields) {
 
 type GrouppedFields struct {
 	Rows            []*FormRow
-	ExtraCssClasses []string
+	ExtraCSSClasses []string
 	Description     string
 	Name            string
 }
@@ -350,12 +350,12 @@ func (fe *FormError) IsEmpty() bool {
 	return len(fe.FieldError) == 0 && len(fe.GeneralErrors) == 0
 }
 
-func (e *FormError) Error() string {
+func (fe *FormError) Error() string {
 	return "Form validation not successful"
 }
 
-func (e *FormError) GetErrorForField(fieldName string) ValidationError {
-	vE, _ := e.FieldError[fieldName]
+func (fe *FormError) GetErrorForField(fieldName string) ValidationError {
+	vE, _ := fe.FieldError[fieldName]
 	return vE
 }
 
@@ -382,12 +382,11 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 				fkModel.Elem().Set(reflect.ValueOf(gormModelV.FieldByName(currentField.Name).Interface()))
 				stringRepresentation := fkModel.MethodByName("String").Call([]reflect.Value{})
 				return fmt.Sprintf("<a href=\"%s\" target=\"_blank\">%s</a>", link, stringRepresentation[0].Interface().(string))
-			} else {
-				fkModel := reflect.New(reflect.TypeOf(gormModelV.FieldByName(currentField.Name).Interface()))
-				fkModel.Elem().Set(reflect.ValueOf(gormModelV.FieldByName(currentField.Name).Interface()))
-				stringRepresentation := fkModel.MethodByName("String").Call([]reflect.Value{})
-				return stringRepresentation
 			}
+			fkModel := reflect.New(reflect.TypeOf(gormModelV.FieldByName(currentField.Name).Interface()))
+			fkModel.Elem().Set(reflect.ValueOf(gormModelV.FieldByName(currentField.Name).Interface()))
+			stringRepresentation := fkModel.MethodByName("String").Call([]reflect.Value{})
+			return stringRepresentation
 		})
 	case "textarea":
 		widget = &TextareaWidget{}
@@ -410,7 +409,7 @@ type Widget struct {
 	FieldDisplayName  string
 	BaseFuncMap       template.FuncMap
 	ReadOnly          bool
-	ShowOnlyHtmlInput bool
+	ShowOnlyHTMLInput bool
 	Required          bool
 	OutputValue       interface{}
 	ValidationErrors  ValidationError
@@ -462,8 +461,8 @@ func (w *Widget) RenderForAdmin() {
 	w.IsForAdmin = true
 }
 
-func (w *Widget) SetShowOnlyHtmlInput() {
-	w.ShowOnlyHtmlInput = true
+func (w *Widget) SetShowOnlyHTMLInput() {
+	w.ShowOnlyHTMLInput = true
 }
 
 func (w *Widget) SetTemplateName(templateName string) {
@@ -493,7 +492,7 @@ func (w *Widget) SetBaseFuncMap(baseFuncMap template.FuncMap) {
 	w.BaseFuncMap = baseFuncMap
 }
 
-func (w *Widget) IdForLabel(model interface{}, F *Field) string {
+func (w *Widget) IDForLabel(model interface{}, F *Field) string {
 	return ""
 }
 
@@ -517,7 +516,7 @@ func (w *Widget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) erro
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -559,7 +558,7 @@ func (w *Widget) GetValue() interface{} {
 	return w.Value
 }
 
-func (w *Widget) GetHtmlInputName() string {
+func (w *Widget) GetHTMLInputName() string {
 	if w.Prefix != "" {
 		return w.Prefix + "-" + w.Name
 	}
@@ -570,7 +569,7 @@ func (w *Widget) Render(formRenderContext *FormRenderContext, currentField *Fiel
 	// spew.Dump("1", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
@@ -590,7 +589,7 @@ func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, curre
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(), "Value": valueStr,
-		"Name": w.GetHtmlInputName(), "FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
+		"Name": w.GetHTMLInputName(), "FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 		"Required": w.Required, "HelpText": w.HelpText, "FormError": w.ValidationErrors,
 		"FormErrorNotEmpty": len(w.ValidationErrors) > 0,
 	}
@@ -600,12 +599,11 @@ func RenderWidget(renderer ITemplateRenderer, templateName string, data map[stri
 	if renderer == nil {
 		r := NewTemplateRenderer("")
 		return r.RenderAsString(CurrentConfig.TemplatesFS, templateName, data, baseFuncMap)
-	} else {
-		return renderer.RenderAsString(
-			CurrentConfig.TemplatesFS, templateName,
-			data, baseFuncMap,
-		)
 	}
+	return renderer.RenderAsString(
+		CurrentConfig.TemplatesFS, templateName,
+		data, baseFuncMap,
+	)
 }
 
 type TextWidget struct {
@@ -631,7 +629,7 @@ func (tw *TextWidget) Render(formRenderContext *FormRenderContext, currentField 
 	// spew.Dump("2", tw.FieldDisplayName)
 	data := tw.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = tw.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = tw.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = tw.ShowOnlyHTMLInput
 	return RenderWidget(tw.Renderer, tw.GetTemplateName(), data, tw.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
 }
 
@@ -660,7 +658,7 @@ func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField
 	}
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
 }
 
@@ -688,7 +686,7 @@ func (w *NumberWidget) Render(formRenderContext *FormRenderContext, currentField
 	// spew.Dump("3", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
@@ -696,7 +694,7 @@ func (w *NumberWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -764,7 +762,7 @@ func (w *EmailWidget) Render(formRenderContext *FormRenderContext, currentField 
 	// spew.Dump("4", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
@@ -772,7 +770,7 @@ func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects)
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -789,12 +787,12 @@ func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects)
 
 type URLWidget struct {
 	Widget
-	UrlValid                 bool
+	URLValid                 bool
 	CurrentLabel             string
 	Href                     string
 	Value                    string
 	ChangeLabel              string
-	AppendHttpsAutomatically bool
+	AppendHTTPSAutomatically bool
 }
 
 func (w *URLWidget) GetWidgetType() WidgetType {
@@ -815,11 +813,11 @@ func (w *URLWidget) GetTemplateName() string {
 func (w *URLWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("5", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	data["UrlValid"] = w.UrlValid
+	data["UrlValid"] = w.URLValid
 	if w.CurrentLabel == "" {
-		data["CurrentLabel"] = "Url"
+		data["CurrentLabel"] = "URL"
 	} else {
 		data["CurrentLabel"] = w.CurrentLabel
 	}
@@ -837,7 +835,7 @@ func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) e
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -846,7 +844,7 @@ func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) e
 		return fmt.Errorf("field %s is required", w.FieldDisplayName)
 	}
 	url := v[0]
-	if w.AppendHttpsAutomatically {
+	if w.AppendHTTPSAutomatically {
 		urlInitialRegex := regexp.MustCompile(`^http(s)?://.*`)
 		if !urlInitialRegex.Match([]byte(v[0])) {
 			url = "https://" + url
@@ -881,7 +879,7 @@ func (w *PasswordWidget) GetTemplateName() string {
 func (w *PasswordWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("6", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	data["DisplayName"] = w.FieldDisplayName
 	data["Value"] = ""
@@ -892,7 +890,7 @@ func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !w.Required {
 		w.SetOutputValue("")
 		return nil
@@ -932,7 +930,7 @@ func (w *HiddenWidget) GetTemplateName() string {
 func (w *HiddenWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("7", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -941,7 +939,7 @@ func (w *HiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -979,7 +977,7 @@ func (w *DateWidget) Render(formRenderContext *FormRenderContext, currentField *
 	if w.DateValue != "" {
 		data["Value"] = w.DateValue
 	}
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -988,7 +986,7 @@ func (w *DateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) 
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1041,14 +1039,14 @@ func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentFie
 	}
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(), "Value": valueStr,
-		"Name": w.GetHtmlInputName(), "FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
+		"Name": w.GetHTMLInputName(), "FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 		"Required": w.Required, "HelpText": w.HelpText, "FormError": w.ValidationErrors,
 		"FormErrorNotEmpty": len(w.ValidationErrors) > 0,
 	}
 	if w.DateTimeValue != "" {
 		data["Value"] = w.DateTimeValue
 	}
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1057,7 +1055,7 @@ func (w *DateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1099,7 +1097,7 @@ func (w *TimeWidget) Render(formRenderContext *FormRenderContext, currentField *
 	if w.TimeValue != "" {
 		data["Value"] = w.TimeValue
 	}
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1108,7 +1106,7 @@ func (w *TimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) 
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1146,7 +1144,7 @@ func (w *TextareaWidget) GetTemplateName() string {
 func (w *TextareaWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("11", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1155,7 +1153,7 @@ func (w *TextareaWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1199,7 +1197,7 @@ func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentFie
 	}
 	// w.Value = nil
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1208,7 +1206,7 @@ func (w *CheckboxWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	if w.ReadOnly {
 		return nil
 	}
-	_, ok := form.Value[w.GetHtmlInputName()]
+	_, ok := form.Value[w.GetHTMLInputName()]
 	w.SetValue(ok == true)
 	w.SetOutputValue(ok == true)
 	return nil
@@ -1278,7 +1276,7 @@ func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext,
 	w.SetAttr("data-selected", value.(string))
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1286,7 +1284,7 @@ func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext,
 func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("13", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1295,7 +1293,7 @@ func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1415,7 +1413,7 @@ func (w *ContentTypeSelectorWidget) GetDataForRendering(formRenderContext *FormR
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 		"AllFields": allFields,
 	}
@@ -1424,7 +1422,7 @@ func (w *ContentTypeSelectorWidget) GetDataForRendering(formRenderContext *FormR
 func (w *ContentTypeSelectorWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("13", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1433,7 +1431,7 @@ func (w *ContentTypeSelectorWidget) ProceedForm(form *multipart.Form, afo IAdmin
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1506,7 +1504,7 @@ func (w *NullBooleanWidget) GetDataForRendering(formRenderContext *FormRenderCon
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1514,7 +1512,7 @@ func (w *NullBooleanWidget) GetDataForRendering(formRenderContext *FormRenderCon
 func (w *NullBooleanWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("14", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1523,7 +1521,7 @@ func (w *NullBooleanWidget) ProceedForm(form *multipart.Form, afo IAdminFilterOb
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1593,7 +1591,7 @@ func (w *SelectMultipleWidget) GetDataForRendering(formRenderContext *FormRender
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1601,7 +1599,7 @@ func (w *SelectMultipleWidget) GetDataForRendering(formRenderContext *FormRender
 func (w *SelectMultipleWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("15", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1610,7 +1608,7 @@ func (w *SelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilte
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1650,7 +1648,7 @@ type RadioOptGroupStringified struct {
 	Selected           bool
 	OptionTemplateName string
 	WrapLabel          bool
-	ForId              string
+	ForID              string
 	Label              string
 	Type               string
 	Name               string
@@ -1662,7 +1660,7 @@ type RadioOptGroupStringified struct {
 type RadioSelectWidget struct {
 	Widget
 	OptGroups map[string][]*RadioOptGroup
-	Id        string
+	ID        string
 	WrapLabel bool
 }
 
@@ -1681,8 +1679,8 @@ func (w *RadioSelectWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *RadioSelectWidget) SetId(id string) {
-	w.Id = id
+func (w *RadioSelectWidget) SetID(ID string) {
+	w.ID = ID
 }
 
 func (w *RadioSelectWidget) GetDataForRendering(formRenderContext *FormRenderContext) WidgetData {
@@ -1703,16 +1701,16 @@ func (w *RadioSelectWidget) GetDataForRendering(formRenderContext *FormRenderCon
 				OptionTemplateName: optionTemplateName,
 				Label:              optGroup.Label,
 				WrapLabel:          w.WrapLabel,
-				ForId:              w.Id,
+				ForID:              w.ID,
 				Type:               "radio",
-				Name:               w.GetHtmlInputName(),
+				Name:               w.GetHTMLInputName(),
 				Attrs:              w.Widget.GetAttrs(),
 			})
 		}
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified, "Id": w.Id,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified, "ID": w.ID,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1720,7 +1718,7 @@ func (w *RadioSelectWidget) GetDataForRendering(formRenderContext *FormRenderCon
 func (w *RadioSelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("16", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1729,7 +1727,7 @@ func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterOb
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1759,7 +1757,7 @@ func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterOb
 type CheckboxSelectMultipleWidget struct {
 	Widget
 	OptGroups map[string][]*RadioOptGroup
-	Id        string
+	ID        string
 	WrapLabel bool
 }
 
@@ -1778,8 +1776,8 @@ func (w *CheckboxSelectMultipleWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *CheckboxSelectMultipleWidget) SetId(id string) {
-	w.Id = id
+func (w *CheckboxSelectMultipleWidget) SetID(ID string) {
+	w.ID = ID
 }
 
 func (w *CheckboxSelectMultipleWidget) GetDataForRendering(formRenderContext *FormRenderContext) WidgetData {
@@ -1800,16 +1798,16 @@ func (w *CheckboxSelectMultipleWidget) GetDataForRendering(formRenderContext *Fo
 				OptionTemplateName: optionTemplateName,
 				Label:              optGroup.Label,
 				WrapLabel:          w.WrapLabel,
-				ForId:              w.Id,
+				ForID:              w.ID,
 				Type:               "checkbox",
-				Name:               w.GetHtmlInputName(),
+				Name:               w.GetHTMLInputName(),
 				Attrs:              w.Widget.GetAttrs(),
 			})
 		}
 	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(), "OptGroups": optGroupSstringified, "Id": w.Id,
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified, "ID": w.ID,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 	}
 }
@@ -1817,7 +1815,7 @@ func (w *CheckboxSelectMultipleWidget) GetDataForRendering(formRenderContext *Fo
 func (w *CheckboxSelectMultipleWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	// spew.Dump("17", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext)
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1826,7 +1824,7 @@ func (w *CheckboxSelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAd
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -1884,17 +1882,17 @@ func (w *FileWidget) Render(formRenderContext *FormRenderContext, currentField *
 	}
 	vI := reflect.ValueOf(w.Value)
 	if w.Value != nil && !vI.IsZero() {
-		data["UploadedFile"] = storage.GetUploadUrl() + w.Value.(string)
+		data["UploadedFile"] = storage.GetUploadURL() + w.Value.(string)
 		data["IsItImage"] = strings.Contains(w.Attrs["accept"], "image/")
 	}
 	data["Value"] = w.Value
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
-	files := form.File[w.GetHtmlInputName()]
+	files := form.File[w.GetHTMLInputName()]
 	if len(files) == 0 {
 		return nil
 	}
@@ -1947,7 +1945,7 @@ type ClearableFileWidget struct {
 	InitialText        string
 	CurrentValue       *URLValue
 	Required           bool
-	Id                 string
+	ID                 string
 	ClearCheckboxLabel string
 	InputText          string
 	Storage            IStorageInterface
@@ -1959,8 +1957,8 @@ func (w *ClearableFileWidget) GetWidgetType() WidgetType {
 	return FileInputWidgetType
 }
 
-func (w *ClearableFileWidget) SetId(id string) {
-	w.Id = id
+func (w *ClearableFileWidget) SetID(ID string) {
+	w.ID = ID
 }
 
 func (w *ClearableFileWidget) IsInitial() bool {
@@ -1987,24 +1985,24 @@ func (w *ClearableFileWidget) Render(formRenderContext *FormRenderContext, curre
 	}
 	vI := reflect.ValueOf(w.Value)
 	if w.Value != nil && !vI.IsZero() {
-		data["UploadedFile"] = storage.GetUploadUrl() + w.Value.(string)
+		data["UploadedFile"] = storage.GetUploadURL() + w.Value.(string)
 		data["IsItImage"] = strings.Contains(w.Attrs["accept"], "image/")
 	}
 	data["Value"] = w.Value
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	data["IsInitial"] = w.IsInitial()
 	data["InitialText"] = w.InitialText
 	data["CurrentValue"] = w.CurrentValue
 	data["Required"] = w.Required
-	data["Id"] = w.Id
+	data["ID"] = w.ID
 	data["ClearCheckboxLabel"] = w.ClearCheckboxLabel
 	data["InputText"] = w.InputText
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
-	files := form.File[w.GetHtmlInputName()]
+	files := form.File[w.GetHTMLInputName()]
 	storage := w.Storage
 	if storage == nil {
 		storage = NewFsStorage()
@@ -2064,18 +2062,18 @@ func (w *MultipleInputHiddenWidget) Render(formRenderContext *FormRenderContext,
 	// spew.Dump("20", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(),
+		"Name":  w.GetHTMLInputName(),
 	}
 	data["Required"] = w.Required
 	data["Type"] = w.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
 	subwidgets := make([]WidgetData, 0)
 	value := TransformValueForWidget(w.Value).([]string)
 	for _, v := range value {
 		w1 := HiddenWidget{}
-		w1.Name = w.GetHtmlInputName()
+		w1.Name = w.GetHTMLInputName()
 		w1.SetValue(v)
 		w1.Attrs = make(map[string]string)
 		for attrName, attrValue := range w.Attrs {
@@ -2098,7 +2096,7 @@ func (w *MultipleInputHiddenWidget) ProceedForm(form *multipart.Form, afo IAdmin
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -2144,7 +2142,7 @@ func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, cu
 	// spew.Dump("21", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(),
+		"Name":  w.GetHTMLInputName(),
 	}
 	tmpOptions := w.PopulateLeftSide()
 	var leftSideOptions []*SelectOptGroup
@@ -2171,14 +2169,14 @@ func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, cu
 	data["AddNewTitle"] = w.AddNewTitle
 	data["FieldDisplayName"] = w.FieldDisplayName
 	data["Type"] = w.GetWidgetType()
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
 	subwidgets := make([]WidgetData, 0)
 	w1 := SelectWidget{}
 	w1.OptGroups = make(map[string][]*SelectOptGroup)
 	w1.OptGroups[""] = leftSideOptions
-	w1.Name = w.GetHtmlInputName() + "_left"
+	w1.Name = w.GetHTMLInputName() + "_left"
 	w1.Attrs = w.GetAttrs()
 	vd := w1.GetDataForRendering(formRenderContext, currentField)
 	vd["Type"] = "select"
@@ -2207,7 +2205,7 @@ func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, cu
 	w2 := SelectWidget{}
 	w2.OptGroups = make(map[string][]*SelectOptGroup)
 	w2.OptGroups[""] = rightSideOptions
-	w2.Name = w.GetHtmlInputName() + "_right"
+	w2.Name = w.GetHTMLInputName() + "_right"
 	w2.Attrs = w.GetAttrs()
 	vd2 := w2.GetDataForRendering(formRenderContext, currentField)
 	vd2["ShowOnlyHtmlInput"] = true
@@ -2237,7 +2235,7 @@ func (w *ChooseFromSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFil
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHtmlInputName()]
+	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
@@ -2276,12 +2274,12 @@ func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, curre
 	// spew.Dump("23", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(),
+		"Name":  w.GetHTMLInputName(),
 	}
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
 	data["Required"] = w.Required
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	if w.DateLabel == "" {
 		data["DateLabel"] = "Date:"
@@ -2296,7 +2294,7 @@ func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, curre
 	subwidgets := make([]WidgetData, 0)
 	value := TransformValueForWidget(w.Value).(*time.Time)
 	w1 := DateWidget{}
-	w1.Name = w.GetHtmlInputName() + "_date"
+	w1.Name = w.GetHTMLInputName() + "_date"
 	if w.DateValue != "" {
 		w1.SetValue(w.DateValue)
 	} else {
@@ -2312,7 +2310,7 @@ func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, curre
 	vd["TemplateName"] = templateName
 	subwidgets = append(subwidgets, vd)
 	w2 := TimeWidget{}
-	w2.Name = w.GetHtmlInputName() + "_time"
+	w2.Name = w.GetHTMLInputName() + "_time"
 	if w.TimeValue != "" {
 		w2.SetValue(w.TimeValue)
 	} else {
@@ -2335,12 +2333,12 @@ func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 	if w.ReadOnly {
 		return nil
 	}
-	vDate, ok := form.Value[w.GetHtmlInputName()+"_date"]
+	vDate, ok := form.Value[w.GetHTMLInputName()+"_date"]
 	if !ok {
 		return fmt.Errorf("no date has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DateValue = vDate[0]
-	vTime, ok := form.Value[w.GetHtmlInputName()+"_time"]
+	vTime, ok := form.Value[w.GetHTMLInputName()+"_time"]
 	if !ok {
 		return fmt.Errorf("no time has been submitted for field %s", w.FieldDisplayName)
 	}
@@ -2390,17 +2388,17 @@ func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext,
 	// spew.Dump("24", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(),
+		"Name":  w.GetHTMLInputName(),
 	}
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
 	data["Required"] = w.Required
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	subwidgets := make([]WidgetData, 0)
 	value := TransformValueForWidget(w.Value).(*time.Time)
 	w1 := DateWidget{}
-	w1.Name = w.GetHtmlInputName() + "_date"
+	w1.Name = w.GetHTMLInputName() + "_date"
 	if w.DateValue != "" {
 		w1.SetValue(w.DateValue)
 	} else {
@@ -2416,7 +2414,7 @@ func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext,
 	vd["TemplateName"] = templateName
 	subwidgets = append(subwidgets, vd)
 	w2 := TimeWidget{}
-	w2.Name = w.GetHtmlInputName() + "_time"
+	w2.Name = w.GetHTMLInputName() + "_time"
 	if w.TimeValue != "" {
 		w2.SetValue(w.TimeValue)
 	} else {
@@ -2439,12 +2437,12 @@ func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdmin
 	if w.ReadOnly {
 		return nil
 	}
-	vDate, ok := form.Value[w.GetHtmlInputName()+"_date"]
+	vDate, ok := form.Value[w.GetHTMLInputName()+"_date"]
 	if !ok {
 		return fmt.Errorf("no date has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DateValue = vDate[0]
-	vTime, ok := form.Value[w.GetHtmlInputName()+"_time"]
+	vTime, ok := form.Value[w.GetHTMLInputName()+"_time"]
 	if !ok {
 		return fmt.Errorf("no time has been submitted for field %s", w.FieldDisplayName)
 	}
@@ -2496,12 +2494,12 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	value := TransformValueForWidget(w.Value).(*time.Time)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
-		"Name":  w.GetHtmlInputName(),
+		"Name":  w.GetHTMLInputName(),
 	}
 	data["FormError"] = w.ValidationErrors
 	data["FormErrorNotEmpty"] = len(w.ValidationErrors) > 0
 	data["Required"] = w.Required
-	data["ShowOnlyHtmlInput"] = w.ShowOnlyHtmlInput
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
 	dateParts := []string{}
 	for _, formatChar := range CurrentConfig.D.Uadmin.DateFormatOrder {
@@ -2582,7 +2580,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	w1 := SelectWidget{}
 	w1.OptGroups = make(map[string][]*SelectOptGroup)
 	w1.OptGroups[""] = yearChoices
-	w1.Name = w.GetHtmlInputName() + "_year"
+	w1.Name = w.GetHTMLInputName() + "_year"
 	if w.YearValue != "" {
 		w1.SetValue(w.YearValue)
 	} else {
@@ -2600,7 +2598,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	w2 := SelectWidget{}
 	w2.OptGroups = make(map[string][]*SelectOptGroup)
 	w2.OptGroups[""] = w.Months
-	w2.Name = w.GetHtmlInputName() + "_month"
+	w2.Name = w.GetHTMLInputName() + "_month"
 	if w.YearValue != "" {
 		w2.SetValue(w.MonthValue)
 	} else {
@@ -2613,7 +2611,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	w3 := SelectWidget{}
 	w3.OptGroups = make(map[string][]*SelectOptGroup)
 	w3.OptGroups[""] = dayChoices
-	w3.Name = w.GetHtmlInputName() + "_day"
+	w3.Name = w.GetHTMLInputName() + "_day"
 	if w.DayValue != "" {
 		w3.SetValue(w.DayValue)
 	} else {
@@ -2642,17 +2640,17 @@ func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 	if w.ReadOnly {
 		return nil
 	}
-	vYear, ok := form.Value[w.GetHtmlInputName()+"_year"]
+	vYear, ok := form.Value[w.GetHTMLInputName()+"_year"]
 	if !ok {
 		return fmt.Errorf("no year has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.YearValue = vYear[0]
-	vMonth, ok := form.Value[w.GetHtmlInputName()+"_month"]
+	vMonth, ok := form.Value[w.GetHTMLInputName()+"_month"]
 	if !ok {
 		return fmt.Errorf("no month has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.MonthValue = vMonth[0]
-	vDay, ok := form.Value[w.GetHtmlInputName()+"_day"]
+	vDay, ok := form.Value[w.GetHTMLInputName()+"_day"]
 	if !ok {
 		return fmt.Errorf("no month has been submitted for field %s", w.FieldDisplayName)
 	}
@@ -2784,7 +2782,7 @@ func (f *Form) Render() string {
 		grouppedFields := make(map[string]*GrouppedFields)
 		grouppedFields["default"] = &GrouppedFields{
 			Rows:            make([]*FormRow, 0),
-			ExtraCssClasses: make([]string, 0),
+			ExtraCSSClasses: make([]string, 0),
 			Name:            "Default",
 		}
 		for _, field := range f.FieldRegistry.GetAllFieldsWithOrdering() {
@@ -3135,24 +3133,24 @@ type FormListEditableCollection struct {
 	InlineCollection map[string]InlineFormListEditableCollection
 }
 
-func (flec *FormListEditableCollection) AddForInline(prefix string, Id string, formListEditable *FormListEditable) {
+func (flec *FormListEditableCollection) AddForInline(prefix string, ID string, formListEditable *FormListEditable) {
 	if flec.InlineCollection[prefix] == nil {
 		flec.InlineCollection[prefix] = make(InlineFormListEditableCollection)
 	}
-	flec.InlineCollection[prefix][Id] = formListEditable
+	flec.InlineCollection[prefix][ID] = formListEditable
 }
 
-func (flec *FormListEditableCollection) GetForInlineAndForModel(prefix string, Id uint) *FormListEditable {
-	IdS := strconv.Itoa(int(Id))
-	return flec.InlineCollection[prefix][IdS]
+func (flec *FormListEditableCollection) GetForInlineAndForModel(prefix string, ID uint) *FormListEditable {
+	IDS := strconv.Itoa(int(ID))
+	return flec.InlineCollection[prefix][IDS]
 }
 
 func (flec *FormListEditableCollection) GetForInlineNew(prefix string) <-chan *FormListEditable {
 	chnl := make(chan *FormListEditable)
 	go func() {
 		defer close(chnl)
-		for modelId, ret := range flec.InlineCollection[prefix] {
-			if !strings.Contains(modelId, "new") {
+		for modelID, ret := range flec.InlineCollection[prefix] {
+			if !strings.Contains(modelID, "new") {
 				continue
 			}
 			chnl <- ret
@@ -3231,12 +3229,12 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 	for ld := range listDisplayRegistry.GetAllFields() {
 		if ld.IsEditable && ld.Field.Name != "ID" {
 			fieldFromNewForm, _ := modelForm.FieldRegistry.GetByName(ld.Field.Name)
-			name := fieldFromNewForm.FieldConfig.Widget.GetHtmlInputName()
+			name := fieldFromNewForm.FieldConfig.Widget.GetHTMLInputName()
 			if ret.Prefix != "" {
 				fieldFromNewForm.FieldConfig.Widget.SetPrefix(ret.Prefix)
 			}
 			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%s_%s", ID, name))
-			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHtmlInput()
+			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
 			ret.FieldRegistry.AddField(fieldFromNewForm)
 		}
@@ -3257,12 +3255,12 @@ func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, pref
 	for ld := range listDisplayRegistry.GetAllFields() {
 		if ld.IsEditable && ld.Field.Name != "ID" {
 			fieldFromNewForm, _ := modelForm.FieldRegistry.GetByName(ld.Field.Name)
-			name := fieldFromNewForm.FieldConfig.Widget.GetHtmlInputName()
+			name := fieldFromNewForm.FieldConfig.Widget.GetHTMLInputName()
 			if ret.Prefix != "" {
 				fieldFromNewForm.FieldConfig.Widget.SetPrefix(ret.Prefix)
 			}
 			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%d_%s", ID, name))
-			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHtmlInput()
+			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
 			ret.FieldRegistry.AddField(fieldFromNewForm)
 		}

@@ -5,18 +5,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type initial_1621680132 struct {
+type initial1621680132 struct {
 }
 
-func (m initial_1621680132) GetName() string {
+func (m initial1621680132) GetName() string {
 	return "user.1621680132"
 }
 
-func (m initial_1621680132) GetId() int64 {
+func (m initial1621680132) GetID() int64 {
 	return 1621680132
 }
 
-func (m initial_1621680132) Up(uadminDatabase *core.UadminDatabase) error {
+func (m initial1621680132) Up(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.AutoMigrate(core.ContentType{})
 	if err != nil {
@@ -41,7 +41,7 @@ func (m initial_1621680132) Up(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1621680132) Down(uadminDatabase *core.UadminDatabase) error {
+func (m initial1621680132) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.Migrator().DropTable(core.Permission{})
 	if err != nil {
@@ -75,6 +75,6 @@ func (m initial_1621680132) Down(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1621680132) Deps() []string {
+func (m initial1621680132) Deps() []string {
 	return []string{}
 }

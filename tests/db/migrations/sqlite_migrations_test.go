@@ -177,7 +177,7 @@ func (suite *MigrationTestSuite) TestBuildTreeWithLoop() {
 	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(Blueprint1WithLoopedMigrations)
 	blueprintRegistry.Register(Blueprint2WithLoopedMigrations)
-	for _ = range blueprintRegistry.TraverseMigrations() {
+	for range blueprintRegistry.TraverseMigrations() {
 	}
 }
 

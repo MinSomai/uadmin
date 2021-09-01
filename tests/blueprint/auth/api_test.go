@@ -19,7 +19,7 @@ import (
 )
 
 type AuthProviderTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
@@ -161,7 +161,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	})
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, ""),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.APICookieName, ""),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "empty cookie passed")
@@ -169,7 +169,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	})
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, "test"),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.APICookieName, "test"),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "no session with key test found")
@@ -185,7 +185,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	// directProvider.
 	req.Header.Set(
 		"Cookie",
-		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, defaultAdapter.GetKey()),
+		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.APICookieName, defaultAdapter.GetKey()),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "session expired")
@@ -243,7 +243,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		req1, _ := http.NewRequest("GET", "/auth/direct/status/", nil)
 		req1.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.APICookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
 			assert.Contains(s.T(), w.Body.String(), "\"id\":")
@@ -253,7 +253,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		req2.Header.Set("Content-Type", "application/json")
 		req2.Header.Set(
 			"Cookie",
-			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.ApiCookieName, sessionKey),
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.APICookieName, sessionKey),
 		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req2, func(w *httptest.ResponseRecorder) bool {
 			assert.Equal(s.T(), w.Result().StatusCode, 204)

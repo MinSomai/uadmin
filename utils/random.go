@@ -45,7 +45,7 @@ func GenerateCSRFToken() string {
 func MaskCSRFToken(token string) string {
 	mask := GenerateRandomStringForCSRFToken()
 	cipher := ""
-	for i, _ := range token {
+	for i := range token {
 		tokenIndex := bytes.IndexByte(csrfAlphabet, token[i])
 		maskIndex := bytes.IndexByte(csrfAlphabet, mask[i])
 		cipher = cipher + string(csrfAlphabet[(tokenIndex+maskIndex)%len(csrfAlphabet)])
@@ -57,7 +57,7 @@ func UnmaskCSRFToken(token string) string {
 	tokenpart := token[32:]
 	maskpart := token[:32]
 	ret := ""
-	for i, _ := range tokenpart {
+	for i := range tokenpart {
 		tokenIndex := bytes.IndexByte(csrfAlphabet, tokenpart[i])
 		maskIndex := bytes.IndexByte(csrfAlphabet, maskpart[i])
 		if tokenIndex >= maskIndex {

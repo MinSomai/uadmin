@@ -6,25 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
-type initial_1623082592 struct {
+type initial1623082592 struct {
 }
 
-func (m initial_1623082592) GetName() string {
+func (m initial1623082592) GetName() string {
 	return "settings.1623082592"
 }
 
-func (m initial_1623082592) GetId() int64 {
+func (m initial1623082592) GetID() int64 {
 	return 1623082592
 }
 
-func (m initial_1623082592) Up(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623082592) Up(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	db.AutoMigrate(models.SettingCategory{})
 	db.AutoMigrate(models.Setting{})
 	return nil
 }
 
-func (m initial_1623082592) Down(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623082592) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.Migrator().DropTable(models.Setting{})
 	if err != nil {
@@ -46,6 +46,6 @@ func (m initial_1623082592) Down(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623082592) Deps() []string {
+func (m initial1623082592) Deps() []string {
 	return make([]string, 0)
 }

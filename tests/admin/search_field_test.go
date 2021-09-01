@@ -9,10 +9,10 @@ import (
 )
 
 type AdminSearchFieldTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
-func (apts *AdminSearchFieldTestSuite) SetupTestData() {
+func (suite *AdminSearchFieldTestSuite) SetupTestData() {
 	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(201, 300) {
 		userModel := &core.User{

@@ -8,7 +8,7 @@ import (
 )
 
 type PermTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (suite *PermTestSuite) TestIntegration() {

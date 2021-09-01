@@ -16,7 +16,7 @@ import (
 )
 
 type WidgetTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func NewTestForm() *multipart.Form {
@@ -315,7 +315,7 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		Id:        "test",
+		ID:        "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
@@ -331,7 +331,7 @@ func (w *WidgetTestSuite) TestRadioSelectWidget() {
 		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
-	assert.Contains(w.T(), renderedWidget, "<li>test<ul id=\"test_0\">")
+	assert.Contains(w.T(), renderedWidget, "for=\"test\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
 	err := widget.ProceedForm(form1, nil)
@@ -347,7 +347,7 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 			Attrs:       map[string]string{"test": "test1"},
 			BaseFuncMap: core.FuncMap,
 		},
-		Id:        "test",
+		ID:        "test",
 		WrapLabel: true,
 	}
 	widget.SetName("dsadas")
@@ -363,7 +363,7 @@ func (w *WidgetTestSuite) TestCheckboxSelectMultipleWidget() {
 		Value:    "dsadas",
 	})
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
-	assert.Contains(w.T(), renderedWidget, "<ul id=\"test\">\n  \n  \n  \n    <li>test<ul id=\"test_0\">")
+	assert.Contains(w.T(), renderedWidget, "for=\"test\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasdasdas"}
 	err := widget.ProceedForm(form1, nil)
@@ -432,7 +432,7 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 		},
 		InitialText:        "test",
 		Required:           true,
-		Id:                 "test",
+		ID:                 "test",
 		ClearCheckboxLabel: "clear file",
 		InputText:          "upload your image",
 	}
@@ -446,7 +446,7 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 		},
 		InitialText:        "test",
 		Required:           true,
-		Id:                 "test",
+		ID:                 "test",
 		ClearCheckboxLabel: "clear file",
 		InputText:          "upload your image",
 		CurrentValue:       &core.URLValue{URL: "https://microsoft.com"},

@@ -51,7 +51,7 @@ func (upr *UserPermRegistry) IsThereAnyPermissionForBlueprint(blueprintName stri
 	if upr.IsSuperUser {
 		return true
 	}
-	for userPermIdentifier, _ := range upr.BlueprintPerm {
+	for userPermIdentifier := range upr.BlueprintPerm {
 		if strings.HasSuffix(userPermIdentifier, fmt.Sprintf("b.%s.", blueprintName)) {
 			return true
 		}

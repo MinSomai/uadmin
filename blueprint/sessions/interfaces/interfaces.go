@@ -39,18 +39,16 @@ func (r *SessionProviderRegistry) GetAdapter(name string) (ISessionProvider, err
 	adapter, ok := r.registeredSessionAdapters[name]
 	if ok {
 		return adapter, nil
-	} else {
-		return nil, fmt.Errorf("adapter with name %s not found", name)
 	}
+	return nil, fmt.Errorf("adapter with name %s not found", name)
 }
 
 func (r *SessionProviderRegistry) GetDefaultAdapter() (ISessionProvider, error) {
 	adapter, ok := r.registeredSessionAdapters[r.defaultAdapter]
 	if ok {
 		return adapter, nil
-	} else {
-		return nil, fmt.Errorf("no default session adapter configured")
 	}
+	return nil, fmt.Errorf("no default session adapter configured")
 }
 
 func NewSessionRegistry() *SessionProviderRegistry {

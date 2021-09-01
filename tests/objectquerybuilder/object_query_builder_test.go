@@ -1,4 +1,4 @@
-package object_query_builder
+package objectquerybuilder
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -12,12 +12,12 @@ import (
 )
 
 type ObjectQueryBuilderTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 	createdUser *core.User
 }
 
 func (suite *ObjectQueryBuilderTestSuite) SetupTest() {
-	suite.UadminTestSuite.SetupTest()
+	suite.TestSuite.SetupTest()
 	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db

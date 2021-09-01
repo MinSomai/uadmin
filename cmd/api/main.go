@@ -11,5 +11,5 @@ func main() {
 		environment = "dev"
 	}
 	app1 := uadmin.NewApp(environment)
-	app1.StartApi()
+	app1.StartAPI()
 }

@@ -6,18 +6,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type initial_1623083395 struct {
+type initial1623083395 struct {
 }
 
-func (m initial_1623083395) GetName() string {
+func (m initial1623083395) GetName() string {
 	return "abtest.1623083395"
 }
 
-func (m initial_1623083395) GetId() int64 {
+func (m initial1623083395) GetID() int64 {
 	return 1623083395
 }
 
-func (m initial_1623083395) Up(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623083395) Up(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.AutoMigrate(abtestmodel.ABTest{})
 	if err != nil {
@@ -30,7 +30,7 @@ func (m initial_1623083395) Up(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623083395) Down(uadminDatabase *core.UadminDatabase) error {
+func (m initial1623083395) Down(uadminDatabase *core.UadminDatabase) error {
 	db := uadminDatabase.Db
 	err := db.Migrator().DropTable(abtestmodel.ABTestValue{})
 	if err != nil {
@@ -52,6 +52,6 @@ func (m initial_1623083395) Down(uadminDatabase *core.UadminDatabase) error {
 	return nil
 }
 
-func (m initial_1623083395) Deps() []string {
+func (m initial1623083395) Deps() []string {
 	return make([]string, 0)
 }

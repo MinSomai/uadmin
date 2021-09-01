@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	_ "github.com/uadmin/uadmin/admin"
+	_ "github.com/uadmin/uadmin/admin" // needed to initialize populatetemplatecontext function
 	abtestblueprint "github.com/uadmin/uadmin/blueprint/abtest"
 	approvalblueprint "github.com/uadmin/uadmin/blueprint/approval"
 	authblueprint "github.com/uadmin/uadmin/blueprint/auth"
@@ -105,7 +105,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("migrate", &MigrateCommand{})
 	a.RegisterCommand("blueprint", &BlueprintCommand{})
 	a.RegisterCommand("swagger", &SwaggerCommand{})
-	a.RegisterCommand("openapi", &OpenApiCommand{})
+	a.RegisterCommand("openapi", &OpenAPICommand{})
 	a.RegisterCommand("superuser", &SuperadminCommand{})
 	a.RegisterCommand("admin", &AdminCommand{})
 	a.RegisterCommand("contenttype", &ContentTypeCommand{})
@@ -153,9 +153,9 @@ func (a App) StartAdmin() {
 	// useradmin.RegisterAdminPart()
 }
 
-func (a App) StartApi() {
+func (a App) StartAPI() {
 	a.Initialize()
-	// _ = a.Router.Run(":" + strconv.Itoa(a.Config.D.Api.ListenPort))
+	// _ = a.Router.Run(":" + strconv.Itoa(a.Config.D.API.ListenPort))
 }
 
 //go:embed templates
@@ -183,9 +183,9 @@ func (a App) InitializeRouter() {
 	// Serve static files
 	a.Router.StaticFS("/static-inbuilt/", fs1)
 	a.BlueprintRegistry.InitializeRouting(a.Router)
-	a.DashboardAdminPanel.RegisterHttpHandlers(a.Router)
+	a.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
 }
 
-func (a App) BaseApiUrl() string {
-	return ":" + strconv.Itoa(a.Config.D.Api.ListenPort)
+func (a App) BaseAPIUrl() string {
+	return ":" + strconv.Itoa(a.Config.D.API.ListenPort)
 }

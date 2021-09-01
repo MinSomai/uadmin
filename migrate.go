@@ -57,12 +57,12 @@ func (c MigrateCommand) GetHelpText() string {
 func prepareMigrationName(message string) string {
 	now := time.Now()
 	sec := now.Unix()
-	message = core.AsciiRegex.ReplaceAllLiteralString(message, "")
+	message = core.ASCIIRegex.ReplaceAllLiteralString(message, "")
 	if len(message) > 30 {
 		message = message[:30]
 	}
-	message = strings.Replace(strings.ToLower(message), " ", "_", -1)
-	message = strings.Replace(strings.ToLower(message), ".", "_", -1)
+	message = strings.Replace(strings.ToLower(message), " ", "", -1)
+	message = strings.Replace(strings.ToLower(message), ".", "", -1)
 	return fmt.Sprintf("%s_%d", message, sec)
 }
 
@@ -107,11 +107,11 @@ type {{.MigrationName}} struct {
 }
 
 func (m {{.MigrationName}}) GetName() string {
-    return "{{.BlueprintName}}.{{.ConcreteMigrationId}}"
+    return "{{.BlueprintName}}.{{.ConcreteMigrationID}}"
 }
 
 func (m {{.MigrationName}}) GetId() int64 {
-    return {{.ConcreteMigrationId}}
+    return {{.ConcreteMigrationID}}
 }
 
 func (m {{.MigrationName}}) Up(uadminDatabase *core.UadminDatabase) error {
@@ -164,12 +164,12 @@ func init() {
 					concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
 					concreteData := struct {
 						MigrationName       string
-						ConcreteMigrationId string
+						ConcreteMigrationID string
 						Dependencies        string
 						BlueprintName       string
 					}{
 						MigrationName:       migrationName,
-						ConcreteMigrationId: strconv.Itoa(int(sec)),
+						ConcreteMigrationID: strconv.Itoa(int(sec)),
 						Dependencies:        "{" + strings.Join(dependenciesString, ",") + "}",
 						BlueprintName:       blueprintName,
 					}
@@ -232,14 +232,14 @@ func init() {
 		}
 		migrationName := prepareMigrationName(opts.Message)
 		pathToConcreteMigrationsFile := dirPath + "/" + migrationName + ".go"
-		var lastMigrationId int
+		var lastMigrationID int
 		err = filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 			var migrationFileRegex = regexp.MustCompile(`.*?_(\d+)\.go`)
 			match := migrationFileRegex.FindStringSubmatch(path)
 			if len(match) > 0 {
-				migrationId, _ := strconv.Atoi(match[1])
-				if migrationId > lastMigrationId {
-					lastMigrationId = migrationId
+				migrationID, _ := strconv.Atoi(match[1])
+				if migrationID > lastMigrationID {
+					lastMigrationID = migrationID
 				}
 			}
 			return nil
@@ -250,17 +250,17 @@ func init() {
 		concreteTpl := template.Must(template.New("concretemigration").Parse(concreteMigrationTpl))
 		concreteData := struct {
 			MigrationName       string
-			ConcreteMigrationId string
+			ConcreteMigrationID string
 			Dependencies        string
 			BlueprintName       string
 		}{
 			MigrationName:       migrationName,
-			ConcreteMigrationId: strconv.Itoa(int(sec)),
+			ConcreteMigrationID: strconv.Itoa(int(sec)),
 			Dependencies:        "",
 			BlueprintName:       opts.Blueprint,
 		}
-		if lastMigrationId > 0 {
-			concreteData.Dependencies = "{" + fmt.Sprintf(`"%s.%s"`, opts.Blueprint, strconv.Itoa(lastMigrationId)) + "}"
+		if lastMigrationID > 0 {
+			concreteData.Dependencies = "{" + fmt.Sprintf(`"%s.%s"`, opts.Blueprint, strconv.Itoa(lastMigrationID)) + "}"
 		}
 		if err = concreteTpl.Execute(&concreteTplBuffer, concreteData); err != nil {
 			panic(err)

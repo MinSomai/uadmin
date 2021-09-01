@@ -23,7 +23,7 @@ func init() {
 			session = sessionAdapter.Create()
 			expiresOn := time.Now().Add(time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second)
 			session.ExpiresOn(&expiresOn)
-			ctx.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HttpOnlyCookie)
+			ctx.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
 			session.Save()
 		}
 		if adminRequestParams.GenerateCSRFToken {
@@ -67,7 +67,7 @@ func init() {
 			}
 		}
 		breadcrumbs := core.NewAdminBreadCrumbsRegistry()
-		breadcrumbs.AddBreadCrumb(&core.AdminBreadcrumb{Name: "Dashboard", Url: core.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
+		breadcrumbs.AddBreadCrumb(&core.AdminBreadcrumb{Name: "Dashboard", URL: core.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
 		context.SetBreadCrumbs(breadcrumbs)
 	}
 }

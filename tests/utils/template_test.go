@@ -6,7 +6,7 @@ import (
 )
 
 type TemplateTestSuite struct {
-	uadmin.UadminTestSuite
+	uadmin.TestSuite
 }
 
 func (s *TemplateTestSuite) TestRenderHTML() {

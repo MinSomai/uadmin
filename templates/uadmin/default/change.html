@@ -29,7 +29,7 @@
                         <a style="margin:0px;" id="trigger_General-Data-tab" href="#General-Data" class="camelcaseFix trigger_hash nav-link active" aria-controls="General-Data" role="tab" data-toggle="tab" aria-selected="true">{{ .PageTitle }}</a>
                     </li>
                     {{ range $inline := .AdminPageInlineRegistry.GetAll }}
-                        <li id="trigger_{{  $inline.GetInlineId }}" class="tab_button nav-item camelcaseFix trigger_hash nav-link"><a style="margin:0px;" href="#{{  $inline.GetInlineId }}" class="camelcaseFix trigger_hash nav-link" aria-selected="false" aria-controls="{{  $inline.GetInlineId }}" role="tab" id="trigger_{{  $inline.GetInlineId }}-tab" data-toggle="tab">{{  $inline.VerboseNamePlural }}</a></li>
+                        <li id="trigger_{{  $inline.GetInlineID }}" class="tab_button nav-item camelcaseFix trigger_hash nav-link"><a style="margin:0px;" href="#{{  $inline.GetInlineID }}" class="camelcaseFix trigger_hash nav-link" aria-selected="false" aria-controls="{{  $inline.GetInlineID }}" role="tab" id="trigger_{{  $inline.GetInlineID }}-tab" data-toggle="tab">{{  $inline.VerboseNamePlural }}</a></li>
                     {{ end }}
                 </ul>
                 <div class="tab-content" id="TabNavigationContent">
@@ -62,7 +62,7 @@
                     {{ $currentURL := .CurrentURL }}
                     {{ $listEditableFormsForInlines := .ListEditableFormsForInlines }}
                     {{ range $inline := .AdminPageInlineRegistry.GetAll }}
-                        <div id="{{  $inline.GetInlineId }}" data-inlineid="{{ $inline.GetInlineId}}" class="tab-pane" role="tabpanel" aria-labelledby="trigger_{{  $inline.GetInlineId }}-tab">
+                        <div id="{{  $inline.GetInlineID }}" data-inlineid="{{ $inline.GetInlineID}}" class="tab-pane" role="tabpanel" aria-labelledby="trigger_{{  $inline.GetInlineID }}-tab">
                             <div class="form-example hide">
                                 {{ $inline.RenderExampleForm $currentAdminContext }}
                             </div>
@@ -106,7 +106,7 @@
                                             {{ end }}
                                             <tr>
                                                 <td onclick="$(this).parent().parent().parent().find('.main_check').prop('checked', false);">
-                                                    <input  class="item_check" type="checkbox" name="{{ $inline.GetInlineId}}-object_id-to-remove-{{ $form.Prefix }}">
+                                                    <input  class="item_check" type="checkbox" name="{{ $inline.GetInlineID}}-object_id-to-remove-{{ $form.Prefix }}">
                                                 </td>
                                                 {{range $field := $listDisplay.GetAllFields}}
                                                 <td>
@@ -130,8 +130,8 @@
                                             {{ range $iterateAdminObjects := ($inline.GetAll $model $requestParams) }}
                                                 <tr>
                                                     <td onclick="$(this).parent().parent().parent().find('.main_check').prop('checked', false);">
-                                                        <input  type="hidden" name="{{ $inline.GetInlineId}}-object_id-{{ $iterateAdminObjects.Id }}">
-                                                        <input  class="item_check" type="checkbox" name="{{ $inline.GetInlineId}}-object_id-to-remove-{{ $iterateAdminObjects.Id }}">
+                                                        <input  type="hidden" name="{{ $inline.GetInlineID}}-object_id-{{ $iterateAdminObjects.Id }}">
+                                                        <input  class="item_check" type="checkbox" name="{{ $inline.GetInlineID}}-object_id-to-remove-{{ $iterateAdminObjects.Id }}">
                                                     </td>
                                                     {{ $form := $listEditableFormsForInlines.GetForInlineAndForModel $inline.Prefix $iterateAdminObjects.Id}}
                                                     {{range $field := $listDisplay.GetAllFields}}
