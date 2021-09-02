@@ -29,10 +29,10 @@ func (s *ListEditableFormTestSuite) TestFormBuilder() {
 	listEditableForm := core.NewFormListEditableFromListDisplayRegistry(nil, "", 10, &core.User{}, userAdminPage.ListDisplay)
 	form := NewTestForm1()
 	userTest := &core.User{}
-	err := listEditableForm.ProceedRequest(form, userTest)
+	err := listEditableForm.ProceedRequest(form, userTest, nil)
 	assert.False(s.T(), err.IsEmpty())
 	form.Value["10_Email"] = []string{"admin@example.com"}
-	err = listEditableForm.ProceedRequest(form, userTest)
+	err = listEditableForm.ProceedRequest(form, userTest, nil)
 	assert.True(s.T(), err.IsEmpty())
 	assert.Equal(s.T(), userTest.Email, "admin@example.com")
 }

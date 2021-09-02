@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"net/url"
 )
@@ -38,6 +39,8 @@ type IAdminContext interface {
 	GetUserObject() *User
 	SetPostForm(formD *multipart.Form)
 	GetPostForm() *multipart.Form
+	GetCtx() *gin.Context
+	SetCtx(ctx *gin.Context)
 }
 
 type AdminContext struct {
@@ -67,10 +70,19 @@ type AdminContext struct {
 	BreadCrumbs            *AdminBreadCrumbsRegistry
 	ID                     uint
 	FormD                  *multipart.Form
+	Ctx *gin.Context
 }
 
 func (c *AdminContext) SetID(ID uint) {
 	c.ID = ID
+}
+
+func (c *AdminContext) GetCtx() *gin.Context {
+	return c.Ctx
+}
+
+func (c *AdminContext) SetCtx(ctx *gin.Context) {
+	c.Ctx = ctx
 }
 
 func (c *AdminContext) SetUserObject(u *User) {

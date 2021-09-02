@@ -361,7 +361,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 				form.FormError.AddGeneralError(removalError)
 			}
 		} else {
-			formError := form.ProceedRequest(f, modelI)
+			formError := form.ProceedRequest(f, modelI, ctx)
 			if removalError != nil {
 				formError.AddGeneralError(formError)
 			}

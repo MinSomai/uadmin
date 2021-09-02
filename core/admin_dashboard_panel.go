@@ -110,7 +110,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									afo1.LoadDataForModelByID(IDUint, objectModel)
 									modelI, _ := c.AdminFilterObjects.GenerateModelInterface()
 									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", IDUint, modelI, adminPage.ListDisplay)
-									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel)
+									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel, ctx)
 									if formListEditableErr.IsEmpty() {
 										dbRes := afo1.SaveModel(objectModel)
 										if dbRes != nil {
@@ -237,7 +237,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								Adapter: uadminDatabase.Adapter,
 								Db:      tx,
 							}}
-							formError := form.ProceedRequest(requestForm, modelToSave, afo)
+							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo)
 							if formError.IsEmpty() {
 								if adminPage.SaveModel != nil {
 									modelToSave = adminPage.SaveModel(modelToSave, ID, afo)

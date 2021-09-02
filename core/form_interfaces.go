@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/asaskevich/govalidator"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"mime/multipart"
@@ -57,6 +59,7 @@ const FkLinkWidgetType WidgetType = "fklink"
 
 type FormRenderContext struct {
 	Model interface{}
+	Ctx *gin.Context
 }
 
 func NewFormRenderContext() *FormRenderContext {
@@ -82,7 +85,7 @@ type IWidget interface {
 	SetFieldDisplayName(displayName string)
 	SetReadonly(readonly bool)
 	GetValue() interface{}
-	ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error
+	ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error
 	SetRequired()
 	SetShowOnlyHTMLInput()
 	SetOutputValue(v interface{})
@@ -91,13 +94,16 @@ type IWidget interface {
 	RenderForAdmin()
 	SetHelpText(helpText string)
 	IsValueChanged() bool
-	SetPopulate(func(m interface{}, currentField *Field) interface{})
+	SetPopulate(func(renderContext *FormRenderContext, currentField *Field) interface{})
 	SetPrefix(prefix string)
 	GetHTMLInputName() string
-	GetPopulate() func(m interface{}, currentField *Field) interface{}
+	GetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{}
 	IsReadOnly() bool
 	IsValueConfigured() bool
 	SetValueConfigured()
+	GetRenderer() ITemplateRenderer
+	GetFieldDisplayName() string
+	GetName() string
 }
 
 type UadminFieldType string
@@ -156,8 +162,8 @@ type Field struct {
 	Ordering        int
 }
 
-func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) ValidationError {
-	err := f.FieldConfig.Widget.ProceedForm(form, afo)
+func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) ValidationError {
+	err := f.FieldConfig.Widget.ProceedForm(form, afo, renderContext)
 	if err == nil {
 		validationErrors := make(ValidationError, 0)
 		for validator := range f.Validators.GetAllValidators() {
@@ -243,7 +249,7 @@ type FieldFormOptions struct {
 	WidgetType     string
 	ReadOnly       bool
 	Required       bool
-	WidgetPopulate func(m interface{}, currentField *Field) interface{}
+	WidgetPopulate func(renderContext *FormRenderContext, currentField *Field) interface{}
 	IsFk           bool
 }
 
@@ -255,7 +261,7 @@ func (ffo *FieldFormOptions) IsItFk() bool {
 	return ffo.IsFk
 }
 
-func (ffo *FieldFormOptions) GetWidgetPopulate() func(m interface{}, currentField *Field) interface{} {
+func (ffo *FieldFormOptions) GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{} {
 	return ffo.WidgetPopulate
 }
 
@@ -362,7 +368,37 @@ func (fe *FormError) GetErrorForField(fieldName string) ValidationError {
 
 func GetWidgetByWidgetType(widgetType string) IWidget {
 	var widget IWidget
+	//case 1:
+	//	return &core.TextWidget{}
+	//	case 2:
+	//	return &core.NumberWidget{}
+	//	case 3:
+	//	widget := &core.NumberWidget{}
+	//	widget.SetAttr("step", "0.1")
+	//	return widget
+	//	case 4:
+	//	return &core.CheckboxWidget{}
+	//	case 5:
+	//	return &core.FileWidget{}
+	//	case 6:
+	//	widget := &core.FileWidget{}
+	//	widget.SetAttr("accept", "image/*")
+	//	return widget
+	//	case 7:
+	//	return &core.DateTimeWidget{}
+	//
 	switch widgetType {
+	case "file":
+		widget = &FileWidget{}
+	case "boolean":
+		widget = &CheckboxWidget{}
+	case "float":
+		widget = &NumberWidget{}
+		widget.SetAttr("step", "0.1")
+	case "integer":
+		widget = &NumberWidget{}
+	case "string":
+		widget = &TextWidget{}
 	case "image":
 		widget = &FileWidget{}
 		widget.SetAttr("accept", "image/*")
@@ -376,8 +412,8 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 		widget = &ChooseFromSelectWidget{}
 	case "fklink":
 		widget = &FkLinkWidget{}
-		widget.SetPopulate(func(m interface{}, currentField *Field) interface{} {
-			gormModelV := reflect.Indirect(reflect.ValueOf(m))
+		widget.SetPopulate(func(renderContext *FormRenderContext, currentField *Field) interface{} {
+			gormModelV := reflect.Indirect(reflect.ValueOf(renderContext.Model))
 			adminPage := CurrentDashboardAdminPanel.FindPageForGormModel(gormModelV.FieldByName(currentField.Name).Interface())
 			if adminPage != nil {
 				link := adminPage.GenerateLinkToEditModel(gormModelV)
@@ -419,9 +455,21 @@ type Widget struct {
 	IsForAdmin        bool
 	HelpText          string
 	ValueChanged      bool
-	Populate          func(m interface{}, currentField *Field) interface{}
+	Populate          func(renderContext *FormRenderContext, currentField *Field) interface{}
 	Prefix            string
 	ValueConfigured   bool
+}
+
+func (w *Widget) GetRenderer() ITemplateRenderer {
+	return w.Renderer
+}
+
+func (w *Widget) GetFieldDisplayName() string {
+	return w.FieldDisplayName
+}
+
+func (w *Widget) GetName() string {
+	return w.Name
 }
 
 func (w *Widget) SetValueConfigured() {
@@ -444,11 +492,11 @@ func (w *Widget) IsValueChanged() bool {
 	return w.ValueChanged
 }
 
-func (w *Widget) SetPopulate(pFunc func(m interface{}, currentField *Field) interface{}) {
+func (w *Widget) SetPopulate(pFunc func(renderContext *FormRenderContext, currentField *Field) interface{}) {
 	w.Populate = pFunc
 }
 
-func (w *Widget) GetPopulate() func(m interface{}, currentField *Field) interface{} {
+func (w *Widget) GetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{} {
 	return w.Populate
 }
 
@@ -515,7 +563,7 @@ func (w *Widget) GetTemplateName() string {
 	return ""
 }
 
-func (w *Widget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *Widget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -580,7 +628,7 @@ func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, curre
 	var value interface{}
 	var valueStr string
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext.Model, currentField)
+		value = w.Populate(formRenderContext, currentField)
 		valueStr = value.(string)
 	} else {
 		value = TransformValueForWidget(w.Value)
@@ -651,7 +699,13 @@ func (tw *DynamicWidget) GetTemplateName() string {
 }
 
 func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
-	realWidget := tw.GetRealWidget(formRenderContext, currentField)
+	var realWidget IWidget
+	if formRenderContext.Ctx.Query("widgetType") != "" {
+		realWidget = GetWidgetByWidgetType(formRenderContext.Ctx.Query("widgetType"))
+	} else {
+		realWidget = tw.GetRealWidget(formRenderContext, currentField)
+	}
+	realWidget.InitializeAttrs()
 	if tw.IsForAdmin {
 		realWidget.RenderForAdmin()
 	}
@@ -665,15 +719,21 @@ func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentFie
 		realWidget.SetHelpText(tw.HelpText)
 	}
 	realWidget.RenderUsingRenderer(tw.Renderer)
+	realWidget.SetName(tw.GetName())
 	realWidget.SetFieldDisplayName(tw.FieldDisplayName)
-	if !realWidget.IsValueConfigured() {
-		realWidget.SetValue(tw.Value)
-	}
-	return realWidget.Render(formRenderContext, currentField)
+	realWidget.SetValue(tw.Value)
+	ret := realWidget.Render(formRenderContext, currentField)
+	return ret
 }
 
-func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
-	realWidget := tw.GetRealWidgetForFormProceeding(form, afo)
+func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
+	var realWidget IWidget
+	if renderContext.Ctx.Query("widgetType") != "" {
+		realWidget = GetWidgetByWidgetType(renderContext.Ctx.Query("widgetType"))
+	} else {
+		realWidget = tw.GetRealWidgetForFormProceeding(form, afo)
+	}
+	realWidget.InitializeAttrs()
 	if tw.IsForAdmin {
 		realWidget.RenderForAdmin()
 	}
@@ -688,10 +748,9 @@ func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	}
 	realWidget.RenderUsingRenderer(tw.Renderer)
 	realWidget.SetFieldDisplayName(tw.FieldDisplayName)
-	if !realWidget.IsValueConfigured() {
-		realWidget.SetValue(tw.Value)
-	}
-	return realWidget.ProceedForm(form, afo)
+	realWidget.SetName(tw.GetName())
+	realWidget.SetValue(tw.Value)
+	return realWidget.ProceedForm(form, afo, renderContext)
 }
 
 type FkLinkWidget struct {
@@ -715,7 +774,7 @@ func (w *FkLinkWidget) GetTemplateName() string {
 
 func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
 	if w.IsReadOnly() {
-		return w.Populate(formRenderContext.Model, currentField).(string)
+		return w.Populate(formRenderContext, currentField).(string)
 	}
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
@@ -751,7 +810,7 @@ func (w *NumberWidget) Render(formRenderContext *FormRenderContext, currentField
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *NumberWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *NumberWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -827,7 +886,7 @@ func (w *EmailWidget) Render(formRenderContext *FormRenderContext, currentField 
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -892,7 +951,7 @@ func (w *URLWidget) Render(formRenderContext *FormRenderContext, currentField *F
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -947,7 +1006,7 @@ func (w *PasswordWidget) Render(formRenderContext *FormRenderContext, currentFie
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -996,7 +1055,7 @@ func (w *HiddenWidget) Render(formRenderContext *FormRenderContext, currentField
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *HiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *HiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1043,7 +1102,7 @@ func (w *DateWidget) Render(formRenderContext *FormRenderContext, currentField *
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *DateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *DateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1088,7 +1147,7 @@ func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentFie
 	var value interface{}
 	var valueStr string
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext.Model, currentField)
+		value = w.Populate(formRenderContext, currentField)
 		valueStr = value.(string)
 	} else {
 		value = TransformDateTimeValueForWidget(w.Value)
@@ -1112,7 +1171,7 @@ func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentFie
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *DateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *DateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1163,7 +1222,7 @@ func (w *TimeWidget) Render(formRenderContext *FormRenderContext, currentField *
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *TimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *TimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1210,7 +1269,7 @@ func (w *TextareaWidget) Render(formRenderContext *FormRenderContext, currentFie
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *TextareaWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *TextareaWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1263,7 +1322,7 @@ func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentFie
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *CheckboxWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *CheckboxWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1312,7 +1371,7 @@ func (w *SelectWidget) GetTemplateName() string {
 func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {
 	var value interface{}
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext.Model, currentField)
+		value = w.Populate(formRenderContext, currentField)
 	} else {
 		value = TransformValueForWidget(w.Value)
 	}
@@ -1350,7 +1409,7 @@ func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1488,7 +1547,7 @@ func (w *ContentTypeSelectorWidget) Render(formRenderContext *FormRenderContext,
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *ContentTypeSelectorWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *ContentTypeSelectorWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1578,7 +1637,7 @@ func (w *NullBooleanWidget) Render(formRenderContext *FormRenderContext, current
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *NullBooleanWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *NullBooleanWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1665,7 +1724,7 @@ func (w *SelectMultipleWidget) Render(formRenderContext *FormRenderContext, curr
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *SelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *SelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1784,7 +1843,7 @@ func (w *RadioSelectWidget) Render(formRenderContext *FormRenderContext, current
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1881,7 +1940,7 @@ func (w *CheckboxSelectMultipleWidget) Render(formRenderContext *FormRenderConte
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *CheckboxSelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *CheckboxSelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -1952,7 +2011,7 @@ func (w *FileWidget) Render(formRenderContext *FormRenderContext, currentField *
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	files := form.File[w.GetHTMLInputName()]
 	if len(files) == 0 {
 		return nil
@@ -2062,7 +2121,7 @@ func (w *ClearableFileWidget) Render(formRenderContext *FormRenderContext, curre
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	files := form.File[w.GetHTMLInputName()]
 	storage := w.Storage
 	if storage == nil {
@@ -2153,7 +2212,7 @@ func (w *MultipleInputHiddenWidget) Render(formRenderContext *FormRenderContext,
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *MultipleInputHiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *MultipleInputHiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -2292,7 +2351,7 @@ func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, cu
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *ChooseFromSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *ChooseFromSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -2390,7 +2449,7 @@ func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, curre
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -2494,7 +2553,7 @@ func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext,
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -2697,7 +2756,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
-func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects) error {
+func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
 	}
@@ -2860,7 +2919,7 @@ func (f *Form) Render() string {
 	FieldValue := func(fieldName string, currentField *Field) interface{} {
 		field, _ := f.FieldRegistry.GetByName(fieldName)
 		if field.FieldConfig.Widget.GetPopulate() != nil {
-			return field.FieldConfig.Widget.GetPopulate()(f.RenderContext.Model, currentField)
+			return field.FieldConfig.Widget.GetPopulate()(f.RenderContext, currentField)
 		}
 		return field.FieldConfig.Widget.GetValue()
 	}
@@ -2884,7 +2943,7 @@ func (f *Form) Render() string {
 	)
 }
 
-func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, afoP ...IAdminFilterObjects) *FormError {
+func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *gin.Context, afoP ...IAdminFilterObjects) *FormError {
 	var afo IAdminFilterObjects
 	if len(afoP) > 0 {
 		afo = afoP[0]
@@ -2893,11 +2952,12 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, afoP 
 		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
+	renderContext := &FormRenderContext{Ctx: ctx}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
 		if field.Name == "ID" {
 			continue
 		}
-		errors := field.ProceedForm(form, afo)
+		errors := field.ProceedForm(form, afo, renderContext)
 		if len(errors) == 0 {
 			continue
 		}
@@ -2915,6 +2975,10 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, afoP 
 		modelF := model.FieldByName(field.Name)
 		if !modelF.IsValid() {
 			formError.AddGeneralError(fmt.Errorf("not valid field %s for model", field.Name))
+			continue
+		}
+		if !formError.IsEmpty() {
+			spew.Dump("formError", formError.GeneralErrors, formError.FieldError)
 			continue
 		}
 		if formError.IsEmpty() && field.SetUpField != nil {
@@ -3048,6 +3112,7 @@ func NewFormFromModelFromGinContext(contextFromGin IAdminContext, gormModel inte
 	form.RequestContext["OTPImage"] = ""
 	form.RequestContext["SessionKey"] = contextFromGin.GetSessionKey()
 	form.RequestContext["ID"] = contextFromGin.GetID()
+	form.RenderContext = &FormRenderContext{Ctx: contextFromGin.GetCtx(), Model: gormModel}
 	contextFromGin.SetForm(form)
 	return form
 }
@@ -3243,13 +3308,14 @@ func (f *FormListEditable) ExistsField(ld *ListDisplay) bool {
 	return err == nil
 }
 
-func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interface{}) *FormError {
+func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *gin.Context) *FormError {
 	formError := &FormError{
 		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
+	renderContext := &FormRenderContext{Ctx: ctx}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
-		errors := field.ProceedForm(form, nil)
+		errors := field.ProceedForm(form, nil, renderContext)
 		if len(errors) == 0 {
 			continue
 		}

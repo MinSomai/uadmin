@@ -151,7 +151,7 @@ type IFieldFormOptions interface {
 	GetWidgetType() string
 	GetReadOnly() bool
 	GetIsRequired() bool
-	GetWidgetPopulate() func(m interface{}, currentField *Field) interface{}
+	GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{}
 	IsItFk() bool
 }
 

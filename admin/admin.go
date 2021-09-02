@@ -44,6 +44,7 @@ func init() {
 		context.SetCurrentURL(ctx.Request.URL.Path)
 		context.SetCurrentQuery(ctx.Request.URL.RawQuery)
 		context.SetFullURL(ctx.Request.URL)
+		context.SetCtx(ctx)
 		context.SetSiteName(core.CurrentConfig.D.Uadmin.SiteName)
 		context.SetRootAdminURL(core.CurrentConfig.D.Uadmin.RootAdminURL)
 		if session != nil {

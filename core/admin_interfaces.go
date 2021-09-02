@@ -906,7 +906,7 @@ func (ld *ListDisplay) GetValue(m interface{}, forExportP ...bool) string {
 		return ld.Populate(m)
 	}
 	if ld.Field.FieldConfig.Widget.GetPopulate() != nil {
-		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetPopulate()(m, ld.Field))
+		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetPopulate()(&FormRenderContext{Model: m}, ld.Field))
 	}
 	if ld.Field.FieldConfig.Widget.IsValueConfigured() {
 		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetValue())

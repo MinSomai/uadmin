@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/uadmin/uadmin/core"
 	"strconv"
 	"time"
@@ -77,17 +78,64 @@ func HumanizeDataType(dataType DataType) string {
 	}
 }
 
+func DataTypeFromString(dataType string) DataType {
+	switch dataType {
+	case "string":
+		return DataType(1)
+	case "integer":
+		return DataType(2)
+	case "float":
+		return DataType(3)
+	case "boolean":
+		return DataType(4)
+	case "file":
+		return DataType(5)
+	case "image":
+		return DataType(6)
+	case "datetime":
+		return DataType(7)
+	default:
+		return DataType(0)
+	}
+}
+
 // Setting model stored system settings
 type Setting struct {
 	core.Model
 	Name         string          `uadmin:"list,search" uadminform:"RequiredFieldOptions"`
-	Value        string          `uadmin:"list"`
-	DefaultValue string          `uadmin:"list"`
-	DataType     DataType        `uadmin:"list,search"`
+	Value        string          `uadmin:"list" uadminform:"DynamicTypeFieldOptions"`
+	DefaultValue string          `uadmin:"list" uadminform:"DynamicTypeFieldOptions"`
+	DataType     DataType        `uadmin:"list,search" uadminform:"RequiredSelectFieldOptions"`
 	Help         string          `uadmin:"list,search" sql:"type:text;"`
 	Category     SettingCategory `uadmin:"list,search" uadminform:"FkRequiredFieldOptions"`
 	CategoryID   uint
 	Code         string `uadmin:"search" uadminform:"ReadonlyField"`
+}
+
+func (s *Setting) GetRealWidget() core.IWidget {
+	spew.Dump("aa", s.DataType)
+	switch s.DataType {
+	case 1:
+		return &core.TextWidget{}
+	case 2:
+		return &core.NumberWidget{}
+	case 3:
+		widget := &core.NumberWidget{}
+		widget.SetAttr("step", "0.1")
+		return widget
+	case 4:
+		return &core.CheckboxWidget{}
+	case 5:
+		return &core.FileWidget{}
+	case 6:
+		widget := &core.FileWidget{}
+		widget.SetAttr("accept", "image/*")
+		return widget
+	case 7:
+		return &core.DateTimeWidget{}
+	default:
+		return &core.Widget{}
+	}
 }
 
 func (s *Setting) String() string {

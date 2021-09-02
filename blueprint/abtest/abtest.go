@@ -51,8 +51,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				OptLabel: "model",
 				Value:    "2",
 			})
-			typeField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *core.Field) interface{} {
-				a := m.(*abtestmodel.ABTest).Type
+			typeField.FieldConfig.Widget.SetPopulate(func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+				a := renderContext.Model.(*abtestmodel.ABTest).Type
 				return strconv.Itoa(int(a))
 			})
 			typeField.SetUpField = func(w core.IWidget, m interface{}, v interface{}, afo core.IAdminFilterObjects) error {

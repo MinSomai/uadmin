@@ -49,8 +49,8 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				OptLabel: "rejected",
 				Value:    "2",
 			})
-			approvalField.FieldConfig.Widget.SetPopulate(func(m interface{}, currentField *core.Field) interface{} {
-				a := m.(*models.Approval).ApprovalAction
+			approvalField.FieldConfig.Widget.SetPopulate(func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+				a := renderContext.Model.(*models.Approval).ApprovalAction
 				return strconv.Itoa(int(a))
 			})
 			approvalField.SetUpField = func(w core.IWidget, m interface{}, v interface{}, afo core.IAdminFilterObjects) error {
