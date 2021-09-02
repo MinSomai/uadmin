@@ -1351,6 +1351,7 @@ type SelectWidget struct {
 	Widget
 	OptGroups                map[string][]*SelectOptGroup
 	DontValidateForExistence bool
+	AddNewLink string
 }
 
 func (w *SelectWidget) GetWidgetType() WidgetType {
@@ -1405,6 +1406,7 @@ func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField
 	// spew.Dump("13", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
+	data["AddNewLink"] = w.AddNewLink
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }

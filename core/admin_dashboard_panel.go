@@ -367,7 +367,9 @@ func init() {
 	var newOption = window.opener.$('<select><option value=""></option></select>');
 	newOption.find('option').attr('value', ID);
 	newOption.find('option').text(Name);
-	var select = window.opener.$("a[href='{{ .Link }}']").parent().find('.related-target select');
+	newOption.find('option').attr('selected', 'selected');
+	var select = window.opener.$("a[href='{{ .Link }}']").parent().parent().find('.related-target select');
+	select.find('option:selected').removeAttr('selected');
 	select.append(newOption.html());
 	select.trigger('change');
 	window.close();

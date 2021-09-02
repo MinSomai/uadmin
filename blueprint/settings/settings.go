@@ -29,6 +29,25 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}
+	settingcategoriesmodelAdminPage := core.NewGormAdminPage(
+		settingsAdminPage,
+		func() (interface{}, interface{}) {
+			return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
+		},
+		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
+			fields := []string{"Name", "Icon"}
+			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			return form
+		},
+	)
+	settingcategoriesmodelAdminPage.PageName = "Setting categories"
+	settingcategoriesmodelAdminPage.Slug = "settingcategory"
+	settingcategoriesmodelAdminPage.BlueprintName = "setting"
+	settingcategoriesmodelAdminPage.Router = mainRouter
+	err = settingsAdminPage.SubPages.AddAdminPage(settingcategoriesmodelAdminPage)
+	if err != nil {
+		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
+	}
 	settingmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
 		func() (interface{}, interface{}) { return &settingmodel.Setting{}, &[]*settingmodel.Setting{} },
@@ -157,6 +176,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			categoryWidget.SetFieldDisplayName(initializedwidgetForCategory.GetFieldDisplayName())
 			categoryWidget.OptGroups = make(map[string][]*core.SelectOptGroup)
 			categoryWidget.OptGroups[""] = make([]*core.SelectOptGroup, 0)
+			categoryWidget.AddNewLink = settingcategoriesmodelAdminPage.GenerateLinkToAddNewModel() + "?_to_field=id&_popup=1"
 			for _, category := range categories {
 				categoryWidget.OptGroups[""] = append(categoryWidget.OptGroups[""], &core.SelectOptGroup{
 					OptLabel: category.Name,
@@ -183,25 +203,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	//}
 	settingmodelAdminPage.NoPermissionToAddNew = true
 	err = settingsAdminPage.SubPages.AddAdminPage(settingmodelAdminPage)
-	if err != nil {
-		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
-	}
-	settingcategoriesmodelAdminPage := core.NewGormAdminPage(
-		settingsAdminPage,
-		func() (interface{}, interface{}) {
-			return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
-		},
-		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
-			fields := []string{"Name", "Icon"}
-			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
-			return form
-		},
-	)
-	settingcategoriesmodelAdminPage.PageName = "Setting categories"
-	settingcategoriesmodelAdminPage.Slug = "settingcategory"
-	settingcategoriesmodelAdminPage.BlueprintName = "setting"
-	settingcategoriesmodelAdminPage.Router = mainRouter
-	err = settingsAdminPage.SubPages.AddAdminPage(settingcategoriesmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
 	}

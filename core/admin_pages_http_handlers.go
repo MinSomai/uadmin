@@ -182,6 +182,10 @@ func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {
 	return fmt.Sprintf("%s/%s/%s/edit/%d", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug, ID)
 }
 
+func (ap *AdminPage) GenerateLinkToAddNewModel() string {
+	return fmt.Sprintf("%s/%s/%s/edit/new", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
+}
+
 func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context) {
 	afo := ap.GetQueryset(ap, nil)
 	var json ModelActionRequestParams
