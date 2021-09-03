@@ -136,8 +136,8 @@ func (m insertall1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 		},
 		{
 			Name:         "Root URL",
-			Value:        core.CurrentConfig.D.Uadmin.RootURL,
-			DefaultValue: "/",
+			Value:        core.CurrentConfig.D.Uadmin.RootAdminURL,
+			DefaultValue: core.CurrentConfig.D.Uadmin.RootAdminURL,
 			DataType:     t.String(),
 			Help:         "is where the listener is mapped to",
 		},
@@ -182,97 +182,6 @@ func (m insertall1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 			DataType:     t.Boolean(),
 			Help:         "allows public access to media handler without authentication",
 		},
-		//{
-		//    Name: "Log Delete",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.LogDelete),
-		//    DefaultValue: "1",
-		//    DataType:     t.Boolean(),
-		//    Help:         "adds a log when a record is deleted",
-		//},
-		//{
-		//    Name: "Log Add",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.LogAdd),
-		//    DefaultValue: "1",
-		//    DataType:     t.Boolean(),
-		//    Help:         "adds a log when a record is added",
-		//},
-		//{
-		//    Name: "Log Edit",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.LogEdit),
-		//    DefaultValue: "1",
-		//    DataType:     t.Boolean(),
-		//    Help:         "adds a log when a record is edited",
-		//},
-		//{
-		//    Name: "Log Read",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.LogRead),
-		//    DefaultValue: "0",
-		//    DataType:     t.Boolean(),
-		//    Help:         "adds a log when a record is read",
-		//},
-		//{
-		//    Name: "Cache Translation",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.CacheTranslation),
-		//    DefaultValue: "0",
-		//    DataType:     t.Boolean(),
-		//    Help:         "allows a translation to store data in a cache memory",
-		//},
-		{
-			Name:         "Allowed IPs",
-			Value:        core.CurrentConfig.D.Uadmin.AllowedIPs,
-			DefaultValue: "*",
-			DataType:     t.String(),
-			Help: `is a list of allowed IPs to access uAdmin interfrace in one of the following formats:
-										- * = Allow all
-										- "" = Allow none
-							 			- "192.168.1.1" Only allow this IP
-										- "192.168.1.0/24" Allow all IPs from 192.168.1.1 to 192.168.1.254
-											You can also create a list of the above formats using comma to separate them.
-											For example: "192.168.1.1,192.168.1.2,192.168.0.0/24`,
-		},
-		{
-			Name:         "Blocked IPs",
-			Value:        core.CurrentConfig.D.Uadmin.BlockedIPs,
-			DefaultValue: "",
-			DataType:     t.String(),
-			Help: `is a list of blocked IPs from accessing uAdmin interfrace in one of the following formats:
-										 - "*" = Block all
-										 - "" = Block none
-										 - "192.168.1.1" Only block this IP
-										 - "192.168.1.0/24" Block all IPs from 192.168.1.1 to 192.168.1.254
-										 		You can also create a list of the above formats using comma to separate them.
-												For example: "192.168.1.1,192.168.1.2,192.168.0.0/24`,
-		},
 		{
 			Name: "Restrict Session IP",
 			Value: func(v bool) string {
@@ -313,58 +222,6 @@ func (m insertall1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 			DataType:     t.Integer(),
 			Help:         "is the maximum number of requests for an idle user",
 		},
-		//{
-		//    Name: "API Log Read",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.APILogRead),
-		//    DefaultValue: "0",
-		//    DataType:     t.Boolean(),
-		//    Help:         "APILogRead controls the data API's logging for read commands.",
-		//},
-		//{
-		//    Name: "API Log Edit",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.APILogEdit),
-		//    DefaultValue: "1",
-		//    DataType:     t.Boolean(),
-		//    Help:         "APILogEdit controls the data API's logging for edit commands.",
-		//},
-		//{
-		//    Name: "API Log Add",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.APILogAdd),
-		//    DefaultValue: "1",
-		//    DataType:     t.Boolean(),
-		//    Help:         "APILogAdd controls the data API's logging for add commands.",
-		//},
-		//{
-		//    Name: "API Log Delete",
-		//    Value: func(v bool) string {
-		//        n := 0
-		//        if v {
-		//            n = 1
-		//        }
-		//        return fmt.Sprint(n)
-		//    }(config.CurrentConfig.D.Uadmin.APILogDelete),
-		//    DefaultValue: "1",
-		//    DataType:     t.Boolean(),
-		//    Help:         "APILogDelete controls the data API's logging for delete commands.",
-		//},
 		{
 			Name: "Log HTTP Requests",
 			Value: func(v bool) string {
@@ -458,13 +315,6 @@ func (m insertall1623263908) Up(uadminDatabase *core.UadminDatabase) error {
 			DefaultValue: "5",
 			DataType:     t.Integer(),
 			Help:         "The maximum number of invalid password attempts before the IP address is blocked for some time from usig the system",
-		},
-		{
-			Name:         "Allowed Hosts",
-			Value:        core.CurrentConfig.D.Uadmin.AllowedHosts,
-			DefaultValue: "0.0.0.0,127.0.0.1,localhost,::1",
-			DataType:     t.String(),
-			Help:         "A comma seprated list of allowed hosts for the server to work. The default value if only for development and production domain should be added before deployment",
 		},
 		{
 			Name:         "Logo",

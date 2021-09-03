@@ -44,8 +44,6 @@ type UadminConfigOptions struct {
 	OTPPeriod              uint   `yaml:"otp_period"`
 	OTPSkew                uint   `yaml:"otp_skew"`
 	PublicMedia            bool   `yaml:"public_media"`
-	AllowedIPs             string `yaml:"allowed_ips"`
-	BlockedIPs             string `yaml:"blocked_ips"`
 	RestrictSessionIP      bool   `yaml:"restrict_session_ip"`
 	RetainMediaVersions    bool   `yaml:"retain_media_versions"`
 	RateLimit              uint   `yaml:"rate_limit"`
@@ -58,7 +56,6 @@ type UadminConfigOptions struct {
 	UserMetrics            bool   `yaml:"user_metrics"`
 	PasswordAttempts       int    `yaml:"password_attempts"`
 	PasswordTimeout        int    `yaml:"password_timeout"`
-	AllowedHosts           string `yaml:"allowed_hosts"`
 	Logo                   string `yaml:"logo"`
 	FavIcon                string `yaml:"fav_icon"`
 	AdminCookieName        string `yaml:"admin_cookie_name"`
@@ -207,8 +204,6 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			//LogEdit: true,
 			//LogRead: false,
 			//CacheTranslation: false,
-			AllowedIPs:          "*",
-			BlockedIPs:          "",
 			RestrictSessionIP:   false,
 			RetainMediaVersions: true,
 			RateLimit:           uint(3),
@@ -225,7 +220,6 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			UserMetrics:            false,
 			PasswordAttempts:       5,
 			PasswordTimeout:        15,
-			AllowedHosts:           "0.0.0.0,127.0.0.1,localhost,::1",
 			Logo:                   "/static-inbuilt/uadmin/logo.png",
 			FavIcon:                "/static-inbuilt/uadmin/favicon.ico",
 			AdminCookieName:        "uadmin-admin",
