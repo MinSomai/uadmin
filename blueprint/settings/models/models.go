@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/uadmin/uadmin/core"
 	"strconv"
 	"time"
@@ -113,7 +112,6 @@ type Setting struct {
 }
 
 func (s *Setting) GetRealWidget() core.IWidget {
-	spew.Dump("aa", s.DataType)
 	switch s.DataType {
 	case 1:
 		return &core.TextWidget{}

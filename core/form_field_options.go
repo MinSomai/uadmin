@@ -99,4 +99,8 @@ func init() {
 		Name:       "DynamicTypeFieldOptions",
 		WidgetType: "dynamic",
 	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:       "ForeignKeyFieldOptions",
+		WidgetType: "foreignkey",
+	})
 }

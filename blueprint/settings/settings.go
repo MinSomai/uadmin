@@ -2,7 +2,6 @@ package settings
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"github.com/uadmin/uadmin/blueprint/settings/migrations"
 	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
@@ -138,11 +137,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				return m2.GetRealWidget()
 			}
 			defaultValueWidget.GetRealWidgetForFormProceeding = func(form *multipart.Form, afo core.IAdminFilterObjects) core.IWidget {
-				dataTypeS := form.Value["datatype"][0]
+				dataTypeS := form.Value["DataType"][0]
 				dataTypeI, _ := strconv.Atoi(dataTypeS)
 				widgetTypeString := settingmodel.HumanizeDataType(settingmodel.DataType(dataTypeI))
 				widgetType := core.GetWidgetByWidgetType(widgetTypeString)
-				spew.Dump("widgetType", widgetType)
 				return widgetType
 			}
 			valueField, _ := form.FieldRegistry.GetByName("Value")
@@ -152,7 +150,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				return m2.GetRealWidget()
 			}
 			valueWidget.GetRealWidgetForFormProceeding = func(form *multipart.Form, afo core.IAdminFilterObjects) core.IWidget {
-				dataTypeS := form.Value["datatype"][0]
+				dataTypeS := form.Value["DataType"][0]
 				dataTypeI, _ := strconv.Atoi(dataTypeS)
 				widgetTypeString := settingmodel.HumanizeDataType(settingmodel.DataType(dataTypeI))
 				widgetType := core.GetWidgetByWidgetType(widgetTypeString)
@@ -160,31 +158,34 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 			categoryField, _ := form.FieldRegistry.GetByName("Category")
 			initializedwidgetForCategory := categoryField.FieldConfig.Widget
-			categoryWidget := &core.SelectWidget{}
+			categoryWidget := &core.ForeignKeyWidget{}
+			categoryWidget.GenerateModelInterface = func() (interface{}, interface{}){
+				return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
+			}
+			categoryWidget.GetQuerySet = func(formRenderContext *core.FormRenderContext) core.IPersistenceStorage{
+				uadminDatabase := core.NewUadminDatabase()
+				return core.NewGormPersistenceStorage(uadminDatabase.Db)
+			}
 			categoryField.FieldConfig.Widget = categoryWidget
 			categoryWidget.RenderForAdmin()
-			categoryWidget.Populate = func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
-				m3 := renderContext.Model.(*settingmodel.Setting)
-				return strconv.Itoa(int(m3.CategoryID))
-			}
-			var categories []*settingmodel.SettingCategory
-			uadminDatabase := core.NewUadminDatabase()
-			uadminDatabase.Db.Find(&categories)
+			//categoryWidget.Populate = func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+			//	m3 := renderContext.Model.(*settingmodel.Setting)
+			//	return strconv.Itoa(int(m3.CategoryID))
+			//}
 			categoryWidget.SetRequired()
+			categoryWidget.SetValue(settingModel.Category)
 			categoryWidget.RenderUsingRenderer(initializedwidgetForCategory.GetRenderer())
 			categoryWidget.SetName(initializedwidgetForCategory.GetName())
 			categoryWidget.SetFieldDisplayName(initializedwidgetForCategory.GetFieldDisplayName())
-			categoryWidget.OptGroups = make(map[string][]*core.SelectOptGroup)
-			categoryWidget.OptGroups[""] = make([]*core.SelectOptGroup, 0)
 			categoryWidget.AddNewLink = settingcategoriesmodelAdminPage.GenerateLinkToAddNewModel() + "?_to_field=id&_popup=1"
-			for _, category := range categories {
-				categoryWidget.OptGroups[""] = append(categoryWidget.OptGroups[""], &core.SelectOptGroup{
-					OptLabel: category.Name,
-					Value: strconv.Itoa(int(category.ID)),
-					Selected: category.ID == settingModel.CategoryID,
-				})
+			categoryField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
+				m1 := modelI.(*settingmodel.Setting)
+				categoryID, _ := strconv.Atoi(v.(string))
+				var settingCategory settingmodel.SettingCategory
+				afo.LoadDataForModelByID(categoryID, &settingCategory)
+				m1.Category = settingCategory
+				return nil
 			}
-			uadminDatabase.Close()
 			return form
 		},
 	)

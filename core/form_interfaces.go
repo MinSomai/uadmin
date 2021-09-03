@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/asaskevich/govalidator"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -43,6 +42,7 @@ const TimeInputWidgetType WidgetType = "time"
 const TextareaInputWidgetType WidgetType = "textarea"
 const CheckboxInputWidgetType WidgetType = "checkbox"
 const SelectWidgetType WidgetType = "select"
+const ForeignKeyWidgetType WidgetType = "foreignkey"
 const NullBooleanWidgetType WidgetType = "nullboolean"
 const SelectMultipleWidgetType WidgetType = "selectmultiple"
 const RadioSelectWidgetType WidgetType = "radioselect"
@@ -408,6 +408,8 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 		widget = &PasswordWidget{}
 	case "dynamic":
 		widget = &DynamicWidget{}
+	case "foreignkey":
+		widget = &ForeignKeyWidget{}
 	case "choose_from_select":
 		widget = &ChooseFromSelectWidget{}
 	case "fklink":
@@ -722,6 +724,7 @@ func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentFie
 	realWidget.SetName(tw.GetName())
 	realWidget.SetFieldDisplayName(tw.FieldDisplayName)
 	realWidget.SetValue(tw.Value)
+	realWidget.SetErrors(tw.ValidationErrors)
 	ret := realWidget.Render(formRenderContext, currentField)
 	return ret
 }
@@ -749,6 +752,7 @@ func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	realWidget.RenderUsingRenderer(tw.Renderer)
 	realWidget.SetFieldDisplayName(tw.FieldDisplayName)
 	realWidget.SetName(tw.GetName())
+	realWidget.SetErrors(tw.ValidationErrors)
 	realWidget.SetValue(tw.Value)
 	return realWidget.ProceedForm(form, afo, renderContext)
 }
@@ -1351,7 +1355,6 @@ type SelectWidget struct {
 	Widget
 	OptGroups                map[string][]*SelectOptGroup
 	DontValidateForExistence bool
-	AddNewLink string
 }
 
 func (w *SelectWidget) GetWidgetType() WidgetType {
@@ -1406,7 +1409,6 @@ func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField
 	// spew.Dump("13", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
-	data["AddNewLink"] = w.AddNewLink
 	data["Type"] = w.GetWidgetType()
 	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
@@ -1435,6 +1437,132 @@ func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 				break
 			}
 		}
+	}
+	w.SetValue(v[0])
+	if foundNotExistent {
+		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+	}
+	w.SetOutputValue(v[0])
+	return nil
+}
+
+type ForeignKeyWidget struct {
+	Widget
+	OptGroups                map[string][]*SelectOptGroup
+	DontValidateForExistence bool
+	AddNewLink string
+	GetQuerySet func(formRenderContext *FormRenderContext) IPersistenceStorage
+	GenerateModelInterface func() (interface{}, interface{})
+}
+
+func (w *ForeignKeyWidget) GetWidgetType() WidgetType {
+	return ForeignKeyWidgetType
+}
+
+func (w *ForeignKeyWidget) GetTemplateName() string {
+	if w.TemplateName == "" {
+		path := "widgets/foreignkey"
+		if w.IsForAdmin {
+			path = "admin/" + path
+		}
+		return CurrentConfig.GetPathToTemplate(path)
+	}
+	return CurrentConfig.GetPathToTemplate(w.TemplateName)
+}
+
+func (w *ForeignKeyWidget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {
+	var value interface{}
+	if w.Populate != nil {
+		value = w.Populate(formRenderContext, currentField)
+	} else {
+		value = strconv.FormatUint(uint64(GetID(reflect.Indirect(reflect.ValueOf(w.Value)))), 10)
+	}
+	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
+	for optGroupName, optGroups := range w.OptGroups {
+		optGroupSstringified[optGroupName] = make([]*SelectOptGroupStringified, 0)
+		for _, optGroup := range optGroups {
+			value1 := TransformValueForWidget(optGroup.Value).(string)
+			optionTemplateName := "widgets/select.option"
+			if w.IsForAdmin {
+				optionTemplateName = "admin/" + optionTemplateName
+			}
+			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
+				OptLabel:           optGroup.OptLabel,
+				Value:              value1,
+				Selected:           value1 == value,
+				OptionTemplateName: optionTemplateName,
+				Attrs:              make(map[string]string),
+			})
+		}
+	}
+	w.SetAttr("data-selected", value.(string))
+	return map[string]interface{}{
+		"Attrs": w.GetAttrs(),
+		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
+		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
+	}
+}
+
+func (w *ForeignKeyWidget) BuildChoices(formRenderContext *FormRenderContext) {
+	queryset := w.GetQuerySet(formRenderContext)
+	w.OptGroups = make(map[string][]*SelectOptGroup)
+	w.OptGroups[""] = make([]*SelectOptGroup, 0)
+	_, models := w.GenerateModelInterface()
+	queryset.Find(models)
+	list := reflect.Indirect(reflect.ValueOf(models))
+	for i := 0; i < list.Len(); i++ {
+		modelStringified := reflect.ValueOf(list.Index(i).Interface()).MethodByName("String").Call([]reflect.Value{})[0].Interface()
+		modelID := strconv.FormatUint(uint64(GetID(list.Index(i))), 10)
+		w.OptGroups[""] = append(w.OptGroups[""], &SelectOptGroup{
+			OptLabel: modelStringified.(string),
+			Value: modelID,
+			Selected: modelID == w.Value,
+		})
+	}
+}
+
+func (w *ForeignKeyWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+	// spew.Dump("13", w.FieldDisplayName)
+	w.BuildChoices(formRenderContext)
+	data := w.GetDataForRendering(formRenderContext, currentField)
+	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
+	data["AddNewLink"] = w.AddNewLink
+	data["Type"] = w.GetWidgetType()
+	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+}
+
+func (w *ForeignKeyWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
+	if w.ReadOnly {
+		return nil
+	}
+	v, ok := form.Value[w.GetHTMLInputName()]
+	if !ok {
+		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
+	}
+	w.BuildChoices(renderContext)
+	foundNotExistent := false
+	var notExistentValue string
+	if !w.DontValidateForExistence {
+		optValues := []string{}
+		for _, optGroup := range w.OptGroups {
+			for _, optGroupOption := range optGroup {
+				optValues = append(optValues, optGroupOption.Value.(string))
+			}
+		}
+		for _, v1 := range v {
+			if !Contains(optValues, v1) {
+				foundNotExistent = true
+				notExistentValue = v1
+				break
+			}
+		}
+	}
+	var c int64
+	queryset := w.GetQuerySet(renderContext)
+	modelI, _ := w.GenerateModelInterface()
+	queryset.Model(modelI).Count(&c)
+	if c == 0 {
+		return fmt.Errorf("no object found to be used for this field")
 	}
 	w.SetValue(v[0])
 	if foundNotExistent {
@@ -2980,7 +3108,6 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *
 			continue
 		}
 		if !formError.IsEmpty() {
-			spew.Dump("formError", formError.GeneralErrors, formError.FieldError)
 			continue
 		}
 		if formError.IsEmpty() && field.SetUpField != nil {

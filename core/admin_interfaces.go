@@ -651,8 +651,7 @@ func (afo *AdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObj
 }
 
 func (afo *AdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
-	modelI, _ := afo.GenerateModelI()
-	afo.UadminDatabase.Db.Model(modelI).Preload(clause.Associations).First(model, ID)
+	afo.UadminDatabase.Db.Preload(clause.Associations).First(model, ID)
 }
 
 func (afo *AdminFilterObjects) SaveModel(model interface{}) error {
