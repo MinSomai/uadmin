@@ -1,7 +1,7 @@
 db:
   default:
     type: "sqlite"
-    name: "test.db"
+    name: "/persist/test.db"
 admin:
   listen_port: 8080
 api:
