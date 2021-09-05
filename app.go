@@ -37,7 +37,7 @@ func NewApp(environment string) *App {
 		a := App{}
 		a.DashboardAdminPanel = core.NewDashboardAdminPanel()
 		core.CurrentDashboardAdminPanel = a.DashboardAdminPanel
-		a.Config = core.NewConfig("configs/" + environment + ".yaml")
+		a.Config = core.NewConfig("configs/" + environment + ".yml")
 		a.Config.TemplatesFS = templatesRoot
 		a.Config.LocalizationFS = localizationRoot
 		a.CommandRegistry = &CommandRegistry{

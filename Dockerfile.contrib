@@ -1,0 +1,18 @@
+ARG  BASE=uadmin/uadmin:release
+FROM $BASE
+ARG  ARCH=amd64
+ENV environment=uadmin
+ENV UADMIN_PATH=/uadmin
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/uadmin
+ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+RUN apt-get -y update \
+    && apt-get -y install libxml2 libc6 libc-bin \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /uadmin
+COPY uadmin.$ARCH /uadmin/uadmin
+RUN chmod +x /uadmin/uadmin
+RUN mkdir -p /uadmin/uploads
+EXPOSE 8080
+# COPY uadmin.yml /uadmin/configs/uadmin.yml
+ENTRYPOINT ls -Rla /uadmin/main

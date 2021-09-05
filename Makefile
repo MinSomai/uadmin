@@ -32,14 +32,16 @@ UADMIN_GITHUB_VERSION:=$(UADMIN_GITHUB)/version.Version=${VERSION}
 BUILD_TAGS?=$(TAGS)
 
 include .mk/check.mk
+include .mk/dist.mk
 include .mk/proto.mk
+include .mk/static.mk
 include .mk/tests.mk
 
 define GOCOMPILE
 CGO_CFLAGS_ALLOW='.*' CGO_LDFLAGS_ALLOW='.*' $(GO) $1 \
                 -ldflags="${LDFLAGS} -B $(BUILD_ID) -X $(UADMIN_GITHUB_VERSION)" \
-                ${GOFLAGS} -tags="${BUILD_TAGS}" ${VERBOSE_FLAGS} \
-                ${UADMIN_GITHUB}
+                ${GOFLAGS} -tags="${BUILD_TAGS}" ${VERBOSE_FLAGS} -o /uadmin/uadmin \
+                cmd/uadmin/main.go
 endef
 
 .PHONY: .build
@@ -47,7 +49,7 @@ endef
 	$(call GOCOMPILE,build)
 
 .PHONY: build
-build: gopath moddownload genlocalfiles .build
+build: gopath moddownload .build
 
 .PHONY: .install
 .install:
@@ -73,3 +75,7 @@ touchlocalfiles: .proto.touch
 .PHONY: clean
 clean: uadmin.clean .proto.clean \
        go clean -i >/dev/null 2>&1 || true
+
+.PHONY: docker
+docker:
+	docker build . -t $(DOCKER_IMAGE):$(DOCKER_TAG)

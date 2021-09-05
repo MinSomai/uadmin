@@ -9,7 +9,7 @@ auth:
   min_username_length: 8
   min_password_length: 8
 swagger:
-  path_to_spec: configs/api-spec.yaml
+  path_to_spec: configs/api-spec.yml
   listen_port: 8082
   api_editor_listen_port: 8083
 uadmin:

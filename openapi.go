@@ -57,7 +57,7 @@ func (command ServeOpenAPIEditorCommand) Proceed(subaction string, args []string
 	specHandler := func(w http.ResponseWriter, req *http.Request) {
 		switch req.Method {
 		case "GET":
-			content, err := ioutil.ReadFile("configs/api-spec.yaml")
+			content, err := ioutil.ReadFile("configs/api-spec.yml")
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -69,7 +69,7 @@ func (command ServeOpenAPIEditorCommand) Proceed(subaction string, args []string
 				http.Error(w, "can't read body", http.StatusBadRequest)
 				return
 			}
-			ioutil.WriteFile("configs/api-spec.yaml", body, 0644)
+			ioutil.WriteFile("configs/api-spec.yml", body, 0644)
 			w.Header().Set("Content-Type", "application/json")
 			data := map[string]string{"ok": "ok"}
 			json.NewEncoder(w).Encode(data)

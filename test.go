@@ -214,7 +214,7 @@ func NewTestApp() *App {
 	a := App{}
 	a.DashboardAdminPanel = core.NewDashboardAdminPanel()
 	core.CurrentDashboardAdminPanel = a.DashboardAdminPanel
-	a.Config = core.NewConfig("configs/" + "test" + ".yaml")
+	a.Config = core.NewConfig("configs/" + "test" + ".yml")
 	a.CommandRegistry = &CommandRegistry{
 		Actions: make(map[string]core.ICommand),
 	}
