@@ -32,7 +32,7 @@ type App struct {
 
 var appInstance *App
 
-func NewApp(environment string) *App {
+func NewApp(environment string, dontInitialize ...bool) *App {
 	if appInstance == nil {
 		a := App{}
 		a.DashboardAdminPanel = core.NewDashboardAdminPanel()
@@ -63,8 +63,10 @@ func NewApp(environment string) *App {
 		appInstance = &a
 		a.RegisterBaseBlueprints()
 		a.RegisterBaseCommands()
-		a.Initialize()
-		a.InitializeRouter()
+		if len(dontInitialize) == 0 || dontInitialize[0] == false {
+			a.Initialize()
+			a.InitializeRouter()
+		}
 		return &a
 	}
 	return appInstance

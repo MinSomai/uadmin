@@ -12,7 +12,7 @@ func main() {
 	if environment == "" {
 		environment = "dev"
 	}
-	app1 := uadmin.NewApp(environment)
+	app1 := uadmin.NewApp(environment, true)
 	app1.BlueprintRegistry.Register(example.ConcreteBlueprint)
 	app1.ExecuteCommand()
 }
