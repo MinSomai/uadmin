@@ -3,7 +3,7 @@ package metrics
 import (
 	"encoding/json"
 	"github.com/uadmin/rrd"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"io/ioutil"
 	"os"
 	"strings"

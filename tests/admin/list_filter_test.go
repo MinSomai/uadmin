@@ -3,8 +3,8 @@ package admin
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/uadmin/uadmin"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm"
 	"strconv"
 	"testing"

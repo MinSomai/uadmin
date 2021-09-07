@@ -2,8 +2,8 @@ package interfaces
 
 import (
 	"github.com/gin-gonic/gin"
-	sessioninterfaces "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	"github.com/uadmin/uadmin/core"
+	sessioninterfaces "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
+	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 type TokenWithExpirationAuthProvider struct {

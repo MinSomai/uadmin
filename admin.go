@@ -3,8 +3,8 @@ package uadmin
 import (
 	"fmt"
 	"github.com/miquella/ask"
-	"github.com/uadmin/uadmin/colors"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/colors"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"log"
 	"os"
 	"strings"

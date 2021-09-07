@@ -3,9 +3,9 @@ package logging
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/blueprint/logging/migrations"
-	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/logging/migrations"
+	logmodel "github.com/sergeyglazyrindev/uadmin/blueprint/logging/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 type Blueprint struct {

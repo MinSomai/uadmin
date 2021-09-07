@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/colors"
+	"github.com/sergeyglazyrindev/uadmin/colors"
 	"log"
 	"runtime/debug"
 	"strings"

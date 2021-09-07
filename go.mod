@@ -1,4 +1,4 @@
-module github.com/uadmin/uadmin
+module github.com/sergeyglazyrindev/uadmin
 
 go 1.16
 

@@ -5,10 +5,10 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/jessevdk/go-flags"
 	"github.com/miquella/ask"
-	utils2 "github.com/uadmin/uadmin/blueprint/auth/utils"
-	userblueprint "github.com/uadmin/uadmin/blueprint/user"
-	"github.com/uadmin/uadmin/core"
-	"github.com/uadmin/uadmin/utils"
+	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
+	userblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/user"
+	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/utils"
 	"os"
 )
 

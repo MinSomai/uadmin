@@ -2,8 +2,8 @@ package migrations
 
 import (
 	"fmt"
-	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
-	"github.com/uadmin/uadmin/core"
+	settingmodel "github.com/sergeyglazyrindev/uadmin/blueprint/settings/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"strings"
 )
 

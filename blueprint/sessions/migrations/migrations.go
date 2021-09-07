@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 var BMigrationRegistry *core.MigrationRegistry

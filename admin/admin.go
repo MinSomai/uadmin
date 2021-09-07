@@ -2,10 +2,10 @@ package admin
 
 import (
 	"github.com/gin-gonic/gin"
-	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	"github.com/uadmin/uadmin/core"
-	"github.com/uadmin/uadmin/utils"
+	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
+	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
+	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/utils"
 	"time"
 )
 

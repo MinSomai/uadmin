@@ -6,7 +6,7 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 RUN apt-get -y update \
     && apt-get -y install wget build-essential git-core golang npm libxml2-dev protobuf-compiler libprotobuf-dev \
     && rm -rf /var/lib/apt/lists/*
-WORKDIR /go/src/github.com/uadmin/uadmin
+WORKDIR /go/src/github.com/sergeyglazyrindev/uadmin
 RUN mkdir /uadmin
 RUN wget https://dl.google.com/go/go1.16.4.linux-amd64.tar.gz
 RUN tar -xvf go1.16.4.linux-amd64.tar.gz

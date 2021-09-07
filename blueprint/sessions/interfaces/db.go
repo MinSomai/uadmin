@@ -2,7 +2,7 @@ package interfaces
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"time"
 )
 

@@ -3,7 +3,7 @@ package uadmin
 import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"os"
 )
 

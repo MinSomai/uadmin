@@ -2,7 +2,7 @@ package routing
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 type BlueprintRouting struct {

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/uadmin/uadmin/colors"
+	"github.com/sergeyglazyrindev/uadmin/colors"
 )
 
 const welcomeMessage = "" +

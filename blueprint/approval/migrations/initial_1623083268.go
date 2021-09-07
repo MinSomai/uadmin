@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	"github.com/uadmin/uadmin/blueprint/approval/models"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/approval/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm"
 )
 

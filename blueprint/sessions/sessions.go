@@ -2,10 +2,10 @@ package sessions
 
 import (
 	"github.com/gin-gonic/gin"
-	interfaces2 "github.com/uadmin/uadmin/blueprint/sessions/interfaces"
-	"github.com/uadmin/uadmin/blueprint/sessions/migrations"
-	"github.com/uadmin/uadmin/core"
-	"github.com/uadmin/uadmin/utils"
+	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/sessions/migrations"
+	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/utils"
 	"strings"
 )
 

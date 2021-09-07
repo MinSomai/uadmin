@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/uadmin/uadmin/preloaded"
+	"github.com/sergeyglazyrindev/uadmin/preloaded"
 	"net"
 	"net/http"
 	"sync"

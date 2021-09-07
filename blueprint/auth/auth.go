@@ -3,10 +3,10 @@ package auth
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	interfaces3 "github.com/uadmin/uadmin/blueprint/auth/interfaces"
-	"github.com/uadmin/uadmin/blueprint/auth/migrations"
-	sessionsblueprint "github.com/uadmin/uadmin/blueprint/sessions"
-	"github.com/uadmin/uadmin/core"
+	interfaces3 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/interfaces"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/auth/migrations"
+	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm/schema"
 	"net/http"
 )

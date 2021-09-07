@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/preloaded"
+	"github.com/sergeyglazyrindev/uadmin/preloaded"
 	"gorm.io/gorm"
 	"time"
 )

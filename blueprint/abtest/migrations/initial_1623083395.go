@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
-	"github.com/uadmin/uadmin/core"
+	abtestmodel "github.com/sergeyglazyrindev/uadmin/blueprint/abtest/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm"
 )
 

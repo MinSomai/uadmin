@@ -3,8 +3,8 @@ package language
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/blueprint/language/migrations"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/language/migrations"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"mime/multipart"
 	"strconv"
 )

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/uadmin/uadmin"
+	"github.com/sergeyglazyrindev/uadmin"
 	"testing"
 )
 

@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package models;
 
-// import "github.com/uadmin/uadmin/model";
+// import "github.com/sergeyglazyrindev/uadmin/model";
 // import "time";
 
-option go_package = "github.com/uadmin/uadmin/blueprint/user/models";
+option go_package = "github.com/sergeyglazyrindev/uadmin/blueprint/user/models";
 // option (gogoproto.protosizer_all) = true;
 // option (gogoproto.sizer_all) = false;
 

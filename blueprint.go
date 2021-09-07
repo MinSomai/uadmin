@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -73,7 +73,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 	}
 	dirPath := "blueprint/" + strings.ToLower(name)
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.Mkdir(dirPath, 0755)
+		err = os.MkdirAll(dirPath, 0755)
 		if err != nil {
 			panic(err)
 		}
@@ -82,9 +82,8 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/blueprint/{{.Name}}/migrations"
-	"github.com/uadmin/uadmin/config"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/{{.Name}}/migrations"
+	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 type Blueprint struct {

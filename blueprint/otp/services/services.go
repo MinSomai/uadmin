@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"image/png"
 	"os"
 

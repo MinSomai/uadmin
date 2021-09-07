@@ -3,9 +3,9 @@ package settings
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/blueprint/settings/migrations"
-	settingmodel "github.com/uadmin/uadmin/blueprint/settings/models"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/settings/migrations"
+	settingmodel "github.com/sergeyglazyrindev/uadmin/blueprint/settings/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"mime/multipart"
 	"strconv"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
@@ -110,7 +110,7 @@ func (m {{.MigrationName}}) GetName() string {
     return "{{.BlueprintName}}.{{.ConcreteMigrationID}}"
 }
 
-func (m {{.MigrationName}}) GetId() int64 {
+func (m {{.MigrationName}}) GetID() int64 {
     return {{.ConcreteMigrationID}}
 }
 
@@ -131,7 +131,7 @@ func (m {{.MigrationName}}) Deps() []string {
 	const migrationRegistryCreationTpl = `package migrations
 
 import (
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 var BMigrationRegistry *core.MigrationRegistry
@@ -218,7 +218,7 @@ func init() {
 		}
 		dirPath := "blueprint/" + strings.ToLower(opts.Blueprint) + "/migrations"
 		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-			err = os.Mkdir(dirPath, 0755)
+			err = os.MkdirAll(dirPath, 0755)
 			if err != nil {
 				panic(err)
 			}

@@ -3,8 +3,8 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uadmin/uadmin/core"
-	"github.com/uadmin/uadmin/preloaded"
+	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/preloaded"
 	"gorm.io/gorm"
 	"net/http"
 	"reflect"

@@ -2,10 +2,10 @@ package uadmin
 
 import (
 	"fmt"
-	abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
-	"github.com/uadmin/uadmin/blueprint/approval/models"
-	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-	"github.com/uadmin/uadmin/core"
+	abtestmodel "github.com/sergeyglazyrindev/uadmin/blueprint/abtest/models"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/approval/models"
+	logmodel "github.com/sergeyglazyrindev/uadmin/blueprint/logging/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"strconv"
 	"time"
 )

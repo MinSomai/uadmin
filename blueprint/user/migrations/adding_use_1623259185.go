@@ -1,6 +1,6 @@
 package migrations
 
-import "github.com/uadmin/uadmin/core"
+import "github.com/sergeyglazyrindev/uadmin/core"
 
 type addinguse1623259185 struct {
 }

@@ -27,7 +27,7 @@ VERBOSE?=false
 ifeq ($(VERBOSE), true)
   VERBOSE_FLAGS+=-v
 endif
-UADMIN_GITHUB:=github.com/uadmin/uadmin
+UADMIN_GITHUB:=github.com/sergeyglazyrindev/uadmin
 UADMIN_GITHUB_VERSION:=$(UADMIN_GITHUB)/version.Version=${VERSION}
 BUILD_TAGS?=$(TAGS)
 

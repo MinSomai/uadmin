@@ -3,9 +3,9 @@ package abtest
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/blueprint/abtest/migrations"
-	abtestmodel "github.com/uadmin/uadmin/blueprint/abtest/models"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/abtest/migrations"
+	abtestmodel "github.com/sergeyglazyrindev/uadmin/blueprint/abtest/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"strconv"
 )
 

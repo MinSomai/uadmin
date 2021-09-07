@@ -2,8 +2,8 @@ package interfaces
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/blueprint/auth/services"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/auth/services"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"time"
 )
 

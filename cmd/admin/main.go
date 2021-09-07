@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/uadmin/uadmin"
+	"github.com/sergeyglazyrindev/uadmin"
 	"os"
 )
 

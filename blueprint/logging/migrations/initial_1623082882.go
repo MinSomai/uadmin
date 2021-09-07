@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	logmodel "github.com/uadmin/uadmin/blueprint/logging/models"
-	"github.com/uadmin/uadmin/core"
+	logmodel "github.com/sergeyglazyrindev/uadmin/blueprint/logging/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm"
 )
 

@@ -3,9 +3,9 @@ package approval
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/uadmin/uadmin/blueprint/approval/migrations"
-	"github.com/uadmin/uadmin/blueprint/approval/models"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/approval/migrations"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/approval/models"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"strconv"
 )
 

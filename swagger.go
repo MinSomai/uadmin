@@ -2,7 +2,7 @@ package uadmin
 
 import (
 	"fmt"
-	"github.com/uadmin/uadmin/core"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"io"
 	"log"
 	"os"
