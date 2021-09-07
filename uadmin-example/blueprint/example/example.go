@@ -13,6 +13,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+	// initialize administrator page for this blueprint.
 	todosAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, nil },
@@ -26,12 +27,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing blueprint: %s", err))
 	}
+	// initialize administrator page for your specific model.
 	todosModelAdminPage := core.NewGormAdminPage(
 		todosAdminPage,
 		func() (interface{}, interface{}) {
 			return &models.Todo{}, &[]*models.Todo{}
 		},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
+			// define fields that you want to have in your admin panel
 			fields := []string{"TaskAlias", "TaskDescription"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			return form
@@ -48,6 +51,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	// if you want to use admin page for your model, please make sure you registered your model in project models.
 	core.ProjectModels.RegisterModel(func() interface{} { return &models.Todo{} })
 }
 

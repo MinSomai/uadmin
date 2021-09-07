@@ -63,7 +63,7 @@ func prepareMigrationName(message string) string {
 	}
 	message = strings.Replace(strings.ToLower(message), " ", "", -1)
 	message = strings.Replace(strings.ToLower(message), ".", "", -1)
-	return fmt.Sprintf("%s_%d", message, sec)
+	return fmt.Sprintf("%s%d", message, sec)
 }
 
 type CreateMigrationOptions struct {
