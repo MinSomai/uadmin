@@ -7,3 +7,7 @@ type Todo struct {
 	TaskAlias string
 	TaskDescription string
 }
+
+func (t *Todo) String() string {
+	return t.TaskAlias
+}

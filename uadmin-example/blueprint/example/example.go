@@ -48,6 +48,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	core.ProjectModels.RegisterModel(func() interface{} { return &models.Todo{} })
 }
 
 var ConcreteBlueprint = Blueprint{

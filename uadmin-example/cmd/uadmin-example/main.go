@@ -14,6 +14,8 @@ func main() {
 	}
 	app1 := uadmin.NewApp(environment, true)
 	app1.BlueprintRegistry.Register(example.ConcreteBlueprint)
+	app1.Initialize()
+	app1.InitializeRouter()
 	app1.ExecuteCommand()
 }
 
