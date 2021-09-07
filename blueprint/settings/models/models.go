@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"strconv"
-	"time"
 )
 
 // SettingCategory is a category for system settings
@@ -140,105 +138,105 @@ func (s *Setting) String() string {
 	return fmt.Sprintf("Setting %s", s.Name)
 }
 
-// Save overides save
-func (s *Setting) Save() {
-	// @todo, probably use it
-	//database.Preload(s)
-	//s.Code = strings.Replace(s.Category.Name, " ", "", -1) + "." + strings.Replace(s.Name, " ", "", -1)
-	//s.ApplyValue()
-	//database.Save(s)
-}
+//// Save overides save
+//func (s *Setting) Save() {
+//	// @todo, probably use it
+//	//database.Preload(s)
+//	//s.Code = strings.Replace(s.Category.Name, " ", "", -1) + "." + strings.Replace(s.Name, " ", "", -1)
+//	//s.ApplyValue()
+//	//database.Save(s)
+//}
 
-// ParseFormValue takes the value of a setting from an HTTP request and saves in the instance of setting
-func (s *Setting) ParseFormValue(v []string) {
-	switch s.DataType {
-	case s.DataType.Boolean():
-		tempV := len(v) == 1 && v[0] == "on"
-		if tempV {
-			s.Value = "1"
-		} else {
-			s.Value = "0"
-		}
-	case s.DataType.DateTime():
-		if len(v) == 1 && v[0] != "" {
-			s.Value = v[0] + ":00"
-		} else {
-			s.Value = ""
-		}
-	default:
-		if len(v) == 1 && v[0] != "" {
-			s.Value = v[0]
-		} else {
-			s.Value = ""
-		}
-	}
-}
-
-// GetValue returns an interface representing the value of the setting
-func (s *Setting) GetValue() interface{} {
-	var err error
-	var v interface{}
-
-	switch s.DataType {
-	case s.DataType.String():
-		if s.Value == "" {
-			v = s.DefaultValue
-		} else {
-			v = s.Value
-		}
-	case s.DataType.Integer():
-		if s.Value != "" {
-			v, err = strconv.ParseInt(s.Value, 10, 64)
-			v = int(v.(int64))
-		}
-		if err != nil {
-			v, err = strconv.ParseInt(s.DefaultValue, 10, 64)
-		}
-		if err != nil {
-			v = 0
-		}
-	case s.DataType.Float():
-		if s.Value != "" {
-			v, err = strconv.ParseFloat(s.Value, 64)
-		}
-		if err != nil {
-			v, err = strconv.ParseFloat(s.DefaultValue, 64)
-		}
-		if err != nil {
-			v = 0.0
-		}
-	case s.DataType.Boolean():
-		if s.Value != "" {
-			v = s.Value == "1"
-		}
-		if v == nil {
-			v = s.DefaultValue == "1"
-		}
-	case s.DataType.File():
-		if s.Value == "" {
-			v = s.DefaultValue
-		} else {
-			v = s.Value
-		}
-	case s.DataType.Image():
-		if s.Value == "" {
-			v = s.DefaultValue
-		} else {
-			v = s.Value
-		}
-	case s.DataType.DateTime():
-		if s.Value != "" {
-			v, err = time.Parse("2006-01-02 15:04:05", s.Value)
-		}
-		if err != nil {
-			v, err = time.Parse("2006-01-02 15:04:05", s.DefaultValue)
-		}
-		if err != nil {
-			v = time.Now()
-		}
-	}
-	return v
-}
+//// ParseFormValue takes the value of a setting from an HTTP request and saves in the instance of setting
+//func (s *Setting) ParseFormValue(v []string) {
+//	switch s.DataType {
+//	case s.DataType.Boolean():
+//		tempV := len(v) == 1 && v[0] == "on"
+//		if tempV {
+//			s.Value = "1"
+//		} else {
+//			s.Value = "0"
+//		}
+//	case s.DataType.DateTime():
+//		if len(v) == 1 && v[0] != "" {
+//			s.Value = v[0] + ":00"
+//		} else {
+//			s.Value = ""
+//		}
+//	default:
+//		if len(v) == 1 && v[0] != "" {
+//			s.Value = v[0]
+//		} else {
+//			s.Value = ""
+//		}
+//	}
+//}
+//
+//// GetValue returns an interface representing the value of the setting
+//func (s *Setting) GetValue() interface{} {
+//	var err error
+//	var v interface{}
+//
+//	switch s.DataType {
+//	case s.DataType.String():
+//		if s.Value == "" {
+//			v = s.DefaultValue
+//		} else {
+//			v = s.Value
+//		}
+//	case s.DataType.Integer():
+//		if s.Value != "" {
+//			v, err = strconv.ParseInt(s.Value, 10, 64)
+//			v = int(v.(int64))
+//		}
+//		if err != nil {
+//			v, err = strconv.ParseInt(s.DefaultValue, 10, 64)
+//		}
+//		if err != nil {
+//			v = 0
+//		}
+//	case s.DataType.Float():
+//		if s.Value != "" {
+//			v, err = strconv.ParseFloat(s.Value, 64)
+//		}
+//		if err != nil {
+//			v, err = strconv.ParseFloat(s.DefaultValue, 64)
+//		}
+//		if err != nil {
+//			v = 0.0
+//		}
+//	case s.DataType.Boolean():
+//		if s.Value != "" {
+//			v = s.Value == "1"
+//		}
+//		if v == nil {
+//			v = s.DefaultValue == "1"
+//		}
+//	case s.DataType.File():
+//		if s.Value == "" {
+//			v = s.DefaultValue
+//		} else {
+//			v = s.Value
+//		}
+//	case s.DataType.Image():
+//		if s.Value == "" {
+//			v = s.DefaultValue
+//		} else {
+//			v = s.Value
+//		}
+//	case s.DataType.DateTime():
+//		if s.Value != "" {
+//			v, err = time.Parse("2006-01-02 15:04:05", s.Value)
+//		}
+//		if err != nil {
+//			v, err = time.Parse("2006-01-02 15:04:05", s.DefaultValue)
+//		}
+//		if err != nil {
+//			v = time.Now()
+//		}
+//	}
+//	return v
+//}
 
 // @todo, analyze later
 //// ApplyValue changes uAdmin global variables' value based in the setting value

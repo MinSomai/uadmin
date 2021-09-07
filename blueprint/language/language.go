@@ -34,6 +34,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			fields := []string{"EnglishName", "Name", "Flag", "Code", "RTL", "Default", "Active", "AvailableInGui"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			defaultField, _ := form.FieldRegistry.GetByName("Default")
+			// add custom validator for defaultField
 			defaultField.Validators.AddValidator("only_one_default_language", func(i interface{}, o interface{}) error {
 				isDefault := i.(bool)
 				if !isDefault {

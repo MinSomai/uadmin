@@ -2,7 +2,6 @@ package services
 
 import (
 	"crypto/rand"
-	// sessionmodel "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/models"
 	"math/big"
 )
 

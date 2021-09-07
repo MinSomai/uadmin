@@ -17,6 +17,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+	// register signin adapters http endpoints
 	for adapter := range b.AuthAdapterRegistry.Iterate() {
 		adapterGroup := group.Group("/" + adapter.GetName())
 		adapterGroup.POST("/signin/", adapter.Signin)
@@ -24,6 +25,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		adapterGroup.POST("/logout/", adapter.Logout)
 		adapterGroup.GET("/status/", adapter.IsAuthenticated)
 	}
+	// customize root admin page list handler to open home page for administrators, could be customized to show some enhanced dashboards
 	core.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
@@ -54,9 +56,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("home"), c, core.FuncMap)
 		}
 	}
+	// Serve static fs if upload directory is configured. Has to be created in the root of the project.
 	if core.CurrentConfig.GetURLToUploadDirectory() != "" {
 		mainRouter.StaticFS(core.CurrentConfig.GetURLToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetURLToUploadDirectory())))
 	}
+	// profile page for admin panel
 	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile", func(ctx *gin.Context) {
 		type Context struct {
 			core.AdminContext
@@ -103,6 +107,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	// register all available auth providers
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthForAdminProvider{})

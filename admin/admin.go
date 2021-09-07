@@ -20,12 +20,14 @@ func init() {
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
 		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
+		// in admin panel we determine user's session using cookies
 		cookie, _ := ctx.Cookie(cookieName)
 		var session interfaces2.ISessionProvider
 		if cookie != "" {
 			session, _ = sessionAdapter.GetByKey(cookie)
 		}
 		if adminRequestParams.CreateSession && session == nil {
+			// create session if no session found in cookies
 			session = sessionAdapter.Create()
 			expiresOn := time.Now().Add(time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second)
 			session.ExpiresOn(&expiresOn)
@@ -33,6 +35,7 @@ func init() {
 			session.Save()
 		}
 		if adminRequestParams.GenerateCSRFToken {
+			// generate csrf token for POST requests
 			token := utils.GenerateCSRFToken()
 			currentCsrfToken, _ := session.Get("csrf_token")
 			if currentCsrfToken == "" {
@@ -65,6 +68,7 @@ func init() {
 		}
 		// context.SetDemo()
 		if session != nil {
+			// determine current user
 			user := session.GetUser()
 			context.SetUserObject(user)
 			context.SetUser(user.Username)
@@ -73,6 +77,7 @@ func init() {
 				context.SetUserPermissionRegistry(user.BuildPermissionRegistry())
 			}
 		}
+		// build breadcrumbs for admin panel
 		breadcrumbs := core.NewAdminBreadCrumbsRegistry()
 		breadcrumbs.AddBreadCrumb(&core.AdminBreadcrumb{Name: "Dashboard", URL: core.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
 		context.SetBreadCrumbs(breadcrumbs)

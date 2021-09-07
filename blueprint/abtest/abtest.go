@@ -1,4 +1,8 @@
 package abtest
+/*
+	Blueprint abtest is designed to do A/B tests for the project. Currently not usable after migration from previous
+	Uadmin implementation.
+ */
 
 import (
 	"fmt"
@@ -14,6 +18,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+	// add new gorm admin page for blueprint
 	abTestAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, nil },
@@ -28,6 +33,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	if err != nil {
 		panic(fmt.Errorf("error initializing abtest blueprint: %s", err))
 	}
+	// add abtest gorm page
 	abtestmodelAdminPage := core.NewGormAdminPage(
 		abTestAdminPage,
 		func() (interface{}, interface{}) { return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{} },
@@ -75,14 +81,18 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
 	abtestmodelAdminPage.Router = mainRouter
+	// customize list display for abtest admin page
 	typeListDisplay, _ := abtestmodelAdminPage.ListDisplay.GetFieldByDisplayName("Type")
+	// custom populate method for type list display
 	typeListDisplay.Populate = func(m interface{}) string {
 		return abtestmodel.HumanizeAbTestType(m.(*abtestmodel.ABTest).Type)
 	}
 	contentTypeListDisplay, _ := abtestmodelAdminPage.ListDisplay.GetFieldByDisplayName("ContentType")
+	// custom populate method for contentType list display
 	contentTypeListDisplay.Populate = func(m interface{}) string {
 		return m.(*abtestmodel.ABTest).ContentType.String()
 	}
+	// initialize inline for abtest, it shows all abtest values that belong to the current abtest object
 	abTestValueInline := core.NewAdminPageInline(
 		"AB Test Values",
 		core.TabularInline, func(m interface{}) (interface{}, interface{}) {
@@ -110,6 +120,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		},
 	)
 	abTestValueInline.VerboseName = "AB Test Value"
+	// add custom fields to abTestValue inline
 	abTestValueInline.ListDisplay.AddField(&core.ListDisplay{
 		DisplayName: "Click through rate",
 		MethodName:  "ClickThroughRate",
@@ -126,6 +137,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) Init() {
+	// add models to ProjectModels, so we can determine admin pages for these models, etc
 	core.ProjectModels.RegisterModel(func() interface{} { return &abtestmodel.ABTestValue{} })
 	core.ProjectModels.RegisterModel(func() interface{} { return &abtestmodel.ABTest{} })
 }

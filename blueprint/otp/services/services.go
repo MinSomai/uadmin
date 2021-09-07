@@ -15,6 +15,7 @@ import (
 )
 
 // getOTP is a function that generates TOTP using github.com/pquerna/otp
+//
 // Parameters:
 //   - seed: OTP seed is base32
 //   - digits: the number of digits for the OTP

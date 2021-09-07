@@ -1,15 +1,13 @@
 package models
+/*
+	Logging model designed to keep all data about admin actions.
+*/
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"github.com/sergeyglazyrindev/uadmin/preloaded"
 	"gorm.io/gorm"
-	"net/http"
-	"reflect"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -122,107 +120,107 @@ func (l Log) String() string {
 	return fmt.Sprintf("Log %s", strconv.Itoa(int(l.ID)))
 }
 
-// Save !
-func (l *Log) Save() {
-	// database.Save(l)
-	//if l.Action == l.Action.Modified() || l.Action == l.Action.Deleted() {
-	//	l.RollBack = preloaded.RootURL + "revertHandler/?log_id=" + fmt.Sprint(l.ID)
-	//}
-	// database.Save(l)
-}
+//// Save !
+//func (l *Log) Save() {
+//	// database.Save(l)
+//	//if l.Action == l.Action.Modified() || l.Action == l.Action.Deleted() {
+//	//	l.RollBack = preloaded.RootURL + "revertHandler/?log_id=" + fmt.Sprint(l.ID)
+//	//}
+//	// database.Save(l)
+//}
 
-// ParseRecord !
-func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *core.User, action Action, r *http.Request) (err error) {
-	//modelName = strings.ToLower(modelName)
-	//model, _ := model2.NewModel(modelName, false)
-	//s, ok := model2.GetSchema(model.Interface())
-	//if !ok {
-	//	errMsg := fmt.Sprintf("Unable to find schema (%s)", modelName)
-	//	debug.Trail(debug.ERROR, errMsg)
-	//	return fmt.Errorf(errMsg)
-	//}
-	//l.Username = user.Username
-	//l.TableName = modelName
-	//l.TableID = int(ID)
-	//l.Action = action
-	//
-	//// Check if the value passed is a pointer
-	//if a.Kind() == reflect.Ptr {
-	//	a = a.Elem()
-	//}
-	//
-	//jsonifyValue := map[string]string{
-	//	"_IP": r.RemoteAddr,
-	//}
-	//for _, f := range s.Fields {
-	//	if !f.IsMethod {
-	//		if f.Type == preloaded.CFK {
-	//			jsonifyValue[f.Name+"ID"] = fmt.Sprint(a.FieldByName(f.Name + "ID").Interface())
-	//		} else if f.Type == preloaded.CDATE {
-	//			val := time.Time{}
-	//			if a.FieldByName(f.Name).Type().Kind() == reflect.Ptr {
-	//				if a.FieldByName(f.Name).IsNil() {
-	//					jsonifyValue[f.Name] = ""
-	//				} else {
-	//					val, _ = a.FieldByName(f.Name).Elem().Interface().(time.Time)
-	//					jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
-	//				}
-	//
-	//			} else {
-	//				val, _ = a.FieldByName(f.Name).Interface().(time.Time)
-	//				jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
-	//			}
-	//
-	//		} else {
-	//			jsonifyValue[f.Name] = fmt.Sprint(a.FieldByName(f.Name).Interface())
-	//		}
-	//
-	//	}
-	//}
-	//json1, _ := json.Marshal(jsonifyValue)
-	//l.Activity = string(json1)
-	//
-	return nil
-}
+//// ParseRecord !
+//func (l *Log) ParseRecord(a reflect.Value, modelName string, ID uint, user *core.User, action Action, r *http.Request) (err error) {
+//	//modelName = strings.ToLower(modelName)
+//	//model, _ := model2.NewModel(modelName, false)
+//	//s, ok := model2.GetSchema(model.Interface())
+//	//if !ok {
+//	//	errMsg := fmt.Sprintf("Unable to find schema (%s)", modelName)
+//	//	debug.Trail(debug.ERROR, errMsg)
+//	//	return fmt.Errorf(errMsg)
+//	//}
+//	//l.Username = user.Username
+//	//l.TableName = modelName
+//	//l.TableID = int(ID)
+//	//l.Action = action
+//	//
+//	//// Check if the value passed is a pointer
+//	//if a.Kind() == reflect.Ptr {
+//	//	a = a.Elem()
+//	//}
+//	//
+//	//jsonifyValue := map[string]string{
+//	//	"_IP": r.RemoteAddr,
+//	//}
+//	//for _, f := range s.Fields {
+//	//	if !f.IsMethod {
+//	//		if f.Type == preloaded.CFK {
+//	//			jsonifyValue[f.Name+"ID"] = fmt.Sprint(a.FieldByName(f.Name + "ID").Interface())
+//	//		} else if f.Type == preloaded.CDATE {
+//	//			val := time.Time{}
+//	//			if a.FieldByName(f.Name).Type().Kind() == reflect.Ptr {
+//	//				if a.FieldByName(f.Name).IsNil() {
+//	//					jsonifyValue[f.Name] = ""
+//	//				} else {
+//	//					val, _ = a.FieldByName(f.Name).Elem().Interface().(time.Time)
+//	//					jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
+//	//				}
+//	//
+//	//			} else {
+//	//				val, _ = a.FieldByName(f.Name).Interface().(time.Time)
+//	//				jsonifyValue[f.Name] = val.Format("2006-01-02 15:04:05 -0700")
+//	//			}
+//	//
+//	//		} else {
+//	//			jsonifyValue[f.Name] = fmt.Sprint(a.FieldByName(f.Name).Interface())
+//	//		}
+//	//
+//	//	}
+//	//}
+//	//json1, _ := json.Marshal(jsonifyValue)
+//	//l.Activity = string(json1)
+//	//
+//	return nil
+//}
 
-// SignIn !
-func (l *Log) SignIn(user string, action Action, r *http.Request) (err error) {
-
-	l.Username = user
-	l.Action = action
-	loginStatus := ""
-	if r.Context().Value(preloaded.CKey("login-status")) != nil {
-		loginStatus = r.Context().Value(preloaded.CKey("login-status")).(string)
-	}
-	jsonifyValue := map[string]string{
-		"IP":           r.RemoteAddr,
-		"Login-Status": loginStatus,
-	}
-	for k, v := range r.Header {
-		jsonifyValue[k] = strings.Join(v, ";")
-	}
-
-	json1, _ := json.Marshal(jsonifyValue)
-	l.Activity = string(json1)
-
-	return nil
-}
-
-// PasswordReset !
-func (l *Log) PasswordReset(user string, action Action, r *http.Request) (err error) {
-
-	l.Username = user
-	l.Action = action
-	jsonifyValue := map[string]string{
-		"IP":           r.RemoteAddr,
-		"Reset-Status": r.FormValue("reset-status"),
-	}
-	for k, v := range r.Header {
-		jsonifyValue[k] = strings.Join(v, ";")
-	}
-
-	json1, _ := json.Marshal(jsonifyValue)
-	l.Activity = string(json1)
-
-	return nil
-}
+//// SignIn !
+//func (l *Log) SignIn(user string, action Action, r *http.Request) (err error) {
+//
+//	l.Username = user
+//	l.Action = action
+//	loginStatus := ""
+//	if r.Context().Value(preloaded.CKey("login-status")) != nil {
+//		loginStatus = r.Context().Value(preloaded.CKey("login-status")).(string)
+//	}
+//	jsonifyValue := map[string]string{
+//		"IP":           r.RemoteAddr,
+//		"Login-Status": loginStatus,
+//	}
+//	for k, v := range r.Header {
+//		jsonifyValue[k] = strings.Join(v, ";")
+//	}
+//
+//	json1, _ := json.Marshal(jsonifyValue)
+//	l.Activity = string(json1)
+//
+//	return nil
+//}
+//
+//// PasswordReset !
+//func (l *Log) PasswordReset(user string, action Action, r *http.Request) (err error) {
+//
+//	l.Username = user
+//	l.Action = action
+//	jsonifyValue := map[string]string{
+//		"IP":           r.RemoteAddr,
+//		"Reset-Status": r.FormValue("reset-status"),
+//	}
+//	for k, v := range r.Header {
+//		jsonifyValue[k] = strings.Join(v, ";")
+//	}
+//
+//	json1, _ := json.Marshal(jsonifyValue)
+//	l.Activity = string(json1)
+//
+//	return nil
+//}

@@ -1,4 +1,8 @@
 package approval
+/*
+	Blueprint approval is designed to provide Approval functionality for administrators. Currently not usable after
+	migration from previous UAdmin implementation.
+*/
 
 import (
 	"fmt"
@@ -35,6 +39,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
 			approvalField, _ := form.FieldRegistry.GetByName("ApprovalAction")
 			w := approvalField.FieldConfig.Widget.(*core.SelectWidget)
+			// initialize select options for ApprovalAction field
 			w.OptGroups = make(map[string][]*core.SelectOptGroup)
 			w.OptGroups[""] = make([]*core.SelectOptGroup, 0)
 			w.OptGroups[""] = append(w.OptGroups[""], &core.SelectOptGroup{
@@ -49,10 +54,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				OptLabel: "rejected",
 				Value:    "2",
 			})
+			// populate ApprovalAction field value
 			approvalField.FieldConfig.Widget.SetPopulate(func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
 				a := renderContext.Model.(*models.Approval).ApprovalAction
 				return strconv.Itoa(int(a))
 			})
+			// setup ApprovalAction field during saving
 			approvalField.SetUpField = func(w core.IWidget, m interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 				approvalM := m.(*models.Approval)
 				vI, _ := strconv.Atoi(v.(string))

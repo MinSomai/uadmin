@@ -159,6 +159,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			categoryField, _ := form.FieldRegistry.GetByName("Category")
 			initializedwidgetForCategory := categoryField.FieldConfig.Widget
 			categoryWidget := &core.ForeignKeyWidget{}
+			// configure foreign key widget for category field
 			categoryWidget.GenerateModelInterface = func() (interface{}, interface{}) {
 				return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
 			}
@@ -177,7 +178,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			categoryWidget.RenderUsingRenderer(initializedwidgetForCategory.GetRenderer())
 			categoryWidget.SetName(initializedwidgetForCategory.GetName())
 			categoryWidget.SetFieldDisplayName(initializedwidgetForCategory.GetFieldDisplayName())
-			categoryWidget.AddNewLink = settingcategoriesmodelAdminPage.GenerateLinkToAddNewModel() + "?_to_field=id&_popup=1"
+			categoryWidget.AddNewLink = settingcategoriesmodelAdminPage.GenerateLinkToAddNewModel()
 			categoryField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 				m1 := modelI.(*settingmodel.Setting)
 				categoryID, _ := strconv.Atoi(v.(string))

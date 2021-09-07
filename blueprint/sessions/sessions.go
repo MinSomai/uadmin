@@ -15,6 +15,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+	// function to verify CSRF
 	mainRouter.Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {
 			if !core.CurrentConfig.RequiresCsrfCheck(c) {
@@ -54,7 +55,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				c.Abort()
 				return
 			}
-			// @todo, get it back when stabilize token
+			// @todo, comment it out when stabilize token
 			//csrfToken, err := session.Get("csrf_token")
 			//if err != nil {
 			//	c.String(400, err.Error())
@@ -67,7 +68,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				c.Abort()
 				return
 			}
-			// @todo, get it back when stabilize token
+			// @todo, comment it out when stabilize token
 			//tokenUnmasked := utils.UnmaskCSRFToken(csrfTokenFromRequest)
 			//if tokenUnmasked != csrfToken {
 			//	c.String(400, "Incorrect csrf-token")

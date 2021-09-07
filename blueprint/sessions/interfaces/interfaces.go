@@ -1,5 +1,8 @@
 package interfaces
-
+/*
+	Package contains session providers provided by UAdmin by default, currently it's only DBSessionProvider, but
+	it's easy to add another provider that works with different data storages, etc
+*/
 import (
 	"fmt"
 	"github.com/sergeyglazyrindev/uadmin/blueprint/auth/services"

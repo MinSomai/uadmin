@@ -7,7 +7,7 @@ import (
 // bcryptDiff
 var bcryptDiff = 12
 
-// hashPass Generates a hash from a password and salt
+// HashPass Generates a hash from a password and salt
 func HashPass(pass string, salt string) (string, error) {
 	password := []byte(pass + salt)
 	hash, err := bcrypt.GenerateFromPassword(password, bcryptDiff)

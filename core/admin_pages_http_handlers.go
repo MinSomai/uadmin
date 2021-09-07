@@ -183,7 +183,7 @@ func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {
 }
 
 func (ap *AdminPage) GenerateLinkToAddNewModel() string {
-	return fmt.Sprintf("%s/%s/%s/edit/new", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
+	return fmt.Sprintf("%s/%s/%s/edit/new?_to_field=id&_popup=1", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
 }
 
 func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context) {

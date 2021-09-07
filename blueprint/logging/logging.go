@@ -32,6 +32,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Username", "Action", "Activity", "CreatedAt", "ContentType", "ModelPK"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
+			// load extra css/js for logging admin page
 			form.ExtraStatic.ExtraJS = append(form.ExtraStatic.ExtraJS, "/static-inbuilt/uadmin/assets/highlight.js/highlight.pack.js")
 			form.ExtraStatic.ExtraJS = append(form.ExtraStatic.ExtraJS, "/static-inbuilt/uadmin/assets/js/initialize.highlight.js")
 			form.ExtraStatic.ExtraCSS = append(form.ExtraStatic.ExtraCSS, "/static-inbuilt/uadmin/assets/highlight.js/styles/default.css")
@@ -44,9 +45,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			usernameField, _ := form.FieldRegistry.GetByName("Username")
 			usernameField.Ordering = 0
 			activityField, _ := form.FieldRegistry.GetByName("Activity")
+			// customize template for widget
 			activityField.FieldConfig.Widget.SetTemplateName("admin/widgets/textareajson")
 			activityField.Ordering = 9
 			createdAtField, _ := form.FieldRegistry.GetByName("CreatedAt")
+			// set CreatedAt field as readonly
 			createdAtField.FieldConfig.Widget.SetReadonly(true)
 			createdAtField.Ordering = 10
 			return form
@@ -64,6 +67,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	actionListDisplay.Populate = func(m interface{}) string {
 		return logmodel.HumanizeAction(m.(*logmodel.Log).Action)
 	}
+	// this is internal data, so no need to add it as new.
 	logmodelAdminPage.NoPermissionToAddNew = true
 	err = logAdminPage.SubPages.AddAdminPage(logmodelAdminPage)
 	if err != nil {
