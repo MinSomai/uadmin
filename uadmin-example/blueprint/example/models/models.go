@@ -4,7 +4,7 @@ import "github.com/sergeyglazyrindev/uadmin/core"
 
 type Todo struct {
 	core.Model
-	TaskAlias string
+	TaskAlias       string
 	TaskDescription string
 }
 

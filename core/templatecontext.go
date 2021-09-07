@@ -70,7 +70,7 @@ type AdminContext struct {
 	BreadCrumbs            *AdminBreadCrumbsRegistry
 	ID                     uint
 	FormD                  *multipart.Form
-	Ctx *gin.Context
+	Ctx                    *gin.Context
 }
 
 func (c *AdminContext) SetID(ID uint) {

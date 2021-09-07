@@ -1,11 +1,11 @@
 package sessions
 
 import (
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyglazyrindev/uadmin"
 	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/sergeyglazyrindev/uadmin/utils"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"

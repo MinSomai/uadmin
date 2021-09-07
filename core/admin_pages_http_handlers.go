@@ -169,7 +169,7 @@ type AdminPage struct {
 	SaveModel                          func(modelI interface{}, ID uint, afo IAdminFilterObjects) interface{} `json:"-"`
 	RegisteredHTTPHandlers             bool
 	NoPermissionToAddNew               bool
-	NoPermissionToEdit				   bool
+	NoPermissionToEdit                 bool
 }
 
 type ModelActionRequestParams struct {

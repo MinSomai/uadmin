@@ -1,9 +1,9 @@
 package routing
 
 import (
-	"github.com/stretchr/testify/suite"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
 	"testing"

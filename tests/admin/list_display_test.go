@@ -1,9 +1,9 @@
 package admin
 
 import (
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 

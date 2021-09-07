@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-
 func main() {
 	environment := os.Getenv("environment")
 	if environment == "" {
@@ -21,4 +20,3 @@ func main() {
 	// and here is the command handler that will be used for any functionality you may need.
 	app1.ExecuteCommand()
 }
-

@@ -3,9 +3,9 @@ package forms
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"mime/multipart"
 	"os"

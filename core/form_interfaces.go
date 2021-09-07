@@ -59,7 +59,7 @@ const FkLinkWidgetType WidgetType = "fklink"
 
 type FormRenderContext struct {
 	Model interface{}
-	Ctx *gin.Context
+	Ctx   *gin.Context
 }
 
 func NewFormRenderContext() *FormRenderContext {
@@ -688,7 +688,7 @@ func (tw *TextWidget) Render(formRenderContext *FormRenderContext, currentField 
 
 type DynamicWidget struct {
 	Widget
-	GetRealWidget func(formRenderContext *FormRenderContext, currentField *Field) IWidget
+	GetRealWidget                  func(formRenderContext *FormRenderContext, currentField *Field) IWidget
 	GetRealWidgetForFormProceeding func(form *multipart.Form, afo IAdminFilterObjects) IWidget
 }
 
@@ -1450,9 +1450,9 @@ type ForeignKeyWidget struct {
 	Widget
 	OptGroups                map[string][]*SelectOptGroup
 	DontValidateForExistence bool
-	AddNewLink string
-	GetQuerySet func(formRenderContext *FormRenderContext) IPersistenceStorage
-	GenerateModelInterface func() (interface{}, interface{})
+	AddNewLink               string
+	GetQuerySet              func(formRenderContext *FormRenderContext) IPersistenceStorage
+	GenerateModelInterface   func() (interface{}, interface{})
 }
 
 func (w *ForeignKeyWidget) GetWidgetType() WidgetType {
@@ -1515,7 +1515,7 @@ func (w *ForeignKeyWidget) BuildChoices(formRenderContext *FormRenderContext) {
 		modelID := strconv.FormatUint(uint64(GetID(list.Index(i))), 10)
 		w.OptGroups[""] = append(w.OptGroups[""], &SelectOptGroup{
 			OptLabel: modelStringified.(string),
-			Value: modelID,
+			Value:    modelID,
 			Selected: modelID == w.Value,
 		})
 	}

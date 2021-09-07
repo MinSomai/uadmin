@@ -1,4 +1,10 @@
 package admin
+/*
+Package admin initializes PopulateTemplateContextForAdminPanel function in the core.
+It helps us to customize admin panel in case if we want, we'd like to keep core package as is, instead, all changes
+have to be done outside of core package. It's non trivial task for us because we need to provide high level abstractions
+to expand uadmin functionality, etc
+*/
 
 import (
 	"github.com/gin-gonic/gin"

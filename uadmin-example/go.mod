@@ -4,5 +4,5 @@ go 1.16
 
 require (
 	github.com/gin-gonic/gin v1.5.0
-	github.com/sergeyglazyrindev/uadmin v1.0.3
+	github.com/sergeyglazyrindev/uadmin v1.0.4
 )

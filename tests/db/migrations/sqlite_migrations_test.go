@@ -3,10 +3,10 @@ package migrations
 import (
 	"fmt"
 	mapset "github.com/deckarep/golang-set"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"os"
 	"strings"
 	"testing"

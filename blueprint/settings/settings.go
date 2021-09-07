@@ -91,37 +91,37 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "String",
-				Value: "1",
+				Value:    "1",
 				Selected: 1 == settingModel.CategoryID,
 			})
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "Integer",
-				Value: "2",
+				Value:    "2",
 				Selected: 2 == settingModel.CategoryID,
 			})
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "Float",
-				Value: "3",
+				Value:    "3",
 				Selected: 3 == settingModel.CategoryID,
 			})
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "Boolean",
-				Value: "4",
+				Value:    "4",
 				Selected: 4 == settingModel.CategoryID,
 			})
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "File",
-				Value: "5",
+				Value:    "5",
 				Selected: 5 == settingModel.CategoryID,
 			})
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "Image",
-				Value: "6",
+				Value:    "6",
 				Selected: 6 == settingModel.CategoryID,
 			})
 			dataTypeWidget.OptGroups[""] = append(dataTypeWidget.OptGroups[""], &core.SelectOptGroup{
 				OptLabel: "Datetime",
-				Value: "7",
+				Value:    "7",
 				Selected: 7 == settingModel.CategoryID,
 			})
 			dataTypeField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
@@ -159,10 +159,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			categoryField, _ := form.FieldRegistry.GetByName("Category")
 			initializedwidgetForCategory := categoryField.FieldConfig.Widget
 			categoryWidget := &core.ForeignKeyWidget{}
-			categoryWidget.GenerateModelInterface = func() (interface{}, interface{}){
+			categoryWidget.GenerateModelInterface = func() (interface{}, interface{}) {
 				return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
 			}
-			categoryWidget.GetQuerySet = func(formRenderContext *core.FormRenderContext) core.IPersistenceStorage{
+			categoryWidget.GetQuerySet = func(formRenderContext *core.FormRenderContext) core.IPersistenceStorage {
 				uadminDatabase := core.NewUadminDatabase()
 				return core.NewGormPersistenceStorage(uadminDatabase.Db)
 			}

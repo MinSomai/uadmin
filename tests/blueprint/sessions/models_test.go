@@ -1,11 +1,11 @@
 package sessions
 
 import (
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyglazyrindev/uadmin"
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
 	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/core"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )

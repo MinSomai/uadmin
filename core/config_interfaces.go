@@ -80,7 +80,7 @@ type UadminDbOptions struct {
 }
 
 type UadminAuthOptions struct {
-	JwtSecretToken  string `yaml:"jwt_secret_token"`
+	JwtSecretToken    string `yaml:"jwt_secret_token"`
 	MinUsernameLength int    `yaml:"min_username_length"`
 	MaxUsernameLength int    `yaml:"max_username_length"`
 	MinPasswordLength int    `yaml:"min_password_length"`
