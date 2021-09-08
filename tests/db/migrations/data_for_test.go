@@ -62,7 +62,7 @@ func (m initialtest11621667392) GetName() string {
 }
 
 func (m initialtest11621667392) GetID() int64 {
-	return 1621667392
+	return 1621667394
 }
 
 func (m initialtest11621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -87,7 +87,7 @@ func (m migration2test1621667393) GetName() string {
 }
 
 func (m migration2test1621667393) GetID() int64 {
-	return 1621667393
+	return 1621667395
 }
 
 func (m migration2test1621667393) Up(uadminDatabase *core.UadminDatabase) error {
@@ -112,7 +112,7 @@ func (m initialblueprintconflicts1621667392) GetName() string {
 }
 
 func (m initialblueprintconflicts1621667392) GetID() int64 {
-	return 1621667392
+	return 1621667396
 }
 
 func (m initialblueprintconflicts1621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -135,7 +135,7 @@ func (m migration2blueprintconflicts1621667392) GetName() string {
 }
 
 func (m migration2blueprintconflicts1621667392) GetID() int64 {
-	return 1621667393
+	return 1621667397
 }
 
 func (m migration2blueprintconflicts1621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -158,7 +158,7 @@ func (m migration3blueprintconflicts1621667392) GetName() string {
 }
 
 func (m migration3blueprintconflicts1621667392) GetID() int64 {
-	return 1621667394
+	return 1621667398
 }
 
 func (m migration3blueprintconflicts1621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -181,7 +181,7 @@ func (m migration4blueprintconflicts1621667392) GetName() string {
 }
 
 func (m migration4blueprintconflicts1621667392) GetID() int64 {
-	return 1621667395
+	return 1621667399
 }
 
 func (m migration4blueprintconflicts1621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -204,7 +204,7 @@ func (m nodeps11621667392) GetName() string {
 }
 
 func (m nodeps11621667392) GetID() int64 {
-	return 1621667392
+	return 1621667492
 }
 
 func (m nodeps11621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -227,7 +227,7 @@ func (m nodeps21621667392) GetName() string {
 }
 
 func (m nodeps21621667392) GetID() int64 {
-	return 1621667392
+	return 1621667493
 }
 
 func (m nodeps21621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -250,7 +250,7 @@ func (m loopedmigration11621667392) GetName() string {
 }
 
 func (m loopedmigration11621667392) GetID() int64 {
-	return 1621667392
+	return 1621667592
 }
 
 func (m loopedmigration11621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -273,7 +273,7 @@ func (m loopedmigration21621667392) GetName() string {
 }
 
 func (m loopedmigration21621667392) GetID() int64 {
-	return 1621667392
+	return 1621667593
 }
 
 func (m loopedmigration21621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -296,7 +296,7 @@ func (m samenamemigration11621667392) GetName() string {
 }
 
 func (m samenamemigration11621667392) GetID() int64 {
-	return 1621667392
+	return 1621667692
 }
 
 func (m samenamemigration11621667392) Up(uadminDatabase *core.UadminDatabase) error {
@@ -319,7 +319,7 @@ func (m samenamemigration21621667392) GetName() string {
 }
 
 func (m samenamemigration21621667392) GetID() int64 {
-	return 1621667392
+	return 1621667693
 }
 
 func (m samenamemigration21621667392) Up(uadminDatabase *core.UadminDatabase) error {
