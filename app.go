@@ -100,7 +100,7 @@ func (a App) RegisterBlueprint(blueprint core.IBlueprint) {
 }
 
 func (a App) RegisterCommand(name string, command core.ICommand) {
-	a.CommandRegistry.addAction(name, command)
+	a.CommandRegistry.AddAction(name, command)
 }
 
 func (a App) RegisterBaseCommands() {
@@ -121,7 +121,7 @@ func (a App) ExecuteCommand() {
 	var help string
 	if len(os.Args) > 1 {
 		action = os.Args[1]
-		isCorrectActionPassed = a.CommandRegistry.isRegisteredCommand(action)
+		isCorrectActionPassed = a.CommandRegistry.IsRegisteredCommand(action)
 	}
 	if !isCorrectActionPassed {
 		helpText := a.CommandRegistry.MakeHelpText()
@@ -134,13 +134,13 @@ Please provide what do you want to do ?
 	}
 	if len(os.Args) > 2 {
 		subaction := os.Args[2]
-		isCorrectActionPassed = a.CommandRegistry.isRegisteredCommand(action)
-		err := a.CommandRegistry.runAction(action, subaction, os.Args[3:])
+		isCorrectActionPassed = a.CommandRegistry.IsRegisteredCommand(action)
+		err := a.CommandRegistry.RunAction(action, subaction, os.Args[3:])
 		if err != nil {
 			fmt.Println(err)
 		}
 	} else {
-		err := a.CommandRegistry.runAction(action, "", make([]string, 0))
+		err := a.CommandRegistry.RunAction(action, "", make([]string, 0))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -148,7 +148,7 @@ Please provide what do you want to do ?
 }
 
 func (a App) TriggerCommandExecution(action string, subaction string, params []string) {
-	a.CommandRegistry.runAction(action, subaction, params)
+	a.CommandRegistry.RunAction(action, subaction, params)
 }
 
 func (a App) StartAdmin() {

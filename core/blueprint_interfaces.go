@@ -26,7 +26,7 @@ type IBlueprintRegistry interface {
 	Register(blueprint IBlueprint)
 	GetMigrationTree() IMigrationTree
 	TraverseMigrations() <-chan *TraverseMigrationResult
-	TraverseMigrationsDownTo(downToMigration string) <-chan *TraverseMigrationResult
+	TraverseMigrationsDownTo(downToMigration int64) <-chan *TraverseMigrationResult
 	InitializeRouting(router *gin.Engine)
 	Initialize()
 	ResetMigrationTree()
@@ -244,10 +244,10 @@ func (r BlueprintRegistry) TraverseMigrations() <-chan *TraverseMigrationResult 
 			return
 		}
 		r.MigrationTree.TreeBuilt()
-		applyMigrationsInOrder := make([]string, 0)
+		applyMigrationsInOrder := make([]int64, 0)
 		allBlueprintRoots := r.MigrationTree.GetRoot().GetChildren()
 		for l := allBlueprintRoots.Front(); l != nil; l = l.Next() {
-			applyMigrationsInOrder = append(applyMigrationsInOrder, l.Value.(IMigrationNode).GetMigration().GetName())
+			applyMigrationsInOrder = append(applyMigrationsInOrder, l.Value.(IMigrationNode).GetMigration().GetID())
 			migrationDepList := l.Value.(IMigrationNode).TraverseDeps(applyMigrationsInOrder, make(MigrationDepList, 0))
 			sort.Reverse(migrationDepList)
 			for _, m := range migrationDepList {
@@ -256,11 +256,11 @@ func (r BlueprintRegistry) TraverseMigrations() <-chan *TraverseMigrationResult 
 			applyMigrationsInOrder = l.Value.(IMigrationNode).TraverseChildren(applyMigrationsInOrder)
 		}
 		for _, migrationName := range applyMigrationsInOrder {
-			node, err := r.MigrationTree.GetNodeByMigrationName(migrationName)
+			node, err := r.MigrationTree.GetNodeByMigrationID(migrationName)
 			if err != nil {
 				res := &TraverseMigrationResult{
 					Node:  nil,
-					Error: fmt.Errorf("Not found migration node with name : %s", migrationName),
+					Error: fmt.Errorf("not found migration node with id : %d", migrationName),
 				}
 				chnl <- res
 				return
@@ -301,7 +301,7 @@ func (r BlueprintRegistry) Initialize() {
 	}
 }
 
-func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <-chan *TraverseMigrationResult {
+func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration int64) <-chan *TraverseMigrationResult {
 	// @todo, fix this implementation
 	chnl := make(chan *TraverseMigrationResult)
 	go func() {
@@ -310,10 +310,10 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <-ch
 		if !wasTreeBuilt {
 			return
 		}
-		applyMigrationsInOrder := make([]string, 0)
+		applyMigrationsInOrder := make([]int64, 0)
 		allBlueprintRoots := r.MigrationTree.GetRoot().GetChildren()
 		for l := allBlueprintRoots.Front(); l != nil; l = l.Next() {
-			applyMigrationsInOrder = append(applyMigrationsInOrder, l.Value.(IMigrationNode).GetMigration().GetName())
+			applyMigrationsInOrder = append(applyMigrationsInOrder, l.Value.(IMigrationNode).GetMigration().GetID())
 			migrationDepList := l.Value.(IMigrationNode).TraverseDeps(applyMigrationsInOrder, make(MigrationDepList, 0))
 			sort.Reverse(migrationDepList)
 			for _, m := range migrationDepList {
@@ -324,21 +324,21 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration string) <-ch
 		downgradeMigrationsInOrder := make(MigrationDepList, 0)
 		var foundMigration = false
 		for _, migrationName := range applyMigrationsInOrder {
-			if len(downToMigration) > 0 && migrationName == downToMigration {
+			if downToMigration > 0 && migrationName == downToMigration {
 				foundMigration = true
 			}
-			if len(downToMigration) > 0 && !foundMigration {
+			if downToMigration > 0 && !foundMigration {
 				continue
 			}
 			downgradeMigrationsInOrder = append(downgradeMigrationsInOrder, migrationName)
 		}
 		sort.Reverse(downgradeMigrationsInOrder)
 		for _, migrationName := range downgradeMigrationsInOrder {
-			node, err := r.MigrationTree.GetNodeByMigrationName(migrationName)
+			node, err := r.MigrationTree.GetNodeByMigrationID(migrationName)
 			if err != nil {
 				res := &TraverseMigrationResult{
 					Node:  nil,
-					Error: fmt.Errorf("Not found migration node with name : %s", migrationName),
+					Error: fmt.Errorf("not found migration node with name : %d", migrationName),
 				}
 				chnl <- res
 				return

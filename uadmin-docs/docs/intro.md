@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Tutorial
 
-Let's discover **Uadmin in less than half hour**.
+Let's discover **Uadmin in less than 30 minutes**.
 
 ## Getting Started
 

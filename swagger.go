@@ -20,10 +20,10 @@ func (c SwaggerCommand) Proceed(subaction string, args []string) error {
 		Actions: make(map[string]core.ICommand),
 	}
 
-	commandRegistry.addAction("serve", &ServeSwaggerServer{})
+	commandRegistry.AddAction("serve", &ServeSwaggerServer{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
-		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
+		isCorrectActionPassed = commandRegistry.IsRegisteredCommand(action)
 	}
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
@@ -34,7 +34,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	return commandRegistry.runAction(subaction, "", args)
+	return commandRegistry.RunAction(subaction, "", args)
 }
 
 func (c SwaggerCommand) GetHelpText() string {

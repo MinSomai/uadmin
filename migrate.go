@@ -33,11 +33,11 @@ func (c MigrateCommand) Proceed(subaction string, args []string) error {
 		Actions: make(map[string]core.ICommand),
 	}
 
-	commandRegistry.addAction("create", &CreateMigration{})
-	commandRegistry.addAction("up", &UpMigration{})
-	commandRegistry.addAction("down", &DownMigration{})
-	commandRegistry.addAction("determine-conflicts", &DetermineConflictsMigration{})
-	isCorrectActionPassed = commandRegistry.isRegisteredCommand(subaction)
+	commandRegistry.AddAction("create", &CreateMigration{})
+	commandRegistry.AddAction("up", &UpMigration{})
+	commandRegistry.AddAction("down", &DownMigration{})
+	commandRegistry.AddAction("determine-conflicts", &DetermineConflictsMigration{})
+	isCorrectActionPassed = commandRegistry.IsRegisteredCommand(subaction)
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
 		help = fmt.Sprintf(`
@@ -47,7 +47,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	return commandRegistry.runAction(subaction, "", args)
+	return commandRegistry.RunAction(subaction, "", args)
 }
 
 func (c MigrateCommand) GetHelpText() string {
@@ -373,7 +373,7 @@ func (command UpMigration) GetHelpText() string {
 }
 
 type DownMigrationOptions struct {
-	MigrationName string `short:"m" required:"false" default:"" description:"Migration downgrade your database to"`
+	ToMigrationId int64 `long:"--to-id" required:"false" default:"0" description:"Migration downgrade your database to"`
 }
 
 type DownMigration struct {
@@ -388,7 +388,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 		panic(err)
 	}
 	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
-	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrationsDownTo(opts.MigrationName) {
+	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrationsDownTo(opts.ToMigrationId) {
 		if traverseMigrationResult.Error != nil {
 			panic(traverseMigrationResult.Error)
 		}

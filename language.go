@@ -18,10 +18,10 @@ func (c LanguageCommand) Proceed(subaction string, args []string) error {
 		Actions: make(map[string]core.ICommand),
 	}
 
-	commandRegistry.addAction("add", &AddLanguageHandler{})
+	commandRegistry.AddAction("add", &AddLanguageHandler{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
-		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
+		isCorrectActionPassed = commandRegistry.IsRegisteredCommand(action)
 	}
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
@@ -32,7 +32,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	return commandRegistry.runAction(subaction, "", args)
+	return commandRegistry.RunAction(subaction, "", args)
 }
 
 func (c LanguageCommand) GetHelpText() string {

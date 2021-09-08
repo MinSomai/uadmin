@@ -22,10 +22,10 @@ func (c SuperadminCommand) Proceed(subaction string, args []string) error {
 	commandRegistry := &CommandRegistry{
 		Actions: make(map[string]core.ICommand),
 	}
-	commandRegistry.addAction("create", &CreateSuperadmin{})
+	commandRegistry.AddAction("create", &CreateSuperadmin{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
-		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
+		isCorrectActionPassed = commandRegistry.IsRegisteredCommand(action)
 	}
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
@@ -36,7 +36,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	return commandRegistry.runAction(subaction, "", args)
+	return commandRegistry.RunAction(subaction, "", args)
 }
 
 func (c SuperadminCommand) GetHelpText() string {

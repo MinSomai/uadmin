@@ -31,8 +31,8 @@ type IMigrationNode interface {
 	GetChildrenCount() int
 	GetChildren() *list.List
 	GetDeps() *list.List
-	TraverseDeps(migrationList []string, depList MigrationDepList) MigrationDepList
-	TraverseChildren(migrationList []string) []string
+	TraverseDeps(migrationList []int64, depList MigrationDepList) MigrationDepList
+	TraverseChildren(migrationList []int64) []int64
 	IsDummy() bool
 	Downgrade(uadminDatabase *UadminDatabase) error
 	Apply(uadminDatabase *UadminDatabase) error
@@ -42,6 +42,7 @@ type IMigrationTree interface {
 	GetRoot() IMigrationNode
 	SetRoot(root IMigrationNode)
 	GetNodeByMigrationName(migrationName string) (IMigrationNode, error)
+	GetNodeByMigrationID(ID int64) (IMigrationNode, error)
 	AddNode(node IMigrationNode) error
 	TreeBuilt()
 	IsTreeBuilt() bool
@@ -116,30 +117,30 @@ func (n MigrationNode) AddDep(node IMigrationNode) {
 	n.Deps.PushBack(node)
 }
 
-func (n MigrationNode) TraverseDeps(migrationList []string, depList MigrationDepList) MigrationDepList {
+func (n MigrationNode) TraverseDeps(migrationList []int64, depList MigrationDepList) MigrationDepList {
 	for l := n.GetDeps().Front(); l != nil; l = l.Next() {
 		migration := l.Value.(IMigrationNode)
 		if migration.IsDummy() {
 			continue
 		}
-		migrationName := l.Value.(IMigrationNode).GetMigration().GetName()
-		if !Contains(migrationList, migrationName) && !Contains(depList, migrationName) {
-			depList = append(depList, l.Value.(IMigrationNode).GetMigration().GetName())
+		migrationName := l.Value.(IMigrationNode).GetMigration().GetID()
+		if !ContainsInt64(migrationList, migrationName) && !ContainsInt64(depList, migrationName) {
+			depList = append(depList, l.Value.(IMigrationNode).GetMigration().GetID())
 			depList = l.Value.(IMigrationNode).TraverseDeps(migrationList, depList)
 		}
 	}
 	return depList
 }
 
-func (n MigrationNode) TraverseChildren(migrationList []string) []string {
+func (n MigrationNode) TraverseChildren(migrationList []int64) []int64 {
 	for l := n.GetChildren().Front(); l != nil; l = l.Next() {
 		migration := l.Value.(IMigrationNode)
 		if migration.IsDummy() {
 			continue
 		}
-		migrationName := l.Value.(IMigrationNode).GetMigration().GetName()
-		if !Contains(migrationList, migrationName) {
-			migrationList = append(migrationList, l.Value.(IMigrationNode).GetMigration().GetName())
+		migrationName := l.Value.(IMigrationNode).GetMigration().GetID()
+		if !ContainsInt64(migrationList, migrationName) {
+			migrationList = append(migrationList, l.Value.(IMigrationNode).GetMigration().GetID())
 			migrationDepList := n.TraverseDeps(migrationList, make(MigrationDepList, 0))
 			sort.Reverse(migrationDepList)
 			for _, m := range migrationDepList {
@@ -203,6 +204,15 @@ func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationN
 	return nil, fmt.Errorf("No node with name %s has been found", migrationName)
 }
 
+func (t MigrationTree) GetNodeByMigrationID(migrationID int64) (IMigrationNode, error) {
+	for _, migration := range t.nodes {
+		if migration.GetMigration().GetID() == migrationID {
+			return migration, nil
+		}
+	}
+	return nil, fmt.Errorf("no node with name %d has been found", migrationID)
+}
+
 func (t MigrationTree) AddNode(node IMigrationNode) error {
 	_, ok := t.nodes[node.GetMigration().GetName()]
 	if ok {
@@ -230,7 +240,7 @@ func (m MigrationList) Less(i, j int) bool {
 }
 func (m MigrationList) Swap(i, j int) { m[i], m[j] = m[j], m[i] }
 
-type MigrationDepList []string
+type MigrationDepList []int64
 
 func (m MigrationDepList) Len() int { return len(m) }
 func (m MigrationDepList) Less(i, j int) bool {

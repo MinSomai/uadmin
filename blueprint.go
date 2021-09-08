@@ -22,10 +22,10 @@ func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 		Actions: make(map[string]core.ICommand),
 	}
 
-	commandRegistry.addAction("create", &CreateBlueprint{})
+	commandRegistry.AddAction("create", &CreateBlueprint{})
 	if len(os.Args) > 2 {
 		action = os.Args[2]
-		isCorrectActionPassed = commandRegistry.isRegisteredCommand(action)
+		isCorrectActionPassed = commandRegistry.IsRegisteredCommand(action)
 	}
 	if !isCorrectActionPassed {
 		helpText := commandRegistry.MakeHelpText()
@@ -36,7 +36,7 @@ Please provide what do you want to do ?
 		fmt.Print(help)
 		return nil
 	}
-	return commandRegistry.runAction(subaction, "", args)
+	return commandRegistry.RunAction(subaction, "", args)
 }
 
 func (c BlueprintCommand) GetHelpText() string {

@@ -10,16 +10,16 @@ type CommandRegistry struct {
 	Actions map[string]core.ICommand
 }
 
-func (r CommandRegistry) addAction(name string, command core.ICommand) {
+func (r CommandRegistry) AddAction(name string, command core.ICommand) {
 	r.Actions[name] = command
 }
 
-func (r CommandRegistry) isRegisteredCommand(name string) bool {
+func (r CommandRegistry) IsRegisteredCommand(name string) bool {
 	_, err := r.Actions[name]
 	return !!err
 }
 
-func (r CommandRegistry) runAction(command string, subaction string, args []string) error {
+func (r CommandRegistry) RunAction(command string, subaction string, args []string) error {
 	action, _ := r.Actions[command]
 	return action.Proceed(subaction, args)
 }
