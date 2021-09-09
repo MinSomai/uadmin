@@ -41,7 +41,6 @@ type IMigrationNode interface {
 type IMigrationTree interface {
 	GetRoot() IMigrationNode
 	SetRoot(root IMigrationNode)
-	GetNodeByMigrationName(migrationName string) (IMigrationNode, error)
 	GetNodeByMigrationID(ID int64) (IMigrationNode, error)
 	AddNode(node IMigrationNode) error
 	TreeBuilt()
@@ -184,7 +183,7 @@ func NewMigrationRootNode() IMigrationNode {
 
 type MigrationTree struct {
 	Root      IMigrationNode
-	nodes     map[string]IMigrationNode
+	nodes     map[int64]IMigrationNode
 	treeBuilt bool
 }
 
@@ -196,30 +195,21 @@ func (t MigrationTree) IsTreeBuilt() bool {
 	return t.treeBuilt
 }
 
-func (t MigrationTree) GetNodeByMigrationName(migrationName string) (IMigrationNode, error) {
-	node, ok := t.nodes[migrationName]
+func (t MigrationTree) GetNodeByMigrationID(migrationID int64) (IMigrationNode, error) {
+	node, ok := t.nodes[migrationID]
 	if ok {
 		return node, nil
-	}
-	return nil, fmt.Errorf("No node with name %s has been found", migrationName)
-}
-
-func (t MigrationTree) GetNodeByMigrationID(migrationID int64) (IMigrationNode, error) {
-	for _, migration := range t.nodes {
-		if migration.GetMigration().GetID() == migrationID {
-			return migration, nil
-		}
 	}
 	return nil, fmt.Errorf("no node with name %d has been found", migrationID)
 }
 
 func (t MigrationTree) AddNode(node IMigrationNode) error {
-	_, ok := t.nodes[node.GetMigration().GetName()]
+	_, ok := t.nodes[node.GetMigration().GetID()]
 	if ok {
 		// return fmt.Errorf("Migration with name %s has been added to tree before", node.GetMigration().GetName())
 		return nil
 	}
-	t.nodes[node.GetMigration().GetName()] = node
+	t.nodes[node.GetMigration().GetID()] = node
 	return nil
 }
 
@@ -284,6 +274,6 @@ func NewMigrationRegistry() *MigrationRegistry {
 func NewMigrationTree() IMigrationTree {
 	return &MigrationTree{
 		Root:  NewMigrationRootNode(),
-		nodes: make(map[string]IMigrationNode),
+		nodes: make(map[int64]IMigrationNode),
 	}
 }

@@ -130,7 +130,7 @@ func (r BlueprintRegistry) buildMigrationTree(chnl chan *TraverseMigrationResult
 					chnl <- res
 					return false
 				}
-				currentNode, err = r.MigrationTree.GetNodeByMigrationName(currentMigration.GetName())
+				currentNode, err = r.MigrationTree.GetNodeByMigrationID(currentMigration.GetID())
 				if currentNode == nil {
 					currentNode = NewMigrationNode(
 						r.MigrationTree.GetRoot(), currentMigration, nil,
@@ -151,7 +151,7 @@ func (r BlueprintRegistry) buildMigrationTree(chnl chan *TraverseMigrationResult
 				numberOfMigrationsWithNoDeps.Add(currentMigration.GetName())
 			}
 			if i != 0 {
-				currentNode, err = r.MigrationTree.GetNodeByMigrationName(currentMigration.GetName())
+				currentNode, err = r.MigrationTree.GetNodeByMigrationID(currentMigration.GetID())
 				if currentNode == nil {
 					currentNode = NewMigrationNode(
 						previousNode, currentMigration, nil,
@@ -200,7 +200,7 @@ func (r BlueprintRegistry) buildMigrationTree(chnl chan *TraverseMigrationResult
 						return false
 					}
 				}
-				tmpNode, err = r.MigrationTree.GetNodeByMigrationName(tmpMigration.GetName())
+				tmpNode, err = r.MigrationTree.GetNodeByMigrationID(tmpMigration.GetID())
 				if tmpNode == nil {
 					tmpNode = NewMigrationNode(
 						previousNode, tmpMigration, nil,
@@ -215,7 +215,7 @@ func (r BlueprintRegistry) buildMigrationTree(chnl chan *TraverseMigrationResult
 	for blueprint := range r.Iterate() {
 		numberOfMigrationsWithNoDescendants := mapset.NewSet()
 		for _, migration := range blueprint.GetMigrationRegistry().GetSortedMigrations() {
-			currentNode, err = r.MigrationTree.GetNodeByMigrationName(migration.GetName())
+			currentNode, err = r.MigrationTree.GetNodeByMigrationID(migration.GetID())
 			if err != nil {
 
 			}
