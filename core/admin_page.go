@@ -4,14 +4,135 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"mime/multipart"
+	"gorm.io/gorm"
 	"net/http"
+	"net/url"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
-	"text/template"
 )
+
+func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, interface{}), generateForm func(modelI interface{}, ctx IAdminContext) *Form) *AdminPage {
+	modelI4, _ := genModelI()
+	modelName := ""
+	if modelI4 != nil {
+		uadminDatabase := NewUadminDatabaseWithoutConnection()
+		stmt := &gorm.Statement{DB: uadminDatabase.Db}
+		stmt.Parse(modelI4)
+		modelName = strings.ToLower(stmt.Schema.Name)
+	}
+	var form *Form
+	var listDisplay *ListDisplayRegistry
+	var searchFieldRegistry *SearchFieldRegistry
+	if modelI4 != nil {
+		form = NewFormFromModelFromGinContext(&AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
+		listDisplay = NewListDisplayRegistryFromGormModel(modelI4)
+		searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
+	}
+	return &AdminPage{
+		Form:           form,
+		SubPages:       NewAdminPageRegistry(),
+		GenerateModelI: genModelI,
+		ParentPage:     parentPage,
+		GetQueryset: func(adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
+			uadminDatabase := NewUadminDatabase()
+			db := uadminDatabase.Db
+			var paginatedQuerySet IPersistenceStorage
+			var perPage int
+			modelI, _ := genModelI()
+			modelI1, _ := genModelI()
+			modelI2, _ := genModelI()
+			modelI3, _ := genModelI()
+			ret := &AdminFilterObjects{
+				InitialGormQuerySet:   NewGormPersistenceStorage(db.Model(modelI)),
+				GormQuerySet:          NewGormPersistenceStorage(db.Model(modelI1)),
+				PaginatedGormQuerySet: NewGormPersistenceStorage(db.Model(modelI2)),
+				Model:                 modelI3,
+				UadminDatabase:        uadminDatabase,
+				GenerateModelI:        genModelI,
+			}
+			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
+				url1, _ := url.Parse(adminRequestParams.RequestURL)
+				queryParams, _ := url.ParseQuery(url1.RawQuery)
+				for filter := range adminPage.ListFilter.Iterate() {
+					filterValue := queryParams.Get(filter.URLFilteringParam)
+					if filterValue != "" {
+						filter.FilterQs(ret, fmt.Sprintf("%s=%s", filter.URLFilteringParam, filterValue))
+					}
+				}
+			}
+			if adminRequestParams != nil && adminRequestParams.Search != "" {
+				searchFilterObjects := &AdminFilterObjects{
+					InitialGormQuerySet:   NewGormPersistenceStorage(db),
+					GormQuerySet:          NewGormPersistenceStorage(db),
+					PaginatedGormQuerySet: NewGormPersistenceStorage(db),
+					Model:                 modelI3,
+					UadminDatabase:        uadminDatabase,
+					GenerateModelI:        genModelI,
+				}
+				for filter := range adminPage.SearchFields.GetAll() {
+					filter.Search(searchFilterObjects, adminRequestParams.Search)
+				}
+				ret.SetPaginatedQuerySet(ret.GetPaginatedQuerySet().Where(searchFilterObjects.GetPaginatedQuerySet().GetCurrentDB()))
+				ret.SetFullQuerySet(ret.GetFullQuerySet().Where(searchFilterObjects.GetFullQuerySet().GetCurrentDB()))
+			}
+			if adminRequestParams != nil && adminRequestParams.Paginator.PerPage > 0 {
+				perPage = adminRequestParams.Paginator.PerPage
+			} else {
+				perPage = adminPage.Paginator.PerPage
+			}
+			if adminRequestParams != nil {
+				paginatedQuerySet = ret.GetPaginatedQuerySet().Offset(adminRequestParams.Paginator.Offset)
+				if adminPage.Paginator.ShowLastPageOnPreviousPage {
+					var countRecords int64
+					ret.GetFullQuerySet().Count(&countRecords)
+					if countRecords > int64(adminRequestParams.Paginator.Offset+(2*perPage)) {
+						paginatedQuerySet = paginatedQuerySet.Limit(perPage)
+					} else {
+						paginatedQuerySet = paginatedQuerySet.Limit(int(countRecords - int64(adminRequestParams.Paginator.Offset)))
+					}
+				} else {
+					paginatedQuerySet = paginatedQuerySet.Limit(perPage)
+				}
+				ret.SetPaginatedQuerySet(paginatedQuerySet)
+				for listDisplay := range adminPage.ListDisplay.GetAllFields() {
+					direction := listDisplay.SortBy.Direction
+					if len(adminRequestParams.Ordering) > 0 {
+						for _, ordering := range adminRequestParams.Ordering {
+							directionSort := 1
+							if strings.HasPrefix(ordering, "-") {
+								directionSort = -1
+								ordering = ordering[1:]
+							}
+							if ordering == listDisplay.DisplayName {
+								direction = directionSort
+								listDisplay.SortBy.Sort(ret, direction)
+							}
+						}
+					}
+				}
+			}
+			return ret
+		},
+		Model:                   modelI4,
+		ModelName:               modelName,
+		Validators:              NewValidatorRegistry(),
+		ExcludeFields:           NewFieldRegistry(),
+		FieldsToShow:            NewFieldRegistry(),
+		ModelActionsRegistry:    NewAdminModelActionRegistry(),
+		InlineRegistry:          NewAdminPageInlineRegistry(),
+		ListDisplay:             listDisplay,
+		ListFilter:              &ListFilterRegistry{ListFilter: make([]*ListFilter, 0)},
+		SearchFields:            searchFieldRegistry,
+		Paginator:               &Paginator{PerPage: CurrentConfig.D.Uadmin.AdminPerPage, ShowLastPageOnPreviousPage: true},
+		ActionsSelectionCounter: true,
+		FilterOptions:           NewFilterOptionsRegistry(),
+		GenerateForm:            generateForm,
+	}
+}
+
+var CurrentAdminPageRegistry *AdminPageRegistry
 
 type AdminPagesList []*AdminPage
 
@@ -233,191 +354,6 @@ func (ap *AdminPage) FetchFilterOptions() []*DisplayFilterOption {
 	return filterOptions
 }
 
-type ConnectionToParentModel struct {
-	FieldNameToValue map[string]interface{}
-}
-
-type InlineType string
-
-var TabularInline InlineType
-var StackedInline InlineType
-
-func init() {
-	TabularInline = "tabular"
-	StackedInline = "stacked"
-}
-
-type AdminPageInline struct {
-	Ordering          int
-	GenerateModelI    func(m interface{}) (interface{}, interface{})
-	GetQueryset       func(afo IAdminFilterObjects, model interface{}, rp *AdminRequestParams) IAdminFilterObjects
-	Actions           *AdminModelActionRegistry
-	EmptyValueDisplay string
-	ExcludeFields     IFieldRegistry
-	FieldsToShow      IFieldRegistry
-	ShowAllFields     bool
-	Validators        *ValidatorRegistry
-	Classes           []string
-	Extra             int
-	MaxNum            int
-	MinNum            int
-	VerboseName       string
-	VerboseNamePlural string
-	ShowChangeLink    bool
-	Template          string
-	ContentType       *ContentType
-	Permission        CustomPermission
-	InlineType        InlineType
-	Prefix            string
-	ListDisplay       *ListDisplayRegistry `json:"-"`
-}
-
-func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) string {
-	type Context struct {
-		AdminContext
-		AdminContextInitial IAdminContext
-		Inline              *AdminPageInline
-	}
-	c := &Context{}
-	c.AdminContextInitial = adminContext
-	c.Inline = api
-	templateRenderer := NewTemplateRenderer("")
-	func1 := make(template.FuncMap)
-	path := "admin/inlineexampleform"
-	templateName := CurrentConfig.GetPathToTemplate(path)
-	return templateRenderer.RenderAsString(
-		CurrentConfig.TemplatesFS, templateName,
-		c, FuncMap, func1,
-	)
-}
-
-func (api *AdminPageInline) GetFormForExample(adminContext IAdminContext) *FormListEditable {
-	modelI, _ := api.GenerateModelI(nil)
-	return api.ListDisplay.BuildListEditableFormForNewModel(adminContext, "toreplacewithid", modelI)
-}
-
-func (api *AdminPageInline) GetFormIdenForNewItems() string {
-	return fmt.Sprintf("example-%s", api.Prefix)
-}
-
-func (api *AdminPageInline) GetInlineID() string {
-	return PrepareStringToBeUsedForHTMLID(api.VerboseNamePlural)
-}
-
-func (api *AdminPageInline) GetAll(model interface{}, rp *AdminRequestParams) <-chan *IterateAdminObjects {
-	qs := api.GetQueryset(nil, model, rp)
-	return qs.IterateThroughWholeQuerySet()
-}
-
-func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Context, f *multipart.Form, model interface{}, rp *AdminRequestParams, adminContext IAdminContext) (InlineFormListEditableCollection, error) {
-	collection := make(InlineFormListEditableCollection)
-	var firstEditableField *ListDisplay
-	qs := api.GetQueryset(afo, model, rp)
-	for ld := range api.ListDisplay.GetAllFields() {
-		if ld.IsEditable {
-			firstEditableField = ld
-			break
-		}
-	}
-	if firstEditableField == nil {
-		return collection, nil
-	}
-	var form *FormListEditable
-	err := false
-	var removalError error
-	for fieldName := range f.Value {
-		if !strings.HasSuffix(fieldName, firstEditableField.Field.FieldConfig.Widget.GetHTMLInputName()) {
-			continue
-		}
-		if !strings.HasPrefix(fieldName, firstEditableField.Prefix) {
-			continue
-		}
-		if strings.Contains(fieldName, "toreplacewithid") {
-			continue
-		}
-		removalError = nil
-		form = nil
-		inlineID := strings.TrimPrefix(fieldName, firstEditableField.Prefix+"-")
-		inlineID = strings.TrimSuffix(inlineID, "-"+firstEditableField.Field.FieldConfig.Widget.GetHTMLInputName())
-		realInlineID := strings.Split(inlineID, "_")
-		modelI, _ := api.GenerateModelI(model)
-		inlineIDToRemove := f.Value[firstEditableField.Prefix+"-"+"object_id-to-remove-"+realInlineID[0]]
-		isNew := false
-		if !strings.Contains(inlineID, "new") {
-			IDI, _ := strconv.Atoi(realInlineID[0])
-			qs.LoadDataForModelByID(uint(IDI), modelI)
-			form = api.ListDisplay.BuildFormForListEditable(adminContext, uint(IDI), modelI)
-			collection[realInlineID[0]] = form
-			if len(inlineIDToRemove) > 0 {
-				removalError = qs.RemoveModelPermanently(modelI)
-			}
-		} else {
-			form = api.ListDisplay.BuildListEditableFormForNewModel(adminContext, realInlineID[0], modelI)
-			collection[realInlineID[0]] = form
-			isNew = true
-		}
-		if len(inlineIDToRemove) > 0 {
-			if removalError != nil {
-				form.FormError = &FormError{
-					FieldError:    make(map[string]ValidationError),
-					GeneralErrors: make(ValidationError, 0),
-				}
-				form.FormError.AddGeneralError(removalError)
-			}
-		} else {
-			formError := form.ProceedRequest(f, modelI, ctx)
-			if removalError != nil {
-				formError.AddGeneralError(formError)
-			}
-			if !formError.IsEmpty() {
-				err = true
-			} else {
-				if isNew {
-					error1 := afo.CreateNew(modelI)
-					if error1 != nil {
-						formError.AddGeneralError(error1)
-						err = true
-					}
-				} else {
-					error1 := afo.SaveModel(modelI)
-					if error1 != nil {
-						formError.AddGeneralError(error1)
-						err = true
-					}
-				}
-			}
-		}
-	}
-	if err {
-		return collection, fmt.Errorf("error while validating inlines")
-	}
-	return collection, nil
-}
-
-func NewAdminPageInline(
-	inlineIden string,
-	inlineType InlineType,
-	generateModelI func(m interface{}) (interface{}, interface{}),
-	getQuerySet func(afo IAdminFilterObjects, model interface{}, rp *AdminRequestParams) IAdminFilterObjects,
-) *AdminPageInline {
-	modelI, _ := generateModelI(nil)
-	ld := NewListDisplayRegistryFromGormModelForInlines(modelI)
-	ld.SetPrefix(PrepareStringToBeUsedForHTMLID(inlineIden))
-	ret := &AdminPageInline{
-		Actions:           NewAdminModelActionRegistry(),
-		ExcludeFields:     NewFieldRegistry(),
-		FieldsToShow:      NewFieldRegistry(),
-		Validators:        NewValidatorRegistry(),
-		Classes:           make([]string, 0),
-		InlineType:        inlineType,
-		ListDisplay:       ld,
-		GenerateModelI:    generateModelI,
-		GetQueryset:       getQuerySet,
-		VerboseNamePlural: inlineIden,
-	}
-	return ret
-}
-
 func NewAdminPageRegistry() *AdminPageRegistry {
 	return &AdminPageRegistry{
 		AdminPages: make(map[string]*AdminPage),
@@ -441,30 +377,4 @@ func (apir *AdminPageInlineRegistry) GetAll() <-chan *AdminPageInline {
 		}
 	}()
 	return chnl
-}
-
-func NewAdminPageInlineRegistry() *AdminPageInlineRegistry {
-	return &AdminPageInlineRegistry{
-		Inlines: make([]*AdminPageInline, 0),
-	}
-}
-
-type SearchFieldRegistry struct {
-	Fields []*SearchField
-}
-
-func (sfr *SearchFieldRegistry) GetAll() <-chan *SearchField {
-	chnl := make(chan *SearchField)
-	go func() {
-		defer close(chnl)
-		for _, field := range sfr.Fields {
-			chnl <- field
-		}
-
-	}()
-	return chnl
-}
-
-func (sfr *SearchFieldRegistry) AddField(sf *SearchField) {
-	sfr.Fields = append(sfr.Fields, sf)
 }

@@ -11,14 +11,9 @@ import (
 	"html/template"
 	"math"
 	"net/http"
-	"net/url"
 	"reflect"
-	"regexp"
 	"strconv"
-	"strings"
 )
-
-var PopulateTemplateContextForAdminPanel func(ctx *gin.Context, context IAdminContext, adminRequestParams *AdminRequestParams)
 
 type DashboardAdminPanel struct {
 	AdminPages  *AdminPageRegistry
@@ -341,10 +336,6 @@ func NewDashboardAdminPanel() *DashboardAdminPanel {
 	}
 }
 
-var GlobalModelActionRegistry *AdminModelActionRegistry
-
-type RemovalTreeList []*RemovalTreeNodeStringified
-
 func NewAdminModelActionRegistry() *AdminModelActionRegistry {
 	adminModelActions := make(map[string]*AdminModelAction)
 	ret := &AdminModelActionRegistry{AdminModelActions: adminModelActions}
@@ -377,180 +368,4 @@ func init() {
 </body></html>{{end}}
 `)
 
-	GlobalModelActionRegistry = NewAdminModelActionRegistry()
-	removalModelAction := NewAdminModelAction(
-		"Delete permanently", &AdminActionPlacement{
-			ShowOnTheListPage: true,
-		},
-	)
-	removalModelAction.RequiresExtraSteps = true
-	removalModelAction.Description = "Delete users permanently"
-	removalModelAction.Handler = func(ap *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
-		removalPlan := make([]RemovalTreeList, 0)
-		removalConfirmed := ctx.PostForm("removal_confirmed")
-		afo.GetUadminDatabase().Db.Transaction(func(tx *gorm.DB) error {
-			uadminDatabase := &UadminDatabase{Db: tx, Adapter: afo.GetUadminDatabase().Adapter}
-			for modelIterated := range afo.IterateThroughWholeQuerySet() {
-				removalTreeNode := BuildRemovalTree(uadminDatabase, modelIterated.Model)
-				if removalConfirmed == "" {
-					deletionStringified := removalTreeNode.BuildDeletionTreeStringified(uadminDatabase)
-					removalPlan = append(removalPlan, deletionStringified)
-				} else {
-					err := removalTreeNode.RemoveFromDatabase(uadminDatabase)
-					if err != nil {
-						return err
-					}
-				}
-			}
-			if removalConfirmed != "" {
-				truncateLastPartOfPath := regexp.MustCompile("/[^/]+/?$")
-				newPath := truncateLastPartOfPath.ReplaceAll([]byte(ctx.Request.URL.RawPath), []byte(""))
-				clonedURL := CloneNetURL(ctx.Request.URL)
-				clonedURL.RawPath = string(newPath)
-				clonedURL.Path = string(newPath)
-				query := clonedURL.Query()
-				query.Set("message", "Objects were removed succesfully")
-				clonedURL.RawQuery = query.Encode()
-				ctx.Redirect(http.StatusFound, clonedURL.String())
-				return nil
-			}
-			type Context struct {
-				AdminContext
-				RemovalPlan []RemovalTreeList
-				AdminPage   *AdminPage
-				ObjectIds   string
-			}
-			c := &Context{}
-			adminRequestParams := NewAdminRequestParams()
-			c.RemovalPlan = removalPlan
-			c.AdminPage = ap
-			c.ObjectIds = ctx.PostForm("object_ids")
-			PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
-
-			tr := NewTemplateRenderer(fmt.Sprintf("Remove %s ?", ap.ModelName))
-			tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
-			return nil
-		})
-		return true, 1
-	}
-	GlobalModelActionRegistry.AddModelAction(removalModelAction)
-}
-
-func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, interface{}), generateForm func(modelI interface{}, ctx IAdminContext) *Form) *AdminPage {
-	modelI4, _ := genModelI()
-	modelName := ""
-	if modelI4 != nil {
-		uadminDatabase := NewUadminDatabaseWithoutConnection()
-		stmt := &gorm.Statement{DB: uadminDatabase.Db}
-		stmt.Parse(modelI4)
-		modelName = strings.ToLower(stmt.Schema.Name)
-	}
-	var form *Form
-	var listDisplay *ListDisplayRegistry
-	var searchFieldRegistry *SearchFieldRegistry
-	if modelI4 != nil {
-		form = NewFormFromModelFromGinContext(&AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
-		listDisplay = NewListDisplayRegistryFromGormModel(modelI4)
-		searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
-	}
-	return &AdminPage{
-		Form:           form,
-		SubPages:       NewAdminPageRegistry(),
-		GenerateModelI: genModelI,
-		ParentPage:     parentPage,
-		GetQueryset: func(adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
-			uadminDatabase := NewUadminDatabase()
-			db := uadminDatabase.Db
-			var paginatedQuerySet IPersistenceStorage
-			var perPage int
-			modelI, _ := genModelI()
-			modelI1, _ := genModelI()
-			modelI2, _ := genModelI()
-			modelI3, _ := genModelI()
-			ret := &AdminFilterObjects{
-				InitialGormQuerySet:   NewGormPersistenceStorage(db.Model(modelI)),
-				GormQuerySet:          NewGormPersistenceStorage(db.Model(modelI1)),
-				PaginatedGormQuerySet: NewGormPersistenceStorage(db.Model(modelI2)),
-				Model:                 modelI3,
-				UadminDatabase:        uadminDatabase,
-				GenerateModelI:        genModelI,
-			}
-			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
-				url1, _ := url.Parse(adminRequestParams.RequestURL)
-				queryParams, _ := url.ParseQuery(url1.RawQuery)
-				for filter := range adminPage.ListFilter.Iterate() {
-					filterValue := queryParams.Get(filter.URLFilteringParam)
-					if filterValue != "" {
-						filter.FilterQs(ret, fmt.Sprintf("%s=%s", filter.URLFilteringParam, filterValue))
-					}
-				}
-			}
-			if adminRequestParams != nil && adminRequestParams.Search != "" {
-				searchFilterObjects := &AdminFilterObjects{
-					InitialGormQuerySet:   NewGormPersistenceStorage(db),
-					GormQuerySet:          NewGormPersistenceStorage(db),
-					PaginatedGormQuerySet: NewGormPersistenceStorage(db),
-					Model:                 modelI3,
-					UadminDatabase:        uadminDatabase,
-					GenerateModelI:        genModelI,
-				}
-				for filter := range adminPage.SearchFields.GetAll() {
-					filter.Search(searchFilterObjects, adminRequestParams.Search)
-				}
-				ret.SetPaginatedQuerySet(ret.GetPaginatedQuerySet().Where(searchFilterObjects.GetPaginatedQuerySet().GetCurrentDB()))
-				ret.SetFullQuerySet(ret.GetFullQuerySet().Where(searchFilterObjects.GetFullQuerySet().GetCurrentDB()))
-			}
-			if adminRequestParams != nil && adminRequestParams.Paginator.PerPage > 0 {
-				perPage = adminRequestParams.Paginator.PerPage
-			} else {
-				perPage = adminPage.Paginator.PerPage
-			}
-			if adminRequestParams != nil {
-				paginatedQuerySet = ret.GetPaginatedQuerySet().Offset(adminRequestParams.Paginator.Offset)
-				if adminPage.Paginator.ShowLastPageOnPreviousPage {
-					var countRecords int64
-					ret.GetFullQuerySet().Count(&countRecords)
-					if countRecords > int64(adminRequestParams.Paginator.Offset+(2*perPage)) {
-						paginatedQuerySet = paginatedQuerySet.Limit(perPage)
-					} else {
-						paginatedQuerySet = paginatedQuerySet.Limit(int(countRecords - int64(adminRequestParams.Paginator.Offset)))
-					}
-				} else {
-					paginatedQuerySet = paginatedQuerySet.Limit(perPage)
-				}
-				ret.SetPaginatedQuerySet(paginatedQuerySet)
-				for listDisplay := range adminPage.ListDisplay.GetAllFields() {
-					direction := listDisplay.SortBy.Direction
-					if len(adminRequestParams.Ordering) > 0 {
-						for _, ordering := range adminRequestParams.Ordering {
-							directionSort := 1
-							if strings.HasPrefix(ordering, "-") {
-								directionSort = -1
-								ordering = ordering[1:]
-							}
-							if ordering == listDisplay.DisplayName {
-								direction = directionSort
-								listDisplay.SortBy.Sort(ret, direction)
-							}
-						}
-					}
-				}
-			}
-			return ret
-		},
-		Model:                   modelI4,
-		ModelName:               modelName,
-		Validators:              NewValidatorRegistry(),
-		ExcludeFields:           NewFieldRegistry(),
-		FieldsToShow:            NewFieldRegistry(),
-		ModelActionsRegistry:    NewAdminModelActionRegistry(),
-		InlineRegistry:          NewAdminPageInlineRegistry(),
-		ListDisplay:             listDisplay,
-		ListFilter:              &ListFilterRegistry{ListFilter: make([]*ListFilter, 0)},
-		SearchFields:            searchFieldRegistry,
-		Paginator:               &Paginator{PerPage: CurrentConfig.D.Uadmin.AdminPerPage, ShowLastPageOnPreviousPage: true},
-		ActionsSelectionCounter: true,
-		FilterOptions:           NewFilterOptionsRegistry(),
-		GenerateForm:            generateForm,
-	}
 }

@@ -9,6 +9,7 @@ type PermissionDescribed struct {
 	Name CustomPermission
 	Bit  PermBitInteger
 }
+
 type IPermissionRegistry interface {
 	AddPermission(permission CustomPermission, permissionBit PermBitInteger)
 	GetPermissionBit(permission CustomPermission) PermBitInteger

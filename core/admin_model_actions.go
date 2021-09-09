@@ -2,76 +2,158 @@ package core
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"net/http"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 )
 
-type ModelDescription struct {
-	Model          interface{}
-	Statement      *gorm.Statement
-	GenerateModelI func() interface{}
-}
+var GlobalModelActionRegistry *AdminModelActionRegistry
 
-type ProjectModelRegistry struct {
-	models map[string]*ModelDescription
-}
+type RemovalTreeList []*RemovalTreeNodeStringified
 
-func (pmr *ProjectModelRegistry) RegisterModel(generateModelI func() interface{}) {
-	model := generateModelI()
-	uadminDatabase := NewUadminDatabaseWithoutConnection()
-	statement := &gorm.Statement{DB: uadminDatabase.Db}
-	statement.Parse(model)
-	v := reflect.ValueOf(model)
-	if v.Kind() == reflect.Ptr {
-		v = reflect.Indirect(v)
+func init() {
+	GlobalModelActionRegistry = NewAdminModelActionRegistry()
+	removalModelAction := NewAdminModelAction(
+		"Delete permanently", &AdminActionPlacement{
+			ShowOnTheListPage: true,
+		},
+	)
+	removalModelAction.RequiresExtraSteps = true
+	removalModelAction.Description = "Delete users permanently"
+	removalModelAction.Handler = func(ap *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
+		removalPlan := make([]RemovalTreeList, 0)
+		removalConfirmed := ctx.PostForm("removal_confirmed")
+		afo.GetUadminDatabase().Db.Transaction(func(tx *gorm.DB) error {
+			uadminDatabase := &UadminDatabase{Db: tx, Adapter: afo.GetUadminDatabase().Adapter}
+			for modelIterated := range afo.IterateThroughWholeQuerySet() {
+				removalTreeNode := BuildRemovalTree(uadminDatabase, modelIterated.Model)
+				if removalConfirmed == "" {
+					deletionStringified := removalTreeNode.BuildDeletionTreeStringified(uadminDatabase)
+					removalPlan = append(removalPlan, deletionStringified)
+				} else {
+					err := removalTreeNode.RemoveFromDatabase(uadminDatabase)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			if removalConfirmed != "" {
+				truncateLastPartOfPath := regexp.MustCompile("/[^/]+/?$")
+				newPath := truncateLastPartOfPath.ReplaceAll([]byte(ctx.Request.URL.RawPath), []byte(""))
+				clonedURL := CloneNetURL(ctx.Request.URL)
+				clonedURL.RawPath = string(newPath)
+				clonedURL.Path = string(newPath)
+				query := clonedURL.Query()
+				query.Set("message", "Objects were removed succesfully")
+				clonedURL.RawQuery = query.Encode()
+				ctx.Redirect(http.StatusFound, clonedURL.String())
+				return nil
+			}
+			type Context struct {
+				AdminContext
+				RemovalPlan []RemovalTreeList
+				AdminPage   *AdminPage
+				ObjectIds   string
+			}
+			c := &Context{}
+			adminRequestParams := NewAdminRequestParams()
+			c.RemovalPlan = removalPlan
+			c.AdminPage = ap
+			c.ObjectIds = ctx.PostForm("object_ids")
+			PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
+
+			tr := NewTemplateRenderer(fmt.Sprintf("Remove %s ?", ap.ModelName))
+			tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
+			return nil
+		})
+		return true, 1
 	}
-	modelName := v.Type().Name()
-	pmr.models[modelName] = &ModelDescription{Model: model, Statement: statement, GenerateModelI: generateModelI}
+	GlobalModelActionRegistry.AddModelAction(removalModelAction)
 }
 
-func (pmr *ProjectModelRegistry) Iterate() <-chan *ModelDescription {
-	chnl := make(chan *ModelDescription)
+type AdminActionPlacement struct {
+	DisplayOnEditPage bool
+	//DisplayToTheTop bool
+	//DisplayToTheBottom bool
+	//DisplayToTheRight bool
+	//DisplayToTheLeft bool
+	ShowOnTheListPage bool
+}
+
+type IAdminModelActionInterface interface {
+}
+
+type AdminModelAction struct {
+	ActionName              string
+	Description             string
+	ShowFutureChanges       bool
+	RedirectToRootModelPage bool
+	Placement               *AdminActionPlacement
+	PermName                CustomPermission
+	Handler                 func(adminPage *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64)
+	IsDisabled              func(afo IAdminFilterObjects, ctx *gin.Context) bool
+	SlugifiedActionName     string
+	RequestMethod           string
+	RequiresExtraSteps      bool
+}
+
+func prepareAdminModelActionName(adminModelAction string) string {
+	slugifiedAdminModelAction := ASCIIRegex.ReplaceAllLiteralString(adminModelAction, "")
+	slugifiedAdminModelAction = strings.Replace(strings.ToLower(slugifiedAdminModelAction), " ", "_", -1)
+	slugifiedAdminModelAction = strings.Replace(strings.ToLower(slugifiedAdminModelAction), ".", "_", -1)
+	return slugifiedAdminModelAction
+}
+
+func NewAdminModelAction(actionName string, placement *AdminActionPlacement) *AdminModelAction {
+	return &AdminModelAction{
+		RedirectToRootModelPage: true,
+		ActionName:              actionName,
+		Placement:               placement,
+		SlugifiedActionName:     prepareAdminModelActionName(actionName),
+		RequestMethod:           "POST",
+	}
+}
+
+type AdminModelActionRegistry struct {
+	AdminModelActions map[string]*AdminModelAction
+}
+
+func (amar *AdminModelActionRegistry) AddModelAction(ma *AdminModelAction) {
+	amar.AdminModelActions[ma.SlugifiedActionName] = ma
+}
+
+func (amar *AdminModelActionRegistry) IsThereAnyActions() bool {
+	return len(amar.AdminModelActions) > 0
+}
+
+func (amar *AdminModelActionRegistry) GetAllModelActions() <-chan *AdminModelAction {
+	chnl := make(chan *AdminModelAction)
 	go func() {
 		defer close(chnl)
-		for _, modelDescription := range pmr.models {
-			chnl <- modelDescription
+		mActions := make([]*AdminModelAction, 0)
+		for _, mAction := range amar.AdminModelActions {
+			mActions = append(mActions, mAction)
+		}
+		sort.Slice(mActions, func(i, j int) bool {
+			return mActions[i].ActionName < mActions[j].ActionName
+		})
+		for _, mAction := range mActions {
+			chnl <- mAction
 		}
 	}()
 	return chnl
 }
 
-func (pmr *ProjectModelRegistry) GetModelByName(modelName string) *ModelDescription {
-	model, exists := pmr.models[modelName]
+func (amar *AdminModelActionRegistry) GetModelActionByName(actionName string) (*AdminModelAction, error) {
+	mAction, exists := amar.AdminModelActions[actionName]
 	if !exists {
-		panic(fmt.Errorf("no model with name %s registered in the project", modelName))
+		return nil, fmt.Errorf("found no model action with name %s", actionName)
 	}
-	return model
-}
-
-func (pmr *ProjectModelRegistry) GetModelFromInterface(model interface{}) *ModelDescription {
-	v := reflect.ValueOf(model)
-	if v.Kind() == reflect.Ptr {
-		v = reflect.Indirect(v)
-	}
-	modelName := v.Type().Name()
-	modelI, _ := pmr.models[modelName]
-	return modelI
-}
-
-var ProjectModels *ProjectModelRegistry
-
-func init() {
-	ProjectModels = &ProjectModelRegistry{
-		models: make(map[string]*ModelDescription),
-	}
-}
-
-func ClearProjectModels() {
-	ProjectModels = &ProjectModelRegistry{
-		models: make(map[string]*ModelDescription),
-	}
+	return mAction, nil
 }
 
 type RemovalTreeNode struct {
