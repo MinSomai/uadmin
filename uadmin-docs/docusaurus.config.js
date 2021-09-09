@@ -60,6 +60,12 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             label: 'Demo',
           },
           {
+            type: 'doc',
+            docId: 'api',
+            position: 'left',
+            label: 'Api',
+          },
+          {
             href: 'https://github.com/sergeyglazyrindev/uadmin',
             label: 'GitHub',
             position: 'right',

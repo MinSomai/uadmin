@@ -5,12 +5,12 @@ go 1.16
 require (
 	github.com/360EntSecGroup-Skylar/excelize/v2 v2.4.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
-	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/c-bata/go-prompt v0.2.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.7.1
-	github.com/fatih/color v1.12.0 // indirect
+	github.com/fatih/color v1.12.0
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-contrib/cors v1.3.1
@@ -38,8 +38,8 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/mattn/go-sqlite3 v1.14.7 // indirect
-	github.com/miquella/ask v1.0.0 // indirect
+	github.com/mattn/go-sqlite3 v1.14.7
+	github.com/miquella/ask v1.0.0
 	github.com/mvdan/xurls v1.1.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
