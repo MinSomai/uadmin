@@ -95,67 +95,6 @@ func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, rende
 
 type ValidationError []error
 
-type FieldFormOptions struct {
-	Name           string
-	Initial        interface{}
-	DisplayName    string
-	Validators     *ValidatorRegistry
-	Choices        *FieldChoiceRegistry
-	HelpText       string
-	WidgetType     string
-	ReadOnly       bool
-	Required       bool
-	WidgetPopulate func(renderContext *FormRenderContext, currentField *Field) interface{}
-	IsFk           bool
-}
-
-func (ffo *FieldFormOptions) GetName() string {
-	return ffo.Name
-}
-
-func (ffo *FieldFormOptions) IsItFk() bool {
-	return ffo.IsFk
-}
-
-func (ffo *FieldFormOptions) GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{} {
-	return ffo.WidgetPopulate
-}
-
-func (ffo *FieldFormOptions) GetInitial() interface{} {
-	return ffo.Initial
-}
-
-func (ffo *FieldFormOptions) GetDisplayName() string {
-	return ffo.DisplayName
-}
-
-func (ffo *FieldFormOptions) GetValidators() *ValidatorRegistry {
-	if ffo.Validators == nil {
-		return NewValidatorRegistry()
-	}
-	return ffo.Validators
-}
-
-func (ffo *FieldFormOptions) GetChoices() *FieldChoiceRegistry {
-	return ffo.Choices
-}
-
-func (ffo *FieldFormOptions) GetHelpText() string {
-	return ffo.HelpText
-}
-
-func (ffo *FieldFormOptions) GetWidgetType() string {
-	return ffo.WidgetType
-}
-
-func (ffo *FieldFormOptions) GetReadOnly() bool {
-	return ffo.ReadOnly
-}
-
-func (ffo *FieldFormOptions) GetIsRequired() bool {
-	return ffo.Required
-}
-
 func NewFieldFromGormField(gormField *schema.Field, forcedWidgetType string) *Field {
 	var widget IWidget
 	if gormField.PrimaryKey {

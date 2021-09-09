@@ -336,17 +336,6 @@ func NewDashboardAdminPanel() *DashboardAdminPanel {
 	}
 }
 
-func NewAdminModelActionRegistry() *AdminModelActionRegistry {
-	adminModelActions := make(map[string]*AdminModelAction)
-	ret := &AdminModelActionRegistry{AdminModelActions: adminModelActions}
-	if GlobalModelActionRegistry != nil {
-		for adminModelAction := range GlobalModelActionRegistry.GetAllModelActions() {
-			ret.AddModelAction(adminModelAction)
-		}
-	}
-	return ret
-}
-
 var AddedObjectInPopup *template.Template
 
 func init() {
