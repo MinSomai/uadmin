@@ -373,7 +373,7 @@ func (command UpMigration) GetHelpText() string {
 }
 
 type DownMigrationOptions struct {
-	ToMigrationId int64 `long:"--to-id" required:"false" default:"0" description:"Migration downgrade your database to"`
+	ToMigrationID int64 `long:"--to-id" required:"false" default:"0" description:"Migration downgrade your database to"`
 }
 
 type DownMigration struct {
@@ -388,7 +388,7 @@ func (command DownMigration) Proceed(subaction string, args []string) error {
 		panic(err)
 	}
 	ensureDatabaseIsReadyForMigrationsAndReadAllApplied()
-	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrationsDownTo(opts.ToMigrationId) {
+	for traverseMigrationResult := range appInstance.BlueprintRegistry.TraverseMigrationsDownTo(opts.ToMigrationID) {
 		if traverseMigrationResult.Error != nil {
 			panic(traverseMigrationResult.Error)
 		}
