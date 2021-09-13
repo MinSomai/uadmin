@@ -53,8 +53,8 @@ func (s *Session) GenerateKey() {
 		// TODO: Increase the session length to 124 and add 4 bytes for User.ID
 		// @todo, redo
 		// s.Key = services.GenerateBase64(24)
-		dialect1 := GetAdapterForDb("default")
-		dialect1.Equals("key", s.Key)
+		adapter := GetAdapterForDb("default")
+		adapter.Equals("key", s.Key)
 		// database.Get(&session, dialect1.ToString(), s.Key)
 		if session.ID == 0 {
 			break

@@ -1,11 +1,8 @@
 package core
 
 import (
-	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
-	"reflect"
 	"text/template"
 )
 
@@ -19,18 +16,7 @@ type DeleteRowStructure struct {
 
 type IDbAdapter interface {
 	Equals(name interface{}, args ...interface{})
-	Quote(name interface{}) string
-	LikeOperator() string
-	ToString() string
-	GetLastInsertID()
-	buildClauses(clauseInterfaces []clause.Interface)
-	QuoteTableName(tableName string) string
-	Delete(db *gorm.DB, model reflect.Value, query interface{}, args ...interface{}) *gorm.DB
-	ReadRows(db *gorm.DB, customSchema bool, SQL string, m interface{}, args ...interface{}) (*sql.Rows, error)
-	GetSQLDialectStrings() map[string]string
 	GetDb(alias string, dryRun bool) (*gorm.DB, error)
-	CreateDb() error
-	Transaction(handler func()) error
 	GetStringToExtractYearFromField(filterOptionField string) string
 	GetStringToExtractMonthFromField(filterOptionField string) string
 	Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)

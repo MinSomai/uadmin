@@ -48,21 +48,8 @@ func GetDb() *gorm.DB {
 
 func TestSqlite(t *testing.T) {
 	db := GetDb()
-	sqlDialect := NewDbAdapter(db, "sqlite")
-	sqlDialect.Equals("admin", true)
-	assert.Equal(t, sqlDialect.ToString(), "`admin` = ?")
-	sqlDialect = NewDbAdapter(db, "sqlite")
-	sqlDialect.GetLastInsertID()
-	assert.Equal(t, sqlDialect.ToString(), "SELECT last_insert_rowid() AS lastid")
-	sqlDialect = NewDbAdapter(db, "sqlite")
-	quotedField := sqlDialect.Quote("test")
-	assert.Equal(t, quotedField, "`test`")
-	quotedField = sqlDialect.LikeOperator()
-	assert.Equal(t, quotedField, " LIKE ")
-	quotedTableName := sqlDialect.QuoteTableName("TestModelA")
-	assert.Equal(t, quotedTableName, "`TestModelA`")
-	quotedTableName = sqlDialect.QuoteTableName("testmodela")
-	assert.Equal(t, quotedTableName, "`testmodela`")
+	adapter := NewDbAdapter(db, "sqlite")
+	adapter.Equals("admin", true)
 }
 
 func TestSqliteFunctional(t *testing.T) {
