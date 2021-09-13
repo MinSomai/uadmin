@@ -4,41 +4,12 @@ sidebar_position: 1
 
 # Admin dashboard panel
 
-Admin context is in use everywhere in the admin panel. It implements following interface
+Admin dashboard panel is responsible for handling admin http requests. For model actions, though it provides one important method:
+
 ```go
-type IAdminContext interface {
-	SetSiteName(siteName string)
-	SetCurrentURL(currentURL string)
-	SetFullURL(fullURL *url.URL)
-	SetRootAdminURL(rootAdminURL string)
-	SetSessionKey(sessionKey string)
-	SetRootURL(rootURL string)
-	SetLanguage(language *Language)
-	SetLogo(logo string)
-	SetFavIcon(favicon string)
-	SetLanguages(langs []Language)
-	SetPageTitle(pageTitle string)
-	SetUser(user string)
-	SetUserExists(userExists bool)
-	SetDemo()
-	SetError(err string)
-	SetErrorExists()
-	GetLanguage() *Language
-	GetRootURL() string
-	SetUserPermissionRegistry(permRegistry *UserPermRegistry)
-	SetForm(form IForm)
-	SetCurrentQuery(currentQuery string)
-	SetBreadCrumbs(breadcrumbs *AdminBreadCrumbsRegistry)
-	GetSessionKey() string
-	SetID(ID uint)
-	GetID() uint
-	SetUserObject(u *User)
-	GetUserObject() *User
-	SetPostForm(formD *multipart.Form)
-	GetPostForm() *multipart.Form
-	GetCtx() *gin.Context
-	SetCtx(ctx *gin.Context)
+func (dap *DashboardAdminPanel) FindPageForGormModel(m interface{}) *AdminPage {
 }
 
 ```
-Later on we will provide example how it could be customized for your specific administration use cases.
+This mwthod finds page that is responsible for handling admin functionality for this model.
+Right now it's used internally, only in ForeignKey widget to build url that leads to the model's admin page.

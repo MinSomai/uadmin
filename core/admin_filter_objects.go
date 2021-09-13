@@ -26,7 +26,7 @@ type IAdminFilterObjects interface {
 	RemoveModelPermanently(model interface{}) error
 }
 
-type AdminFilterObjects struct {
+type GormAdminFilterObjects struct {
 	InitialGormQuerySet   IPersistenceStorage
 	GormQuerySet          IPersistenceStorage
 	PaginatedGormQuerySet IPersistenceStorage
@@ -41,68 +41,68 @@ type IterateAdminObjects struct {
 	RenderContext *FormRenderContext
 }
 
-func (afo *AdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
+func (afo *GormAdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
 	return afo.PaginatedGormQuerySet
 }
 
-func (afo *AdminFilterObjects) GetFullQuerySet() IPersistenceStorage {
+func (afo *GormAdminFilterObjects) GetFullQuerySet() IPersistenceStorage {
 	return afo.GormQuerySet
 }
 
-func (afo *AdminFilterObjects) SetFullQuerySet(storage IPersistenceStorage) {
+func (afo *GormAdminFilterObjects) SetFullQuerySet(storage IPersistenceStorage) {
 	afo.GormQuerySet = storage
 }
 
-func (afo *AdminFilterObjects) GenerateModelInterface() (interface{}, interface{}) {
+func (afo *GormAdminFilterObjects) GenerateModelInterface() (interface{}, interface{}) {
 	return afo.GenerateModelI()
 }
 
-func (afo *AdminFilterObjects) GetInitialQuerySet() IPersistenceStorage {
+func (afo *GormAdminFilterObjects) GetInitialQuerySet() IPersistenceStorage {
 	return afo.InitialGormQuerySet
 }
 
-func (afo *AdminFilterObjects) SetInitialQuerySet(storage IPersistenceStorage) {
+func (afo *GormAdminFilterObjects) SetInitialQuerySet(storage IPersistenceStorage) {
 	afo.InitialGormQuerySet = storage
 }
 
-func (afo *AdminFilterObjects) GetCurrentModel() interface{} {
+func (afo *GormAdminFilterObjects) GetCurrentModel() interface{} {
 	return afo.Model
 }
 
-func (afo *AdminFilterObjects) GetUadminDatabase() *UadminDatabase {
+func (afo *GormAdminFilterObjects) GetUadminDatabase() *UadminDatabase {
 	return afo.UadminDatabase
 }
 
-func (afo *AdminFilterObjects) SetPaginatedQuerySet(storage IPersistenceStorage) {
+func (afo *GormAdminFilterObjects) SetPaginatedQuerySet(storage IPersistenceStorage) {
 	afo.PaginatedGormQuerySet = storage
 }
 
-func (afo *AdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) {
+func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) {
 	afo.UadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
-		return handler(&AdminFilterObjects{UadminDatabase: &UadminDatabase{Db: tx}, GenerateModelI: afo.GenerateModelI})
+		return handler(&GormAdminFilterObjects{UadminDatabase: &UadminDatabase{Db: tx}, GenerateModelI: afo.GenerateModelI})
 	})
 }
 
-func (afo *AdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
+func (afo *GormAdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
 	afo.UadminDatabase.Db.Preload(clause.Associations).First(model, ID)
 }
 
-func (afo *AdminFilterObjects) SaveModel(model interface{}) error {
+func (afo *GormAdminFilterObjects) SaveModel(model interface{}) error {
 	res := afo.UadminDatabase.Db.Save(model)
 	return res.Error
 }
 
-func (afo *AdminFilterObjects) CreateNew(model interface{}) error {
+func (afo *GormAdminFilterObjects) CreateNew(model interface{}) error {
 	res := afo.UadminDatabase.Db.Model(model).Create(model)
 	return res.Error
 }
 
-func (afo *AdminFilterObjects) RemoveModelPermanently(model interface{}) error {
+func (afo *GormAdminFilterObjects) RemoveModelPermanently(model interface{}) error {
 	res := afo.UadminDatabase.Db.Unscoped().Delete(model)
 	return res.Error
 }
 
-func (afo *AdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
+func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
 		defer close(chnl)
@@ -126,7 +126,7 @@ func (afo *AdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 	return chnl
 }
 
-func (afo *AdminFilterObjects) IterateThroughWholeQuerySet() <-chan *IterateAdminObjects {
+func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
 		defer close(chnl)

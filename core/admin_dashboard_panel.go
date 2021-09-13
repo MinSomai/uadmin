@@ -228,7 +228,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						}
 						uadminDatabase := NewUadminDatabase()
 						transactionerror := uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
-							afo := &AdminFilterObjects{UadminDatabase: &UadminDatabase{
+							afo := &GormAdminFilterObjects{UadminDatabase: &UadminDatabase{
 								Adapter: uadminDatabase.Adapter,
 								Db:      tx,
 							}}
@@ -242,7 +242,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								mID := GetID(reflect.ValueOf(modelToSave))
 								successfulInline := true
 								for inline := range adminPage.InlineRegistry.GetAll() {
-									afo1 := &AdminFilterObjects{UadminDatabase: &UadminDatabase{
+									afo1 := &GormAdminFilterObjects{UadminDatabase: &UadminDatabase{
 										Adapter: uadminDatabase.Adapter,
 										Db:      tx,
 									}}

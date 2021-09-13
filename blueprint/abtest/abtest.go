@@ -107,9 +107,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			if afo == nil {
 				db = core.NewUadminDatabase()
 			} else {
-				db = afo.(*core.AdminFilterObjects).UadminDatabase
+				db = afo.(*core.GormAdminFilterObjects).UadminDatabase
 			}
-			return &core.AdminFilterObjects{
+			return &core.GormAdminFilterObjects{
 				GormQuerySet:   core.NewGormPersistenceStorage(db.Db.Model(&abtestmodel.ABTestValue{}).Where(&abtestmodel.ABTestValue{ABTestID: abTest.ID})),
 				Model:          &abtestmodel.ABTestValue{},
 				UadminDatabase: db,

@@ -44,7 +44,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 			modelI1, _ := genModelI()
 			modelI2, _ := genModelI()
 			modelI3, _ := genModelI()
-			ret := &AdminFilterObjects{
+			ret := &GormAdminFilterObjects{
 				InitialGormQuerySet:   NewGormPersistenceStorage(db.Model(modelI)),
 				GormQuerySet:          NewGormPersistenceStorage(db.Model(modelI1)),
 				PaginatedGormQuerySet: NewGormPersistenceStorage(db.Model(modelI2)),
@@ -63,7 +63,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				}
 			}
 			if adminRequestParams != nil && adminRequestParams.Search != "" {
-				searchFilterObjects := &AdminFilterObjects{
+				searchFilterObjects := &GormAdminFilterObjects{
 					InitialGormQuerySet:   NewGormPersistenceStorage(db),
 					GormQuerySet:          NewGormPersistenceStorage(db),
 					PaginatedGormQuerySet: NewGormPersistenceStorage(db),
