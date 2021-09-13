@@ -9,10 +9,6 @@ import (
 	"text/template"
 )
 
-type ConnectionToParentModel struct {
-	FieldNameToValue map[string]interface{}
-}
-
 type InlineType string
 
 var TabularInline InlineType

@@ -9,6 +9,8 @@ Right now uadmin supports only sqlite database, but it's easy to provide adapter
 type IDbAdapter interface {
 	Equals(name interface{}, args ...interface{})
 	GetDb(alias string, dryRun bool) (*gorm.DB, error)
+	GetStringToExtractYearFromField(filterOptionField string) string
+	GetStringToExtractMonthFromField(filterOptionField string) string
 	Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
 	IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
 	Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
@@ -40,4 +42,32 @@ type IDbAdapter interface {
 	BuildDeleteString(table string, cond string, values ...interface{}) *DeleteRowStructure
 }
 ```
-and don't forget to handle this database type in the core.NewDbAdapter function.
+and don't forget to handle this database type in the core.NewDbAdapter function.  
+You can get instance of the uadminDatabase using function:
+```go
+type UadminDatabase struct {
+	Db      *gorm.DB
+	Adapter IDbAdapter
+}
+
+func (uad *UadminDatabase) Close() {
+	db, _ := uad.Db.DB()
+	db.Close()
+}
+func NewUadminDatabase(alias1 ...string) *UadminDatabase {
+	var alias string
+	if len(alias1) == 0 {
+		alias = "default"
+	} else {
+		alias = alias1[0]
+	}
+	adapter := GetAdapterForDb(alias)
+	Db, _ = adapter.GetDb(
+		alias, false,
+	)
+	return &UadminDatabase{Db: Db, Adapter: adapter}
+}
+DBInstance := NewUadminDatabase()
+defer DBInstance.Close()
+// do whatever you want with database
+```

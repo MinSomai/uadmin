@@ -83,16 +83,12 @@ func (ldr *ListDisplayRegistry) GetFieldByDisplayName(displayName string) (*List
 	return listField, nil
 }
 
-type IListDisplayInterface interface {
-	GetValue(m interface{}) string
-}
-
 type ListDisplay struct {
 	DisplayName string
 	Field       *Field
 	ChangeLink  bool
 	Ordering    int
-	SortBy      *SortBy
+	SortBy      ISortBy
 	Populate    func(m interface{}) string
 	MethodName  string
 	IsEditable  bool
@@ -159,13 +155,6 @@ func NewListDisplay(field *Field) *ListDisplay {
 		DisplayName: displayName, Field: field, ChangeLink: true,
 		SortBy: &SortBy{Field: field, Direction: 1},
 	}
-}
-
-func NewListDisplayRegistry() *ListDisplayRegistry {
-	ret := &ListDisplayRegistry{
-		ListDisplayFields: make(map[string]*ListDisplay),
-	}
-	return ret
 }
 
 func NewListDisplayRegistryFromGormModelForInlines(modelI interface{}) *ListDisplayRegistry {

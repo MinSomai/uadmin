@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"text/template"
 )
 
 type DeleteRowStructure struct {
@@ -95,10 +94,6 @@ type Database struct {
 	databases map[string]*UadminDatabase
 }
 
-var (
-	postgresDsnTemplate, _ = template.New("postgresdsn").Parse("host={{.Host}} user={{.User}} password={{.Password}} dbname={{.Name}} port=5432 sslmode=disable TimeZone=UTC")
-)
-
 func NewDatabase(config *UadminConfig) *Database {
 	database := Database{}
 	database.config = config
@@ -110,21 +105,6 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 	if alias == "" {
 		alias = "default"
 	}
-	//var tplBytes bytes.Buffer
-	//databaseConfig, _ := reflections.GetField(d.config.D.Db, strings.Title(alias))
-	//err := postgresDsnTemplate.Execute(&tplBytes, databaseConfig)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//databaseOpened, err := gorm.Open(postgres.Open(tplBytes.String()), &gorm.Config{})
-	//if err != nil {
-	//	panic(err)
-	//}
-	//d.databases[alias] = &UadminDatabase{
-	//	db: databaseOpened,
-	//	dialect: NewDbAdapter(databaseOpened, d.config.D.Db.Default.Type),
-	//}
-	// return d.databases[alias].db
 	return GetDB(alias)
 }
 

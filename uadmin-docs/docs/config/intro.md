@@ -1,17 +1,61 @@
-package core
+---
+sidebar_position: 1
+---
 
-import (
-	"container/list"
-	"embed"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/go-openapi/loads"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
-	"os"
-)
+# Config
 
+Config is a general config for uadmin. It has following fields:
+```go
+// Info from config file
+type UadminConfig struct {
+	// would be used to handle swagger, but maybe it would be refactored later.
+	APISpec                   *loads.Document
+	// this is data loaded from the config
+	D                         *UadminConfigurableConfig
+	// this is embedded template fs
+	TemplatesFS               embed.FS
+	// this is embedded localization fs
+	LocalizationFS            embed.FS
+	// used to ignore CSRF checks for admin functinality
+	RequiresCsrfCheck         func(c *gin.Context) bool
+	// patterns to ignore csrf check
+	PatternsToIgnoreCsrfCheck *list.List
+	// error handle func that could be used to send important error for example to sentry
+	ErrorHandleFunc           func(int, string, string)
+	// this is a special variable that is set it to true during tests
+	InTests                   bool
+	// you can use ConfigContent in your blueprint to initialize blueprint specific configs.
+	ConfigContent			  []byte
+}
+```
+An example of the config in the configs/sqlite.yml
+```yml
+db:
+  default:
+    type: "sqlite"
+    name: "/persist/test.db"
+admin:
+  listen_port: 8080
+api:
+  listen_port: 5000
+auth:
+  max_username_length: 40
+  min_username_length: 8
+  min_password_length: 8
+swagger:
+  path_to_spec: configs/api-spec.yml
+  listen_port: 8082
+  api_editor_listen_port: 8083
+uadmin:
+  secure_cookie: false
+  http_only_cookie: false
+  debug_tests: false
+  upload_path: upload-for-tests/
+```
+And there's a lot of options that could be configured through config file.  
+You may provide default database alias and slave. This is typical configuration to have a cluster with slaves and one master. So it should suit most of the real use cases.  
+You can customize listen_port for admin, etc. Please check out core/config_interfaces.go.  
+```go
 // DBSettings !
 type DBSettings struct {
 	Type     string `json:"type"` // sqlite, mysql
@@ -23,55 +67,93 @@ type DBSettings struct {
 }
 
 type UadminConfigOptions struct {
+	// theme, should be a subfolder in the uadmin folder in the TemplatesFS
 	Theme                  string `yaml:"theme"`
+	// site name that will be used in the admin panel.
 	SiteName               string `yaml:"site_name"`
+	// currently not widely used, maybe removed later.
 	ReportingLevel         int    `yaml:"reporting_level"`
+	// currently not widely used, maybe removed later.
 	ReportTimeStamp        bool   `yaml:"report_timestamp"`
+	// currently not widely used, maybe removed later.
 	DebugDB                bool   `yaml:"debug_db"`
+	// currently not widely used, maybe removed later.
 	PageLength             int    `yaml:"page_length"`
+	// to be used during cropping, currently not in use cause cropping is a plannned feature
 	MaxImageHeight         int    `yaml:"max_image_height"`
+	// to be used during cropping, currently not in use cause cropping is a plannned feature
 	MaxImageWidth          int    `yaml:"max_image_width"`
+	// max upload file size
 	MaxUploadFileSize      int64  `yaml:"max_upload_file_size"`
 	EmailFrom              string `yaml:"email_from"`
 	EmailUsername          string `yaml:"email_username"`
 	EmailPassword          string `yaml:"email_password"`
 	EmailSMTPServer        string `yaml:"email_smtp_server"`
 	EmailSMTPServerPort    int    `yaml:"email_smtp_server_port"`
+	// root url for your API
 	RootURL                string `yaml:"root_url"`
+	// root url for your admin panel
 	RootAdminURL           string `yaml:"root_admin_url"`
+	// currently not widely used, maybe removed later.
 	OTPAlgorithm           string `yaml:"otp_algorithm"`
+	// currently not widely used, maybe removed later.
 	OTPDigits              int    `yaml:"otp_digits"`
+	// currently not widely used, maybe removed later.
 	OTPPeriod              uint   `yaml:"otp_period"`
+	// currently not widely used, maybe removed later.
 	OTPSkew                uint   `yaml:"otp_skew"`
+	// currently not widely used, maybe removed later.
 	PublicMedia            bool   `yaml:"public_media"`
+	// currently not widely used, maybe removed later.
 	RestrictSessionIP      bool   `yaml:"restrict_session_ip"`
+	// currently not widely used, maybe removed later.
 	RetainMediaVersions    bool   `yaml:"retain_media_versions"`
+	// currently not widely used, maybe removed later.
 	RateLimit              uint   `yaml:"rate_limit"`
+	// currently not widely used, maybe removed later.
 	RateLimitBurst         uint   `yaml:"rate_limit_burst"`
+	// currently not widely used, maybe removed later.
 	LogHTTPRequests        bool   `yaml:"log_http_requests"`
+	// currently not widely used, maybe removed later.
 	HTTPLogFormat          string `yaml:"http_log_format"`
+	// currently not widely used, maybe removed later.
 	LogTrail               bool   `yaml:"log_trail"`
+	// currently not widely used, maybe removed later.
 	TrailLoggingLevel      int    `yaml:"trail_logging_level"`
+	// currently not widely used, maybe removed later.
 	SystemMetrics          bool   `yaml:"system_metrics"`
+	// currently not widely used, maybe removed later.
 	UserMetrics            bool   `yaml:"user_metrics"`
-	PasswordAttempts       int    `yaml:"password_attempts"`
+	// currently not widely used, maybe removed later.
 	PasswordTimeout        int    `yaml:"password_timeout"`
+	// currently not widely used, maybe removed later.
+	PasswordAttempts       int    `yaml:"password_attempts"`
+	// logo for admin panel
 	Logo                   string `yaml:"logo"`
+	// favicon for admin panel
 	FavIcon                string `yaml:"fav_icon"`
+	// admin cookie name for user session
 	AdminCookieName        string `yaml:"admin_cookie_name"`
+	// currently not widely used, maybe removed later.
 	APICookieName          string `yaml:"api_cookie_name"`
 	SessionDuration        int64  `yaml:"session_duration"`
 	SecureCookie           bool   `yaml:"secure_cookie"`
 	HTTPOnlyCookie         bool   `yaml:"http_only_cookie"`
+	// to be used during signin, it could be email or username.
 	DirectAPISigninByField string `yaml:"direct_api_signin_by_field"`
+	// currently not widely used, maybe removed later.
 	DebugTests             bool   `yaml:"debug_tests"`
+	// currently not widely used, maybe removed later.
 	PoweredOnSite          string `yaml:"powered_on_site"`
+	// used to generate code for password reset
 	ForgotCodeExpiration   int    `yaml:"forgot_code_expiration"`
 	DateFormat             string `yaml:"date_format"`
 	UploadPath             string `yaml:"upload_path"`
 	DateTimeFormat         string `yaml:"datetime_format"`
 	TimeFormat             string `yaml:"time_format"`
+	// order of the fields for your project for date format. used in one form widget.
 	DateFormatOrder        string `yaml:"date_format_order"`
+	// number of records on one admin list page.
 	AdminPerPage           int    `yaml:"admin_per_page"`
 }
 
@@ -81,6 +163,7 @@ type UadminDbOptions struct {
 }
 
 type UadminAuthOptions struct {
+	// currently not widely used, maybe removed later.
 	JwtSecretToken    string `yaml:"jwt_secret_token"`
 	MinUsernameLength int    `yaml:"min_username_length"`
 	MaxUsernameLength int    `yaml:"max_username_length"`
@@ -111,73 +194,9 @@ type UadminSwaggerOptions struct {
 	PathToSpec          string `yaml:"path_to_spec"`
 	APIEditorListenPort int    `yaml:"api_editor_listen_port"`
 }
-
-type UadminConfigurableConfig struct {
-	Uadmin  *UadminConfigOptions  `yaml:"uadmin"`
-	Test    string                `yaml:"test"`
-	Db      *UadminDbOptions      `yaml:"db"`
-	Auth    *UadminAuthOptions    `yaml:"auth"`
-	Admin   *UadminAdminOptions   `yaml:"admin"`
-	API     *UadminAPIOptions     `yaml:"api"`
-	Swagger *UadminSwaggerOptions `yaml:"swagger"`
-}
-
-type FieldChoice struct {
-	DisplayAs string
-	Value     interface{}
-}
-
-type IFieldChoiceRegistryInterface interface {
-	IsValidChoice(v interface{}) bool
-}
-
-type FieldChoiceRegistry struct {
-	Choices []*FieldChoice
-}
-
-func (fcr *FieldChoiceRegistry) IsValidChoice(v interface{}) bool {
-	return false
-}
-
-type IFieldFormOptions interface {
-	GetName() string
-	GetInitial() interface{}
-	GetDisplayName() string
-	GetValidators() *ValidatorRegistry
-	GetChoices() *FieldChoiceRegistry
-	GetHelpText() string
-	GetWidgetType() string
-	GetReadOnly() bool
-	GetIsRequired() bool
-	GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{}
-	IsItFk() bool
-}
-
-// Info from config file
-type UadminConfig struct {
-	APISpec                   *loads.Document
-	D                         *UadminConfigurableConfig
-	TemplatesFS               embed.FS
-	LocalizationFS            embed.FS
-	RequiresCsrfCheck         func(c *gin.Context) bool
-	PatternsToIgnoreCsrfCheck *list.List
-	ErrorHandleFunc           func(int, string, string)
-	InTests                   bool
-	ConfigContent			  []byte
-}
-
-func (c *UadminConfig) GetPathToTemplate(templateName string) string {
-	return fmt.Sprintf("templates/uadmin/%s/%s.html", c.D.Uadmin.Theme, templateName)
-}
-
-func (c *UadminConfig) GetPathToUploadDirectory() string {
-	return fmt.Sprintf("%s/%s", os.Getenv("UADMIN_PATH"), c.D.Uadmin.UploadPath)
-}
-
-func (c *UadminConfig) GetURLToUploadDirectory() string {
-	return fmt.Sprintf("/%s", c.D.Uadmin.UploadPath)
-}
-
+```
+Default values are following:
+```go
 func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type rawStuff UadminConfigurableConfig
 	raw := rawStuff{
@@ -246,52 +265,5 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 
 	*ucc = UadminConfigurableConfig(raw)
 	return nil
-
 }
-
-var CurrentConfig *UadminConfig
-
-// Reads info from config file
-func NewConfig(file string) *UadminConfig {
-	file = os.Getenv("UADMIN_PATH") + "/" + file
-	_, err := os.Stat(file)
-	if err != nil {
-		log.Fatal("Config file is missing: ", file)
-	}
-	content, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	c := UadminConfig{}
-	err = yaml.Unmarshal([]byte(content), &c.D)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	c.ConfigContent = content
-	c.PatternsToIgnoreCsrfCheck = list.New()
-	c.PatternsToIgnoreCsrfCheck.PushBack("/ignorecsrfcheck")
-	c.RequiresCsrfCheck = func(c *gin.Context) bool {
-		for e := CurrentConfig.PatternsToIgnoreCsrfCheck.Front(); e != nil; e = e.Next() {
-			pathToIgnore := e.Value.(string)
-			if c.Request.URL.Path == pathToIgnore {
-				return false
-			}
-		}
-		return true
-	}
-	CurrentConfig = &c
-	return &c
-}
-
-// Reads info from config file
-func NewSwaggerSpec(file string) *loads.Document {
-	_, err := os.Stat(file)
-	if err != nil {
-		log.Fatal("Config file is missing: ", file)
-	}
-	doc, err := loads.Spec(file)
-	if err != nil {
-		panic(err)
-	}
-	return doc
-}
+```

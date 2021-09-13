@@ -3,7 +3,6 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sergeyglazyrindev/uadmin/preloaded"
 	"gorm.io/gorm"
 	"time"
 )
@@ -28,24 +27,14 @@ func (s *Session) String() string {
 	return fmt.Sprintf("Session for user %s", s.User.String())
 }
 
-// Save !
-func (s *Session) Save() {
-	u := s.User
-	s.User = User{}
-	// database.Save(s)
-	s.User = u
-	if preloaded.CacheSessions {
-		if s.Active {
-			// database.Preload(s)
-			// @todo, redo
-			// services.CachedSessions[s.Key] = *s
-		} else {
-			// @todo, redo
-			// delete(services.CachedSessions, s.Key)
-		}
-	}
-}
-
+//// Save !
+//func (s *Session) Save() {
+//	u := s.User
+//	s.User = User{}
+//	// database.Save(s)
+//	s.User = u
+//}
+//
 // GenerateKey !
 func (s *Session) GenerateKey() {
 	session := Session{}
@@ -65,7 +54,7 @@ func (s *Session) GenerateKey() {
 // Logout deactivates a session
 func (s *Session) Logout() {
 	s.Active = false
-	s.Save()
+	// s.Save()
 }
 
 func (s *Session) GetData(name string) (string, error) {

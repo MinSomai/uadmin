@@ -97,7 +97,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				}
 				ret.SetPaginatedQuerySet(paginatedQuerySet)
 				for listDisplay := range adminPage.ListDisplay.GetAllFields() {
-					direction := listDisplay.SortBy.Direction
+					direction := listDisplay.SortBy.GetDirection()
 					if len(adminRequestParams.Ordering) > 0 {
 						for _, ordering := range adminRequestParams.Ordering {
 							directionSort := 1
@@ -180,7 +180,7 @@ func (apr *AdminPageRegistry) GetByModelName(modelName string) *AdminPage {
 func (apr *AdminPageRegistry) GetBySlug(slug string) (*AdminPage, error) {
 	adminPage, ok := apr.AdminPages[slug]
 	if !ok {
-		return nil, fmt.Errorf("No admin page with alias %s", slug)
+		return nil, fmt.Errorf("no admin page with alias %s", slug)
 	}
 	return adminPage, nil
 }
@@ -309,19 +309,19 @@ func (ap *AdminPage) GenerateLinkToAddNewModel() string {
 
 func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context) {
 	afo := ap.GetQueryset(ap, nil)
-	var json ModelActionRequestParams
+	var json1 ModelActionRequestParams
 	if ctx.GetHeader("Content-Type") == "application/json" {
-		if err := ctx.ShouldBindJSON(&json); err != nil {
+		if err := ctx.ShouldBindJSON(&json1); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
-		if err := ctx.ShouldBind(&json); err != nil {
+		if err := ctx.ShouldBind(&json1); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	}
-	objectIds := strings.Split(json.ObjectIds, ",")
+	objectIds := strings.Split(json1.ObjectIds, ",")
 	objectUintIds := make([]uint, 0)
 	for _, objectID := range objectIds {
 		idV, err := strconv.Atoi(objectID)
@@ -329,10 +329,10 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 			objectUintIds = append(objectUintIds, uint(idV))
 		}
 	}
-	json.RealObjectIds = objectUintIds
-	if len(json.RealObjectIds) > 0 {
+	json1.RealObjectIds = objectUintIds
+	if len(json1.RealObjectIds) > 0 {
 		primaryKeyField, _ := ap.Form.FieldRegistry.GetPrimaryKey()
-		afo.SetFullQuerySet(afo.GetFullQuerySet().Where(fmt.Sprintf("%s IN ?", primaryKeyField.DBName), json.RealObjectIds))
+		afo.SetFullQuerySet(afo.GetFullQuerySet().Where(fmt.Sprintf("%s IN ?", primaryKeyField.DBName), json1.RealObjectIds))
 		modelAction, _ := ap.ModelActionsRegistry.GetModelActionByName(modelActionName)
 		if ctx.GetHeader("Content-Type") == "application/json" {
 			_, affectedRows := modelAction.Handler(ap, afo, ctx)

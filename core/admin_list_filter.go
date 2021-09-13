@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-type IListFilterInterface interface {
-	FilterQs(afo IAdminFilterObjects, filterString string)
-}
-
 type ListFilter struct {
 	Title             string
 	URLFilteringParam string

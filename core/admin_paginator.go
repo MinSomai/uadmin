@@ -10,10 +10,6 @@ type PaginationType string
 var LimitPaginationType PaginationType = "limit"
 var CursorPaginationType PaginationType = "cursor"
 
-type IPaginationInterface interface {
-	Paginate(afo IAdminFilterObjects)
-}
-
 type Paginator struct {
 	PerPage                    int
 	AllowEmptyFirstPage        bool

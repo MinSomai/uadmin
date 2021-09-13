@@ -116,6 +116,9 @@ func (d *SqliteDialect) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 	// 		}
 	// 	}
 	// }
+	//var (
+	//	postgresDsnTemplate, _ = template.New("postgresdsn").Parse("host={{.Host}} user={{.User}} password={{.Password}} dbname={{.Name}} port=5432 sslmode=disable TimeZone=UTC")
+	//)
 	var aliasDatabaseSettings *DBSettings
 	if alias == "default" {
 		aliasDatabaseSettings = CurrentDatabaseSettings.Default
@@ -463,11 +466,6 @@ func sqliteUadminDatetimeCastTime(dt string, tzName string, connTzname string) s
 	return res
 }
 
-//func sqlite_uadmin_regex(re_pattern string, re_string string) bool {
-//	regex := regexp.MustCompile(re_pattern)
-//	return regex.Find([]byte(re_string)) != nil
-//}
-
 func sqliteUadminDatetimeExtract(extract string, dt string, tzName string, connTzname string) string {
 	dtTmp := sqliteUadminDatetimeParse(dt, tzName, connTzname)
 	if dtTmp == nil {
@@ -520,6 +518,10 @@ func init() {
 					return err
 				}
 			}
+			//func sqlite_uadmin_regex(re_pattern string, re_string string) bool {
+			//	regex := regexp.MustCompile(re_pattern)
+			//	return regex.Find([]byte(re_string)) != nil
+			//}
 			//if err := conn.RegisterFunc("uadmin_regex", sqlite_uadmin_regex, true); err != nil {
 			//	return err
 			//}

@@ -1,11 +1,8 @@
 package core
 
-type ISortInterface interface {
-	Order(afo IAdminFilterObjects)
-}
-
 type ISortBy interface {
 	Sort(afo IAdminFilterObjects, direction int)
+	GetDirection() int
 }
 
 type SortBy struct {
@@ -21,3 +18,6 @@ func (sb *SortBy) Sort(afo IAdminFilterObjects, direction int) {
 	afo.SetPaginatedQuerySet(afo.GetPaginatedQuerySet().Order(sortBy))
 }
 
+func (sb *SortBy) GetDirection() int {
+	return sb.Direction
+}

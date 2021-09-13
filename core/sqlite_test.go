@@ -52,18 +52,6 @@ func TestSqlite(t *testing.T) {
 	adapter.Equals("admin", true)
 }
 
-func TestSqliteFunctional(t *testing.T) {
-	//db := GetDb().Begin()
-	//db = db.Exec("INSERT INTO users (`username`) VALUES (\"test\")")
-	//last_ids := []int{}
-	//sql_dialect := NewDbDialect(db, "sqlite")
-	//sql_dialect.GetLastInsertId()
-	//db = db.Raw(sql_dialect.ToString())
-	//db = db.Pluck("lastid", &last_ids)
-	//db.Commit()
-	// assert.Equal(t, 1, len(last_ids))
-}
-
 func TestSqlite_uadmin_datetime_cast_date(t *testing.T) {
 	time1 := "2005-07-29 09:56:00-05"
 	dt := sqliteUadminDatetimeParse(time1, "UTC", "UTC")
