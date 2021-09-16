@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
+	"html/template"
 	"time"
 )
 

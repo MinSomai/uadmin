@@ -16,7 +16,7 @@
     <div class="col-sm-12 ">
         <div class="input-group col-sm-12">
 {{ end }}
-            <textarea {{ if .ReadOnly }}readonly{{ end }} name="{{ .Name }}" {{Include "admin/widgets/attrs" }}>{{ .Value }}</textarea>
+            <textarea {{ if .ReadOnly }}readonly{{ end }} name="{{ .Name }}" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }}>{{ .Value }}</textarea>
 {{ if not .ShowOnlyHtmlInput }}
         </div>
     </div>

@@ -25,10 +25,10 @@
 
                     <label class="input-group-btn">
                                     <span class="btn btn-primary">
-                                      Browse… <input name="{{ .Name }}" type="file" style="display: none;" {{Include "admin/widgets/attrs" }} >
+                                      Browse… <input name="{{ .Name }}" type="file" style="display: none;" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} >
                                     </span>
                     </label>
-                    <input type="text" class="form-control" readonly="" id="{{ .Name }}-filename" {{Include "admin/widgets/attrs" }}>
+                    <input type="text" class="form-control" readonly="" id="{{ .Name }}-filename" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} >
                 </div>
                 {{ if .UploadedFile }}
                     <div class="uploaded-file">

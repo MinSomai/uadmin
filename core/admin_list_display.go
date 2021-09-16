@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"html/template"
 	"math"
 	"reflect"
 	"sort"
@@ -121,29 +122,29 @@ func (ld *ListDisplay) IsEligibleForOrdering() bool {
 	return ld.SortBy != nil
 }
 
-func (ld *ListDisplay) GetValue(m interface{}, forExportP ...bool) string {
+func (ld *ListDisplay) GetValue(m interface{}, forExportP ...bool) template.HTML {
 	forExport := false
 	if len(forExportP) > 0 {
 		forExport = forExportP[0]
 	}
 	if ld.MethodName != "" {
 		values := reflect.ValueOf(m).MethodByName(ld.MethodName).Call([]reflect.Value{})
-		return values[0].String()
+		return template.HTML(values[0].String())
 	}
 	if ld.Populate != nil {
-		return ld.Populate(m)
+		return template.HTML(ld.Populate(m))
 	}
 	if ld.Field.FieldConfig.Widget.GetPopulate() != nil {
-		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetPopulate()(&FormRenderContext{Model: m}, ld.Field))
+		return template.HTML(TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetPopulate()(&FormRenderContext{Model: m}, ld.Field)))
 	}
 	if ld.Field.FieldConfig.Widget.IsValueConfigured() {
-		return TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetValue())
+		return template.HTML(TransformValueForListDisplay(ld.Field.FieldConfig.Widget.GetValue()))
 	}
 	gormModelV := reflect.Indirect(reflect.ValueOf(m))
 	if reflect.ValueOf(m).IsZero() || gormModelV.IsZero() { // || gormModelV.FieldByName(ld.Field.Name).IsZero()
 		return ""
 	}
-	return TransformValueForListDisplay(gormModelV.FieldByName(ld.Field.Name).Interface(), forExport)
+	return template.HTML(TransformValueForListDisplay(gormModelV.FieldByName(ld.Field.Name).Interface(), forExport))
 }
 
 func NewListDisplay(field *Field) *ListDisplay {

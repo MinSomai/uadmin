@@ -11,7 +11,7 @@
     </label>
 </td>
 <td style="width: 80%">
-    <input class="form-control target-input strings" name="{{.Name}}" type="hidden" value="{{.Value}}" {{Include "admin/widgets/attrs" }} {{if .ReadOnly}} readonly {{end}} style="border-radius:4px;">
+    <input class="form-control target-input strings" name="{{.Name}}" type="hidden" value="{{.Value}}" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} {{if .ReadOnly}} readonly {{end}} style="border-radius:4px;">
     <div class="choose-from-select related-widget-wrapper">
         {{ if .FormErrorNotEmpty }}
         {{ range $error := .FormError }}

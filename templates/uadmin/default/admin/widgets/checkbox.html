@@ -30,7 +30,7 @@
                 {{ end }}
             {{ end }}
             <div onclick="$(this).find('input').click();" class="material-switch" style="padding-left:15px;padding-top:5px">
-                <input name="{{ .Name }}" {{Include "admin/widgets/attrs" }} type="checkbox">
+                <input name="{{ .Name }}" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} type="checkbox">
                 <label class="label-primary"></label>
             </div>
 {{ if not .ShowOnlyHtmlInput }}

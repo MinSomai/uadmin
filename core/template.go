@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"io/fs"
 	"strings"
-	"text/template"
 )
 
 type ITemplateRenderer interface {
 	AddFuncMap(funcName string, concreteFunc interface{})
 	Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap)
-	RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) string
+	RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML
 }
 
 type IncludeContext struct {
@@ -30,8 +30,8 @@ func (tr *TemplateRenderer) AddFuncMap(funcName string, concreteFunc interface{}
 }
 
 func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) {
-	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) string {
-		return func(templateName string, data1 ...interface{}) string {
+	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) template.HTML {
+		return func(templateName string, data1 ...interface{}) template.HTML {
 			data2 := data
 			if len(data1) == 1 {
 				data2 = data1[0]
@@ -54,14 +54,12 @@ func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, da
 	RenderHTML(ctx, fsys, path, data, baseFuncMap, funcs1)
 }
 
-func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) string {
-	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) string {
-		return func(templateName string, data1 ...interface{}) string {
+func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML {
+	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) template.HTML {
+		return func(templateName string, data1 ...interface{}) template.HTML {
 			data2 := data
 			if len(data1) == 1 {
 				data2 = data1[0]
-				if strings.Contains(path, "multipleinputhidden") {
-				}
 			}
 			return tr.RenderAsString(fsys, CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
 		}
@@ -80,7 +78,7 @@ func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interfa
 	funcs1["Include"] = Include(funcs1)
 	templateWriter := bytes.NewBuffer([]byte{})
 	RenderHTMLAsString(templateWriter, fsys, path, data, baseFuncMap, funcs1)
-	return templateWriter.String()
+	return template.HTML(templateWriter.String())
 }
 
 func NewTemplateRenderer(pageTitle string) ITemplateRenderer {

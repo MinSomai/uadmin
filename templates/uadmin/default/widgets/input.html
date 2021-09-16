@@ -6,7 +6,7 @@
       {{ end }}
     {{ end }}
 {{ end }}
-        <input class="form-control" name="{{.Name}}" type="{{ .Type }}" value="{{.Value}}" {{Include "widgets/attrs" }} {{if .ReadOnly}} readonly {{end}} />
+        <input class="form-control" name="{{.Name}}" type="{{ .Type }}" value="{{.Value}}" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} {{if .ReadOnly}} readonly {{end}} />
 {{ if not .ShowOnlyHtmlInput }}
     {{ if ne .Type "hidden" }}
       {{ if .FieldDisplayName }}

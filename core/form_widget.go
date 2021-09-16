@@ -6,12 +6,12 @@ import (
 	"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"html/template"
 	"mime/multipart"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -55,7 +55,7 @@ type IWidget interface {
 	SetTemplateName(templateName string)
 	RenderUsingRenderer(renderer ITemplateRenderer)
 	// GetValue(v interface{}, model interface{}) interface{}
-	Render(formRenderContext *FormRenderContext, currentField *Field) string
+	Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML
 	SetValue(v interface{})
 	SetName(name string)
 	GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData
@@ -338,7 +338,7 @@ func (w *Widget) GetHTMLInputName() string {
 	return w.Name
 }
 
-func (w *Widget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *Widget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("1", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
@@ -361,22 +361,22 @@ func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, curre
 		}
 	}
 	return map[string]interface{}{
-		"Attrs": w.GetAttrs(), "Value": valueStr,
+		"Attrs": w.GetAttrs(), "Value": template.HTML(valueStr),
 		"Name": w.GetHTMLInputName(), "FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
 		"Required": w.Required, "HelpText": w.HelpText, "FormError": w.ValidationErrors,
 		"FormErrorNotEmpty": len(w.ValidationErrors) > 0,
 	}
 }
 
-func RenderWidget(renderer ITemplateRenderer, templateName string, data map[string]interface{}, baseFuncMap template.FuncMap) string {
+func RenderWidget(renderer ITemplateRenderer, templateName string, data map[string]interface{}, baseFuncMap template.FuncMap) template.HTML {
 	if renderer == nil {
 		r := NewTemplateRenderer("")
-		return r.RenderAsString(CurrentConfig.TemplatesFS, templateName, data, baseFuncMap)
+		return template.HTML(r.RenderAsString(CurrentConfig.TemplatesFS, templateName, data, baseFuncMap))
 	}
-	return renderer.RenderAsString(
+	return template.HTML(renderer.RenderAsString(
 		CurrentConfig.TemplatesFS, templateName,
 		data, baseFuncMap,
-	)
+	))
 }
 
 type TextWidget struct {
@@ -398,7 +398,7 @@ func (tw *TextWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(tw.TemplateName)
 }
 
-func (tw *TextWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (tw *TextWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("2", tw.FieldDisplayName)
 	data := tw.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = tw.GetWidgetType()
@@ -420,7 +420,7 @@ func (tw *DynamicWidget) GetTemplateName() string {
 	panic("shouldn't be called")
 }
 
-func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	var realWidget IWidget
 	if formRenderContext.Ctx.Query("widgetType") != "" {
 		realWidget = GetWidgetByWidgetType(formRenderContext.Ctx.Query("widgetType"))
@@ -496,9 +496,9 @@ func (w *FkLinkWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	if w.IsReadOnly() {
-		return w.Populate(formRenderContext, currentField).(string)
+		return template.HTML(w.Populate(formRenderContext, currentField).(string))
 	}
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
@@ -526,7 +526,7 @@ func (w *NumberWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *NumberWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *NumberWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("3", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
@@ -602,7 +602,7 @@ func (w *EmailWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *EmailWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *EmailWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("4", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
@@ -654,7 +654,7 @@ func (w *URLWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *URLWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *URLWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("5", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -720,7 +720,7 @@ func (w *PasswordWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *PasswordWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *PasswordWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("6", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -771,7 +771,7 @@ func (w *HiddenWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *HiddenWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *HiddenWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("7", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -815,7 +815,7 @@ func (w *DateWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *DateWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *DateWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("8", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	if w.DateValue != "" {
@@ -866,7 +866,7 @@ func (w *DateTimeWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("9", w.FieldDisplayName)
 	var value interface{}
 	var valueStr string
@@ -935,7 +935,7 @@ func (w *TimeWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *TimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *TimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("10", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	if w.TimeValue != "" {
@@ -985,7 +985,7 @@ func (w *TextareaWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *TextareaWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *TextareaWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("11", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1033,7 +1033,7 @@ func (w *CheckboxWidget) SetValue(v interface{}) {
 	w.Value = v1
 }
 
-func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("12", w.FieldDisplayName)
 	value := TransformValueForWidget(w.Value)
 	if value != "" && value != "false" {
@@ -1125,7 +1125,7 @@ func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext,
 	}
 }
 
-func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("13", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1241,7 +1241,7 @@ func (w *ForeignKeyWidget) BuildChoices(formRenderContext *FormRenderContext) {
 	}
 }
 
-func (w *ForeignKeyWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *ForeignKeyWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("13", w.FieldDisplayName)
 	w.BuildChoices(formRenderContext)
 	data := w.GetDataForRendering(formRenderContext, currentField)
@@ -1389,7 +1389,7 @@ func (w *ContentTypeSelectorWidget) GetDataForRendering(formRenderContext *FormR
 	}
 }
 
-func (w *ContentTypeSelectorWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *ContentTypeSelectorWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("13", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1479,7 +1479,7 @@ func (w *NullBooleanWidget) GetDataForRendering(formRenderContext *FormRenderCon
 	}
 }
 
-func (w *NullBooleanWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *NullBooleanWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("14", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1566,7 +1566,7 @@ func (w *SelectMultipleWidget) GetDataForRendering(formRenderContext *FormRender
 	}
 }
 
-func (w *SelectMultipleWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *SelectMultipleWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("15", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1685,7 +1685,7 @@ func (w *RadioSelectWidget) GetDataForRendering(formRenderContext *FormRenderCon
 	}
 }
 
-func (w *RadioSelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *RadioSelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("16", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1782,7 +1782,7 @@ func (w *CheckboxSelectMultipleWidget) GetDataForRendering(formRenderContext *Fo
 	}
 }
 
-func (w *CheckboxSelectMultipleWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *CheckboxSelectMultipleWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("17", w.FieldDisplayName)
 	data := w.GetDataForRendering(formRenderContext)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
@@ -1843,7 +1843,7 @@ func (w *FileWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *FileWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *FileWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("18", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	storage := w.Storage
@@ -1946,7 +1946,7 @@ func (w *ClearableFileWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *ClearableFileWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *ClearableFileWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("19", w.FieldDisplayName)
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	storage := w.Storage
@@ -2028,7 +2028,7 @@ func (w *MultipleInputHiddenWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *MultipleInputHiddenWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *MultipleInputHiddenWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("20", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
@@ -2108,7 +2108,7 @@ func (w *ChooseFromSelectWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("21", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
@@ -2240,7 +2240,7 @@ func (w *SplitDateTimeWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("23", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
@@ -2354,7 +2354,7 @@ func (w *SplitHiddenDateTimeWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("24", w.FieldDisplayName)
 	data := map[string]interface{}{
 		"Attrs": w.GetAttrs(),
@@ -2459,7 +2459,7 @@ func (w *SelectDateWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
-func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentField *Field) string {
+func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("25", w.FieldDisplayName)
 	value := TransformValueForWidget(w.Value).(*time.Time)
 	data := map[string]interface{}{

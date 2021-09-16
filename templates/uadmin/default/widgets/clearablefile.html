@@ -3,4 +3,4 @@
     <input type="checkbox" name="{{ .Name }}_clear" id="{{ .Id }}"{{ if .Attrs.disabled }} disabled{{ end }}>
     <label for="{{ .Id }}">{{ .ClearCheckboxLabel }}</label></span>{{ end }}<br>
 {{ .InputText }}:{{ end }}
-    <input type="{{ .Type }}" name="{{ .Name }}"{{ Include "widgets/attrs" }}>{{ if .IsInitial }}</p>{{end}}
+    <input type="{{ .Type }}" name="{{ .Name }}" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }}>{{ if .IsInitial }}</p>{{end}}

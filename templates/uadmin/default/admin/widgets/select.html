@@ -23,7 +23,7 @@
       </div>
       {{ end }}
       {{ end }}
-      <select {{ if .Multiple }}multiple{{ end }} name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{Include "admin/widgets/attrs" }}>
+      <select {{ if .Multiple }}multiple{{ end }} name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} >
       {{ range $groupName, $groupChoices := .OptGroups }}
       {{ if $groupName }}<optgroup label="{{ $groupName }}">{{end}}
       {{ range $i, $option := $groupChoices }}

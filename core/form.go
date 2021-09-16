@@ -8,7 +8,7 @@ import (
 	"mime/multipart"
 	"reflect"
 	"strings"
-	"text/template"
+	"html/template"
 )
 
 type FormRenderContext struct {
@@ -111,9 +111,9 @@ func (f *Form) SetPrefix(prefix string) {
 	}
 }
 
-func (f *Form) Render() string {
-	RenderFieldGroups := func(funcs1 template.FuncMap) func() string {
-		return func() string {
+func (f *Form) Render() template.HTML {
+	RenderFieldGroups := func(funcs1 template.FuncMap) func() template.HTML {
+		return func() template.HTML {
 			templateWriter := bytes.NewBuffer([]byte{})
 			ret := make([]string, 0)
 			for _, group := range f.GroupsOfTheFields.GrouppedFields {
@@ -132,7 +132,7 @@ func (f *Form) Render() string {
 					ret = append(ret, templateWriter.String())
 				}
 			}
-			return strings.Join(ret, "\n")
+			return template.HTML(strings.Join(ret, "\n"))
 		}
 	}
 	if f.GroupsOfTheFields == nil {

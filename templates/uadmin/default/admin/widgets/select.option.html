@@ -1,1 +1,1 @@
-<option value="{{ .Value }}" {{ if .Selected }}selected="selected"{{ end }} {{Include "admin/widgets/attrs" }}>{{ .OptLabel }}</option>
+<option value="{{ .Value }}" {{ if .Selected }}selected="selected"{{ end }} {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} >{{ .OptLabel }}</option>

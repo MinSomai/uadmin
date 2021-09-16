@@ -6,7 +6,7 @@ import (
 	"mime/multipart"
 	"strconv"
 	"strings"
-	"text/template"
+	"html/template"
 )
 
 type InlineType string
@@ -44,7 +44,7 @@ type AdminPageInline struct {
 	ListDisplay       *ListDisplayRegistry `json:"-"`
 }
 
-func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) string {
+func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) template.HTML {
 	type Context struct {
 		AdminContext
 		AdminContextInitial IAdminContext
@@ -57,10 +57,10 @@ func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) string
 	func1 := make(template.FuncMap)
 	path := "admin/inlineexampleform"
 	templateName := CurrentConfig.GetPathToTemplate(path)
-	return templateRenderer.RenderAsString(
+	return template.HTML(templateRenderer.RenderAsString(
 		CurrentConfig.TemplatesFS, templateName,
 		c, FuncMap, func1,
-	)
+	))
 }
 
 func (api *AdminPageInline) GetFormForExample(adminContext IAdminContext) *FormListEditable {
