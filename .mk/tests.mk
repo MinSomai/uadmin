@@ -1,5 +1,5 @@
 TEST_PATTERN?=
-RACE?=
+RACE?=-race
 UT_PACKAGES?=$(shell $(GO) list ./...)
 FUNC_TESTS_CMD:="grep -e 'func Test${TEST_PATTERN}' tests/*.go | perl -pe 's|.*func (.*?)\(.*|\1|g' | shuf"
 FUNC_TESTS:=$(shell sh -c $(FUNC_TESTS_CMD))
@@ -83,19 +83,17 @@ ifneq ($(TEST_PATTERN),)
 	export UADMIN_PATH=$(shell pwd) ; \
 	$(GO) clean -testcache ; \
 
-	ifneq ($(strip $(UT_PACKAGE)),)
-		$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} ${UT_PACKAGE}
-	else
-		for pkg in ${UT_PACKAGES}; do \
-			if [ -n "$$pkg" ]; then \
-				$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} $$pkg; \
-			fi; \
-		done
-	endif
+	# $(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} ${UT_PACKAGES}
+	for pkg in ${UT_PACKAGES}; do \
+		if [ -n "$$pkg" ]; then \
+			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} $$pkg; \
+		fi; \
+	done
 else
 	set -v ; \
 	export UADMIN_PATH=$(shell pwd) ; \
 	$(GO) clean -testcache ; \
+	# $(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} ${UT_PACKAGES}
 	for pkg in ${UT_PACKAGES}; do \
 		if [ -n "$$pkg" ]; then \
 			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg; \
