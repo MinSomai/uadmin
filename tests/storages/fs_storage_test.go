@@ -50,5 +50,5 @@ func (suite *FsStorageTestSuite) TestFullFlow() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestFsStorage(t *testing.T) {
-	uadmin.Run(t, new(FsStorageTestSuite))
+	uadmin.RunTests(t, new(FsStorageTestSuite))
 }

@@ -1,7 +1,5 @@
 db:
   default:
-#    type: "sqlite"
-#    name: "test.db"
     type: "postgres"
     name: "uadminofficialtest"
     password: "123456"

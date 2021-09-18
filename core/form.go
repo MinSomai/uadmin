@@ -102,6 +102,7 @@ type Form struct {
 	DontGenerateFormTag bool
 	Prefix              string
 	RenderContext       *FormRenderContext
+	ChangesSaved        bool
 }
 
 func (f *Form) SetPrefix(prefix string) {

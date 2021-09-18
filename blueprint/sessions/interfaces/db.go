@@ -19,8 +19,8 @@ func (s *DbSession) Set(name string, value string) {
 }
 
 func (s *DbSession) SetUser(user *core.User) {
-	s.session.UserID = user.ID
-	s.session.User = *user
+	s.session.UserID = &user.ID
+	s.session.User = user
 }
 
 func (s *DbSession) Get(name string) (string, error) {
@@ -43,7 +43,7 @@ func (s *DbSession) GetUser() *core.User {
 	if s.session == nil {
 		return nil
 	}
-	return &s.session.User
+	return s.session.User
 }
 
 func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {

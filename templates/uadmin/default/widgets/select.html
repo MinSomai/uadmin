@@ -2,7 +2,7 @@
   <label class="camelcaseFix">{{.FieldDisplayName}}</label>
   <div class="input-group">
     <span style="min-width:140px;" class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
-    <select name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }}>
+    <select name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }}>
     {{ range $groupName, $groupChoices := .OptGroups }}
     {{ if $groupName }}<optgroup label="{{ $groupName }}">{{end}}
     {{ range $i, $option := $groupChoices }}

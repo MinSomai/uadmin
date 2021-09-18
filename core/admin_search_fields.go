@@ -21,10 +21,10 @@ func (sf *SearchField) Search(afo IAdminFilterObjects, searchString string) {
 	} else {
 		operator := IContainsGormOperator{}
 		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
-		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, true)
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, &SQLConditionBuilder{Type: "or"})
 		afo.SetFullQuerySet(gormOperatorContext.Tx)
 		gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
-		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, true)
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, &SQLConditionBuilder{Type: "or"})
 		afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
 	}
 }

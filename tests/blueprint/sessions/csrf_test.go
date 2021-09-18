@@ -3,7 +3,6 @@ package sessions
 import (
 	"github.com/sergeyglazyrindev/uadmin"
 	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
-	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/sergeyglazyrindev/uadmin/utils"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -20,9 +19,7 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 	session := interfaces2.NewSession()
 	token := utils.GenerateCSRFToken()
 	session.SetData("csrf_token", token)
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	uadminDatabase.Db.Create(session)
+	s.UadminDatabase.Db.Create(session)
 	req, _ := http.NewRequest("POST", "/testcsrf", nil)
 	tokenmasked := utils.MaskCSRFToken(token)
 	req.Header.Set("X-CSRF-TOKEN", tokenmasked)
@@ -52,5 +49,5 @@ func (s *CsrfTestSuite) TestIgnoreCsrfCheck() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestCsrf(t *testing.T) {
-	uadmin.Run(t, new(CsrfTestSuite))
+	uadmin.RunTests(t, new(CsrfTestSuite))
 }

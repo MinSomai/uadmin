@@ -4,7 +4,7 @@
                     <label class="camelcaseFix">{{.FieldDisplayName}}</label>
                   </span>
 {{ end }}
-        <input class="form-control" name="{{.Name}}" type="text" value="{{.Value}}" {{ range $k, $v := .Attrs }} {{ $k|attr }}="{{ $v|safe }}"{{ end }} {{if .ReadOnly}} readonly {{end}}>
+        <input class="form-control" name="{{.Name}}" type="text" value="{{.Value}}" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} {{if .ReadOnly}} readonly {{end}}>
 {{ if not .ShowOnlyHtmlInput }}
     </div>
 </div>

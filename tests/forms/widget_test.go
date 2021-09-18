@@ -127,7 +127,7 @@ func (w *WidgetTestSuite) TestHiddenWidget() {
 	widget.SetName("dsadas")
 	widget.SetValue("dsadas<>")
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
-	assert.Contains(w.T(), renderedWidget, "value=\"dsadas&amp;lt;&amp;gt;\"")
+	assert.Contains(w.T(), renderedWidget, "value=\"dsadas&lt;&gt;\"")
 	form1 := NewTestForm()
 	form1.Value["dsadas"] = []string{"dsadasas"}
 	err := widget.ProceedForm(form1, nil, nil)
@@ -587,5 +587,5 @@ func (w *WidgetTestSuite) TestSelectDateWidget() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestWidget(t *testing.T) {
-	uadmin.Run(t, new(WidgetTestSuite))
+	uadmin.RunTests(t, new(WidgetTestSuite))
 }

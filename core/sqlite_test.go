@@ -53,7 +53,7 @@ func TestSqlite(t *testing.T) {
 }
 
 func TestSqlite_uadmin_datetime_cast_date(t *testing.T) {
-	time1 := "2005-07-29 09:56:00-05"
+	time1 := "2005-07-29 09:56:00.781963317+00:00"
 	dt := sqliteUadminDatetimeParse(time1, "UTC", "UTC")
 	assert.Equal(t, dt.Year(), 2005)
 	dt = sqliteUadminDatetimeParse("", "UTC", "UTC")

@@ -6,44 +6,40 @@ import (
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"os"
 	"strings"
 	"testing"
 	"time"
 )
 
 type MigrationTestSuite struct {
-	suite.Suite
-	app *uadmin.App
-	db  *core.UadminDatabase
+	uadmin.TestSuite
 }
 
 func (suite *MigrationTestSuite) SetupTest() {
+	suite.TestSuite.SetupTest()
+}
+
+func (suite *MigrationTestSuite) BeforeTest(suiteName string, testName string) {
 	appliedMigrations = make([]string, 0)
-	app := uadmin.NewTestApp()
-	suite.app = app
-	db := core.NewUadminDatabase()
-	defer db.Close()
-	db.Db.Exec("DROP TABLE migrations")
-	db.Db.AutoMigrate(uadmin.Migration{})
-	suite.app.BlueprintRegistry = core.NewBlueprintRegistry()
-	suite.app.BlueprintRegistry.Register(TestBlueprint)
-	suite.app.BlueprintRegistry.Register(Test1Blueprint)
+	suite.UadminDatabase.Db.Exec("DROP TABLE migrations")
+	suite.UadminDatabase.Db.AutoMigrate(uadmin.Migration{})
+	suite.App.BlueprintRegistry = core.NewBlueprintRegistry()
+	suite.App.BlueprintRegistry.Register(TestBlueprint)
+	suite.App.BlueprintRegistry.Register(Test1Blueprint)
 }
 
 func (suite *MigrationTestSuite) TearDownSuite() {
-	err := os.Remove(suite.app.Config.D.Db.Default.Name)
-	if err != nil {
-		assert.Equal(suite.T(), true, false, fmt.Errorf("Couldnt remove db with name %s", suite.app.Config.D.Db.Default.Name))
-	}
+	//err := os.Remove(suite.app.Config.D.Db.Default.Name)
+	//if err != nil {
+	//	assert.Equal(suite.T(), true, false, fmt.Errorf("Couldnt remove db with name %s", suite.app.Config.D.Db.Default.Name))
+	//}
 	uadmin.ClearTestApp()
 }
 
 func (suite *MigrationTestSuite) TestUpgradeDatabase() {
-	suite.app.BlueprintRegistry.Register(TestBlueprint)
-	suite.app.BlueprintRegistry.Register(Test1Blueprint)
-	suite.app.TriggerCommandExecution("migrate", "up", make([]string, 0))
+	suite.App.BlueprintRegistry.Register(TestBlueprint)
+	suite.App.BlueprintRegistry.Register(Test1Blueprint)
+	suite.App.TriggerCommandExecution("migrate", "up", make([]string, 0))
 	appliedMigrationsExpected := mapset.NewSet()
 	appliedMigrationsExpected.Add("user.1621667393")
 	appliedMigrationsExpected.Add("user.1621680132")
@@ -55,40 +51,36 @@ func (suite *MigrationTestSuite) TestUpgradeDatabase() {
 	}
 	assert.Equal(suite.T(), appliedMigrationsExpected, appliedMigrationsActual)
 	var appliedMigrationsDb []uadmin.Migration
-	db := core.NewUadminDatabase()
-	defer db.Close()
-	db.Db.Find(&appliedMigrationsDb)
+	suite.UadminDatabase.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 4, len(appliedMigrationsDb))
 }
 
 func (suite *MigrationTestSuite) TestDowngradeDatabase() {
-	suite.app.BlueprintRegistry.Register(TestBlueprint)
-	suite.app.BlueprintRegistry.Register(Test1Blueprint)
+	suite.App.BlueprintRegistry.Register(TestBlueprint)
+	suite.App.BlueprintRegistry.Register(Test1Blueprint)
 	appliedMigrationsExpected := mapset.NewSet()
 	appliedMigrationsExpected.Add("user.1621667393")
 	appliedMigrationsExpected.Add("user.1621680132")
 	appliedMigrationsExpected.Add("test1.1621667393")
 	appliedMigrationsExpected.Add("test1.1621680132")
-	db := core.NewUadminDatabase()
-	defer db.Close()
-	db.Db.Create(
+	suite.UadminDatabase.Db.Create(
 		&uadmin.Migration{MigrationName: "user.1621667393", AppliedAt: time.Now()},
 	)
-	db.Db.Create(
+	suite.UadminDatabase.Db.Create(
 		&uadmin.Migration{MigrationName: "user.1621680132", AppliedAt: time.Now()},
 	)
-	db.Db.Create(
+	suite.UadminDatabase.Db.Create(
 		&uadmin.Migration{MigrationName: "test1.1621667393", AppliedAt: time.Now()},
 	)
-	db.Db.Create(
+	suite.UadminDatabase.Db.Create(
 		&uadmin.Migration{MigrationName: "test1.1621680132", AppliedAt: time.Now()},
 	)
 	var appliedMigrationsDb []uadmin.Migration
-	db.Db.Find(&appliedMigrationsDb)
+	suite.UadminDatabase.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 4, len(appliedMigrationsDb))
-	suite.app.TriggerCommandExecution("migrate", "down", []string{""})
+	suite.App.TriggerCommandExecution("migrate", "down", []string{""})
 	appliedMigrationsDb = make([]uadmin.Migration, 0)
-	db.Db.Find(&appliedMigrationsDb)
+	suite.UadminDatabase.Db.Find(&appliedMigrationsDb)
 	assert.Equal(suite.T(), 0, len(appliedMigrationsDb))
 }
 
@@ -96,10 +88,8 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForUpgrade() {
 	concreteBlueprintRegistry := core.NewBlueprintRegistry()
 	concreteBlueprintRegistry.Register(TestBlueprint)
 	concreteBlueprintRegistry.Register(Test1Blueprint)
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
 	for res := range concreteBlueprintRegistry.TraverseMigrations() {
-		res.Node.Apply(uadminDatabase)
+		res.Node.Apply(suite.UadminDatabase)
 	}
 	appliedMigrationsExpected := mapset.NewSet()
 	appliedMigrationsExpected.Add("user.1621667393")
@@ -123,10 +113,8 @@ func (suite *MigrationTestSuite) TestTraverseDatabaseForDowngrade() {
 	toDowngradeMigrationsExpected.Add("test1.1621667393")
 	toDowngradeMigrationsExpected.Add("test1.1621680132")
 	downgradedMigrationsActual := mapset.NewSet()
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
 	for res := range concreteBlueprintRegistry.TraverseMigrationsDownTo(0) {
-		res.Node.Downgrade(uadminDatabase)
+		res.Node.Downgrade(suite.UadminDatabase)
 		downgradedMigrationsActual.Add(res.Node.GetMigration().GetName())
 	}
 	assert.Equal(suite.T(), toDowngradeMigrationsExpected, downgradedMigrationsActual)
@@ -195,5 +183,5 @@ func (suite *MigrationTestSuite) TestBuildTreeWithLoop() {
 // a normal test function and pass our suite to suite.Run
 func TestSqliteMigrations(t *testing.T) {
 	uadmin.ClearApp()
-	suite.Run(t, new(MigrationTestSuite))
+	uadmin.RunTests(t, new(MigrationTestSuite))
 }

@@ -14,7 +14,6 @@ type AdminPaginationTestSuite struct {
 }
 
 func (suite *AdminPaginationTestSuite) SetupTestData() {
-	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(1, 100) {
 		userModel := &core.User{
 			Email:     fmt.Sprintf("admin_%d@example.com", i),
@@ -22,9 +21,8 @@ func (suite *AdminPaginationTestSuite) SetupTestData() {
 			FirstName: "firstname_" + strconv.Itoa(i),
 			LastName:  "lastname_" + strconv.Itoa(i),
 		}
-		uadminDatabase.Db.Create(&userModel)
+		suite.UadminDatabase.Db.Create(&userModel)
 	}
-	uadminDatabase.Close()
 }
 
 func (suite *AdminPaginationTestSuite) TestPagination() {
@@ -43,5 +41,5 @@ func (suite *AdminPaginationTestSuite) TestPagination() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestAdminPagination(t *testing.T) {
-	uadmin.Run(t, new(AdminPaginationTestSuite))
+	uadmin.RunTests(t, new(AdminPaginationTestSuite))
 }

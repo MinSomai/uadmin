@@ -213,6 +213,9 @@ func (ap *DirectAuthForAdminProvider) IsAuthenticated(c *gin.Context) {
 }
 
 func getUserForUadminPanel(user *core.User) *gin.H {
+	if user == nil {
+		return &gin.H{}
+	}
 	return &gin.H{"name": user.Username, "id": user.ID, "for-uadmin-panel": true}
 }
 

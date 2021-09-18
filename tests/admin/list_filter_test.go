@@ -15,7 +15,6 @@ type AdminListFilterTestSuite struct {
 }
 
 func (suite *AdminListFilterTestSuite) SetupTestData() {
-	uadminDatabase := core.NewUadminDatabase()
 	for i := range core.GenerateNumberSequence(101, 200) {
 		userModel := &core.User{
 			Email:     fmt.Sprintf("admin_%d@example.com", i),
@@ -23,9 +22,8 @@ func (suite *AdminListFilterTestSuite) SetupTestData() {
 			FirstName: "firstname_" + strconv.Itoa(i),
 			LastName:  "lastname_" + strconv.Itoa(i),
 		}
-		uadminDatabase.Db.Create(&userModel)
+		suite.UadminDatabase.Db.Create(&userModel)
 	}
-	uadminDatabase.Close()
 }
 
 func (suite *AdminListFilterTestSuite) TestFiltering() {
@@ -35,9 +33,7 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 	var users []core.User
 	adminRequestParams := core.NewAdminRequestParams()
 	adminRequestParams.RequestURL = "http://127.0.0.1/?Username__exact=admin_101"
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	statement := &gorm.Statement{DB: uadminDatabase.Db}
+	statement := &gorm.Statement{DB: suite.UadminDatabase.Db}
 	statement.Parse(&core.User{})
 	listFilter := &core.ListFilter{
 		URLFilteringParam: "Username__exact",
@@ -50,5 +46,5 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestListFilter(t *testing.T) {
-	uadmin.Run(t, new(AdminListFilterTestSuite))
+	uadmin.RunTests(t, new(AdminListFilterTestSuite))
 }

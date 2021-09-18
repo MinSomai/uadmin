@@ -1,8 +1,10 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type DeleteRowStructure struct {
@@ -18,35 +20,39 @@ type IDbAdapter interface {
 	GetDb(alias string, dryRun bool) (*gorm.DB, error)
 	GetStringToExtractYearFromField(filterOptionField string) string
 	GetStringToExtractMonthFromField(filterOptionField string) string
-	Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	In(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Range(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Date(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Year(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Month(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Day(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Week(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Time(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Second(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
-	IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, forSearching bool)
+	Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	In(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Range(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Date(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Year(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Month(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Day(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Week(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Time(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
+	IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder)
 	BuildDeleteString(table string, cond string, values ...interface{}) *DeleteRowStructure
+	SetIsolationLevelForTests(db *gorm.DB)
+	Close(db *gorm.DB)
+	ClearTestDatabase()
+	SetTimeZone(db *gorm.DB, timezone string)
 }
 
 var Db *gorm.DB
@@ -57,11 +63,20 @@ type UadminDatabase struct {
 }
 
 func (uad *UadminDatabase) Close() {
-	db, _ := uad.Db.DB()
-	db.Close()
+	uad.Adapter.Close(uad.Db)
 }
 
+func (uad *UadminDatabase) ForcefullyClose() {
+	db1, _ := uad.Db.DB()
+	db1.Close()
+}
+
+var UadminTestDatabase *UadminDatabase
+
 func NewUadminDatabase(alias1 ...string) *UadminDatabase {
+	if CurrentConfig.InTests && UadminTestDatabase != nil {
+		return UadminTestDatabase
+	}
 	var alias string
 	if len(alias1) == 0 {
 		alias = "default"
@@ -76,6 +91,9 @@ func NewUadminDatabase(alias1 ...string) *UadminDatabase {
 }
 
 func NewUadminDatabaseWithoutConnection(alias1 ...string) *UadminDatabase {
+	if CurrentConfig.InTests && UadminTestDatabase != nil {
+		return UadminTestDatabase
+	}
 	var alias string
 	if len(alias1) == 0 {
 		alias = "default"
@@ -110,6 +128,7 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 
 type DatabaseSettings struct {
 	Default *DBSettings
+	Slave *DBSettings
 }
 
 var CurrentDatabaseSettings *DatabaseSettings
@@ -146,6 +165,32 @@ func GetAdapterForDb(alias1 ...string) IDbAdapter {
 	}
 	if alias == "default" {
 		databaseConfig = CurrentDatabaseSettings.Default
+	} else {
+		databaseConfig = CurrentDatabaseSettings.Slave
 	}
 	return NewDbAdapter(Db, databaseConfig.Type)
+}
+
+func NewDbAdapter(db *gorm.DB, dbType string) IDbAdapter {
+	switch dbType {
+	case "sqlite":
+		return &SqliteAdapter{
+			DbType: dbType,
+			Statement: &gorm.Statement{
+				DB:      db,
+				Context: context.Background(),
+				Clauses: map[string]clause.Clause{},
+			},
+		}
+	case "postgres":
+		return &PostgresAdapter{
+			DbType: dbType,
+			Statement: &gorm.Statement{
+				DB:      db,
+				Context: context.Background(),
+				Clauses: map[string]clause.Clause{},
+			},
+		}
+	}
+	return nil
 }

@@ -85,7 +85,9 @@ func (lfr *ListFilterRegistry) Iterate() <-chan *ListFilter {
 		for _, lF := range lfr.ListFilter {
 			lfList = append(lfList, lF)
 		}
-		sort.Sort(lfList)
+		sort.Slice(lfList, func(i int, j int) bool {
+			return lfList[i].Ordering < lfList[j].Ordering
+		})
 		for _, lf := range lfList {
 			chnl <- lf
 		}

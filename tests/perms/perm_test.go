@@ -12,9 +12,7 @@ type PermTestSuite struct {
 }
 
 func (suite *PermTestSuite) TestIntegration() {
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	db := uadminDatabase.Db
+	db := suite.UadminDatabase.Db
 	contentType := core.ContentType{BlueprintName: "user", ModelName: "user"}
 	db.Create(&contentType)
 	permission := core.Permission{ContentType: contentType, PermissionBits: core.RevertPermBit}
@@ -31,7 +29,7 @@ func (suite *PermTestSuite) TestIntegration() {
 	db.Model(&u).Association("UserGroups").Append(&g1)
 	db.Save(&u)
 	var u1 core.User
-	db.Model(&core.User{}).First(&u1)
+	db.Model(&core.User{}).Where("email = 'ffsdfsd@example.com'").First(&u1)
 	permRegistry := u1.BuildPermissionRegistry()
 	userPerm := permRegistry.GetPermissionForBlueprint("user", "user")
 	assert.True(suite.T(), userPerm.HasRevertPermission())
@@ -41,5 +39,5 @@ func (suite *PermTestSuite) TestIntegration() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestPermissionSystem(t *testing.T) {
-	uadmin.Run(t, new(PermTestSuite))
+	uadmin.RunTests(t, new(PermTestSuite))
 }

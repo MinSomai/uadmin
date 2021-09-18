@@ -59,10 +59,6 @@ func (m initial1621680132) Down(uadminDatabase *core.UadminDatabase) error {
 	if err != nil {
 		return err
 	}
-	err = db.Migrator().DropTable(core.ContentType{})
-	if err != nil {
-		return err
-	}
 	var contentType core.ContentType
 	stmt := &gorm.Statement{DB: db}
 	stmt.Parse(&core.OneTimeAction{})

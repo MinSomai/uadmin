@@ -249,7 +249,9 @@ func (r BlueprintRegistry) TraverseMigrations() <-chan *TraverseMigrationResult 
 		for l := allBlueprintRoots.Front(); l != nil; l = l.Next() {
 			applyMigrationsInOrder = append(applyMigrationsInOrder, l.Value.(IMigrationNode).GetMigration().GetID())
 			migrationDepList := l.Value.(IMigrationNode).TraverseDeps(applyMigrationsInOrder, make(MigrationDepList, 0))
-			sort.Reverse(migrationDepList)
+			sort.Slice(migrationDepList, func(i int, j int) bool {
+				return i > j
+			})
 			for _, m := range migrationDepList {
 				applyMigrationsInOrder = append(applyMigrationsInOrder, m)
 			}
@@ -315,7 +317,9 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration int64) <-cha
 		for l := allBlueprintRoots.Front(); l != nil; l = l.Next() {
 			applyMigrationsInOrder = append(applyMigrationsInOrder, l.Value.(IMigrationNode).GetMigration().GetID())
 			migrationDepList := l.Value.(IMigrationNode).TraverseDeps(applyMigrationsInOrder, make(MigrationDepList, 0))
-			sort.Reverse(migrationDepList)
+			sort.Slice(migrationDepList, func(i int, j int) bool {
+				return i > j
+			})
 			for _, m := range migrationDepList {
 				applyMigrationsInOrder = append(applyMigrationsInOrder, m)
 			}
@@ -332,7 +336,9 @@ func (r BlueprintRegistry) TraverseMigrationsDownTo(downToMigration int64) <-cha
 			}
 			downgradeMigrationsInOrder = append(downgradeMigrationsInOrder, migrationName)
 		}
-		sort.Reverse(downgradeMigrationsInOrder)
+		sort.Slice(downgradeMigrationsInOrder, func(i int, j int) bool {
+			return i > j
+		})
 		for _, migrationName := range downgradeMigrationsInOrder {
 			node, err := r.MigrationTree.GetNodeByMigrationID(migrationName)
 			if err != nil {

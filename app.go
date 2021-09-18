@@ -28,6 +28,7 @@ type App struct {
 	CommandRegistry     *CommandRegistry
 	BlueprintRegistry   core.IBlueprintRegistry
 	DashboardAdminPanel *core.DashboardAdminPanel
+	RouterInitialized   bool
 }
 
 var appInstance *App
@@ -45,6 +46,9 @@ func NewApp(environment string, dontInitialize ...bool) *App {
 		}
 		core.CurrentDatabaseSettings = &core.DatabaseSettings{
 			Default: a.Config.D.Db.Default,
+		}
+		if a.Config.D.Db.Slave != nil && a.Config.D.Db.Slave.Name != "" {
+			core.CurrentDatabaseSettings.Slave = a.Config.D.Db.Slave
 		}
 		a.BlueprintRegistry = core.NewBlueprintRegistry()
 		a.Database = core.NewDatabase(a.Config)
@@ -179,6 +183,9 @@ func (c uadminStaticFS) Open(name string) (fs.File, error) {
 }
 
 func (a App) InitializeRouter() {
+	if a.RouterInitialized {
+		return
+	}
 	// http.FS can be used to create a http Filesystem
 	staticFiles := uadminStaticFS{staticRoot}
 	fs1 := nethttp.FS(staticFiles)
@@ -186,6 +193,7 @@ func (a App) InitializeRouter() {
 	a.Router.StaticFS("/static-inbuilt/", fs1)
 	a.BlueprintRegistry.InitializeRouting(a.Router)
 	a.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
+	a.RouterInitialized = true
 }
 
 func (a App) BaseAPIUrl() string {

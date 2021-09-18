@@ -31,14 +31,14 @@ func (s *ListEditableFormTestSuite) TestFormBuilder() {
 	userTest := &core.User{}
 	err := listEditableForm.ProceedRequest(form, userTest, nil)
 	assert.False(s.T(), err.IsEmpty())
-	form.Value["10_Email"] = []string{"admin@example.com"}
+	form.Value["10_Email"] = []string{"adminlisteditable@example.com"}
 	err = listEditableForm.ProceedRequest(form, userTest, nil)
 	assert.True(s.T(), err.IsEmpty())
-	assert.Equal(s.T(), userTest.Email, "admin@example.com")
+	assert.Equal(s.T(), userTest.Email, "adminlisteditable@example.com")
 }
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestListEditableForm(t *testing.T) {
-	uadmin.Run(t, new(ListEditableFormTestSuite))
+	uadmin.RunTests(t, new(ListEditableFormTestSuite))
 }

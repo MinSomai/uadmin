@@ -141,7 +141,9 @@ func (n MigrationNode) TraverseChildren(migrationList []int64) []int64 {
 		if !ContainsInt64(migrationList, migrationName) {
 			migrationList = append(migrationList, l.Value.(IMigrationNode).GetMigration().GetID())
 			migrationDepList := n.TraverseDeps(migrationList, make(MigrationDepList, 0))
-			sort.Reverse(migrationDepList)
+			sort.Slice(migrationDepList, func(i int, j int) bool {
+				return i > j
+			})
 			for _, m := range migrationDepList {
 				migrationList = append(migrationList, m)
 			}
@@ -261,7 +263,9 @@ func (r MigrationRegistry) GetSortedMigrations() MigrationList {
 		sortedMigrations[i] = migration
 		i++
 	}
-	sort.Sort(sortedMigrations)
+	sort.Slice(sortedMigrations, func(i int, j int) bool {
+		return sortedMigrations[i].GetID() < sortedMigrations[j].GetID()
+	})
 	return sortedMigrations
 }
 

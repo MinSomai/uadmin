@@ -224,6 +224,9 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 }
 
 var GetUserForAPI func(user *core.User) *gin.H = func(user *core.User) *gin.H {
+	if user == nil {
+		return &gin.H{}
+	}
 	return &gin.H{"name": user.Username, "id": user.ID}
 }
 

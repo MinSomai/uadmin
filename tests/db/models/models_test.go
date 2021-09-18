@@ -16,12 +16,10 @@ type BuildRemovalTreeTestSuite struct {
 
 func (s *BuildRemovalTreeTestSuite) SetupTest() {
 	s.TestSuite.SetupTest()
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	uadminDatabase.Db.AutoMigrate(&UserGroupContentType{})
-	uadminDatabase.Db.AutoMigrate(&UserContentType{})
-	uadminDatabase.Db.AutoMigrate(&OneTimeActionContentType{})
-	uadminDatabase.Db.AutoMigrate(&SessionContentType{})
+	s.UadminDatabase.Db.AutoMigrate(&UserGroupContentType{})
+	s.UadminDatabase.Db.AutoMigrate(&UserContentType{})
+	s.UadminDatabase.Db.AutoMigrate(&OneTimeActionContentType{})
+	s.UadminDatabase.Db.AutoMigrate(&SessionContentType{})
 	core.ProjectModels.RegisterModel(func() interface{} { return &SessionContentType{} })
 	core.ProjectModels.RegisterModel(func() interface{} { return &OneTimeActionContentType{} })
 	core.ProjectModels.RegisterModel(func() interface{} { return &UserContentType{} })
@@ -38,14 +36,14 @@ func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *core.UadminDat
 	uadminDatabase.Db.Create(usergroup)
 	uadminDatabase.Db.Model(usergroup).Association("Permissions").Append(permission)
 	uadminDatabase.Db.Save(usergroup)
-	user := &core.User{Email: "admin@example.com"}
+	user := &core.User{Email: "adminmodelstest@example.com"}
 	uadminDatabase.Db.Create(user)
 	uadminDatabase.Db.Model(user).Association("Permissions").Append(permission)
 	uadminDatabase.Db.Model(user).Association("UserGroups").Append(usergroup)
 	uadminDatabase.Db.Save(user)
 	oneTimeAction := &core.OneTimeAction{User: *user, Code: "aaa"}
 	uadminDatabase.Db.Create(oneTimeAction)
-	session := &core.Session{User: *user, LoginTime: time.Now(), LastLogin: time.Now()}
+	session := &core.Session{User: user, LoginTime: time.Now(), LastLogin: time.Now()}
 	uadminDatabase.Db.Create(session)
 	sessionContentType := &SessionContentType{Session: *session, ContentType: *contentType}
 	uadminDatabase.Db.Save(sessionContentType)
@@ -58,12 +56,10 @@ func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *core.UadminDat
 }
 
 func (s *BuildRemovalTreeTestSuite) TearDownSuite() {
-	uadminDatabase := core.NewUadminDatabase()
-	uadminDatabase.Db.Migrator().DropTable(&UserGroupContentType{})
-	uadminDatabase.Db.Migrator().DropTable(&UserContentType{})
-	uadminDatabase.Db.Migrator().DropTable(&OneTimeActionContentType{})
-	uadminDatabase.Db.Migrator().DropTable(&SessionContentType{})
-	uadminDatabase.Close()
+	s.UadminDatabase.Db.Migrator().DropTable(&UserGroupContentType{})
+	s.UadminDatabase.Db.Migrator().DropTable(&UserContentType{})
+	s.UadminDatabase.Db.Migrator().DropTable(&OneTimeActionContentType{})
+	s.UadminDatabase.Db.Migrator().DropTable(&SessionContentType{})
 	s.TestSuite.TearDownSuite()
 }
 
@@ -116,9 +112,7 @@ func (ugct *SessionContentType) String() string {
 }
 
 func (s *BuildRemovalTreeTestSuite) TestRemovalStringified() {
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	s.ConfigureData(uadminDatabase)
+	s.ConfigureData(s.UadminDatabase)
 	//spew.Dump("contentType", contentType.ID)
 	//spew.Dump("permission", permission.ID)
 	//spew.Dump("usergroup", usergroup.ID)
@@ -128,32 +122,30 @@ func (s *BuildRemovalTreeTestSuite) TestRemovalStringified() {
 	//spew.Dump("usergroup permissions", len(usergroup.Permissions))
 	//spew.Dump("user permissions", len(user.Permissions))
 	//spew.Dump("user groups", len(user.UserGroups))
-	removalTreeNode := core.BuildRemovalTree(uadminDatabase, s.ContentType)
-	deletionStringified := removalTreeNode.BuildDeletionTreeStringified(uadminDatabase)
+	removalTreeNode := core.BuildRemovalTree(s.UadminDatabase, s.ContentType)
+	deletionStringified := removalTreeNode.BuildDeletionTreeStringified(s.UadminDatabase)
 	assert.Equal(s.T(), len(deletionStringified), 15)
 }
 
 func (s *BuildRemovalTreeTestSuite) TestRemoval() {
-	uadminDatabase := core.NewUadminDatabase()
-	s.ConfigureData(uadminDatabase)
-	defer uadminDatabase.Close()
+	s.ConfigureData(s.UadminDatabase)
 	var c int64
-	removalTreeNode := core.BuildRemovalTree(uadminDatabase, s.ContentType)
-	removalTreeNode.RemoveFromDatabase(uadminDatabase)
-	uadminDatabase.Db.Model(&core.Permission{}).Count(&c)
+	removalTreeNode := core.BuildRemovalTree(s.UadminDatabase, s.ContentType)
+	removalTreeNode.RemoveFromDatabase(s.UadminDatabase)
+	s.UadminDatabase.Db.Model(&core.Permission{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
-	uadminDatabase.Db.Model(&OneTimeActionContentType{}).Count(&c)
+	s.UadminDatabase.Db.Model(&OneTimeActionContentType{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
-	uadminDatabase.Db.Model(&UserContentType{}).Count(&c)
+	s.UadminDatabase.Db.Model(&UserContentType{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
-	uadminDatabase.Db.Model(&UserGroupContentType{}).Count(&c)
+	s.UadminDatabase.Db.Model(&UserGroupContentType{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
-	uadminDatabase.Db.Model(&SessionContentType{}).Count(&c)
+	s.UadminDatabase.Db.Model(&SessionContentType{}).Count(&c)
 	assert.Equal(s.T(), c, int64(0))
 }
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestBuildRemovalTree(t *testing.T) {
-	uadmin.Run(t, new(BuildRemovalTreeTestSuite))
+	uadmin.RunTests(t, new(BuildRemovalTreeTestSuite))
 }

@@ -167,6 +167,12 @@ func RenderHTMLAsString(writer *bytes.Buffer, fsys fs.FS, path string, data inte
 	for k, v := range baseFuncMap {
 		funcs1[k] = v
 	}
+	for k, v := range FuncMap {
+		_, funcExists := funcs1[k]
+		if !funcExists {
+			funcs1[k] = v
+		}
+	}
 	//includeToKeep, includeToKeepExists := funcs1["IncludeToKeep"]
 	//if includeToKeepExists {
 	//	funcs1["Include"] = includeToKeep

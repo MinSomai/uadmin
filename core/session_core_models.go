@@ -10,8 +10,8 @@ import (
 type Session struct {
 	Model
 	Key        string
-	User       User
-	UserID     uint
+	User       *User
+	UserID     *uint
 	LoginTime  time.Time
 	LastLogin  time.Time
 	Active     bool `gorm:"default:false"`

@@ -64,7 +64,6 @@ type UadminConfigOptions struct {
 	SecureCookie           bool   `yaml:"secure_cookie"`
 	HTTPOnlyCookie         bool   `yaml:"http_only_cookie"`
 	DirectAPISigninByField string `yaml:"direct_api_signin_by_field"`
-	DebugTests             bool   `yaml:"debug_tests"`
 	PoweredOnSite          string `yaml:"powered_on_site"`
 	ForgotCodeExpiration   int    `yaml:"forgot_code_expiration"`
 	DateFormat             string `yaml:"date_format"`
@@ -164,6 +163,7 @@ type UadminConfig struct {
 	ErrorHandleFunc           func(int, string, string)
 	InTests                   bool
 	ConfigContent			  []byte
+	DebugTests                bool
 }
 
 func (c *UadminConfig) GetPathToTemplate(templateName string) string {
@@ -229,7 +229,6 @@ func (ucc *UadminConfigurableConfig) UnmarshalYAML(unmarshal func(interface{}) e
 			SecureCookie:           false,
 			HTTPOnlyCookie:         true,
 			DirectAPISigninByField: "username",
-			DebugTests:             false,
 			ForgotCodeExpiration:   10,
 			DateFormat:             "01/_2/2006",
 			DateTimeFormat:         "01/_2/2006 15:04",

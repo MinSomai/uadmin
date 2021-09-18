@@ -70,10 +70,10 @@ func init() {
 		if session != nil {
 			// determine current user
 			user := session.GetUser()
-			context.SetUserObject(user)
-			context.SetUser(user.Username)
-			context.SetUserExists(user.ID != 0)
-			if user.ID != 0 {
+			if user != nil {
+				context.SetUserObject(user)
+				context.SetUser(user.Username)
+				context.SetUserExists(true)
 				context.SetUserPermissionRegistry(user.BuildPermissionRegistry())
 			}
 		}

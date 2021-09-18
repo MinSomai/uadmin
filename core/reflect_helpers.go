@@ -134,6 +134,8 @@ func IsTruthyValue(value interface{}) bool {
 	if r.Kind() == reflect.Slice {
 		s := reflect.ValueOf(value)
 		return s.Len() != 0
+	} else if typeString == "bool" {
+		return value.(bool) == true
 	} else if r.Kind() == reflect.Struct {
 	} else if typeString == "string" {
 		return value != ""

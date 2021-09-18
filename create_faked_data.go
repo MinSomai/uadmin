@@ -30,7 +30,7 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 		}
 		uadminDatabase.Db.Create(&oneTimeAction)
 		session := &core.Session{
-			User:      *userModel,
+			User:      userModel,
 			LoginTime: time.Now(),
 			LastLogin: time.Now(),
 		}

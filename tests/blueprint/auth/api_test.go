@@ -68,8 +68,8 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		Path: "/auth/direct-for-admin/status/",
 	}
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
-		assert.Contains(s.T(), w.Body.String(), "for-uadmin-panel")
-		return strings.Contains(w.Body.String(), "for-uadmin-panel")
+		assert.Equal(s.T(), w.Body.String(), "{}\n")
+		return w.Body.String() == "{}\n"
 	})
 	var jsonStr = []byte(`{"signinfield":"test", "password": "123456"}`)
 	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStr))
@@ -90,9 +90,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		Salt:             salt,
 		IsPasswordUsable: true,
 	}
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	db := uadminDatabase.Db
+	db := s.UadminDatabase.Db
 	db.Create(&user)
 	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
@@ -122,6 +120,10 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 			return strings.Contains(w.Body.String(), "for-uadmin-panel")
 		})
 		req, _ = http.NewRequest("GET", "/admin/profile", bytes.NewBuffer([]byte("")))
+		req.Header.Set(
+			"Cookie",
+			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
+		)
 		uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 			assert.Contains(s.T(), w.Body.String(), "oldPassword")
 			assert.Contains(s.T(), w.Body.String(), "<form")
@@ -133,7 +135,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 
 func (s *AuthProviderTestSuite) TestSignupForUadminAdmin() {
 	// hashedPassword, err := utils2.HashPass(password, salt)
-	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
+	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadminapitest@example.com"}`)
 	req, _ := http.NewRequest("POST", "/auth/direct-for-admin/signup/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -144,7 +146,7 @@ func (s *AuthProviderTestSuite) TestSignupForUadminAdmin() {
 
 func (s *AuthProviderTestSuite) TestSignupForApi() {
 	// hashedPassword, err := utils2.HashPass(password, salt)
-	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
+	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadminapitest@example.com"}`)
 	req, _ := http.NewRequest("POST", "/auth/direct/signup/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -196,8 +198,8 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 	defaultAdapter.ExpiresOn(&expiresOn)
 	defaultAdapter.Save()
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
-		assert.Contains(s.T(), w.Body.String(), "\"id\":0")
-		return strings.Contains(w.Body.String(), "\"id\":0")
+		assert.Equal(s.T(), w.Body.String(), "{}\n")
+		return w.Body.String() == "{}\n"
 	})
 	var jsonStr = []byte(`{"signinfield":"test", "password": "123456"}`)
 	req, _ = http.NewRequest("POST", "/auth/direct/signin/", bytes.NewBuffer(jsonStr))
@@ -218,9 +220,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForApi() {
 		Salt:             salt,
 		IsPasswordUsable: true,
 	}
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	db := uadminDatabase.Db
+	db := s.UadminDatabase.Db
 	db.Create(&user)
 	req, _ = http.NewRequest("POST", "/auth/direct/signin/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
@@ -274,7 +274,7 @@ func (s *AuthProviderTestSuite) TestOpenAdminPage() {
 		assert.Equal(s.T(), w.Code, 200)
 		return strings.Contains(w.Body.String(), "uadmin - Admin Login")
 	})
-	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
+	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadminapitest@example.com"}`)
 	req, _ = http.NewRequest("POST", "/auth/direct-for-admin/signup/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -295,7 +295,7 @@ func (s *AuthProviderTestSuite) TestOpenAdminPage() {
 }
 
 func (s *AuthProviderTestSuite) TestForgotFunctionality() {
-	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadmin@example.com"}`)
+	var jsonStr = []byte(`{"username":"test", "confirm_password": "12345678", "password": "12345678", "email": "uadminapitest@example.com"}`)
 	req, _ := http.NewRequest("POST", "/auth/direct-for-admin/signup/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -306,7 +306,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 		token := utils.GenerateCSRFToken()
 		session.Set("csrf_token", token)
 		session.Save()
-		var jsonStr1 = []byte(`{"email": "uadmin@example.com"}`)
+		var jsonStr1 = []byte(`{"email": "uadminapitest@example.com"}`)
 		req1, _ := http.NewRequest("POST", "/user/api/forgot", bytes.NewBuffer(jsonStr1))
 		req1.Header.Set(
 			"Cookie",
@@ -319,25 +319,21 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 				Subject: "Password reset for admin panel",
 			})
 			var oneTimeAction core.OneTimeAction
-			uadminDatabase := core.NewUadminDatabase()
-			defer uadminDatabase.Close()
-			db := uadminDatabase.Db
+			db := s.UadminDatabase.Db
 			db.Model(core.OneTimeAction{}).First(&oneTimeAction)
-			var jsonStr1 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
-			req1, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr1))
-			req1.Header.Set(
+			var jsonStr2 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
+			req2, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr2))
+			req2.Header.Set(
 				"Cookie",
 				fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 			)
-			tokenmasked := utils.MaskCSRFToken(token)
-			req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
-			uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
-				var oneTimeAction core.OneTimeAction
-				uadminDatabase := core.NewUadminDatabase()
-				defer uadminDatabase.Close()
-				db := uadminDatabase.Db
-				db.Model(core.OneTimeAction{}).First(&oneTimeAction)
-				assert.True(s.T(), oneTimeAction.IsUsed)
+			tokenmasked1 := utils.MaskCSRFToken(token)
+			req2.Header.Set("X-CSRF-TOKEN", tokenmasked1)
+			uadmin.TestHTTPResponse(s.T(), s.App, req2, func(w *httptest.ResponseRecorder) bool {
+				var oneTimeAction1 core.OneTimeAction
+				db1 := s.UadminDatabase.Db
+				db1.Model(core.OneTimeAction{}).First(&oneTimeAction1)
+				assert.True(s.T(), oneTimeAction1.IsUsed)
 				assert.Equal(s.T(), w.Code, 200)
 				return w.Code == 200
 			})
@@ -351,5 +347,5 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestAuthAdapters(t *testing.T) {
-	uadmin.Run(t, new(AuthProviderTestSuite))
+	uadmin.RunTests(t, new(AuthProviderTestSuite))
 }

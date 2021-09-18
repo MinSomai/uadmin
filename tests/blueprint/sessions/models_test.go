@@ -17,20 +17,16 @@ type SessionTestSuite struct {
 func (s *SessionTestSuite) TestSavingSession() {
 	session := interfaces2.NewSession()
 	session.SetData("testkey", "testvalue")
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	uadminDatabase.Db.Create(session)
+	s.UadminDatabase.Db.Create(session)
 	var loadedsession core.Session
-	uadminDatabase.Db.Model(&core.Session{}).First(&loadedsession)
+	s.UadminDatabase.Db.Model(&core.Session{}).First(&loadedsession)
 	val, _ := loadedsession.GetData("testkey")
 	assert.Equal(s.T(), val, "testvalue")
 }
 
 func (s *SessionTestSuite) TestTransactionConsistencyInTests() {
 	var loadedsession core.Session
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	uadminDatabase.Db.Model(&core.Session{}).First(&loadedsession)
+	s.UadminDatabase.Db.Model(&core.Session{}).First(&loadedsession)
 	val, _ := loadedsession.GetData("testkey")
 	assert.Equal(s.T(), val, "")
 }
@@ -39,7 +35,7 @@ func (s *SessionTestSuite) TestDbSessionAdapter() {
 	blueprint, _ := s.App.BlueprintRegistry.GetByName("sessions")
 	dbadapter, _ := blueprint.(sessionsblueprint.Blueprint).SessionAdapterRegistry.GetAdapter("db")
 	dbadapter = dbadapter.Create()
-	assert.Equal(s.T(), dbadapter.GetUser().ID, uint(0))
+	assert.Nil(s.T(), dbadapter.GetUser())
 	dbadapter.Set("testkey", "testvalue")
 	dbadapter.Save()
 	dbadapter, _ = dbadapter.GetByKey(dbadapter.GetKey())
@@ -70,5 +66,5 @@ func (s *SessionTestSuite) TestDbSessionAdapter() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestSessions(t *testing.T) {
-	uadmin.Run(t, new(SessionTestSuite))
+	uadmin.RunTests(t, new(SessionTestSuite))
 }

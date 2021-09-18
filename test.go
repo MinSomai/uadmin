@@ -1,9 +1,8 @@
 package uadmin
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/sergeyglazyrindev/uadmin/utils"
 	"github.com/stretchr/testify/suite"
@@ -21,11 +20,17 @@ import (
 type TestSuite struct {
 	suite.Suite
 	App *App
+	UadminDatabase *core.UadminDatabase
 }
+
 
 func (suite *TestSuite) SetupTest() {
 	app := NewFullAppForTests()
 	suite.App = app
+}
+
+func (suite *TestSuite) StoreDatabase(uadminDatabase *core.UadminDatabase) {
+	suite.UadminDatabase = uadminDatabase
 }
 
 func (suite *TestSuite) TearDownSuite() {
@@ -74,7 +79,7 @@ func endStats(s *suite.SuiteInformation, testName string, passed bool) {
 	s.TestStats[testName].Passed = passed
 }
 
-func Run(t *testing.T, currentsuite suite.TestingSuite) {
+func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 	defer failOnPanic(t)
 
 	currentsuite.SetT(t)
@@ -138,33 +143,119 @@ func Run(t *testing.T, currentsuite suite.TestingSuite) {
 					currentsuite.SetT(parentT)
 				}()
 
-				if setupTestSuite, ok := currentsuite.(suite.SetupTestSuite); ok {
-					setupTestSuite.SetupTest()
-				}
-				if beforeTestSuite, ok := currentsuite.(suite.BeforeTest); ok {
-					beforeTestSuite.BeforeTest(methodFinder.Elem().Name(), method.Name)
-				}
-
-				if stats != nil {
-					startStats(stats, method.Name)
-				}
-				appForTests.Config.InTests = true
 				utils.SentEmailsDuringTests.ClearTestEmails()
-				if appForTests.Config.D.Db.Default.Type == "sqlite" {
-					appInstance.BlueprintRegistry.ResetMigrationTree()
+				config := core.NewConfig("configs/" + "test" + ".yml")
+				core.CurrentConfig = config
+				core.CurrentConfig.InTests = true
+				core.CurrentConfig.TemplatesFS = templatesRoot
+				core.CurrentConfig.LocalizationFS = localizationRoot
+				core.CurrentDatabaseSettings = &core.DatabaseSettings{
+					Default: config.D.Db.Default,
+					Slave: config.D.Db.Slave,
+				}
+				if config.D.Db.Default.Type == "sqlite" {
+					a := NewApp("test", true)
+					a.Config.InTests = true
+					core.CurrentConfig.InTests = true
+					uadminDatabase := core.NewUadminDatabase()
+					uadminDatabase.Adapter.SetTimeZone(uadminDatabase.Db, "UTC")
+					core.UadminTestDatabase  = uadminDatabase
 					upCommand := MigrateCommand{}
 					upCommand.Proceed("up", make([]string, 0))
+					reflect.ValueOf(currentsuite).MethodByName("StoreDatabase").Call([]reflect.Value{reflect.ValueOf(uadminDatabase)})
+					if setupTestSuite, ok := currentsuite.(suite.SetupTestSuite); ok {
+						setupTestSuite.SetupTest()
+					}
+					if beforeTestSuite, ok := currentsuite.(suite.BeforeTest); ok {
+						beforeTestSuite.BeforeTest(methodFinder.Elem().Name(), method.Name)
+					}
+
+					if stats != nil {
+						startStats(stats, method.Name)
+					}
 					method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
 					appInstance.BlueprintRegistry.ResetMigrationTree()
 					downCommand := MigrateCommand{}
 					downCommand.Proceed("down", make([]string, 0))
+					//err := os.Remove(suite.app.Config.D.Db.Default.Name)
+					//if err != nil {
+					//	assert.Equal(suite.T(), true, false, fmt.Errorf("Couldnt remove db with name %s", suite.app.Config.D.Db.Default.Name))
+					//}
+					core.UadminTestDatabase = nil
+					uadminDatabase.Close()
 				} else {
+					a := NewApp("test", true)
+					core.CurrentConfig.InTests = true
+					a.Config.InTests = true
+					if !CreatedDatabaseForTests && core.CurrentDatabaseSettings.Default.Type != "sqlite" {
+						var aliasDatabaseSettings *core.DBSettings
+						aliasDatabaseSettings = core.CurrentDatabaseSettings.Default
+						host := aliasDatabaseSettings.Host
+						if host == "" {
+							host = "127.0.0.1"
+						}
+						port := aliasDatabaseSettings.Port
+						if port == 0 {
+							port = 5432
+						}
+						user := aliasDatabaseSettings.User
+						if user == "" {
+							user = "root"
+						}
+						dsnToCreateDatabase := fmt.Sprintf("host=%s user=%s password=%s port=%d dbname=postgres sslmode=disable TimeZone=UTC",
+							host,
+							user,
+							aliasDatabaseSettings.Password,
+							port,
+						)
+						db1, err1 := sql.Open(core.CurrentDatabaseSettings.Default.Type, dsnToCreateDatabase)
+						if err1 != nil {
+							panic(err1)
+						}
+						db1.Exec("create database " + aliasDatabaseSettings.Name)
+						dsnToCreateDatabase = fmt.Sprintf("host=%s user=%s password=%s port=%d dbname=%s sslmode=disable TimeZone=UTC",
+							host,
+							user,
+							aliasDatabaseSettings.Password,
+							port,
+							aliasDatabaseSettings.Name,
+						)
+						db1, err1 = sql.Open(core.CurrentDatabaseSettings.Default.Type, dsnToCreateDatabase)
+						if err1 != nil {
+							panic(err1)
+						}
+						_, err4 := db1.Exec("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+						if err4 != nil {
+							panic(err4)
+						}
+						CreatedDatabaseForTests = true
+					}
 					uadminDatabase := core.NewUadminDatabase()
+					core.UadminTestDatabase  = uadminDatabase
+					uadminDatabase.Adapter.SetIsolationLevelForTests(uadminDatabase.Db)
+					uadminDatabase.Adapter.SetTimeZone(uadminDatabase.Db, "UTC")
+					upCommand := MigrateCommand{}
+					upCommand.Proceed("up", make([]string, 0))
 					uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
+						newUadminDatabase := &core.UadminDatabase{Db: tx, Adapter: uadminDatabase.Adapter}
+						core.UadminTestDatabase  = newUadminDatabase
+						reflect.ValueOf(currentsuite).MethodByName("StoreDatabase").Call([]reflect.Value{reflect.ValueOf(newUadminDatabase)})
+						if setupTestSuite, ok := currentsuite.(suite.SetupTestSuite); ok {
+							setupTestSuite.SetupTest()
+						}
+						if beforeTestSuite, ok := currentsuite.(suite.BeforeTest); ok {
+							beforeTestSuite.BeforeTest(methodFinder.Elem().Name(), method.Name)
+						}
+
+						if stats != nil {
+							startStats(stats, method.Name)
+						}
 						method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
 						// return nil will commit the whole transaction
 						return fmt.Errorf("dont commit")
 					})
+					core.UadminTestDatabase.Adapter.ClearTestDatabase()
+					core.UadminTestDatabase = nil
 					uadminDatabase.Close()
 				}
 			},
@@ -210,35 +301,48 @@ func runTests(t testing.TB, tests []testing.InternalTest) {
 	}
 }
 
-func NewTestApp() *App {
-	a := App{}
-	a.DashboardAdminPanel = core.NewDashboardAdminPanel()
-	core.CurrentDashboardAdminPanel = a.DashboardAdminPanel
-	a.Config = core.NewConfig("configs/" + "test" + ".yml")
-	a.CommandRegistry = &CommandRegistry{
-		Actions: make(map[string]core.ICommand),
-	}
-	a.BlueprintRegistry = core.NewBlueprintRegistry()
-	a.Database = core.NewDatabase(a.Config)
-	a.Router = gin.Default()
-	a.Router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://foo.com"},
-		AllowMethods:     []string{"PUT", "PATCH"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return origin == "https://github.com"
-		},
-		MaxAge: 12 * time.Hour,
-	}))
-	a.RegisterBaseCommands()
-	core.CurrentDatabaseSettings = &core.DatabaseSettings{
-		Default: a.Config.D.Db.Default,
-	}
-	StoreCurrentApp(&a)
-	return &a
-}
+//func NewTestApp() *App {
+//	a := App{}
+//	a.DashboardAdminPanel = core.NewDashboardAdminPanel()
+//	core.CurrentDashboardAdminPanel = a.DashboardAdminPanel
+//	a.Config = core.NewConfig("configs/" + "test" + ".yml")
+//	a.Config.InTests = true
+//	core.CurrentConfig = a.Config
+//	a.CommandRegistry = &CommandRegistry{
+//		Actions: make(map[string]core.ICommand),
+//	}
+//	a.BlueprintRegistry = core.NewBlueprintRegistry()
+//	a.Database = core.NewDatabase(a.Config)
+//	a.Router = gin.Default()
+//	a.Router.Use(cors.New(cors.Config{
+//		AllowOrigins:     []string{"https://foo.com"},
+//		AllowMethods:     []string{"PUT", "PATCH"},
+//		AllowHeaders:     []string{"Origin"},
+//		ExposeHeaders:    []string{"Content-Length"},
+//		AllowCredentials: true,
+//		AllowOriginFunc: func(origin string) bool {
+//			return origin == "https://github.com"
+//		},
+//		MaxAge: 12 * time.Hour,
+//	}))
+//	a.RegisterBaseCommands()
+//	core.CurrentDatabaseSettings = &core.DatabaseSettings{
+//		Default: a.Config.D.Db.Default,
+//		Slave: a.Config.D.Db.Slave,
+//	}
+//	uadminDatabase := core.NewUadminDatabase()
+//	uadminDatabase.Adapter.SetIsolationLevelForTests(uadminDatabase.Db)
+//	a.BlueprintRegistry.ResetMigrationTree()
+//	StoreCurrentApp(&a)
+//	if core.CurrentConfig.D.Db.Default.Type == "sqlite" {
+//		appInstance.BlueprintRegistry.ResetMigrationTree()
+//		downCommand := MigrateCommand{}
+//		downCommand.Proceed("down", make([]string, 0))
+//	}
+//	upCommand := MigrateCommand{}
+//	upCommand.Proceed("up", make([]string, 0))
+//	return &a
+//}
 
 // Helper function to process a request and test its response
 func TestHTTPResponse(t *testing.T, app *App, req *http.Request, f func(w *httptest.ResponseRecorder) bool) {
@@ -255,15 +359,24 @@ func TestHTTPResponse(t *testing.T, app *App, req *http.Request, f func(w *httpt
 }
 
 var appForTests *App
+var CreatedDatabaseForTests bool
 
 func NewFullAppForTests() *App {
 	if appForTests != nil {
+		if appForTests.Config.D.Db.Default.Type == "sqlite" {
+			appForTests.BlueprintRegistry.ResetMigrationTree()
+			upCommand := MigrateCommand{}
+			upCommand.Proceed("up", make([]string, 0))
+		}
 		return appForTests
 	}
-	a := NewApp("test")
-	appForTests = a
-	// appForTests.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
+	a := NewApp("test", true)
+	a.Config.InTests = true
 	StoreCurrentApp(a)
+	appForTests = a
+	a.Initialize()
+	a.InitializeRouter()
+	// appForTests.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
 	return a
 }
 

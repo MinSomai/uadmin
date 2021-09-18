@@ -56,5 +56,5 @@ func (s *FormTestSuite) TestFormBuilder() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestForm(t *testing.T) {
-	uadmin.Run(t, new(FormTestSuite))
+	uadmin.RunTests(t, new(FormTestSuite))
 }

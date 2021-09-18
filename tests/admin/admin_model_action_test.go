@@ -17,10 +17,8 @@ type AdminModelActionTestSuite struct {
 }
 
 func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
-	userModel := &core.User{Username: "admin", FirstName: "firstname", LastName: "lastname", IsSuperUser: true}
-	uadminDatabase := core.NewUadminDatabase()
-	defer uadminDatabase.Close()
-	uadminDatabase.Db.Create(userModel)
+	userModel := &core.User{Username: "adminmodelactiontest", FirstName: "firstname", LastName: "lastname", IsSuperUser: true, Email: "adminmodelactiontest@gmail.com"}
+	suite.UadminDatabase.Db.Create(userModel)
 	adminUserBlueprintPage, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	adminModelAction := core.NewAdminModelAction(
@@ -46,9 +44,7 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 	userForm := core.NewFormFromModelFromGinContext(adminContext, &core.User{}, make([]string, 0), []string{"ID"}, true, "")
 	adminUserPage.Form = userForm
 	uadmin.TestHTTPResponse(suite.T(), suite.App, req, func(w *httptest.ResponseRecorder) bool {
-		uadminDatabase := core.NewUadminDatabase()
-		defer uadminDatabase.Close()
-		db := uadminDatabase.Db
+		db := suite.UadminDatabase.Db
 		var user core.User
 		db.Model(&core.User{}).First(&user)
 		assert.False(suite.T(), user.IsSuperUser)
@@ -60,5 +56,5 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestAdminModelAction(t *testing.T) {
-	uadmin.Run(t, new(AdminModelActionTestSuite))
+	uadmin.RunTests(t, new(AdminModelActionTestSuite))
 }

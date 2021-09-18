@@ -10,10 +10,10 @@ import (
 	"github.com/sergeyglazyrindev/uadmin/blueprint/user/migrations"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/sergeyglazyrindev/uadmin/utils"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
-	"html/template"
 	"time"
 )
 

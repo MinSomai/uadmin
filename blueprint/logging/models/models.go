@@ -110,7 +110,7 @@ type Log struct {
 	ModelPK       uint      `uadmin:"list,search" uadminform:"ReadonlyField"`
 	Action        Action    `uadminform:"ReadonlyField" uadmin:"list,search"`
 	Username      string    `uadminform:"ReadonlyField" uadmin:"list,search"`
-	Activity      string    `gorm:"type:longtext" uadminform:"ReadonlyTextareaFieldOptions" uadmin:"list,search"`
+	Activity      string    `gorm:"type:text" uadminform:"ReadonlyTextareaFieldOptions" uadmin:"list,search"`
 	CreatedAt     time.Time `uadminform:"DateTimeFieldOptions" uadmin:"list,search"`
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
