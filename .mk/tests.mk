@@ -77,7 +77,7 @@ ifeq ($(COVERAGE), true)
 			coverfile="${COVERAGE_WD}/$$(echo $$pkg | tr / -).cover"; \
         	export UADMIN_PATH=${CURRENT_DIRECTORY} ; \
 			export TEST_ENVIRONMENT=${TEST_ENVIRONMENT} ; \
-			$(GO) test -tags "${BUILD_TAGS} test" -covermode=${COVERAGE_MODE} -coverprofile="$$coverfile" ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg; \
+			$(GO) test -tags "${BUILD_TAGS} test" -covermode=${COVERAGE_MODE} -coverprofile="$$coverfile" ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg || exit 1; \
 		fi; \
 	done
 else
@@ -90,7 +90,7 @@ ifneq ($(TEST_PATTERN),)
 	# $(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} ${UT_PACKAGES}
 	for pkg in ${UT_PACKAGES}; do \
 		if [ -n "$$pkg" ]; then \
-			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} $$pkg; \
+			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} -test.run ${TEST_PATTERN} $$pkg || exit 1; \
 		fi; \
 	done
 else
@@ -101,7 +101,7 @@ else
 	# $(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} ${UT_PACKAGES}
 	for pkg in ${UT_PACKAGES}; do \
 		if [ -n "$$pkg" ]; then \
-			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg && exit 1; \
+			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg || exit 1; \
 		fi; \
 	done
 endif
