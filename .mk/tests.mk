@@ -1,5 +1,6 @@
 TEST_PATTERN?=
 RACE?=-race
+CURRENT_DIRECTORY?=$(shell pwd)
 TEST_ENVIRONMENT?=
 UT_PACKAGES?=$(shell $(GO) list ./...)
 FUNC_TESTS_CMD:="grep -e 'func Test${TEST_PATTERN}' tests/*.go | perl -pe 's|.*func (.*?)\(.*|\1|g' | shuf"
@@ -74,7 +75,7 @@ ifeq ($(COVERAGE), true)
 	for pkg in ${UT_PACKAGES}; do \
 		if [ -n "$$pkg" ]; then \
 			coverfile="${COVERAGE_WD}/$$(echo $$pkg | tr / -).cover"; \
-        	export UADMIN_PATH=$(shell pwd) ; \
+        	export UADMIN_PATH=${CURRENT_DIRECTORY} ; \
 			export TEST_ENVIRONMENT=${TEST_ENVIRONMENT} ; \
 			$(GO) test -tags "${BUILD_TAGS} test" -covermode=${COVERAGE_MODE} -coverprofile="$$coverfile" ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg; \
 		fi; \
@@ -82,7 +83,7 @@ ifeq ($(COVERAGE), true)
 else
 ifneq ($(TEST_PATTERN),)
 	set -v ; \
-	export UADMIN_PATH=$(shell pwd) ; \
+	export UADMIN_PATH=${CURRENT_DIRECTORY} ; \
 	export TEST_ENVIRONMENT=${TEST_ENVIRONMENT} ; \
 	$(GO) clean -testcache ; \
 
@@ -94,7 +95,7 @@ ifneq ($(TEST_PATTERN),)
 	done
 else
 	set -v ; \
-	export UADMIN_PATH=$(shell pwd) ; \
+	export UADMIN_PATH=${CURRENT_DIRECTORY} ; \
 	export TEST_ENVIRONMENT=${TEST_ENVIRONMENT} ; \
 	$(GO) clean -testcache ; \
 	# $(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} ${UT_PACKAGES}

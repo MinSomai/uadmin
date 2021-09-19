@@ -5,7 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+env:
+  UADMIN_PATH: /home/runner/work/uadmin/uadmin
 jobs:
   build:
     runs-on: ubuntu-latest
