@@ -53,6 +53,7 @@ type IDbAdapter interface {
 	Close(db *gorm.DB)
 	ClearTestDatabase()
 	SetTimeZone(db *gorm.DB, timezone string)
+	InitializeDatabaseForTests(databaseSettings *DBSettings)
 }
 
 var Db *gorm.DB

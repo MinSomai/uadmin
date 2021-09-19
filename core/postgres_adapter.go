@@ -1,6 +1,7 @@
 package core
 
 import (
+	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
@@ -288,4 +289,47 @@ func (d *PostgresAdapter) ClearTestDatabase() {
 
 func (d *PostgresAdapter) SetTimeZone(db *gorm.DB, timezone string) {
 	db.Exec("SET TIME ZONE UTC")
+}
+
+func (d *PostgresAdapter) InitializeDatabaseForTests(databaseSettings *DBSettings) {
+	aliasDatabaseSettings := databaseSettings
+	host := aliasDatabaseSettings.Host
+	if host == "" {
+		host = "127.0.0.1"
+	}
+	port := aliasDatabaseSettings.Port
+	if port == 0 {
+		port = 5432
+	}
+	user := aliasDatabaseSettings.User
+	if user == "" {
+		user = "root"
+	}
+	dsnToCreateDatabase := fmt.Sprintf("host=%s user=%s password=%s port=%d dbname=postgres sslmode=disable TimeZone=UTC",
+		host,
+		user,
+		aliasDatabaseSettings.Password,
+		port,
+	)
+	db1, err1 := sql.Open(databaseSettings.Type, dsnToCreateDatabase)
+	if err1 != nil {
+		panic(err1)
+	}
+	db1.Exec("create database " + aliasDatabaseSettings.Name)
+	dsnToCreateDatabase = fmt.Sprintf("host=%s user=%s password=%s port=%d dbname=%s sslmode=disable TimeZone=UTC",
+		host,
+		user,
+		aliasDatabaseSettings.Password,
+		port,
+		aliasDatabaseSettings.Name,
+	)
+	db1, err1 = sql.Open(databaseSettings.Type, dsnToCreateDatabase)
+	if err1 != nil {
+		panic(err1)
+	}
+	_, err4 := db1.Exec("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+	if err4 != nil {
+		panic(err4)
+	}
+
 }

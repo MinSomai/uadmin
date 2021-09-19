@@ -271,6 +271,10 @@ func (d *SqliteAdapter) ClearTestDatabase() {
 func (d *SqliteAdapter) SetTimeZone(db *gorm.DB, timezone string) {
 }
 
+func (d *SqliteAdapter) InitializeDatabaseForTests(databaseSettings *DBSettings) {
+
+}
+
 func sqliteUadminDatetimeParse(dt string, tzName string, connTzname string) *time.Time {
 	if dt == "" {
 		return nil
