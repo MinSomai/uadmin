@@ -143,7 +143,7 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 				}()
 
 				utils.SentEmailsDuringTests.ClearTestEmails()
-				config := core.NewConfig("configs/" + "test" + ".yml")
+				config := core.NewConfig("configs/" + os.Getenv("TEST_ENVIRONMENT") + ".yml")
 				core.CurrentConfig = config
 				core.CurrentConfig.InTests = true
 				core.CurrentConfig.TemplatesFS = templatesRoot
@@ -153,7 +153,7 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 					Slave: config.D.Db.Slave,
 				}
 				if config.D.Db.Default.Type == "sqlite" {
-					a := NewApp("test", true)
+					a := NewApp(os.Getenv("TEST_ENVIRONMENT"), true)
 					a.Config.InTests = true
 					core.CurrentConfig.InTests = true
 					uadminDatabase := core.NewUadminDatabase()
@@ -183,7 +183,7 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 					core.UadminTestDatabase = nil
 					uadminDatabase.Close()
 				} else {
-					a := NewApp("test", true)
+					a := NewApp(os.Getenv("TEST_ENVIRONMENT"), true)
 					core.CurrentConfig.InTests = true
 					a.Config.InTests = true
 					if !CreatedDatabaseForTests && core.CurrentDatabaseSettings.Default.Type != "sqlite" {
@@ -331,7 +331,7 @@ func NewFullAppForTests() *App {
 		}
 		return appForTests
 	}
-	a := NewApp("test", true)
+	a := NewApp(os.Getenv("TEST_ENVIRONMENT"), true)
 	a.Config.InTests = true
 	StoreCurrentApp(a)
 	appForTests = a

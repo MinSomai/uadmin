@@ -6,6 +6,6 @@ import (
 )
 
 func TestDefaultConfigValues(t *testing.T) {
-	uadminConfig := NewConfig("configs/test.yml")
+	uadminConfig := NewConfig("configs/test_sqlite.yml")
 	assert.Equal(t, uadminConfig.D.Uadmin.Theme, "default")
 }
