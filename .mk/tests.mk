@@ -101,7 +101,7 @@ else
 	# $(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} ${UT_PACKAGES}
 	for pkg in ${UT_PACKAGES}; do \
 		if [ -n "$$pkg" ]; then \
-			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg && break; \
+			$(GO) test -tags "${BUILD_TAGS} test" -ldflags="${LDFLAGS}" ${RACE} ${GOFLAGS} ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg && exit 1; \
 		fi; \
 	done
 endif
