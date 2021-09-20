@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/asaskevich/govalidator"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
@@ -233,12 +234,17 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, gin.H{"success": true})
 	})
 	mainRouter.NoRoute(func(ctx *gin.Context) {
+		if strings.HasPrefix(ctx.Request.RequestURI, "/static-inbuilt/") || strings.HasSuffix(ctx.Request.RequestURI, ".css") ||
+			strings.HasSuffix(ctx.Request.RequestURI, ".js") || strings.HasSuffix(ctx.Request.RequestURI, ".map") {
+			ctx.Abort()
+			return
+		}
 		// ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 		type Context struct {
 			core.AdminContext
 			Menu string
 		}
-
+		spew.Dump("request 111", ctx.Request)
 		c := &Context{}
 		core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
 		//
