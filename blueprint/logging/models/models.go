@@ -1,4 +1,5 @@
 package models
+
 /*
 	Logging model designed to keep all data about admin actions.
 */

@@ -1,8 +1,9 @@
 package abtest
+
 /*
 	Blueprint abtest is designed to do A/B tests for the project. Currently not usable after migration from previous
 	Uadmin implementation.
- */
+*/
 
 import (
 	"fmt"

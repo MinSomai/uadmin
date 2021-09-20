@@ -35,4 +35,3 @@ func NewAdminBreadCrumbsRegistry() *AdminBreadCrumbsRegistry {
 	ret := &AdminBreadCrumbsRegistry{BreadCrumbs: make([]*AdminBreadcrumb, 0)}
 	return ret
 }
-

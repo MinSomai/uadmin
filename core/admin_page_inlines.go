@@ -3,10 +3,10 @@ package core
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"mime/multipart"
 	"strconv"
 	"strings"
-	"html/template"
 )
 
 type InlineType string

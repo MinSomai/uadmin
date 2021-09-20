@@ -82,4 +82,3 @@ func NewAdminRequestParamsFromGinContext(ctx *gin.Context) *AdminRequestParams {
 	ret.Ordering = finalOrderingParts
 	return ret
 }
-

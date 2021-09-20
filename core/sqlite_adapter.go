@@ -46,7 +46,7 @@ func (d *SqliteAdapter) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 			db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
 				DisableForeignKeyConstraintWhenMigrating: true,
 				DryRun:                                   dryRun,
-				Logger: logger.Default.LogMode(logger.Info),
+				Logger:                                   logger.Default.LogMode(logger.Info),
 			})
 		} else {
 			db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
@@ -337,10 +337,11 @@ func sqliteUadminDatetimeExtract(extract string, dt string, tzName string, connT
 	return 0
 }
 
-func sqlite_uadmin_regex(re_string string, re_pattern string) bool {
-	regex := regexp.MustCompile(re_pattern)
-	return regex.Find([]byte(re_string)) != nil
+func sqliteUadminRegex(reString string, rePattern string) bool {
+	regex := regexp.MustCompile(rePattern)
+	return regex.Find([]byte(reString)) != nil
 }
+
 //if err := conn.RegisterFunc("uadmin_datetime_cast_year", sqlite_uadmin_datetime_cast_year, true); err != nil {
 //	return err
 //}
@@ -358,7 +359,7 @@ func init() {
 			if err = conn.RegisterFunc("uadmin_datetime_cast_time", sqliteUadminDatetimeCastTime, true); err != nil {
 				return err
 			}
-			if err := conn.RegisterFunc("uadmin_regex", sqlite_uadmin_regex, true); err != nil {
+			if err := conn.RegisterFunc("uadmin_regex", sqliteUadminRegex, true); err != nil {
 				return err
 			}
 			for operator := range ProjectGormOperatorRegistry.GetAll() {

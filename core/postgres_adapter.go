@@ -3,7 +3,7 @@ package core
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // import needed for postgres database
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -29,7 +29,6 @@ func (d *PostgresAdapter) GetStringToExtractYearFromField(filterOptionField stri
 func (d *PostgresAdapter) GetStringToExtractMonthFromField(filterOptionField string) string {
 	return fmt.Sprintf("EXTRACT(MONTH FROM %s AT TIME ZONE 'UTC')", filterOptionField)
 }
-
 
 var cachedPostgresDB *gorm.DB
 
@@ -71,13 +70,11 @@ func (d *PostgresAdapter) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 				Logger: logger.Default.LogMode(logger.Info),
 			})
 		} else {
-			db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-			})
+			db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		}
 		cachedPostgresDB = db
 	} else {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		})
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		db.Exec("SET TIME ZONE UTC")
 	}
 	return db, err

@@ -31,11 +31,11 @@ func attr(s string) template.HTMLAttr {
 }
 
 var FuncMap = template.FuncMap{
-	"Tf":  Tf,
-	"add": add,
-	"mul": mul,
-	"safe": safe,
-	"attr": attr,
+	"Tf":            Tf,
+	"add":           add,
+	"mul":           mul,
+	"safe":          safe,
+	"attr":          attr,
 	"GenerateAttrs": GenerateAttrs,
 	//"CSRF": func() string {
 	//	return "dfsafsa"

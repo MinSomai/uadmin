@@ -76,7 +76,7 @@ type UadminConfigOptions struct {
 
 type UadminDbOptions struct {
 	Default *DBSettings
-	Slave *DBSettings
+	Slave   *DBSettings
 }
 
 type UadminAuthOptions struct {
@@ -162,7 +162,7 @@ type UadminConfig struct {
 	PatternsToIgnoreCsrfCheck *list.List
 	ErrorHandleFunc           func(int, string, string)
 	InTests                   bool
-	ConfigContent			  []byte
+	ConfigContent             []byte
 	DebugTests                bool
 }
 

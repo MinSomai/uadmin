@@ -1,4 +1,5 @@
 package interfaces
+
 /*
 	Package contains sign in providers, like: token signin, token with expiration, direct signin (by username or email).
 	Currently usable only: direct signin and direct signin for admin panel

@@ -162,4 +162,3 @@ func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, pref
 	}
 	return ret
 }
-

@@ -728,14 +728,13 @@ type SQLConditionBuilder struct {
 	Type string
 }
 
-func (scb *SQLConditionBuilder) Build(db IPersistenceStorage, query interface{}, args...interface{}) IPersistenceStorage {
+func (scb *SQLConditionBuilder) Build(db IPersistenceStorage, query interface{}, args ...interface{}) IPersistenceStorage {
 	if scb.Type == "or" {
 		return db.Or(query, args...)
-	} else {
-		return db.Where(query, args...)
 	}
+	return db.Where(query, args...)
 }
 
-func NewSQLConditionBuilder(conditionType string) *SQLConditionBuilder{
+func NewSQLConditionBuilder(conditionType string) *SQLConditionBuilder {
 	return &SQLConditionBuilder{Type: conditionType}
 }

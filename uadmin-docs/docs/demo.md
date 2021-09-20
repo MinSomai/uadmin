@@ -6,6 +6,6 @@ sidebar_position: 3
 
 Check out demo [here](https://uadmin.sergeyg.me/admin):
 ```
-username: uadmindemo
+username: adminadmin
 password: 123456789
 ```

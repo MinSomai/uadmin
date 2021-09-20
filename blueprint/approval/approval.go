@@ -1,4 +1,5 @@
 package approval
+
 /*
 	Blueprint approval is designed to provide Approval functionality for administrators. Currently not usable after
 	migration from previous UAdmin implementation.

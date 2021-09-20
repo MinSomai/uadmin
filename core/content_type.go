@@ -11,4 +11,3 @@ type ContentType struct {
 func (ct *ContentType) String() string {
 	return fmt.Sprintf("Content type for blueprint %s and model name %s", ct.BlueprintName, ct.ModelName)
 }
-

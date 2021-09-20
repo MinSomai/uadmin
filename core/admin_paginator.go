@@ -24,4 +24,3 @@ type Paginator struct {
 func (p *Paginator) Paginate(afo IAdminFilterObjects) {
 
 }
-

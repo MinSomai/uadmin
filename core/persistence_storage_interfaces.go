@@ -439,4 +439,3 @@ func (gps *GormPersistenceStorage) Exec(sql string, values ...interface{}) IPers
 	gps.Db = gps.Db.Exec(sql, values)
 	return gps
 }
-

@@ -71,4 +71,3 @@ func ClearProjectModels() {
 		models: make(map[string]*ModelDescription),
 	}
 }
-

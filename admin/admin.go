@@ -1,4 +1,5 @@
 package admin
+
 /*
 Package admin initializes PopulateTemplateContextForAdminPanel function in the core.
 It helps us to customize admin panel in case if we want, we'd like to keep core package as is, instead, all changes

@@ -169,7 +169,6 @@ func (suite *MigrationTestSuite) TestBuildTreeWithLoop() {
 	}
 }
 
-
 //func (suite *MigrationTestSuite) TestBuildTreeWithTwoSameMigrationNames() {
 //	blueprintRegistry := core.NewBlueprintRegistry()
 //	blueprintRegistry.Register(Blueprint1WithSameMigrationNames)

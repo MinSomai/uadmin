@@ -149,4 +149,3 @@ func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *Iterate
 	}()
 	return chnl
 }
-

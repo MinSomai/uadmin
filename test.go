@@ -18,10 +18,9 @@ import (
 
 type TestSuite struct {
 	suite.Suite
-	App *App
+	App            *App
 	UadminDatabase *core.UadminDatabase
 }
-
 
 func (suite *TestSuite) SetupTest() {
 	app := NewFullAppForTests()
@@ -150,7 +149,7 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 				core.CurrentConfig.LocalizationFS = localizationRoot
 				core.CurrentDatabaseSettings = &core.DatabaseSettings{
 					Default: config.D.Db.Default,
-					Slave: config.D.Db.Slave,
+					Slave:   config.D.Db.Slave,
 				}
 				if config.D.Db.Default.Type == "sqlite" {
 					a := NewApp(os.Getenv("TEST_ENVIRONMENT"), true)
@@ -158,7 +157,7 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 					core.CurrentConfig.InTests = true
 					uadminDatabase := core.NewUadminDatabase()
 					uadminDatabase.Adapter.SetTimeZone(uadminDatabase.Db, "UTC")
-					core.UadminTestDatabase  = uadminDatabase
+					core.UadminTestDatabase = uadminDatabase
 					upCommand := MigrateCommand{}
 					upCommand.Proceed("up", make([]string, 0))
 					reflect.ValueOf(currentsuite).MethodByName("StoreDatabase").Call([]reflect.Value{reflect.ValueOf(uadminDatabase)})
@@ -192,14 +191,14 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 						CreatedDatabaseForTests = true
 					}
 					uadminDatabase := core.NewUadminDatabase()
-					core.UadminTestDatabase  = uadminDatabase
+					core.UadminTestDatabase = uadminDatabase
 					uadminDatabase.Adapter.SetIsolationLevelForTests(uadminDatabase.Db)
 					uadminDatabase.Adapter.SetTimeZone(uadminDatabase.Db, "UTC")
 					upCommand := MigrateCommand{}
 					upCommand.Proceed("up", make([]string, 0))
 					uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
 						newUadminDatabase := &core.UadminDatabase{Db: tx, Adapter: uadminDatabase.Adapter}
-						core.UadminTestDatabase  = newUadminDatabase
+						core.UadminTestDatabase = newUadminDatabase
 						reflect.ValueOf(currentsuite).MethodByName("StoreDatabase").Call([]reflect.Value{reflect.ValueOf(newUadminDatabase)})
 						if setupTestSuite, ok := currentsuite.(suite.SetupTestSuite); ok {
 							setupTestSuite.SetupTest()

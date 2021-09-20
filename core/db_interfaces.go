@@ -129,7 +129,7 @@ func (d Database) ConnectTo(alias string) *gorm.DB {
 
 type DatabaseSettings struct {
 	Default *DBSettings
-	Slave *DBSettings
+	Slave   *DBSettings
 }
 
 var CurrentDatabaseSettings *DatabaseSettings
