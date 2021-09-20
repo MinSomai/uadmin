@@ -56,6 +56,7 @@ type AdminPage struct {
 	RegisteredHTTPHandlers             bool
 	NoPermissionToAddNew               bool
 	NoPermissionToEdit                 bool
+	PermissionName                     CustomPermission
 }
 ```
 The easiest way to create new admin page for Gorm is:

@@ -9,7 +9,7 @@ const FeatureList = [
     description: (
       <>
         Uadmin has been designed to simplify project development in Go. Almost everything needed for development integrated
-        into the uadmin. You shouldn't worry about data migrations, uadmin provides you flexible migration system.
+        into the uadmin. You shouldn't worry about data migrations, uadmin provides for you flexible migration system.
       </>
     ),
   },
@@ -19,7 +19,7 @@ const FeatureList = [
     description: (
       <>
         Uadmin fully powered by blueprint methodology. Everything related to one domain system has to be written in one module called
-        <a href="https://en.wikipedia.org/wiki/Software_blueprint" target="_blank">blueprint</a>.
+        &nbsp;<a href="https://en.wikipedia.org/wiki/Software_blueprint" target="_blank">blueprint</a>.
       </>
     ),
   },

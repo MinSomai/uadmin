@@ -5,7 +5,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
   title: 'Uadmin',
-  tagline: 'Build projects in Go easily',
+  tagline: 'Build projects in Go easily. Clean code. SOLID. Patterns.',
   url: 'https://uadmindocs.sergeyg.me',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -66,8 +66,29 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             label: 'Api',
           },
           {
+            type: 'doc',
+            docId: 'contribution',
+            position: 'left',
+            label: 'Contributing',
+          },
+          {
             href: 'https://github.com/sergeyglazyrindev/uadmin',
             label: 'GitHub',
+            position: 'right',
+          },
+          {
+            href: 'https://gophers.slack.com/archives/C017ULYJHMZ',
+            label: 'Slack',
+            position: 'right',
+          },
+          {
+            href: 'https://t.me/joinchat/VzgmokqjF7s4Nzk0',
+            label: 'Telegram - uadmin_development',
+            position: 'right',
+          },
+          {
+            href: 'https://discord.gg/kADzHWatSj',
+            label: 'Discord',
             position: 'right',
           },
         ],
@@ -82,14 +103,22 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
                 label: 'Tutorial',
                 to: '/docs/intro',
               },
+              {
+                label: 'API',
+                to: '/docs/api',
+              },
             ],
           },
           {
             title: 'Community',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/uadmin',
+                label: 'Slack',
+                href: 'https://gophers.slack.com/archives/C017ULYJHMZ',
+              },
+              {
+                label: 'Telegram - uadmin_development',
+                href: 'https://t.me/joinchat/VzgmokqjF7s4Nzk0',
               },
               {
                 label: 'Discord',
@@ -103,6 +132,10 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
               {
                 label: 'GitHub',
                 href: 'https://github.com/sergeyglazyrindev/uadmin',
+              },
+              {
+                label: 'Stack Overflow',
+                href: 'https://stackoverflow.com/questions/tagged/uadmin',
               },
             ],
           },

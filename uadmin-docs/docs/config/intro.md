@@ -26,6 +26,8 @@ type UadminConfig struct {
 	InTests                   bool
 	// you can use ConfigContent in your blueprint to initialize blueprint specific configs.
 	ConfigContent			  []byte
+	// debug tests mode for database, simplifies test debugging
+	DebugTests                bool
 }
 ```
 An example of the config in the configs/sqlite.yml
