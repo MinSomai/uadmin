@@ -60,6 +60,10 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
 		return
 	}
+	if !user.IsSuperUser && !user.IsStaff {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have an access to admin panel"})
+		return
+	}
 	if !user.IsPasswordUsable {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
 		return
