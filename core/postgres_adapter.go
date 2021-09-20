@@ -8,7 +8,10 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
+	"os"
+	"os/exec"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -329,4 +332,33 @@ func (d *PostgresAdapter) InitializeDatabaseForTests(databaseSettings *DBSetting
 		panic(err4)
 	}
 
+}
+
+func (d *PostgresAdapter) StartDBShell(databaseSettings *DBSettings) error {
+	host := databaseSettings.Host
+	if host == "" {
+		host = "127.0.0.1"
+	}
+	port := databaseSettings.Port
+	if port == 0 {
+		port = 5432
+	}
+	commandToExecute := exec.Command(
+		"psql", "-U", databaseSettings.User,
+		"-h", host, "-p", strconv.Itoa(port), databaseSettings.Name,
+	)
+	commandToExecute.Env = os.Environ()
+	commandToExecute.Env = append(commandToExecute.Env, "PGPASSWORD=" + databaseSettings.Password)
+	// Sets standard output to cmd.stdout writer
+	commandToExecute.Stdout = os.Stdout
+	// Sets standard input to cmd.stdin reader
+	commandToExecute.Stdin = os.Stdin
+	var err error
+	if err = commandToExecute.Start(); err != nil {
+		return err
+	}
+	if err = commandToExecute.Wait(); err != nil {
+		return err
+	}
+	return nil
 }

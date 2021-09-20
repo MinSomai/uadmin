@@ -3,6 +3,10 @@ db:
   default:
     type: "sqlite"
     name: "uadmin.db"
+#    type: "postgres"
+#    name: "uadminofficialtest"
+#    password: "123456"
+#    user: "uadminofficialtest"
 auth:
   jwt_secret_token: "jdnfksdmfksd"
   max_username_length: 40

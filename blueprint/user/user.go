@@ -448,34 +448,22 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 					return ret
 				}
 			}
+			passwordField, _ := form.FieldRegistry.GetByName("Password")
+			passwordField.SetUpField = func(w core.IWidget, m interface{}, v interface{}, afo core.IAdminFilterObjects) error {
+				user := m.(*core.User)
+				vI, _ := v.(string)
+				if user.Salt == "" && vI != "" {
+					user.Salt = utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
+					hashedPassword, _ := utils2.HashPass(vI, user.Salt)
+					user.IsPasswordUsable = true
+					user.Password = hashedPassword
+				}
+
+				return nil
+			}
 			return form
 		},
 	)
-	usermodelAdminPage.SaveModel = func(modelI interface{}, ID uint, afo core.IAdminFilterObjects) interface{} {
-		user := modelI.(*core.User)
-		if user.Salt == "" && user.Password != "" {
-			user.Salt = utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
-		}
-		if ID != 0 {
-			userM := &core.User{}
-			afo.GetUadminDatabase().Db.First(userM, ID)
-			if userM.Password != user.Password && user.Password != "" {
-				// hashedPassword, err := utils2.HashPass(password, salt)
-				hashedPassword, _ := utils2.HashPass(user.Password, user.Salt)
-				user.IsPasswordUsable = true
-				user.Password = hashedPassword
-			}
-		} else {
-			if user.Password != "" {
-				// hashedPassword, err := utils2.HashPass(password, salt)
-				hashedPassword, _ := utils2.HashPass(user.Password, user.Salt)
-				user.Password = hashedPassword
-				user.IsPasswordUsable = true
-			}
-		}
-		afo.GetUadminDatabase().Db.Save(user)
-		return user
-	}
 	usermodelAdminPage.PageName = "Users"
 	usermodelAdminPage.Slug = "user"
 	usermodelAdminPage.BlueprintName = "user"

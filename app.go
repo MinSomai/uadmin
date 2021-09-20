@@ -117,6 +117,8 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("contenttype", &ContentTypeCommand{})
 	a.RegisterCommand("generate-fake-data", &CreateFakedDataCommand{})
 	a.RegisterCommand("language", &LanguageCommand{})
+	a.RegisterCommand("dbshell", &DbShellCommand{})
+	a.RegisterCommand("shell", &ShellCommand{})
 }
 
 func (a App) ExecuteCommand() {

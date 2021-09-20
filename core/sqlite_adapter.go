@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 	"math"
+	"os"
+	"os/exec"
 	"reflect"
 	"regexp"
 	"strings"
@@ -273,6 +275,24 @@ func (d *SqliteAdapter) SetTimeZone(db *gorm.DB, timezone string) {
 
 func (d *SqliteAdapter) InitializeDatabaseForTests(databaseSettings *DBSettings) {
 
+}
+
+func (d *SqliteAdapter) StartDBShell(databaseSettings *DBSettings) error {
+	commandToExecute := exec.Command(
+		"sqlite3", databaseSettings.Name,
+	)
+	// Sets standard output to cmd.stdout writer
+	commandToExecute.Stdout = os.Stdout
+	// Sets standard input to cmd.stdin reader
+	commandToExecute.Stdin = os.Stdin
+	var err error
+	if err = commandToExecute.Start(); err != nil {
+		return err
+	}
+	if err = commandToExecute.Wait(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func sqliteUadminDatetimeParse(dt string, tzName string, connTzname string) *time.Time {

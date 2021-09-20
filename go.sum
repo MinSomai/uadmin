@@ -1302,6 +1302,8 @@ github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce h1:fb190+cK2Xz/dvi9
 github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce/go.mod h1:o8v6yHRoik09Xen7gje4m9ERNah1d1PPsVq1VEx9vE4=
 github.com/tommy-muehle/go-mnd/v2 v2.4.0 h1:1t0f8Uiaq+fqKteUR4N9Umr6E99R+lDnLnq7PwX2PPE=
 github.com/tommy-muehle/go-mnd/v2 v2.4.0/go.mod h1:WsUAkMJMYww6l/ufffCD3m+P7LEvr8TnZn9lwVDlgzw=
+github.com/traefik/yaegi v0.10.0 h1:c/0rhUcj5+KJhJX++eCrPeKXnJaOZ17X8gYCznU9Xxc=
+github.com/traefik/yaegi v0.10.0/go.mod h1:RuCwD8/wsX7b6KoQHOaIFUfuH3gQIK4KWnFFmJMw5VA=
 github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640 h1:A8ZPAW0kgZQ9MaqZRJyq9Zb39Zsf84G2Ypafszsttb8=
 github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640/go.mod h1:Xo1H4x3+D6gR2/pDDHOLe3uvF7Y59Sro7ErzHnDuLfs=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
