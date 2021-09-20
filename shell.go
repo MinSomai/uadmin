@@ -1,7 +1,7 @@
 package uadmin
 
 import (
-	_ "github.com/traefik/yaegi"
+	_ "github.com/traefik/yaegi" // this is our go shell package
 	"os"
 	"os/exec"
 )
