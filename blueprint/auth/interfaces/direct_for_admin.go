@@ -82,6 +82,7 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	if cookie != "" {
 		sessionAdapter, _ = sessionAdapter.GetByKey(cookie)
 		sessionAdapter.ExpiresOn(&sessionExpirationTime)
+		c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
 	} else {
 		sessionAdapter = sessionAdapter.Create()
 		sessionAdapter.ExpiresOn(&sessionExpirationTime)
