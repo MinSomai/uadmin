@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	core.CurrentDashboardAdminPanel.ListHandler = func(ctx *gin.Context) {
 		defaultAdapter, _ := b.AuthAdapterRegistry.GetAdapter("direct-for-admin")
 		userSession := defaultAdapter.GetSession(ctx)
-		if userSession == nil || userSession.GetUser().ID == 0 {
+		if userSession == nil || userSession.GetUser() == nil {
 			type Context struct {
 				core.AdminContext
 			}
