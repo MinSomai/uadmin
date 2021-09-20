@@ -48,7 +48,7 @@ func (s *SessionTestSuite) TestDbSessionAdapter() {
 	if err == nil {
 		assert.True(s.T(), false)
 	}
-	expiresOn := time.Time{}
+	expiresOn := time.Now().UTC()
 	expiresOn = expiresOn.Add(10 * time.Minute)
 	dbadapter.ExpiresOn(&expiresOn)
 	assert.False(s.T(), dbadapter.IsExpired())

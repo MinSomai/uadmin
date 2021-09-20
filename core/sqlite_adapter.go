@@ -61,6 +61,7 @@ func (d *SqliteAdapter) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 		db, err = gorm.Open(sqlite.Dialector{DriverName: "UadminSqliteDriver", DSN: aliasDatabaseSettings.Name}, &gorm.Config{
 			DisableForeignKeyConstraintWhenMigrating: true,
 			DryRun:                                   dryRun,
+			Logger:                                   logger.Default.LogMode(logger.Info),
 		})
 	}
 	db.Exec("PRAGMA case_sensitive_like = 1;")

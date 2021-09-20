@@ -88,7 +88,7 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	cookieName := core.CurrentConfig.D.Uadmin.APICookieName
 	cookie, err := c.Cookie(cookieName)
 	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second
-	sessionExpirationTime := time.Now().Add(sessionDuration)
+	sessionExpirationTime := time.Now().UTC().Add(sessionDuration)
 	if cookie != "" {
 		sessionAdapter, _ = sessionAdapter.GetByKey(cookie)
 		sessionAdapter.ExpiresOn(&sessionExpirationTime)
@@ -153,7 +153,7 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	sessionAdapter = sessionAdapter.Create()
 	sessionAdapter.SetUser(&user)
 	sessionDuration := time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second
-	sessionExpirationTime := time.Now().Add(sessionDuration)
+	sessionExpirationTime := time.Now().UTC().Add(sessionDuration)
 	sessionAdapter.ExpiresOn(&sessionExpirationTime)
 	sessionAdapter.Save()
 	c.SetCookie(core.CurrentConfig.D.Uadmin.APICookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
@@ -216,7 +216,7 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
 		return
 	}
-	if !sessionAdapter.IsExpired() {
+	if sessionAdapter.IsExpired() {
 		c.JSON(http.StatusBadRequest, utils.APIBadResponse("session expired"))
 		return
 	}
@@ -246,7 +246,7 @@ func (ap *DirectAuthProvider) GetSession(c *gin.Context) sessioninterfaces.ISess
 	if err != nil {
 		return nil
 	}
-	if !sessionAdapter.IsExpired() {
+	if sessionAdapter.IsExpired() {
 		return nil
 	}
 	return sessionAdapter

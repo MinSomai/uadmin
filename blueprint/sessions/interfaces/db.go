@@ -80,7 +80,7 @@ func (s *DbSession) IsExpired() bool {
 	if s.session == nil || s.session.ExpiresOn == nil {
 		return true
 	}
-	return s.session.ExpiresOn.After(time.Now())
+	return s.session.ExpiresOn.Before(time.Now().UTC())
 }
 
 func (s *DbSession) Save() bool {

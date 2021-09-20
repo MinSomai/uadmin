@@ -26,6 +26,8 @@
         </div>
         {{$initialOrderList := .InitialOrderList }}
         {{$initialOrder := .InitialOrder }}
+        {{$userObject := .GetUserObject }}
+        {{$adminPage := .AdminPage }}
         <div class="col-xs-3 col-sm-4" style="padding:0px;">
             {{ if .PermissionForBlueprint.HasAddPermission }}
                 {{ if not .NoPermissionToAddNew }}
@@ -44,7 +46,7 @@
                         <option>Choose action</option>
                         {{ end }}
 
-                        {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActions }}
+                        {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActionsForUser $userObject $adminPage }}
                         {{ if $adminModelAction.Placement.ShowOnTheListPage }}
                         <option {{ if $adminModelAction.RequiresExtraSteps }}data-extrasteps="1"{{ end }} name="{{ $adminModelAction.SlugifiedActionName }}" data-description="{{ $adminModelAction.Description }}" data-method="{{ $adminModelAction.RequestMethod }}">{{ $adminModelAction.ActionName }}</option>
                         {{ end }}

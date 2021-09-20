@@ -91,19 +91,20 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 			serverKey := c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.APICookieName))
 			if serverKey == "" {
-				if c.Query("for-uadmin-panel") == "1" {
-					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
-				} else {
-					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.APICookieName)
-				}
+				serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
 			}
 			defaultSessionAdapter, _ := b.SessionAdapterRegistry.GetDefaultAdapter()
 			session, _ := defaultSessionAdapter.GetByKey(serverKey)
+			if session == nil {
+				c.Next()
+				return
+			}
 			if session.IsExpired() && c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL {
 				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
 				return
 			}
-			if session.GetUser() != nil && !session.GetUser().IsStaff && !session.GetUser().IsSuperUser {
+			user := session.GetUser()
+			if c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL && (user == nil || (!user.IsStaff && !user.IsSuperUser)) {
 				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
 				return
 			}

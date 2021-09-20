@@ -30,7 +30,7 @@ func init() {
 		if adminRequestParams.CreateSession && session == nil {
 			// create session if no session found in cookies
 			session = sessionAdapter.Create()
-			expiresOn := time.Now().Add(time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second)
+			expiresOn := time.Now().UTC().Add(time.Duration(core.CurrentConfig.D.Uadmin.SessionDuration) * time.Second)
 			session.ExpiresOn(&expiresOn)
 			ctx.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, session.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", ctx.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
 			session.Save()

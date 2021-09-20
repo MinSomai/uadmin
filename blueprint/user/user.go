@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/asaskevich/govalidator"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
@@ -244,7 +243,6 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			core.AdminContext
 			Menu string
 		}
-		spew.Dump("request 111", ctx.Request)
 		c := &Context{}
 		core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
 		//

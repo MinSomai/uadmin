@@ -27,6 +27,7 @@ type User struct {
 	OTPSeed              string       `protobuf:"bytes,15,opt,name=OTPSeed,proto3" json:"OTPSeed,omitempty"`
 	OTPRequired          bool         `protobuf:"bytes,15,opt,name=OTPRequired,proto3" json:"OTPRequired,omitempty" uadminform:"OTPRequiredOptions" gorm:"default:false"`
 	Salt                 string       `protobuf:"bytes,16,opt,name=Salt,proto3" json:"Salt,omitempty"`
+	PermissionRegistry   *UserPermRegistry `gorm:"-"`
 }
 
 func (u *User) Reset() { *u = User{} }
@@ -61,8 +62,12 @@ func (u *User) Save() {
 }
 
 func (u *User) BuildPermissionRegistry() *UserPermRegistry {
+	if u.PermissionRegistry != nil {
+		return u.PermissionRegistry
+	}
 	userPermRegistry := NewUserPermRegistry()
 	userPermRegistry.IsSuperUser = u.IsSuperUser
+	u.PermissionRegistry = userPermRegistry
 	if u.IsSuperUser {
 		return userPermRegistry
 	}

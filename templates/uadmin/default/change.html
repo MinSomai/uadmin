@@ -40,9 +40,11 @@
                         </div>
                         {{ end }}
                         <div class="col-xs-12 col-sm-12" style="padding:0px;">
+                            {{$userObject := .GetUserObject }}
+                            {{$adminPage := .AdminPage }}
                             {{ if .AdminModelActionRegistry.IsThereAnyActions }}
                                {{ $idValue := .ID }}
-                                {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActions }}
+                                {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActionsForUser $userObject $adminPage }}
                                     {{ if $adminModelAction.Placement.DisplayOnEditPage }}
                                         {{ if ne $idValue 0 }}
                                             <a class="btn btn-primary pull-right" href="{{.CurrentURL}}/{{ $adminModelAction.SlugifiedActionName }}">

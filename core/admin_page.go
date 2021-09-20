@@ -291,6 +291,7 @@ type AdminPage struct {
 	RegisteredHTTPHandlers             bool
 	NoPermissionToAddNew               bool
 	NoPermissionToEdit                 bool
+	PermissionName                     CustomPermission
 }
 
 type ModelActionRequestParams struct {
@@ -301,6 +302,20 @@ type ModelActionRequestParams struct {
 func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {
 	ID := GetID(gormModelV)
 	return fmt.Sprintf("%s/%s/%s/edit/%d", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug, ID)
+}
+
+func (ap *AdminPage) DoesUserHavePermission(u *User, permissionNameL ...CustomPermission) bool {
+	permissionName := ap.PermissionName
+	if permissionName == "" && len(permissionNameL) > 0 {
+		permissionName = permissionNameL[0]
+	}
+	if permissionName == "" {
+		panic("Please specify permission name you want to check user permissions for")
+	}
+	userPermissions := u.BuildPermissionRegistry()
+	// modelI, _ := ap.GenerateModelI()
+	userPerm := userPermissions.GetPermissionForBlueprint(ap.BlueprintName, ap.ModelName)
+	return userPerm.DoesUserHaveRightFor(permissionName)
 }
 
 func (ap *AdminPage) GenerateLinkToAddNewModel() string {

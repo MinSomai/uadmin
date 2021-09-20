@@ -1,7 +1,7 @@
 TEST_PATTERN?=
 RACE?=-race
 CURRENT_DIRECTORY?=$(shell pwd)
-TEST_ENVIRONMENT?=
+TEST_ENVIRONMENT?=test.sqlite
 UT_PACKAGES?=$(shell $(GO) list ./...)
 FUNC_TESTS_CMD:="grep -e 'func Test${TEST_PATTERN}' tests/*.go | perl -pe 's|.*func (.*?)\(.*|\1|g' | shuf"
 FUNC_TESTS:=$(shell sh -c $(FUNC_TESTS_CMD))

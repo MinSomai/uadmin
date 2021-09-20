@@ -23,8 +23,20 @@ func init() {
 		},
 	)
 	removalModelAction.RequiresExtraSteps = true
+	removalModelAction.PermName = "delete"
 	removalModelAction.Description = "Delete users permanently"
 	removalModelAction.Handler = func(ap *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
+		type Context struct {
+			AdminContext
+		}
+		c := &Context{}
+		adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
+		PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
+		user := c.GetUserObject()
+		if !ap.DoesUserHavePermission(user, "delete") {
+			ctx.AbortWithStatus(409)
+			return false, 0
+		}
 		removalPlan := make([]RemovalTreeList, 0)
 		removalConfirmed := ctx.PostForm("removal_confirmed")
 		afo.GetUadminDatabase().Db.Transaction(func(tx *gorm.DB) error {
@@ -136,6 +148,29 @@ func (amar *AdminModelActionRegistry) GetAllModelActions() <-chan *AdminModelAct
 		defer close(chnl)
 		mActions := make([]*AdminModelAction, 0)
 		for _, mAction := range amar.AdminModelActions {
+			mActions = append(mActions, mAction)
+		}
+		sort.Slice(mActions, func(i, j int) bool {
+			return mActions[i].ActionName < mActions[j].ActionName
+		})
+		for _, mAction := range mActions {
+			chnl <- mAction
+		}
+	}()
+	return chnl
+}
+
+func (amar *AdminModelActionRegistry) GetAllModelActionsForUser(user *User, adminPage *AdminPage) <-chan *AdminModelAction {
+	chnl := make(chan *AdminModelAction)
+	go func() {
+		defer close(chnl)
+		permissionRegistry := user.BuildPermissionRegistry()
+		mActions := make([]*AdminModelAction, 0)
+		userPerm := permissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
+		for _, mAction := range amar.AdminModelActions {
+			if mAction.PermName != "" && !userPerm.DoesUserHaveRightFor(mAction.PermName) {
+				continue
+			}
 			mActions = append(mActions, mAction)
 		}
 		sort.Slice(mActions, func(i, j int) bool {

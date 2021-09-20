@@ -80,6 +80,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							Message                  string
 							CurrentAdminContext      IAdminContext
 							NoPermissionToAddNew     bool
+							AdminPage                *AdminPage
 							NoPermissionToEdit       bool
 						}
 
@@ -87,6 +88,12 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						c.NoPermissionToAddNew = adminPage.NoPermissionToAddNew
 						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 						PopulateTemplateContextForAdminPanel(ctx, c, NewAdminRequestParams())
+						user := c.GetUserObject()
+						existsAnyPermission := user.BuildPermissionRegistry().IsThereAnyPermissionForBlueprint(adminPage.BlueprintName)
+						if !existsAnyPermission {
+							ctx.AbortWithStatus(409)
+							return
+						}
 						c.Message = ctx.Query("message")
 						c.NoPermissionToEdit = adminPage.NoPermissionToEdit
 						c.PermissionForBlueprint = c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
@@ -94,6 +101,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						c.AdminModelActionRegistry = adminPage.ModelActionsRegistry
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, IsActive: true})
+						c.AdminPage = adminPage
 						if ctx.Request.Method == "POST" {
 							c.AdminFilterObjects.WithTransaction(func(afo1 IAdminFilterObjects) error {
 								postForm, _ := ctx.MultipartForm()
@@ -138,6 +146,11 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					c := &Context{}
 					adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 					PopulateTemplateContextForAdminPanel(ctx, c, NewAdminRequestParams())
+					user := c.GetUserObject()
+					if !adminPage.DoesUserHavePermission(user, "read") {
+						ctx.AbortWithStatus(409)
+						return
+					}
 					// permissionForBlueprint := c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
 					adminFilterObjects := adminPage.GetQueryset(adminPage, adminRequestParams)
 					rows, _ := adminFilterObjects.GetFullQuerySet().Rows()
@@ -190,6 +203,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						AdminRequestParams          *AdminRequestParams
 						CurrentAdminContext         IAdminContext
 						ListEditableFormsForInlines *FormListEditableCollection
+						AdminPage                   *AdminPage
 					}
 
 					c := &Context{}
@@ -217,8 +231,21 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					form.DontGenerateFormTag = true
 					c.IsNew = true
 					c.AdminPageInlineRegistry = adminPage.InlineRegistry
+					c.AdminPage = adminPage
 					form.ForAdminPanel = true
+					user := c.GetUserObject()
 					if ctx.Request.Method == "POST" {
+						if id != "new" {
+							if !subPage.DoesUserHavePermission(user, "edit") {
+								ctx.AbortWithStatus(409)
+								return
+							}
+						} else {
+							if !subPage.DoesUserHavePermission(user, "add") {
+								ctx.AbortWithStatus(409)
+								return
+							}
+						}
 						requestForm, _ := ctx.MultipartForm()
 						var modelToSave interface{}
 						if id != "new" {
@@ -279,6 +306,17 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							return
 						}
 					} else {
+						if id != "new" {
+							if !subPage.DoesUserHavePermission(user, "edit") {
+								ctx.AbortWithStatus(409)
+								return
+							}
+						} else {
+							if !subPage.DoesUserHavePermission(user, "add") {
+								ctx.AbortWithStatus(409)
+								return
+							}
+						}
 						for inline := range adminPage.InlineRegistry.GetAll() {
 							if id == "new" {
 								continue
