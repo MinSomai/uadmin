@@ -103,6 +103,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
 				return
 			}
+			if session.GetUser() != nil && !session.GetUser().IsStaff && !session.GetUser().IsSuperUser {
+				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
+				return
+			}
 			c.Next()
 		}
 	}())
