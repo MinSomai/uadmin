@@ -452,8 +452,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			passwordField.SetUpField = func(w core.IWidget, m interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 				user := m.(*core.User)
 				vI, _ := v.(string)
-				if user.Salt == "" && vI != "" {
-					user.Salt = utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
+				if vI != "" {
+					if user.Salt == "" {
+						user.Salt = utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
+					}
 					hashedPassword, _ := utils2.HashPass(vI, user.Salt)
 					user.IsPasswordUsable = true
 					user.Password = hashedPassword
