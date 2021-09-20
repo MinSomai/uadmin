@@ -20,6 +20,7 @@ Reach us at:
 
 - [gophers.slack.com #uadmin](https://gophers.slack.com/messages/uadmin/)
 - [discord #uadmin](https://discord.gg/kADzHWatSj)
+- [telegram uadmin_development](https://t.me/joinchat/VzgmokqjF7s4Nzk0)
 
 [join gophers.slack.com](https://join.slack.com/t/gophers/shared_invite/zt-fajz7jh3-2cpkmFU~hQb8d5LmOCnhfQ)
 
