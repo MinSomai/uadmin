@@ -10,6 +10,10 @@ Let's discover **Uadmin in less than 30 minutes**.
 
 Get started by **creating a new project**.
 
+## Hot reloading of your go project on file changes
+
+For this we propose you to use "reflex" go package in a way: `reflex -r '\.go' -s -- sh -c "go run cmd/uadmin/main.go admin serve"`. And on file changes your project would be reloaded.
+
 ## Generate a new project
 
 1. Make sure you use go1.16.
