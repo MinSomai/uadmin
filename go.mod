@@ -56,7 +56,7 @@ require (
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/traefik/yaegi v0.10.0 // indirect
+	github.com/traefik/yaegi v0.10.0
 	github.com/uadmin/rrd v0.0.0-20200219090641-e438da1b7640
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
