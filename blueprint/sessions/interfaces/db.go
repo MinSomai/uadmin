@@ -77,6 +77,9 @@ func (s *DbSession) Delete() bool {
 }
 
 func (s *DbSession) IsExpired() bool {
+	if s.session == nil || s.session.ExpiresOn == nil {
+		return true
+	}
 	return s.session.ExpiresOn.After(time.Now())
 }
 

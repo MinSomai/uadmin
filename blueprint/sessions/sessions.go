@@ -78,6 +78,34 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Next()
 		}
 	}())
+	mainRouter.Use(func() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			if !strings.HasPrefix(c.Request.URL.Path, core.CurrentConfig.D.Uadmin.RootAdminURL) {
+				c.Next()
+				return
+			}
+			contentType := c.Request.Header.Get("Content-Type")
+			if contentType == "application/json" {
+				c.Next()
+				return
+			}
+			serverKey := c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.APICookieName))
+			if serverKey == "" {
+				if c.Query("for-uadmin-panel") == "1" {
+					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
+				} else {
+					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.APICookieName)
+				}
+			}
+			defaultSessionAdapter, _ := b.SessionAdapterRegistry.GetDefaultAdapter()
+			session, _ := defaultSessionAdapter.GetByKey(serverKey)
+			if session.IsExpired() && c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL {
+				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
+				return
+			}
+			c.Next()
+		}
+	}())
 	core.FuncMap["CSRF"] = func(Key string) string {
 		sessionAdapter, _ := ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		session, _ := sessionAdapter.GetByKey(Key)
