@@ -4,8 +4,9 @@ Easy to use, blazing fast and secure.
 
 [![go report card](https://goreportcard.com/badge/github.com/sergeyglazyrindev/uadmin "go report card")](https://goreportcard.com/report/github.com/sergeyglazyrindev/uadmin)
 [![GoDoc](https://godoc.org/github.com/sergeyglazyrindev/uadmin?status.svg)](https://godoc.org/github.com/sergeyglazyrindev/uadmin)
-[![codecov](https://codecov.io/gh/uadmin/uadmin/branch/master/graph/badge.svg)](https://codecov.io/gh/uadmin/uadmin)
-[![Build Status](https://travis-ci.org/uadmin/uadmin.svg?branch=master)](https://travis-ci.org/uadmin/uadmin)
+<a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-3%25-brightgreen.svg?longCache=true&style=flat)</a>
+![sqlite build status](https://github.com/sergeyglazyrindev/uadmin/actions/workflows/sqlite.ci.yml/badge.svg)
+![postgres build status](https://github.com/sergeyglazyrindev/uadmin/actions/workflows/postgres.ci.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/sergeyglazyrindev/uadmin/blob/master/LICENSE)
 
 Originally open sourced by [IntegrityNet Solutions and Services](https://www.integritynet.biz/)

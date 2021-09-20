@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"time"
 )
@@ -80,6 +81,7 @@ func (s *DbSession) IsExpired() bool {
 	if s.session == nil || s.session.ExpiresOn == nil {
 		return true
 	}
+	spew.Dump("session expires on", s.session.ExpiresOn, time.Now().UTC())
 	return s.session.ExpiresOn.Before(time.Now().UTC())
 }
 

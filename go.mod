@@ -13,6 +13,7 @@ require (
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fatih/color v1.12.0
 	github.com/fatih/structtag v1.2.0 // indirect
+	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.5.0
@@ -26,6 +27,7 @@ require (
 	github.com/go-openapi/swag v0.19.13 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golangci/errcheck v0.0.0-20181223084120-ef45e06d44b6 // indirect
 	github.com/golangci/go-tools v0.0.0-20190318055746-e32c54105b7c // indirect
 	github.com/golangci/goconst v0.0.0-20180610141641-041c5f2b40f3 // indirect
@@ -35,6 +37,7 @@ require (
 	github.com/golangci/ineffassign v0.0.0-20190609212857-42439a7714cc // indirect
 	github.com/golangci/prealloc v0.0.0-20180630174525-215b22d4de21 // indirect
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/jpoles1/gopherbadger v2.5.0+incompatible // indirect
 	github.com/klauspost/cpuid v1.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.2

@@ -74,10 +74,10 @@ ifeq ($(COVERAGE), true)
 	set -v ; \
 	for pkg in ${UT_PACKAGES}; do \
 		if [ -n "$$pkg" ]; then \
-			coverfile="${COVERAGE_WD}/$$(echo $$pkg | tr / -).cover"; \
+			coverfile="${COVERAGE_WD}/uadmin.cover"; \
         	export UADMIN_PATH=${CURRENT_DIRECTORY} ; \
 			export TEST_ENVIRONMENT=${TEST_ENVIRONMENT} ; \
-			$(GO) test -tags "${BUILD_TAGS} test" -covermode=${COVERAGE_MODE} -coverprofile="$$coverfile" ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg || exit 1; \
+			$(GO) test -tags "${BUILD_TAGS} test" -coverpkg ./... -coverprofile="$$coverfile" ${VERBOSE_FLAGS} -timeout ${TIMEOUT} $$pkg || exit 1; \
 		fi; \
 	done
 else
