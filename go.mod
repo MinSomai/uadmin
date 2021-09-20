@@ -8,6 +8,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/c-bata/go-prompt v0.2.6 // indirect
+	github.com/cespare/reflex v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fatih/color v1.12.0

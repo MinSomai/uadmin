@@ -1,6 +1,7 @@
 package uadmin
 
 import (
+	_ "github.com/traefik/yaegi"
 	"os"
 	"os/exec"
 )
