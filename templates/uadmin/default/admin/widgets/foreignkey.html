@@ -1,6 +1,6 @@
 {{ if not .ShowOnlyHtmlInput }}
   <td class="hidden-xs">
-    <label {{ if .HelpText }}data-toggle="tooltip" data-placement="bottom" data-original-title="{{ .HelpText }}"{{ end }} class="col-sm-12 control-label form_label"><span class="camelcaseFix">{{ .FieldDisplayName }}</span>:
+    <label {{ if .HelpText }}data-toggle="tooltip" data-placement="bottom" data-original-title="{{ .HelpText }}"{{ end }} class="col-sm-12 control-label form_label"><span class="camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</span>:
       <span class="{{ if .HelpText }}text-muted{{ end }}" style="font-size:12px;">
                           {{ if .HelpText }}
                               <i class="fa fa-question-circle"></i>:
@@ -12,7 +12,7 @@
     </label>
   </td>
   <td style="width:80%;" class="search">
-    <label class="col-sm-12 control-label form_label visible-xs"><span class="camelcaseFix">{{ .FieldDisplayName }}</span>:{{ if .Required }}<span style="color:#f00;font-weight:bold;">&nbsp;*</span>{{ end }}</label>
+    <label class="col-sm-12 control-label form_label visible-xs"><span class="camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</span>:{{ if .Required }}<span style="color:#f00;font-weight:bold;">&nbsp;*</span>{{ end }}</label>
     <div class="col-sm-12 ">
       <div class="input-group col-sm-12 {{ if .AddNewLink }}related-target{{ end }}">
 {{ end }}

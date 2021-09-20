@@ -85,7 +85,7 @@
                                             </th>
                                             {{range $inline.ListDisplay.GetAllFields}}
                                                 <th class="pointer">
-                                                    {{.DisplayName}}
+                                                    {{ GetDisplayName .DisplayName}}
                                                 </th>
                                             {{end}}
                                         </tr>
@@ -130,10 +130,10 @@
                                             {{ range $iterateAdminObjects := ($inline.GetAll $model $requestParams) }}
                                                 <tr>
                                                     <td onclick="$(this).parent().parent().parent().find('.main_check').prop('checked', false);">
-                                                        <input  type="hidden" name="{{ $inline.GetInlineID}}-object_id-{{ $iterateAdminObjects.Id }}">
-                                                        <input  class="item_check" type="checkbox" name="{{ $inline.GetInlineID}}-object_id-to-remove-{{ $iterateAdminObjects.Id }}">
+                                                        <input  type="hidden" name="{{ $inline.GetInlineID}}-object_id-{{ $iterateAdminObjects.ID }}">
+                                                        <input  class="item_check" type="checkbox" name="{{ $inline.GetInlineID}}-object_id-to-remove-{{ $iterateAdminObjects.ID }}">
                                                     </td>
-                                                    {{ $form := $listEditableFormsForInlines.GetForInlineAndForModel $inline.Prefix $iterateAdminObjects.Id}}
+                                                    {{ $form := $listEditableFormsForInlines.GetForInlineAndForModel $inline.Prefix $iterateAdminObjects.ID}}
                                                     {{range $field := $listDisplay.GetAllFields}}
                                                         <td>
                                                             {{ if $field.Field }}

@@ -1,5 +1,5 @@
 <div class="form-group search">
-  <label class="camelcaseFix">{{.FieldDisplayName}}</label>
+  <label class="camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</label>
   <div class="input-group">
     <span style="min-width:140px;" class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
     <select name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }}>

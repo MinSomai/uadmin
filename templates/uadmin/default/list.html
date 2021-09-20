@@ -74,7 +74,7 @@
                             <input class="main_check" type="checkbox">
                         </th>
                         {{range .ListDisplay.GetAllFields}}
-                            <th class="trigger_desc pointer" ><a href="{{ if .IsEligibleForOrdering }}?initialOrder={{$initialOrder}}&o={{.GetOrderingName $initialOrderList}}{{ end }}" class="camelcaseFix">{{.DisplayName}}</a>
+                            <th class="trigger_desc pointer" ><a href="{{ if .IsEligibleForOrdering }}?initialOrder={{$initialOrder}}&o={{.GetOrderingName $initialOrderList}}{{ end }}" class="camelcaseFix">{{ GetDisplayName .DisplayName}}</a>
                                 <span class="fa-stack fa-fw pull-right">
                                     <i class="fontdarkgray fa fa-sort-asc fa-stack-1x"></i>
                                     <i class="fontdarkgray fa fa-sort-desc fa-stack-1x"></i>
