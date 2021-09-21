@@ -17,9 +17,6 @@ Before pushing your changes, please make sure the tests and the linters pass:
 * make lint
 * make test
 
-_Please note, make functional will create local network resources
-(bridges, namespaces, ...)_
-
 Once ready push your changes to your Uadmin fork our CI will check your
 pull request.
 
