@@ -2,7 +2,6 @@ package admin
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +40,6 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 	}
 	adminUserPage.ListFilter.Add(listFilter)
 	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
-	spew.Dump("users11111111 found", users)
 	assert.Equal(suite.T(), reflect.Indirect(reflect.ValueOf(users)).Len(), 1)
 }
 

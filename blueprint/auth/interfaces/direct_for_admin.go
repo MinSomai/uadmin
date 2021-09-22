@@ -2,7 +2,6 @@ package interfaces
 
 import (
 	"github.com/asaskevich/govalidator"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
@@ -220,7 +219,6 @@ func getUserForUadminPanel(user core.IUser) *gin.H {
 	if user == nil {
 		return &gin.H{}
 	}
-	spew.Dump("user111", user)
 	return &gin.H{"name": user.GetUsername(), "id": user.GetID(), "for-uadmin-panel": true}
 }
 
@@ -240,7 +238,6 @@ func (ap *DirectAuthForAdminProvider) GetSession(c *gin.Context) sessioninterfac
 	if err != nil {
 		return nil
 	}
-	spew.Dump("check session", sessionAdapter.IsExpired())
 	if sessionAdapter.IsExpired() {
 		return nil
 	}

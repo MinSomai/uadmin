@@ -2,7 +2,6 @@ package admin
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/stretchr/testify/assert"
@@ -33,11 +32,9 @@ func (suite *AdminPaginationTestSuite) TestPagination() {
 	var users = core.GenerateBunchOfUserModels()
 	adminRequestParams := core.NewAdminRequestParams()
 	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
-	spew.Dump("users2222 found", users)
 	assert.Equal(suite.T(), reflect.Indirect(reflect.ValueOf(users)).Len(), core.CurrentConfig.D.Uadmin.AdminPerPage)
 	adminRequestParams.Paginator.Offset = 88
 	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
-	spew.Dump("users33333 found", users)
 	assert.Greater(suite.T(), reflect.Indirect(reflect.ValueOf(users)).Len(), core.CurrentConfig.D.Uadmin.AdminPerPage)
 }
 
