@@ -21,8 +21,8 @@ type ISessionProvider interface {
 	Set(name string, value string)
 	Get(name string) (string, error)
 	ClearAll() bool
-	GetUser() *core.User
-	SetUser(user *core.User)
+	GetUser() core.IUser
+	SetUser(user core.IUser)
 	Save() bool
 	ExpiresOn(*time.Time)
 }

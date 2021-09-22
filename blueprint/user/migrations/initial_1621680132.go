@@ -26,7 +26,7 @@ func (m initial1621680132) Up(uadminDatabase *core.UadminDatabase) error {
 	if err != nil {
 		return err
 	}
-	err = db.AutoMigrate(core.User{})
+	err = db.AutoMigrate(core.GenerateUserModel())
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (m initial1621680132) Down(uadminDatabase *core.UadminDatabase) error {
 	if err != nil {
 		return err
 	}
-	err = db.Migrator().DropTable(core.User{})
+	err = db.Migrator().DropTable(core.GenerateUserModel())
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (m initial1621680132) Down(uadminDatabase *core.UadminDatabase) error {
 	db.Model(&core.ContentType{}).Where(&core.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
 	db.Unscoped().Where(" 1 = 1").Delete(&contentType)
 	stmt = &gorm.Statement{DB: db}
-	stmt.Parse(&core.User{})
+	stmt.Parse(core.GenerateUserModel())
 	db.Model(&core.ContentType{}).Where(&core.ContentType{BlueprintName: "user", ModelName: stmt.Schema.Table}).First(&contentType)
 	db.Unscoped().Where(" 1 = 1").Delete(&contentType)
 	return nil

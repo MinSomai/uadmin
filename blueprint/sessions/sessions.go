@@ -104,7 +104,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				return
 			}
 			user := session.GetUser()
-			if c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL && (user == nil || (!user.IsStaff && !user.IsSuperUser)) {
+			if c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL && (user == nil || (!user.GetIsStaff() && !user.GetIsSuperUser())) {
 				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
 				return
 			}

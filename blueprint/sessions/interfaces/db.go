@@ -19,9 +19,10 @@ func (s *DbSession) Set(name string, value string) {
 	s.session.SetData(name, value)
 }
 
-func (s *DbSession) SetUser(user *core.User) {
-	s.session.UserID = &user.ID
-	s.session.User = user
+func (s *DbSession) SetUser(user core.IUser) {
+	userID := user.GetID()
+	s.session.UserID = &userID
+	s.session.User = user.(*core.User)
 }
 
 func (s *DbSession) Get(name string) (string, error) {
@@ -40,8 +41,14 @@ func (s *DbSession) GetKey() string {
 	return s.session.Key
 }
 
-func (s *DbSession) GetUser() *core.User {
+func (s *DbSession) GetUser() core.IUser {
 	if s.session == nil {
+		return nil
+	}
+	if s.session.UserID == nil {
+		return nil
+	}
+	if s.session.User == nil {
 		return nil
 	}
 	return s.session.User

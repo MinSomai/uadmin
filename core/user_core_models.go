@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"time"
 )
@@ -30,13 +31,193 @@ type User struct {
 	PermissionRegistry   *UserPermRegistry `gorm:"-"`
 }
 
+func (u *User) GetID() uint {
+	return u.ID
+}
+
+func (u *User) GetCreatedAt() time.Time {
+	return u.CreatedAt
+}
+
+func (u *User) GetUpdatedAt() time.Time {
+	return u.UpdatedAt
+}
+
+func (u *User) GetDeletedAt() gorm.DeletedAt {
+	return u.DeletedAt
+}
+
+func (u *User) GetUsername() string {
+	return u.Username
+}
+
+func (u *User) GetFirstName() string {
+	return u.FirstName
+}
+
+func (u *User) GetLastName() string {
+	return u.LastName
+}
+
+func (u *User) GetPassword() string {
+	return u.Password
+}
+
+func (u *User) GetIsPasswordUsable() bool {
+	return u.IsPasswordUsable
+}
+
+func (u *User) GetEmail() string {
+	return u.Email
+}
+
+func (u *User) GetActive() bool {
+	return u.Active
+}
+
+func (u *User) GetIsStaff() bool {
+	return u.IsStaff
+}
+
+func (u *User) GetIsSuperUser() bool {
+	return u.IsSuperUser
+}
+
+func (u *User) GetUserGroups() *[]UserGroup {
+	return &u.UserGroups
+}
+
+func (u *User) GetPermissions() *[]Permission {
+	return &u.Permissions
+}
+
+func (u *User) GetPhoto() string {
+	return u.Photo
+}
+
+func (u *User) GetLastLogin() *time.Time {
+	return u.LastLogin
+}
+
+func (u *User) GetExpiresOn() *time.Time {
+	return u.ExpiresOn
+}
+
+func (u *User) GetGeneratedOTPToVerify() string {
+	return u.GeneratedOTPToVerify
+}
+
+func (u *User) GetOTPSeed() string {
+	return u.OTPSeed
+}
+
+func (u *User) GetOTPRequired() bool {
+	return u.OTPRequired
+}
+
+func (u *User) GetSalt() string {
+	return u.Salt
+}
+
+func (u *User) GetPermissionRegistry() *UserPermRegistry {
+	return u.PermissionRegistry
+}
+
+func (u *User) SetCreatedAt(t *time.Time) {
+	u.CreatedAt = *t
+}
+
+func (u *User) SetUpdatedAt(t *time.Time) {
+	u.UpdatedAt = *t
+}
+
+func (u *User) SetDeletedAt(t gorm.DeletedAt) {
+	u.DeletedAt = t
+}
+
+func (u *User) SetUsername(username string) {
+	u.Username = username
+}
+
+func (u *User) SetFirstName(firstName string) {
+	u.FirstName = firstName
+}
+
+func (u *User) SetLastName(lastName string) {
+	u.LastName = lastName
+}
+
+func (u *User) SetPassword(password string) {
+	u.Password = password
+}
+
+func (u *User) SetIsPasswordUsable(isPasswordUsable bool) {
+	u.IsPasswordUsable = isPasswordUsable
+}
+
+func (u *User) SetEmail(email string) {
+	u.Email = email
+}
+
+func (u *User) SetActive(isActive bool) {
+	u.Active = isActive
+}
+
+func (u *User) SetIsStaff(isStaff bool) {
+	u.IsStaff = isStaff
+}
+
+func (u *User) SetIsSuperUser(isSuperUser bool) {
+	u.IsSuperUser = isSuperUser
+}
+
+func (u *User) SetUserGroups(userGroups *[]UserGroup) {
+	u.UserGroups = *userGroups
+}
+
+func (u *User) SetPermissions(permissions *[]Permission) {
+	u.Permissions = *permissions
+}
+
+func (u *User) SetPhoto(photo string) {
+	u.Photo = photo
+}
+
+func (u *User) SetLastLogin(t *time.Time) {
+	u.LastLogin = t
+}
+
+func (u *User) SetExpiresOn(t *time.Time) {
+	u.ExpiresOn = t
+}
+
+func (u *User) SetGeneratedOTPToVerify(generatedOtpToVerify string) {
+	u.GeneratedOTPToVerify = generatedOtpToVerify
+}
+
+func (u *User) SetOTPSeed(seed string) {
+	u.OTPSeed = seed
+}
+
+func (u *User) SetOTPRequired(isOtpRequired bool) {
+	u.OTPRequired = isOtpRequired
+}
+
+func (u *User) SetSalt(salt string) {
+	u.Salt = salt
+}
+
+func (u *User) SetPermissionRegistry(upr *UserPermRegistry) {
+	u.PermissionRegistry = upr
+}
+
 func (u *User) Reset() { *u = User{} }
 
 func (u *User) String() string {
-	return fmt.Sprintf("User %s - %s", u.Email, u.FullName())
+	return fmt.Sprintf("User %s - %s", u.Email, u.GetFullName())
 }
 
-func (u *User) FullName() string {
+func (u *User) GetFullName() string {
 	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
 }
 

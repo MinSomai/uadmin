@@ -17,7 +17,12 @@ type AdminModelActionTestSuite struct {
 }
 
 func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
-	userModel := &core.User{Username: "adminmodelactiontest", FirstName: "firstname", LastName: "lastname", IsSuperUser: true, Email: "adminmodelactiontest@gmail.com"}
+	userModel := core.GenerateUserModel()
+	userModel.SetUsername("adminmodelactiontest")
+	userModel.SetFirstName("firstname")
+	userModel.SetLastName("lastname")
+	userModel.SetIsSuperUser(true)
+	userModel.SetEmail("adminmodelactiontest@gmail.com")
 	suite.UadminDatabase.Db.Create(userModel)
 	adminUserBlueprintPage, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
@@ -29,7 +34,7 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 		return tx.(*core.GormPersistenceStorage).Db.Error == nil, tx.(*core.GormPersistenceStorage).Db.RowsAffected
 	}
 	adminUserPage.ModelActionsRegistry.AddModelAction(adminModelAction)
-	var jsonStr = []byte(fmt.Sprintf(`{"object_ids": "%d"}`, userModel.ID))
+	var jsonStr = []byte(fmt.Sprintf(`{"object_ids": "%d"}`, userModel.GetID()))
 	req, _ := http.NewRequest("POST", "/admin/users/user/turnsuperuserstonormalusers/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	for adminModelAction := range adminUserPage.ModelActionsRegistry.GetAllModelActions() {
@@ -41,7 +46,7 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 
 	}
 	adminContext := &core.AdminContext{}
-	userForm := core.NewFormFromModelFromGinContext(adminContext, &core.User{}, make([]string, 0), []string{"ID"}, true, "")
+	userForm := core.NewFormFromModelFromGinContext(adminContext, core.GenerateUserModel(), make([]string, 0), []string{"ID"}, true, "")
 	adminUserPage.Form = userForm
 	uadmin.TestHTTPResponse(suite.T(), suite.App, req, func(w *httptest.ResponseRecorder) bool {
 		db := suite.UadminDatabase.Db

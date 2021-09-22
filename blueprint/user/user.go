@@ -67,9 +67,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		var user core.User
-		db.Model(core.User{}).Where(&core.User{Email: json.Email}).First(&user)
-		if user.ID == 0 {
+		user := core.GenerateUserModel()
+		db.Model(core.GenerateUserModel()).Where(&core.User{Email: json.Email}).First(user)
+		if user.GetID() == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "User with this email not found"})
 			return
 		}
@@ -87,14 +87,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 
 		c := Context{}
-		c.Name = user.Username
+		c.Name = user.GetUsername()
 		c.Website = core.CurrentConfig.D.Uadmin.SiteName
 		host := core.CurrentConfig.D.Uadmin.PoweredOnSite
 		// @todo, generate code to restore access
 		actionExpiresAt := time.Now()
 		actionExpiresAt = actionExpiresAt.Add(time.Duration(core.CurrentConfig.D.Uadmin.ForgotCodeExpiration) * time.Minute)
 		var oneTimeAction = core.OneTimeAction{
-			User:       user,
+			User:       *user.(*core.User),
 			ExpiresOn:  actionExpiresAt,
 			Code:       utils.RandStringRunesForOneTimeAction(32),
 			ActionType: 1,
@@ -110,7 +110,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			return
 		}
 		subject := "Password reset for admin panel on the " + core.CurrentConfig.D.Uadmin.SiteName
-		err = utils.SendEmail(core.CurrentConfig.D.Uadmin.EmailFrom, []string{user.Email}, []string{}, []string{}, subject, templateWriter.String())
+		err = utils.SendEmail(core.CurrentConfig.D.Uadmin.EmailFrom, []string{user.GetEmail()}, []string{}, []string{}, subject, templateWriter.String())
 		return
 	})
 	group.POST("/api/reset-password", func(ctx *gin.Context) {
@@ -185,7 +185,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
-		hashedPassword, err := utils2.HashPass(json.OldPassword, user.Salt)
+		hashedPassword, err := utils2.HashPass(json.OldPassword, user.GetSalt())
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -195,9 +195,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Password doesn't match current one"})
 		//	return
 		//}
-		hashedPassword, err = utils2.HashPass(json.Password, user.Salt)
-		user.Password = hashedPassword
-		user.IsPasswordUsable = true
+		hashedPassword, err = utils2.HashPass(json.Password, user.GetSalt())
+		user.SetPassword(hashedPassword)
+		user.SetIsPasswordUsable(true)
 		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
@@ -211,7 +211,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
-		user.OTPRequired = false
+		user.SetOTPRequired(false)
 		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
@@ -225,7 +225,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		cookie, _ := ctx.Cookie(cookieName)
 		session, _ := sessionAdapter.GetByKey(cookie)
 		user := session.GetUser()
-		user.OTPRequired = true
+		user.SetOTPRequired(true)
 		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
@@ -275,12 +275,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		func() (interface{}, interface{}) { return &core.User{}, &[]*core.User{} },
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Username", "FirstName", "LastName", "Email", "Active", "IsStaff", "IsSuperUser", "Password", "Photo", "LastLogin", "ExpiresOn"}
-			if ctx.GetUserObject().IsSuperUser {
+			if ctx.GetUserObject().GetIsSuperUser() {
 				fields = append(fields, "UserGroups")
 				fields = append(fields, "Permissions")
 			}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
-			if ctx.GetUserObject().IsSuperUser {
+			if ctx.GetUserObject().GetIsSuperUser() {
 				usergroupsField, _ := form.FieldRegistry.GetByName("UserGroups")
 				usergroupsField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 					model := modelI.(*core.User)
@@ -490,11 +490,11 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		func() (interface{}, interface{}) { return &core.UserGroup{}, &[]*core.UserGroup{} },
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"GroupName"}
-			if ctx.GetUserObject().IsSuperUser {
+			if ctx.GetUserObject().GetIsSuperUser() {
 				fields = append(fields, "Permissions")
 			}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
-			if ctx.GetUserObject().IsSuperUser {
+			if ctx.GetUserObject().GetIsSuperUser() {
 				permissionsField, _ := form.FieldRegistry.GetByName("Permissions")
 				permissionsField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 					model := modelI.(*core.UserGroup)

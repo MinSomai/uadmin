@@ -9,7 +9,7 @@ import (
 type TokenAuthProvider struct {
 }
 
-func (ap *TokenAuthProvider) GetUserFromRequest(c *gin.Context) *core.User {
+func (ap *TokenAuthProvider) GetUserFromRequest(c *gin.Context) core.IUser {
 	return nil
 }
 

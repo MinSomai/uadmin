@@ -9,7 +9,7 @@ import (
 type TokenWithExpirationAuthProvider struct {
 }
 
-func (ap *TokenWithExpirationAuthProvider) GetUserFromRequest(c *gin.Context) *core.User {
+func (ap *TokenWithExpirationAuthProvider) GetUserFromRequest(c *gin.Context) core.IUser {
 	return nil
 }
 

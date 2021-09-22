@@ -304,7 +304,7 @@ func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {
 	return fmt.Sprintf("%s/%s/%s/edit/%d", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug, ID)
 }
 
-func (ap *AdminPage) DoesUserHavePermission(u *User, permissionNameL ...CustomPermission) bool {
+func (ap *AdminPage) DoesUserHavePermission(u IUser, permissionNameL ...CustomPermission) bool {
 	permissionName := ap.PermissionName
 	if permissionName == "" && len(permissionNameL) > 0 {
 		permissionName = permissionNameL[0]

@@ -58,11 +58,11 @@ func VerifyOTP(pass, seed string, digits int, algorithm string, skew uint, perio
 	return valid
 }
 
-func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user *core.User) (secret string, imagePath string) {
+func GenerateOTPSeed(digits int, algorithm string, skew uint, period uint, user core.IUser) (secret string, imagePath string) {
 	algo := getOTPAlgorithm(strings.ToLower(algorithm))
 
 	opts := totp.GenerateOpts{
-		AccountName: user.Username,
+		AccountName: user.GetUsername(),
 		Issuer:      core.CurrentConfig.D.Uadmin.SiteName,
 		Algorithm:   algo,
 		Digits:      otp.Digits(digits),

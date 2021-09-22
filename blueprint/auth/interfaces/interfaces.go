@@ -13,7 +13,7 @@ import (
 )
 
 type IAuthProvider interface {
-	GetUserFromRequest(c *gin.Context) *core.User
+	GetUserFromRequest(c *gin.Context) core.IUser
 	Signin(c *gin.Context)
 	Logout(c *gin.Context)
 	IsAuthenticated(c *gin.Context)

@@ -37,8 +37,8 @@ type IAdminContext interface {
 	GetSessionKey() string
 	SetID(ID uint)
 	GetID() uint
-	SetUserObject(u *User)
-	GetUserObject() *User
+	SetUserObject(u IUser)
+	GetUserObject() IUser
 	SetPostForm(formD *multipart.Form)
 	GetPostForm() *multipart.Form
 	GetCtx() *gin.Context
@@ -62,7 +62,7 @@ type AdminContext struct {
 	RootAdminURL           string
 	User                   string
 	UserExists             bool
-	UserObject             *User
+	UserObject             IUser
 	Demo                   bool
 	UserPermissionRegistry *UserPermRegistry
 	CurrentURL             string
@@ -87,11 +87,11 @@ func (c *AdminContext) SetCtx(ctx *gin.Context) {
 	c.Ctx = ctx
 }
 
-func (c *AdminContext) SetUserObject(u *User) {
+func (c *AdminContext) SetUserObject(u IUser) {
 	c.UserObject = u
 }
 
-func (c *AdminContext) GetUserObject() *User {
+func (c *AdminContext) GetUserObject() IUser {
 	return c.UserObject
 }
 

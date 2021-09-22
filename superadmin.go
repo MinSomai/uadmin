@@ -112,18 +112,17 @@ Please provide flags -n and -e which are username and email of the user respecti
 	if err != nil {
 		return err
 	}
-	admin := core.User{
-		FirstName:        opts.FirstName,
-		LastName:         opts.LastName,
-		Username:         opts.Username,
-		Email:            opts.Email,
-		Password:         hashedPassword,
-		Active:           true,
-		IsSuperUser:      true,
-		Salt:             salt,
-		IsPasswordUsable: true,
-	}
-	db.Create(&admin)
+	admin := core.GenerateUserModel()
+	admin.SetFirstName(opts.FirstName)
+	admin.SetLastName(opts.LastName)
+	admin.SetUsername(opts.Username)
+	admin.SetEmail(opts.Email)
+	admin.SetPassword(hashedPassword)
+	admin.SetActive(true)
+	admin.SetIsSuperUser(true)
+	admin.SetSalt(salt)
+	admin.SetIsPasswordUsable(true)
+	db.Create(admin)
 	core.Trail(core.INFO, "Superuser created successfully")
 	return nil
 }

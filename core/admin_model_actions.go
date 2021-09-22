@@ -160,7 +160,7 @@ func (amar *AdminModelActionRegistry) GetAllModelActions() <-chan *AdminModelAct
 	return chnl
 }
 
-func (amar *AdminModelActionRegistry) GetAllModelActionsForUser(user *User, adminPage *AdminPage) <-chan *AdminModelAction {
+func (amar *AdminModelActionRegistry) GetAllModelActionsForUser(user IUser, adminPage *AdminPage) <-chan *AdminModelAction {
 	chnl := make(chan *AdminModelAction)
 	go func() {
 		defer close(chnl)

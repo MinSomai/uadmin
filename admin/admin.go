@@ -73,7 +73,7 @@ func init() {
 			user := session.GetUser()
 			if user != nil {
 				context.SetUserObject(user)
-				context.SetUser(user.Username)
+				context.SetUser(user.GetUsername())
 				context.SetUserExists(true)
 				context.SetUserPermissionRegistry(user.BuildPermissionRegistry())
 			}
@@ -82,5 +82,8 @@ func init() {
 		breadcrumbs := core.NewAdminBreadCrumbsRegistry()
 		breadcrumbs.AddBreadCrumb(&core.AdminBreadcrumb{Name: "Dashboard", URL: core.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
 		context.SetBreadCrumbs(breadcrumbs)
+	}
+	core.GenerateUserModel = func() core.IUser {
+		return &core.User{}
 	}
 }

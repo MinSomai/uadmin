@@ -13,16 +13,19 @@ type AdminListDisplayTestSuite struct {
 }
 
 func (suite *AdminListDisplayTestSuite) TestListDisplay() {
-	userModel := &core.User{Username: "admin", FirstName: "firstname", LastName: "lastname"}
+	userModel := core.GenerateUserModel()
+	userModel.SetUsername("admin")
+	userModel.SetFirstName("firstname")
+	userModel.SetLastName("lastname")
 	adminUserBlueprintPage, _ := core.CurrentDashboardAdminPanel.AdminPages.GetBySlug("users")
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	listDisplayUsername, _ := adminUserPage.ListDisplay.GetFieldByDisplayName("Username")
 	assert.Equal(suite.T(), listDisplayUsername.GetValue(userModel), template.HTML("admin"))
 	compositeField := core.NewListDisplay(nil)
-	compositeField.MethodName = "FullName"
+	compositeField.MethodName = "GetFullName"
 	compositeField = core.NewListDisplay(nil)
 	compositeField.Populate = func(m interface{}) string {
-		return m.(*core.User).FullName()
+		return m.(core.IUser).GetFullName()
 	}
 	assert.Equal(suite.T(), compositeField.GetValue(userModel), template.HTML("firstname lastname"))
 }

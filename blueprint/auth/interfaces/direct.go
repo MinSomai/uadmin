@@ -34,7 +34,7 @@ type SignupParams struct {
 type DirectAuthProvider struct {
 }
 
-func (ap *DirectAuthProvider) GetUserFromRequest(c *gin.Context) *core.User {
+func (ap *DirectAuthProvider) GetUserFromRequest(c *gin.Context) core.IUser {
 	session := ap.GetSession(c)
 	if session != nil {
 		return session.GetUser()
@@ -223,11 +223,11 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 	c.JSON(http.StatusOK, GetUserForAPI(sessionAdapter.GetUser()))
 }
 
-var GetUserForAPI func(user *core.User) *gin.H = func(user *core.User) *gin.H {
+var GetUserForAPI = func(user core.IUser) *gin.H {
 	if user == nil {
 		return &gin.H{}
 	}
-	return &gin.H{"name": user.Username, "id": user.ID}
+	return &gin.H{"name": user.GetUsername(), "id": user.GetID()}
 }
 
 func (ap *DirectAuthProvider) GetSession(c *gin.Context) sessioninterfaces.ISessionProvider {

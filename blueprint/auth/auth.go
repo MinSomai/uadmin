@@ -74,7 +74,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ChangesSaved bool
 			DBFields     []*schema.Field
 			F            *core.Form
-			User         *core.User
+			User         core.IUser
 		}
 
 		c := &Context{}

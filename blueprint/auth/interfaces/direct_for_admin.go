@@ -34,7 +34,7 @@ type SignupParamsForUadminAdmin struct {
 type DirectAuthForAdminProvider struct {
 }
 
-func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) *core.User {
+func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) core.IUser {
 	session := ap.GetSession(c)
 	if session != nil {
 		return session.GetUser()
@@ -51,25 +51,25 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	var user core.User
-	db.Model(core.User{}).Where(&core.User{Username: json.SigninField}).First(&user)
-	if user.ID == 0 {
+	var user = core.GenerateUserModel()
+	db.Model(core.User{}).Where(&core.User{Username: json.SigninField}).First(user)
+	if user.GetID() == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
 		return
 	}
-	if !user.Active {
+	if !user.GetActive() {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
 		return
 	}
-	if !user.IsSuperUser && !user.IsStaff {
+	if !user.GetIsSuperUser() && !user.GetIsStaff() {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have an access to admin panel"})
 		return
 	}
-	if !user.IsPasswordUsable {
+	if !user.GetIsPasswordUsable() {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
 		return
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password+user.Salt))
+	err := bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(json.Password+user.GetSalt()))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
 		return
@@ -89,7 +89,7 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 		sessionAdapter.ExpiresOn(&sessionExpirationTime)
 		c.SetCookie(core.CurrentConfig.D.Uadmin.AdminCookieName, sessionAdapter.GetKey(), int(core.CurrentConfig.D.Uadmin.SessionDuration), "/", c.Request.URL.Host, core.CurrentConfig.D.Uadmin.SecureCookie, core.CurrentConfig.D.Uadmin.HTTPOnlyCookie)
 	}
-	sessionAdapter.SetUser(&user)
+	sessionAdapter.SetUser(user)
 	sessionAdapter.Save()
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))
 }
@@ -216,11 +216,12 @@ func (ap *DirectAuthForAdminProvider) IsAuthenticated(c *gin.Context) {
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))
 }
 
-func getUserForUadminPanel(user *core.User) *gin.H {
+func getUserForUadminPanel(user core.IUser) *gin.H {
 	if user == nil {
 		return &gin.H{}
 	}
-	return &gin.H{"name": user.Username, "id": user.ID, "for-uadmin-panel": true}
+	spew.Dump("user111", user)
+	return &gin.H{"name": user.GetUsername(), "id": user.GetID(), "for-uadmin-panel": true}
 }
 
 func (ap *DirectAuthForAdminProvider) GetSession(c *gin.Context) sessioninterfaces.ISessionProvider {
