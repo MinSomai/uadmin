@@ -33,6 +33,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
       - name: Build
-        run: go build -v .
+        run: go build TAGS=postgres -v .
       - name: Test
-        run: make test TEST_ENVIRONMENT=test_postgres
+        run: make test TAGS=postgres TEST_ENVIRONMENT=test_postgres

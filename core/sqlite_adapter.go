@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/mattn/go-sqlite3"
@@ -391,5 +392,16 @@ func init() {
 			}
 			return nil
 		},
+	})
+	InitializeGlobalAdapterRegistry()
+	GlobalDbAdapterRegistry.RegisterAdapter("sqlite", func(db *gorm.DB) IDbAdapter{
+		return &SqliteAdapter{
+			DbType: "sqlite",
+			Statement: &gorm.Statement{
+				DB:      db,
+				Context: context.Background(),
+				Clauses: map[string]clause.Clause{},
+			},
+		}
 	})
 }

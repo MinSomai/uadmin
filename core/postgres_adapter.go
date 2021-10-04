@@ -1,3 +1,5 @@
+// +build postgres
+
 package core
 
 import (
@@ -361,4 +363,19 @@ func (d *PostgresAdapter) StartDBShell(databaseSettings *DBSettings) error {
 		return err
 	}
 	return nil
+}
+
+
+func init() {
+	InitializeGlobalAdapterRegistry()
+	GlobalDbAdapterRegistry.RegisterAdapter("postgres", func(db *gorm.DB) IDbAdapter{
+		return &PostgresAdapter{
+			DbType: "postgres",
+			Statement: &gorm.Statement{
+				DB:      db,
+				Context: context.Background(),
+				Clauses: map[string]clause.Clause{},
+			},
+		}
+	})
 }

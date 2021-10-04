@@ -1,10 +1,8 @@
 package core
 
 import (
-	"context"
 	"fmt"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type DeleteRowStructure struct {
@@ -173,26 +171,28 @@ func GetAdapterForDb(alias1 ...string) IDbAdapter {
 	return NewDbAdapter(Db, databaseConfig.Type)
 }
 
-func NewDbAdapter(db *gorm.DB, dbType string) IDbAdapter {
-	switch dbType {
-	case "sqlite":
-		return &SqliteAdapter{
-			DbType: dbType,
-			Statement: &gorm.Statement{
-				DB:      db,
-				Context: context.Background(),
-				Clauses: map[string]clause.Clause{},
-			},
-		}
-	case "postgres":
-		return &PostgresAdapter{
-			DbType: dbType,
-			Statement: &gorm.Statement{
-				DB:      db,
-				Context: context.Background(),
-				Clauses: map[string]clause.Clause{},
-			},
+type DbAdapterRegistry struct {
+	dbTypeToAdapter map[string]func(db *gorm.DB) IDbAdapter
+}
+
+func (dar *DbAdapterRegistry) RegisterAdapter(dbType string, createAdapterHandler func(db *gorm.DB) IDbAdapter) {
+	dar.dbTypeToAdapter[dbType] = createAdapterHandler
+}
+
+var GlobalDbAdapterRegistry *DbAdapterRegistry
+
+func InitializeGlobalAdapterRegistry() {
+	if GlobalDbAdapterRegistry == nil {
+		GlobalDbAdapterRegistry = &DbAdapterRegistry{
+			dbTypeToAdapter: make(map[string]func(db *gorm.DB) IDbAdapter),
 		}
 	}
-	return nil
+}
+
+func NewDbAdapter(db *gorm.DB, dbType string) IDbAdapter {
+	adapter, ok := GlobalDbAdapterRegistry.dbTypeToAdapter[dbType]
+	if !ok {
+		panic("no adapter " + dbType + " has been registered")
+	}
+	return adapter(db)
 }
