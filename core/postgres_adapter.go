@@ -3,6 +3,7 @@
 package core
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq" // import needed for postgres database
