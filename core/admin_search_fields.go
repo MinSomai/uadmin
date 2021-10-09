@@ -19,13 +19,7 @@ func (sf *SearchField) Search(afo IAdminFilterObjects, searchString string) {
 	if sf.CustomSearch != nil {
 		sf.CustomSearch(afo, searchString)
 	} else {
-		operator := IContainsGormOperator{}
-		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
-		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, &SQLConditionBuilder{Type: "or"})
-		afo.SetFullQuerySet(gormOperatorContext.Tx)
-		gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
-		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, sf.Field, searchString, &SQLConditionBuilder{Type: "or"})
-		afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
+		afo.Search(sf.Field, searchString)
 	}
 }
 
@@ -70,4 +64,13 @@ func (sfr *SearchFieldRegistry) GetAll() <-chan *SearchField {
 
 func (sfr *SearchFieldRegistry) AddField(sf *SearchField) {
 	sfr.Fields = append(sfr.Fields, sf)
+}
+
+func (sfr *SearchFieldRegistry) GetFieldByName(fieldName string) *SearchField {
+	for _, field := range sfr.Fields {
+		if field.Field.DBName == fieldName {
+			return field
+		}
+	}
+	return nil
 }

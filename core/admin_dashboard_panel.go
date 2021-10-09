@@ -2,17 +2,13 @@ package core
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 	excelize1 "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"html/template"
 	"math"
 	"net/http"
 	"reflect"
-	"strconv"
 )
 
 type DashboardAdminPanel struct {
@@ -108,11 +104,9 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								ids := postForm.Value["object_id"]
 								for _, objectID := range ids {
 									objectModel, _ := c.AdminFilterObjects.GenerateModelInterface()
-									IDInt, _ := strconv.Atoi(objectID)
-									IDUint := uint(IDInt)
-									afo1.LoadDataForModelByID(IDUint, objectModel)
+									afo1.LoadDataForModelByID(objectID, objectModel)
 									modelI, _ := c.AdminFilterObjects.GenerateModelInterface()
-									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", IDUint, modelI, adminPage.ListDisplay)
+									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", objectID, modelI, adminPage.ListDisplay)
 									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel, ctx)
 									if formListEditableErr.IsEmpty() {
 										dbRes := afo1.SaveModel(objectModel)
@@ -153,10 +147,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					}
 					// permissionForBlueprint := c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
 					adminFilterObjects := adminPage.GetQueryset(adminPage, adminRequestParams)
-					rows, _ := adminFilterObjects.GetFullQuerySet().Rows()
-					defer rows.Close()
-					db := NewUadminDatabase()
-					defer db.Close()
+					_, models := adminFilterObjects.GenerateModelInterface()
+					adminFilterObjects.GetFullQuerySet().Find(models)
 					f := excelize1.NewFile()
 					i := 1
 					currentColumn := 'A'
@@ -165,20 +157,14 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						currentColumn++
 					}
 					i++
-					for rows.Next() {
-						model, _ := adminFilterObjects.GenerateModelInterface()
-						db.Db.ScanRows(rows.(*sql.Rows), model)
-						// db.Db.ScanRows(rows, model)
+					for iterateAdminObjects := range adminFilterObjects.IterateThroughWholeQuerySet() {
 						currentColumn = 'A'
 						for listDisplay := range adminPage.ListDisplay.GetAllFields() {
-							f.SetCellValue("Sheet1", fmt.Sprintf("%c%d", currentColumn, i), listDisplay.GetValue(model, true))
+							f.SetCellValue("Sheet1", fmt.Sprintf("%c%d", currentColumn, i), listDisplay.GetValue(iterateAdminObjects.Model, true))
 							currentColumn++
 						}
 						i++
 					}
-
-					//f.SetCellValue("Sheet1", "B2", 100)
-					//f.SetCellValue("Sheet1", "A1", 50)
 					b, _ := f.WriteToBuffer()
 					downloadName := adminPage.PageName + ".xlsx"
 					ctx.Header("Content-Description", "File Transfer")
@@ -213,10 +199,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					c.ListEditableFormsForInlines = NewFormListEditableCollection()
 					modelI, _ := adminPage.GenerateModelI()
 					if id != "new" {
-						uadminDatabase := NewUadminDatabase()
-						idI, _ := strconv.Atoi(id)
-						uadminDatabase.Db.Preload(clause.Associations).First(modelI, idI)
-						uadminDatabase.Close()
+						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
+						adminPage.GetQueryset(adminPage, adminRequestParams).LoadDataForModelByID(id, modelI)
 					}
 					adminRequestParams := NewAdminRequestParams()
 					c.AdminRequestParams = adminRequestParams
@@ -253,26 +237,17 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						} else {
 							modelToSave, _ = adminPage.GenerateModelI()
 						}
-						uadminDatabase := NewUadminDatabase()
-						transactionerror := uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
-							afo := &GormAdminFilterObjects{UadminDatabase: &UadminDatabase{
-								Adapter: uadminDatabase.Adapter,
-								Db:      tx,
-							}}
-							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo)
+						afo := adminPage.GetQueryset(adminPage, adminRequestParams)
+						afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
+							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo1)
 							if formError.IsEmpty() {
 								if adminPage.SaveModel != nil {
-									modelToSave = adminPage.SaveModel(modelToSave, ID, afo)
+									modelToSave = adminPage.SaveModel(modelToSave, ID, afo1)
 								} else {
-									tx.Save(modelToSave)
+									afo.GetInitialQuerySet().Save(modelToSave)
 								}
-								mID := GetID(reflect.ValueOf(modelToSave))
 								successfulInline := true
 								for inline := range adminPage.InlineRegistry.GetAll() {
-									afo1 := &GormAdminFilterObjects{UadminDatabase: &UadminDatabase{
-										Adapter: uadminDatabase.Adapter,
-										Db:      tx,
-									}}
 									inlineListEditableCollection, formError1 := inline.ProceedRequest(afo1, ctx, requestForm, modelToSave, adminRequestParams, c)
 									if formError1 != nil {
 										successfulInline = false
@@ -283,6 +258,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									return fmt.Errorf("error while submitting inlines")
 								}
 								if ctx.Query("_popup") == "1" {
+									mID := GetID(reflect.ValueOf(modelToSave))
 									data := make(map[string]interface{})
 									data["Link"] = ctx.Request.URL.String()
 									data["ID"] = mID
@@ -293,7 +269,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								} else if len(requestForm.Value["save_add_another"]) > 0 {
 									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/new", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug))
 								} else if len(requestForm.Value["save_continue"]) > 0 {
-									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/%d", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug, mID))
+									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug, id))
 								} else {
 									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug))
 								}
@@ -301,10 +277,6 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							}
 							return fmt.Errorf("not successful form validation")
 						})
-						uadminDatabase.Close()
-						if transactionerror == nil {
-							return
-						}
 					} else {
 						if id != "new" {
 							if !subPage.DoesUserHavePermission(user, "edit") {
@@ -323,7 +295,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							}
 							for iterateAdminObjects := range inline.GetAll(c.Model, c.AdminRequestParams) {
 								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.ID, iterateAdminObjects.Model)
-								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, strconv.Itoa(int(iterateAdminObjects.ID)), listEditable)
+								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, iterateAdminObjects.ID, listEditable)
 							}
 						}
 					}

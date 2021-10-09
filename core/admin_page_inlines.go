@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"mime/multipart"
-	"strconv"
 	"strings"
 )
 
@@ -116,9 +115,8 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 		inlineIDToRemove := f.Value[firstEditableField.Prefix+"-"+"object_id-to-remove-"+realInlineID[0]]
 		isNew := false
 		if !strings.Contains(inlineID, "new") {
-			IDI, _ := strconv.Atoi(realInlineID[0])
-			qs.LoadDataForModelByID(uint(IDI), modelI)
-			form = api.ListDisplay.BuildFormForListEditable(adminContext, uint(IDI), modelI)
+			qs.LoadDataForModelByID(realInlineID[0], modelI)
+			form = api.ListDisplay.BuildFormForListEditable(adminContext, realInlineID[0], modelI)
 			collection[realInlineID[0]] = form
 			if len(inlineIDToRemove) > 0 {
 				removalError = qs.RemoveModelPermanently(modelI)

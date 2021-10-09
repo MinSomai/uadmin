@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -29,9 +28,8 @@ func (flec *FormListEditableCollection) AddForInline(prefix string, ID string, f
 	flec.InlineCollection[prefix][ID] = formListEditable
 }
 
-func (flec *FormListEditableCollection) GetForInlineAndForModel(prefix string, ID uint) *FormListEditable {
-	IDS := strconv.Itoa(int(ID))
-	return flec.InlineCollection[prefix][IDS]
+func (flec *FormListEditableCollection) GetForInlineAndForModel(prefix string, ID string) *FormListEditable {
+	return flec.InlineCollection[prefix][ID]
 }
 
 func (flec *FormListEditableCollection) GetForInlineNew(prefix string) <-chan *FormListEditable {
@@ -137,7 +135,7 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 	return ret
 }
 
-func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, prefix string, ID uint, model interface{}, listDisplayRegistry *ListDisplayRegistry) *FormListEditable {
+func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, prefix string, ID string, model interface{}, listDisplayRegistry *ListDisplayRegistry) *FormListEditable {
 	modelForm := NewFormFromModel(model, []string{}, []string{}, false, "")
 	modelForm.ForAdminPanel = true
 	ret := &FormListEditable{FieldRegistry: NewFieldRegistry()}
@@ -149,7 +147,7 @@ func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, pref
 			if ret.Prefix != "" {
 				fieldFromNewForm.FieldConfig.Widget.SetPrefix(ret.Prefix)
 			}
-			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%d_%s", ID, name))
+			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%s_%s", ID, name))
 			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
 			ret.FieldRegistry.AddField(fieldFromNewForm)

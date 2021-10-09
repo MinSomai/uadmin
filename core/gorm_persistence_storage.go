@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm/clause"
 	"net/url"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -455,6 +454,27 @@ type GormAdminFilterObjects struct {
 	GenerateModelI        func() (interface{}, interface{})
 }
 
+func (afo *GormAdminFilterObjects) FilterQs(filterString string) {
+	statement := &gorm.Statement{DB: afo.GetUadminDatabase().Db}
+	statement.Parse(afo.GetCurrentModel())
+	schema1 := statement.Schema
+	operatorContext := FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetFullQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
+	afo.SetFullQuerySet(operatorContext.Tx)
+	operatorContext = FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetPaginatedQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
+	afo.SetPaginatedQuerySet(operatorContext.Tx)
+
+}
+
+func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
+	operator := IContainsGormOperator{}
+	gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
+	operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
+	afo.SetFullQuerySet(gormOperatorContext.Tx)
+	gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
+	operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
+	afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
+}
+
 func (afo *GormAdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
 	return afo.PaginatedGormQuerySet
 }
@@ -491,9 +511,13 @@ func (afo *GormAdminFilterObjects) SetPaginatedQuerySet(storage IPersistenceStor
 	afo.PaginatedGormQuerySet = storage
 }
 
+func (afo *GormAdminFilterObjects) GetDB() IPersistenceStorage {
+	return NewGormPersistenceStorage(afo.UadminDatabase.Db)
+}
+
 func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) {
 	afo.UadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
-		return handler(&GormAdminFilterObjects{UadminDatabase: &UadminDatabase{Db: tx}, GenerateModelI: afo.GenerateModelI})
+		return handler(&GormAdminFilterObjects{UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter}, GenerateModelI: afo.GenerateModelI})
 	})
 }
 
@@ -511,9 +535,21 @@ func (afo *GormAdminFilterObjects) CreateNew(model interface{}) error {
 	return res.Error
 }
 
+func (afo *GormAdminFilterObjects) FilterByMultipleIds(field *Field, realObjectIds []string) {
+	afo.SetFullQuerySet(afo.GetFullQuerySet().Where(fmt.Sprintf("%s IN ?", field.DBName), realObjectIds))
+}
+
 func (afo *GormAdminFilterObjects) RemoveModelPermanently(model interface{}) error {
 	res := afo.UadminDatabase.Db.Unscoped().Delete(model)
 	return res.Error
+}
+
+func (afo *GormAdminFilterObjects) SortBy(field *Field, direction int) {
+	sortBy := field.DBName
+	if direction == -1 {
+		sortBy += " desc"
+	}
+	afo.SetPaginatedQuerySet(afo.GetPaginatedQuerySet().Order(sortBy))
 }
 
 func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
@@ -528,10 +564,9 @@ func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 			model := s.Index(i).Interface()
 			gormModelV := reflect.Indirect(reflect.ValueOf(model))
 			ID := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
-			IDN, _ := strconv.Atoi(ID.(string))
 			yieldV := &IterateAdminObjects{
 				Model:         model,
-				ID:            uint(IDN),
+				ID:            ID.(string),
 				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV
@@ -552,10 +587,9 @@ func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *Iterate
 			model := s.Index(i).Interface()
 			gormModelV := reflect.Indirect(reflect.ValueOf(model))
 			ID := TransformValueForWidget(gormModelV.FieldByName(modelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
-			IDN, _ := strconv.Atoi(ID.(string))
 			yieldV := &IterateAdminObjects{
 				Model:         model,
-				ID:            uint(IDN),
+				ID:            ID.(string),
 				RenderContext: &FormRenderContext{Model: model},
 			}
 			chnl <- yieldV

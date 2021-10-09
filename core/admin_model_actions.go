@@ -3,10 +3,8 @@ package core
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"reflect"
-	"regexp"
 	"sort"
 	"strings"
 )
@@ -24,7 +22,7 @@ func init() {
 	)
 	removalModelAction.RequiresExtraSteps = true
 	removalModelAction.PermName = "delete"
-	removalModelAction.Description = "Delete users permanently"
+	removalModelAction.Description = "Delete permanently"
 	removalModelAction.Handler = func(ap *AdminPage, afo IAdminFilterObjects, ctx *gin.Context) (bool, int64) {
 		type Context struct {
 			AdminContext
@@ -39,30 +37,23 @@ func init() {
 		}
 		removalPlan := make([]RemovalTreeList, 0)
 		removalConfirmed := ctx.PostForm("removal_confirmed")
-		afo.GetUadminDatabase().Db.Transaction(func(tx *gorm.DB) error {
-			uadminDatabase := &UadminDatabase{Db: tx, Adapter: afo.GetUadminDatabase().Adapter}
+		afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
 			for modelIterated := range afo.IterateThroughWholeQuerySet() {
-				removalTreeNode := BuildRemovalTree(uadminDatabase, modelIterated.Model)
+				removalTreeNode := BuildRemovalTree(afo1.GetUadminDatabase(), modelIterated.Model)
 				if removalConfirmed == "" {
-					deletionStringified := removalTreeNode.BuildDeletionTreeStringified(uadminDatabase)
+					deletionStringified := removalTreeNode.BuildDeletionTreeStringified(afo1.GetUadminDatabase())
 					removalPlan = append(removalPlan, deletionStringified)
 				} else {
-					err := removalTreeNode.RemoveFromDatabase(uadminDatabase)
+					err := removalTreeNode.RemoveFromDatabase(afo1.GetUadminDatabase())
 					if err != nil {
 						return err
 					}
 				}
 			}
 			if removalConfirmed != "" {
-				truncateLastPartOfPath := regexp.MustCompile("/[^/]+/?$")
-				newPath := truncateLastPartOfPath.ReplaceAll([]byte(ctx.Request.URL.RawPath), []byte(""))
-				clonedURL := CloneNetURL(ctx.Request.URL)
-				clonedURL.RawPath = string(newPath)
-				clonedURL.Path = string(newPath)
-				query := clonedURL.Query()
+				query := ctx.Request.URL.Query()
 				query.Set("message", "Objects were removed succesfully")
-				clonedURL.RawQuery = query.Encode()
-				ctx.Redirect(http.StatusFound, clonedURL.String())
+				ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s?%s", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.ModelName, query.Encode()))
 				return nil
 			}
 			type Context struct {
@@ -82,7 +73,7 @@ func init() {
 			tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
 			return nil
 		})
-		return true, 1
+		return true, int64(len(ctx.PostForm("object_ids")))
 	}
 	GlobalModelActionRegistry.AddModelAction(removalModelAction)
 }
@@ -378,5 +369,11 @@ func NewAdminModelActionRegistry() *AdminModelActionRegistry {
 			ret.AddModelAction(adminModelAction)
 		}
 	}
+	return ret
+}
+
+func NewEmptyModelActionRegistry() *AdminModelActionRegistry {
+	adminModelActions := make(map[string]*AdminModelAction)
+	ret := &AdminModelActionRegistry{AdminModelActions: adminModelActions}
 	return ret
 }

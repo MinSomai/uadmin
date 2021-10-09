@@ -102,6 +102,7 @@ if you want to merge conflicted migrations
 		return err
 	}
 	const concreteMigrationTpl = `package migrations
+import "github.com/sergeyglazyrindev/uadmin/core"
 
 type {{.MigrationName}} struct {
 }

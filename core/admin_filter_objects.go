@@ -17,10 +17,15 @@ type IAdminFilterObjects interface {
 	SetInitialQuerySet(IPersistenceStorage)
 	GenerateModelInterface() (interface{}, interface{})
 	RemoveModelPermanently(model interface{}) error
+	FilterQs(filterString string)
+	Search(field *Field, searchString string)
+	SortBy(field *Field, direction int)
+	FilterByMultipleIds(field *Field, realObjectIds []string)
+	GetDB() IPersistenceStorage
 }
 
 type IterateAdminObjects struct {
 	Model         interface{}
-	ID            uint
+	ID            string
 	RenderContext *FormRenderContext
 }

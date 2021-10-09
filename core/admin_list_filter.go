@@ -1,7 +1,6 @@
 package core
 
 import (
-	"gorm.io/gorm"
 	"net/url"
 	"sort"
 	"strconv"
@@ -23,13 +22,7 @@ func (lf *ListFilter) FilterQs(afo IAdminFilterObjects, filterString string) {
 	if lf.CustomFilterQs != nil {
 		lf.CustomFilterQs(afo, filterString)
 	} else {
-		statement := &gorm.Statement{DB: afo.GetUadminDatabase().Db}
-		statement.Parse(afo.GetCurrentModel())
-		schema1 := statement.Schema
-		operatorContext := FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetFullQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
-		afo.SetFullQuerySet(operatorContext.Tx)
-		operatorContext = FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetPaginatedQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
-		afo.SetPaginatedQuerySet(operatorContext.Tx)
+		afo.FilterQs(filterString)
 	}
 }
 

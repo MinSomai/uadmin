@@ -32,6 +32,9 @@ func (apr *AdminPageRegistry) GetByModelName(modelName string) *AdminPage {
 	for adminPage := range apr.GetAll() {
 		for subPage := range adminPage.SubPages.GetAll() {
 			projectModel := ProjectModels.GetModelFromInterface(subPage.Model)
+			if projectModel == nil {
+				continue
+			}
 			// spew.Dump("AAAAAAAAAA", projectModel.Statement.Schema.Name)
 			if projectModel.Statement.Schema.Name == modelName {
 				return subPage
@@ -175,7 +178,7 @@ type AdminPage struct {
 
 type ModelActionRequestParams struct {
 	ObjectIds     string `form:"object_ids" json:"object_ids" xml:"object_ids"  binding:"required"`
-	RealObjectIds []uint
+	RealObjectIds []string
 }
 
 func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {
@@ -216,17 +219,14 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 		}
 	}
 	objectIds := strings.Split(json1.ObjectIds, ",")
-	objectUintIds := make([]uint, 0)
+	objectUintIds := make([]string, 0)
 	for _, objectID := range objectIds {
-		idV, err := strconv.Atoi(objectID)
-		if err == nil {
-			objectUintIds = append(objectUintIds, uint(idV))
-		}
+		objectUintIds = append(objectUintIds, objectID)
 	}
 	json1.RealObjectIds = objectUintIds
 	if len(json1.RealObjectIds) > 0 {
 		primaryKeyField, _ := ap.Form.FieldRegistry.GetPrimaryKey()
-		afo.SetFullQuerySet(afo.GetFullQuerySet().Where(fmt.Sprintf("%s IN ?", primaryKeyField.DBName), json1.RealObjectIds))
+		afo.FilterByMultipleIds(primaryKeyField, json1.RealObjectIds)
 		modelAction, _ := ap.ModelActionsRegistry.GetModelActionByName(modelActionName)
 		if ctx.GetHeader("Content-Type") == "application/json" {
 			_, affectedRows := modelAction.Handler(ap, afo, ctx)
