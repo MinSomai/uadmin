@@ -4,7 +4,8 @@ sidebar_position: 1
 
 # Database support
 
-Right now uadmin supports only sqlite, postgres databases, but it's easy to provide adapters for another databases, we just need to write implementation of the interface
+Right now uadmin supports only sqlite, postgres databases, but it's easy to provide adapters for another databases, we just need to write implementation of the interface.
+For non sqlite adapter, please build your package with corresponding tag: for postgres - with postgres.
 ```go
 type IDbAdapter interface {
 	Equals(name interface{}, args ...interface{})
