@@ -3,7 +3,7 @@ package estweet
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sergeyglazyrindev/uadmin/blueprint/estweet/migrations"
+	"github.com/sergeyglazyrindev/es_uadmin_example/blueprint/estweet/migrations"
 	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
