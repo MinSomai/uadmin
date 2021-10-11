@@ -30,3 +30,4 @@ lint.json
 contrib/docker
 /estest
 /uadmin-example/main
+/es-uadmin-example/main
