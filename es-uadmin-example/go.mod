@@ -1,0 +1,8 @@
+module github.com/sergeyglazyrindev/es_uadmin_example
+
+go 1.16
+
+require (
+	github.com/gin-gonic/gin v1.5.0
+	github.com/sergeyglazyrindev/uadmin v1.1.0
+)
