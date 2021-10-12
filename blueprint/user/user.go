@@ -101,7 +101,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 
 		db.Model(core.OneTimeAction{}).Save(&oneTimeAction)
-		link := host + core.CurrentConfig.D.Uadmin.RootAdminURL + "/resetpassword/?key=" + oneTimeAction.Code
+		link := host + core.CurrentConfig.D.Uadmin.RootAdminURL + "resetpassword/?key=" + oneTimeAction.Code
 		c.URL = link
 		err = template1.Execute(templateWriter, c)
 		if err != nil {
