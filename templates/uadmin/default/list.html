@@ -31,7 +31,7 @@
         <div class="col-xs-3 col-sm-4" style="padding:0px;">
             {{ if .PermissionForBlueprint.HasAddPermission }}
                 {{ if not .NoPermissionToAddNew }}
-                    <a class="btn btn-primary search pull-right" href="{{.CurrentURL}}/edit/new">
+                    <a class="btn btn-primary search pull-right" href="{{.CurrentURL}}/edit/new/">
                         <i class="fa fa-plus"></i>
                     </a>
                 {{ end }}
@@ -100,7 +100,7 @@
                             {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.ID $iterateAdminObjects.Model}}
                             {{range $field := $listDisplay.GetAllFields}}
                                 <td>
-                                    {{if eq $i 0}}{{ if not $noPermissionToEdit }}<a class="bold clickable Row_id no-style" href="{{$currentURL}}/edit/{{$iterateAdminObjects.ID}}">{{ end }}{{ end }}
+                                    {{if eq $i 0}}{{ if not $noPermissionToEdit }}<a class="bold clickable Row_id no-style" href="{{$currentURL}}/edit/{{$iterateAdminObjects.ID}}/">{{ end }}{{ end }}
                                     {{ if $field.Field }}
                                         {{ $fieldExistsInTheForm := $form.ExistsField $field }}
                                         {{ if $fieldExistsInTheForm }}
@@ -163,7 +163,7 @@
         </div>
         <div class="col-sm-4 col-xs-2">
             <div style="display:inline-block;float:right;">
-                <form id="export_form" method="POST" action="{{ .CurrentURL }}/export?{{ .CurrentQuery }}">
+                <form id="export_form" method="POST" action="{{ .CurrentURL }}/export/?{{ .CurrentQuery }}">
                     <input type="hidden" name="csrf-token" value="{{CSRF .SessionKey}}" />
                     <input type="hidden" class="form-control camelcaseFixPlaceHolder"
                            name="export" placeholder="Search..." value="true" />
@@ -216,7 +216,7 @@
         var form = $('#action-form');
         var selectedAction = $('#model-actions').children("option:selected");
         var requiresExtraSteps = selectedAction.data('extrasteps');
-        var url = location.pathname + '/' + selectedAction.attr('name');
+        var url = location.pathname + '/' + selectedAction.attr('name') + "/";
         var objectIdsInput = $(ev.currentTarget).find('input[name="object_ids"]');
         var objectIds = [];
         $('.item_check:checked').each(function(_, item) {

@@ -61,7 +61,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		mainRouter.StaticFS(core.CurrentConfig.GetURLToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetURLToUploadDirectory())))
 	}
 	// profile page for admin panel
-	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile", func(ctx *gin.Context) {
+	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile/", func(ctx *gin.Context) {
 		type Context struct {
 			core.AdminContext
 			ID           uint
@@ -74,7 +74,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			ChangesSaved bool
 			DBFields     []*schema.Field
 			F            *core.Form
-			User         core.IUser
+			User         string
 		}
 
 		c := &Context{}
@@ -88,7 +88,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		form1 := core.NewFormFromModelFromGinContext(c, user, make([]string, 0), []string{"Username", "FirstName", "LastName", "Email", "Photo", "LastLogin", "ExpiresOn", "OTPRequired"}, true, "")
 		form1.TemplateName = "form/profile_form"
 		c.F = form1
-		c.User = user
+		c.User = user.GetUsername()
 		if ctx.Request.Method == "POST" {
 			requestForm, _ := ctx.MultipartForm()
 			formError := form1.ProceedRequest(requestForm, user, ctx)
@@ -96,7 +96,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				uadminDatabase := core.NewUadminDatabase()
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
-				db.Save(user)
+				db.Save(user.(*core.User))
 				c.ChangesSaved = true
 				form1.ChangesSaved = true
 				ctx.Redirect(302, ctx.Request.URL.String())

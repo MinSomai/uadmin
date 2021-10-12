@@ -69,7 +69,7 @@
     $('#disable2FactorAuth').click(function(ev) {
         ev.preventDefault();
         $.ajax({
-            url: "/user/api/disable-2fa",
+            url: "/user/api/disable-2fa/",
             method: "POST",
             processData: false,
             contentType:"application/json; charset=utf-8",
@@ -86,7 +86,7 @@
         ev.preventDefault();
         var form = $(ev.currentTarget);
         $.ajax({
-            url: "/user/api/change-password",
+            url: "/user/api/change-password/",
             method: "POST",
             processData: false,
             contentType:"application/json; charset=utf-8",
@@ -110,7 +110,7 @@
     $('#enable2FactorAuth').click(function(ev) {
         ev.preventDefault();
         $.ajax({
-            url: "/user/api/enable-2fa",
+            url: "/user/api/enable-2fa/",
             method: "POST",
             processData: false,
             contentType:"application/json; charset=utf-8",

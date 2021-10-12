@@ -28,5 +28,5 @@ RUN apt-get -y update \
 #RUN mv go /usr/local
 COPY --from=builder /uadmin/uadmin /uadmin/uadmin
 COPY configs/sqlite.yml /uadmin/configs/uadmin.yml
-COPY configs/demo.yml /uadmin/configs/demo.yml
+COPY configs/real_demo.yml /uadmin/configs/demo.yml
 ENTRYPOINT ["/uadmin/uadmin", "admin", "serve"]

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"net/http"
 	"reflect"
 	"sort"
@@ -53,7 +54,7 @@ func init() {
 			if removalConfirmed != "" {
 				query := ctx.Request.URL.Query()
 				query.Set("message", "Objects were removed succesfully")
-				ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s?%s", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.ModelName, query.Encode()))
+				ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/?%s", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.ModelName, query.Encode()))
 				return nil
 			}
 			type Context struct {
@@ -133,6 +134,15 @@ func (amar *AdminModelActionRegistry) IsThereAnyActions() bool {
 	return len(amar.AdminModelActions) > 0
 }
 
+func (amar *AdminModelActionRegistry) IsThereAnyActionsToShowOnEditPage(user IUser, ap *AdminPage) bool {
+	for adminModelAction := range amar.GetAllModelActionsForUser(user, ap) {
+		if adminModelAction.Placement.DisplayOnEditPage {
+			return true
+		}
+	}
+	return false
+}
+
 func (amar *AdminModelActionRegistry) GetAllModelActions() <-chan *AdminModelAction {
 	chnl := make(chan *AdminModelAction)
 	go func() {
@@ -193,7 +203,7 @@ type RemovalTreeNode struct {
 }
 
 type RemovalTreeNodeStringified struct {
-	Explanation string
+	Explanation template.HTML
 	Level       int
 }
 
@@ -245,7 +255,7 @@ func (rtn *RemovalTreeNode) BuildDeletionTreeStringified(uadminDatabase *UadminD
 		if len(removalTreeNode.RawSQL) > 0 {
 			for _, rawSQL := range removalTreeNode.RawSQL {
 				removalTreeStringified = append(removalTreeStringified, &RemovalTreeNodeStringified{
-					Explanation: fmt.Sprintf("Association with %s", rawSQL.Table),
+					Explanation: template.HTML(fmt.Sprintf("Association with %s", rawSQL.Table)),
 					Level:       removalTreeNode.Level,
 				})
 			}
@@ -254,14 +264,14 @@ func (rtn *RemovalTreeNode) BuildDeletionTreeStringified(uadminDatabase *UadminD
 		Idv := TransformValueForWidget(gormModelV.FieldByName(removalTreeNode.ModelDescription.Statement.Schema.PrimaryFields[0].Name).Interface())
 		modelAdminPage := CurrentAdminPageRegistry.GetByModelName(removalTreeNode.ModelDescription.Statement.Schema.Name)
 		if modelAdminPage != nil {
-			url := fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, modelAdminPage.ParentPage.Slug, modelAdminPage.Slug)
+			url := fmt.Sprintf("%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, modelAdminPage.ParentPage.Slug, modelAdminPage.Slug)
 			removalTreeStringified = append(removalTreeStringified, &RemovalTreeNodeStringified{
-				Explanation: fmt.Sprintf("<a target='_blank' href='%s/%s'>%s</a>", url, Idv, reflect.ValueOf(removalTreeNode.Model).MethodByName("String").Call([]reflect.Value{})[0]),
+				Explanation: template.HTML(fmt.Sprintf("<a target='_blank' href='%s%s/'>%s</a>", url, Idv, reflect.ValueOf(removalTreeNode.Model).MethodByName("String").Call([]reflect.Value{})[0])),
 				Level:       removalTreeNode.Level,
 			})
 		} else {
 			removalTreeStringified = append(removalTreeStringified, &RemovalTreeNodeStringified{
-				Explanation: fmt.Sprintf("%s", reflect.ValueOf(removalTreeNode.Model).MethodByName("String").Call([]reflect.Value{})[0]),
+				Explanation: template.HTML(fmt.Sprintf("%s", reflect.ValueOf(removalTreeNode.Model).MethodByName("String").Call([]reflect.Value{})[0])),
 				Level:       removalTreeNode.Level,
 			})
 		}

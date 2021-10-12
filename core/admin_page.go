@@ -183,7 +183,7 @@ type ModelActionRequestParams struct {
 
 func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {
 	ID := GetID(gormModelV)
-	return fmt.Sprintf("%s/%s/%s/edit/%d", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug, ID)
+	return fmt.Sprintf("%s/%s/%s/edit/%d/", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug, ID)
 }
 
 func (ap *AdminPage) DoesUserHavePermission(u IUser, permissionNameL ...CustomPermission) bool {
@@ -192,7 +192,7 @@ func (ap *AdminPage) DoesUserHavePermission(u IUser, permissionNameL ...CustomPe
 		permissionName = permissionNameL[0]
 	}
 	if permissionName == "" {
-		panic("Please specify permission name you want to check user permissions for")
+		return false
 	}
 	userPermissions := u.BuildPermissionRegistry()
 	// modelI, _ := ap.GenerateModelI()
@@ -201,7 +201,7 @@ func (ap *AdminPage) DoesUserHavePermission(u IUser, permissionNameL ...CustomPe
 }
 
 func (ap *AdminPage) GenerateLinkToAddNewModel() string {
-	return fmt.Sprintf("%s/%s/%s/edit/new?_to_field=id&_popup=1", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
+	return fmt.Sprintf("%s/%s/%s/edit/new/?_to_field=id&_popup=1", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
 }
 
 func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context) {

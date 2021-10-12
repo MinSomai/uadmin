@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    var RootURL = '{{.RootAdminURL}}';
+    var RootURL = '{{.RootAdminURL}}/';
 </script>
 
 <script src="/static-inbuilt/uadmin/assets/js/jquery.min.js" type="text/javascript"></script>
@@ -7,6 +7,7 @@
     var signedOut = false;
     $(document).ready(function() {
         $('#admin-logout').click(function(e) {
+            e.preventDefault();
             if (signedOut) {
                 return;
             }
@@ -18,7 +19,7 @@
                 processData: false,
                 contentType:"application/json; charset=utf-8",
                 success: function() {
-                    location.href = '{{.RootAdminURL}}';
+                    location.href = '{{.RootAdminURL}}/';
                 },
                 error: function(xhr) {
                     alert('Error while logout');

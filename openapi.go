@@ -77,8 +77,8 @@ func (command ServeOpenAPIEditorCommand) Proceed(subaction string, args []string
 	}
 
 	http.HandleFunc("/", editorHandler)
-	http.HandleFunc("/spec", specHandler)
-	fmt.Printf("Please open following url in browser http://localhost:8083/?saveToFileEndpoint=/spec\n")
+	http.HandleFunc("/spec/", specHandler)
+	fmt.Printf("Please open following url in browser http://localhost:8083/?saveToFileEndpoint=/spec/\n")
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", appInstance.Config.D.Swagger.APIEditorListenPort), nil))
 	return nil
 }

@@ -282,15 +282,15 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 		routergroup := router.Group("/" + blueprint.GetName())
 		blueprint.InitRouter(router, routergroup)
 	}
-	router.GET("/ping", func(c *gin.Context) {
+	router.GET("/ping/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
-	router.POST("/testcsrf", func(c *gin.Context) {
+	router.POST("/testcsrf/", func(c *gin.Context) {
 		c.String(200, "csrf token test passed")
 	})
-	router.POST("/ignorecsrfcheck", func(c *gin.Context) {
+	router.POST("/ignorecsrfcheck/", func(c *gin.Context) {
 		c.String(200, "csrf token test passed")
 	})
 }

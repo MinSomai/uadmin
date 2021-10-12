@@ -43,7 +43,7 @@ type ChangePasswordHandlerParams struct {
 }
 
 func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	mainRouter.GET("/reset-password", func(ctx *gin.Context) {
+	mainRouter.GET("/reset-password/", func(ctx *gin.Context) {
 		type Context struct {
 			core.AdminContext
 		}
@@ -52,7 +52,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		tr := core.NewTemplateRenderer("Reset Password")
 		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("resetpassword"), c, core.FuncMap)
 	})
-	group.POST("/api/forgot", func(ctx *gin.Context) {
+	group.POST("/api/forgot/", func(ctx *gin.Context) {
 		var json ForgotPasswordHandlerParams
 		if err := ctx.ShouldBindJSON(&json); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -101,7 +101,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 
 		db.Model(core.OneTimeAction{}).Save(&oneTimeAction)
-		link := host + core.CurrentConfig.D.Uadmin.RootAdminURL + "/resetpassword?key=" + oneTimeAction.Code
+		link := host + core.CurrentConfig.D.Uadmin.RootAdminURL + "/resetpassword/?key=" + oneTimeAction.Code
 		c.URL = link
 		err = template1.Execute(templateWriter, c)
 		if err != nil {
@@ -113,7 +113,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		err = utils.SendEmail(core.CurrentConfig.D.Uadmin.EmailFrom, []string{user.GetEmail()}, []string{}, []string{}, subject, templateWriter.String())
 		return
 	})
-	group.POST("/api/reset-password", func(ctx *gin.Context) {
+	group.POST("/api/reset-password/", func(ctx *gin.Context) {
 		var json ResetPasswordHandlerParams
 		if err := ctx.ShouldBindJSON(&json); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -158,7 +158,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		db.Save(&oneTimeAction.User)
 		db.Save(&oneTimeAction)
 	})
-	group.POST("/api/change-password", func(ctx *gin.Context) {
+	group.POST("/api/change-password/", func(ctx *gin.Context) {
 		var json ChangePasswordHandlerParams
 		if err := ctx.ShouldBindJSON(&json); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -195,16 +195,20 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Password doesn't match current one"})
 		//	return
 		//}
+		if user.GetSalt() == "" {
+			user.SetSalt(utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength))
+		}
 		hashedPassword, err = utils2.HashPass(json.Password, user.GetSalt())
 		user.SetPassword(hashedPassword)
 		user.SetIsPasswordUsable(true)
 		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		db.Save(&user)
+		user1 := user.(*core.User)
+		db.Save(user1)
 		ctx.JSON(http.StatusOK, gin.H{"success": true})
 	})
-	group.POST("/api/disable-2fa", func(ctx *gin.Context) {
+	group.POST("/api/disable-2fa/", func(ctx *gin.Context) {
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
 		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
@@ -218,7 +222,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		db.Save(&user)
 		ctx.JSON(http.StatusOK, gin.H{"success": true})
 	})
-	group.POST("/api/enable-2fa", func(ctx *gin.Context) {
+	group.POST("/api/enable-2fa/", func(ctx *gin.Context) {
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
 		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName

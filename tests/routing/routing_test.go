@@ -28,7 +28,7 @@ func (suite *ConcreteTestSuite) TestRouterInitialization() {
 	// suite.app.Router = gin.Default()
 	routergroup := suite.App.Router.Group("/" + "user")
 	ConcreteBlueprint.InitRouter(suite.App.Router, routergroup)
-	req, _ := http.NewRequest("GET", "/user/visit", nil)
+	req, _ := http.NewRequest("GET", "/user/visit/", nil)
 	uadmin.TestHTTPResponse(suite.T(), suite.App, req, func(w *httptest.ResponseRecorder) bool {
 		return visited
 	})
@@ -36,7 +36,7 @@ func (suite *ConcreteTestSuite) TestRouterInitialization() {
 
 func (suite *ConcreteTestSuite) TestPingEndpoint() {
 	// suite.app.Router = gin.Default()
-	req, _ := http.NewRequest("GET", "/ping", nil)
+	req, _ := http.NewRequest("GET", "/ping/", nil)
 	uadmin.TestHTTPResponse(suite.T(), suite.App, req, func(w *httptest.ResponseRecorder) bool {
 		return w.Body.String() == "{\"message\":\"pong\"}\n"
 	})

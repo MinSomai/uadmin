@@ -24,7 +24,7 @@
 <div class="fixed-top bg-black3 default-padding z-index9">
     <div class="">
         <div class="pull-left" style="display: block-inline;">
-            <a href="{{.RootAdminURL}}"><img class="hvr-grow" style="max-height:40px" src="{{.Logo}}"></a>
+            <a href="{{.RootAdminURL}}/"><img class="hvr-grow" style="max-height:40px" src="{{.Logo}}"></a>
         </div>
     </div>
 </div>
@@ -76,8 +76,10 @@
                 </div>
             </div>
             {{end}}
-            <button type="submit" class="btn btn-primary">Login</button>
-            <a class="pointer" id="forgotpassword_trigger"  style="margin-left:25px; vertical-align:bottom;">Forgot Password</a>
+            <div class="form-group" style="display: flex; align-items: center;">
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a class="pointer" id="forgotpassword_trigger"  style="margin-left:25px; vertical-align:bottom;">Forgot Password</a>
+            </div>
         </form>
         <hr>
         <div class="hidden error-cont alert alert-warning">
@@ -179,7 +181,7 @@
         show_loading();
         var form = $("#forgot-password-form");
         $.ajax({
-            url: "/user/api/forgot?for-uadmin-panel=1",
+            url: "/user/api/forgot/?for-uadmin-panel=1",
             method: "POST",
             processData: false,
             contentType:"application/json; charset=utf-8",

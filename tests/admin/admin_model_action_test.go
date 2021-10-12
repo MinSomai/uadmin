@@ -38,6 +38,9 @@ func (suite *AdminModelActionTestSuite) TestAdminModelAction() {
 	req, _ := http.NewRequest("POST", "/admin/users/user/turnsuperuserstonormalusers/", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	for adminModelAction := range adminUserPage.ModelActionsRegistry.GetAllModelActions() {
+		if adminModelAction.SlugifiedActionName != "turnsuperuserstonormalusers" {
+			continue
+		}
 		suite.App.Router.Any(fmt.Sprintf("%s/%s/%s/%s/", core.CurrentConfig.D.Uadmin.RootAdminURL, "users", adminUserPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *core.AdminPage, slugifiedModelActionName string) func(ctx *gin.Context) {
 			return func(ctx *gin.Context) {
 				adminPage.HandleModelAction(slugifiedModelActionName, ctx)

@@ -99,12 +99,12 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				c.Next()
 				return
 			}
-			if session.IsExpired() && c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL {
+			if session.IsExpired() && c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL + "/" {
 				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
 				return
 			}
 			user := session.GetUser()
-			if c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL && (user == nil || (!user.GetIsStaff() && !user.GetIsSuperUser())) {
+			if c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL + "/" && (user == nil || (!user.GetIsStaff() && !user.GetIsSuperUser())) {
 				c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
 				return
 			}

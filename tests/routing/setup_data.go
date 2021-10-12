@@ -13,7 +13,7 @@ var ConcreteBlueprint BlueprintRouting
 var visited = false
 
 func (b BlueprintRouting) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	group.GET("/visit", func(c *gin.Context) {
+	group.GET("/visit/", func(c *gin.Context) {
 		visited = true
 	})
 }

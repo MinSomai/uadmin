@@ -217,7 +217,8 @@ func (fr *FieldRegistry) GetPrimaryKey() (*Field, error) {
 
 func (fr *FieldRegistry) AddField(field *Field) {
 	if _, err := fr.GetByName(field.Name); err == nil {
-		panic(fmt.Errorf("field %s already in the field registry", field.Name))
+		Trail(ERROR, fmt.Errorf("field %s already in the field registry", field.Name))
+		return
 	}
 	fr.Fields[field.Name] = field
 	ordering := fr.MaxOrdering + 1

@@ -128,7 +128,7 @@ func (f *Form) Render() template.HTML {
 					err := RenderHTMLAsString(templateWriter, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)
 					if err != nil {
 						Trail(CRITICAL, "Error while parsing include of the template %s", "form/grouprow")
-						panic(err)
+						return ""
 					}
 					ret = append(ret, templateWriter.String())
 				}

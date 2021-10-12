@@ -121,7 +121,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 			assert.Contains(s.T(), w.Body.String(), "for-uadmin-panel")
 			return strings.Contains(w.Body.String(), "for-uadmin-panel")
 		})
-		req, _ = http.NewRequest("GET", "/admin/profile", bytes.NewBuffer([]byte("")))
+		req, _ = http.NewRequest("GET", "/admin/profile/", bytes.NewBuffer([]byte("")))
 		req.Header.Set(
 			"Cookie",
 			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
@@ -270,7 +270,7 @@ func (s *AuthProviderTestSuite) TestSignupForApi() {
 //}
 
 func (s *AuthProviderTestSuite) TestOpenAdminPage() {
-	req, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL, nil)
+	req, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL + "/", nil)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "uadmin - Admin Login")
 		assert.Equal(s.T(), w.Code, 200)
@@ -282,7 +282,7 @@ func (s *AuthProviderTestSuite) TestOpenAdminPage() {
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
 		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
-		req1, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL, nil)
+		req1, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL + "/", nil)
 		req1.Header.Set(
 			"Cookie",
 			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
@@ -309,7 +309,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 		session.Set("csrf_token", token)
 		session.Save()
 		var jsonStr1 = []byte(`{"email": "uadminapitest@example.com"}`)
-		req1, _ := http.NewRequest("POST", "/user/api/forgot", bytes.NewBuffer(jsonStr1))
+		req1, _ := http.NewRequest("POST", "/user/api/forgot/", bytes.NewBuffer(jsonStr1))
 		req1.Header.Set(
 			"Cookie",
 			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
@@ -324,7 +324,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 			db := s.UadminDatabase.Db
 			db.Model(core.OneTimeAction{}).First(&oneTimeAction)
 			var jsonStr2 = []byte(fmt.Sprintf(`{"code": "%s", "password": "1234567890", "confirm_password": "1234567890"}`, oneTimeAction.Code))
-			req2, _ := http.NewRequest("POST", "/user/api/reset-password", bytes.NewBuffer(jsonStr2))
+			req2, _ := http.NewRequest("POST", "/user/api/reset-password/", bytes.NewBuffer(jsonStr2))
 			req2.Header.Set(
 				"Cookie",
 				fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),

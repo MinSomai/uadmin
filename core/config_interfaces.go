@@ -268,7 +268,7 @@ func NewConfig(file string) *UadminConfig {
 	}
 	c.ConfigContent = content
 	c.PatternsToIgnoreCsrfCheck = list.New()
-	c.PatternsToIgnoreCsrfCheck.PushBack("/ignorecsrfcheck")
+	c.PatternsToIgnoreCsrfCheck.PushBack("/ignorecsrfcheck/")
 	c.RequiresCsrfCheck = func(c *gin.Context) bool {
 		for e := CurrentConfig.PatternsToIgnoreCsrfCheck.Front(); e != nil; e = e.Next() {
 			pathToIgnore := e.Value.(string)

@@ -15,7 +15,7 @@
     }
 </style>
 {{ if .ID }}
-    <form method="POST" id="delete-object-form" action="{{ .ListURL }}/delete_permanently">
+    <form method="POST" id="delete-object-form" action="{{ .ListURL }}/delete_permanently/">
         <input type="hidden" name="csrf-token" value="{{CSRF .SessionKey}}" />
         <input type="hidden" name="object_ids" value="{{ .ID }}" />
     </form>
@@ -39,23 +39,23 @@
                             <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{ .Message }}</span>
                         </div>
                         {{ end }}
-                        <div class="col-xs-12 col-sm-12" style="padding:0px;">
-                            {{$userObject := .GetUserObject }}
-                            {{$adminPage := .AdminPage }}
-                            {{ if .AdminModelActionRegistry.IsThereAnyActions }}
-                               {{ $idValue := .ID }}
-                                {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActionsForUser $userObject $adminPage }}
-                                    {{ if $adminModelAction.Placement.DisplayOnEditPage }}
-                                        {{ if ne $idValue 0 }}
-                                            <a class="btn btn-primary pull-right" href="{{.CurrentURL}}/{{ $adminModelAction.SlugifiedActionName }}">
-                                                {{ $adminModelAction.ActionName }}
-                                            </a>
+                        {{$userObject := .GetUserObject }}
+                        {{$adminPage := .AdminPage }}
+                        {{ if .AdminModelActionRegistry.IsThereAnyActionsToShowOnEditPage $userObject $adminPage }}
+                            <div class="col-xs-12 col-sm-12" style="padding:0px;">
+                                   {{ $idValue := .ID }}
+                                    {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActionsForUser $userObject $adminPage }}
+                                        {{ if $adminModelAction.Placement.DisplayOnEditPage }}
+                                            {{ if ne $idValue 0 }}
+                                                <a class="btn btn-primary pull-right" href="{{.CurrentURL}}/{{ $adminModelAction.SlugifiedActionName }}/">
+                                                    {{ $adminModelAction.ActionName }}
+                                                </a>
+                                            {{ end }}
                                         {{ end }}
                                     {{ end }}
-                                {{ end }}
-                            {{ end }}
-                        </div>
-                            {{ .Form.Render }}
+                            </div>
+                        {{ end }}
+                        {{ .Form.Render }}
                     </div>
                     {{ $model := .Model }}
                     {{ $ID := .ID }}

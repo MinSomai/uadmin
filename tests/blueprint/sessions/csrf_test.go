@@ -20,7 +20,7 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 	token := utils.GenerateCSRFToken()
 	session.SetData("csrf_token", token)
 	s.UadminDatabase.Db.Create(session)
-	req, _ := http.NewRequest("POST", "/testcsrf", nil)
+	req, _ := http.NewRequest("POST", "/testcsrf/", nil)
 	tokenmasked := utils.MaskCSRFToken(token)
 	req.Header.Set("X-CSRF-TOKEN", tokenmasked)
 	req.Header.Set("X-UADMIN-API", session.Key)
@@ -28,7 +28,7 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 		assert.Equal(s.T(), w.Code, 200)
 		return w.Code == 200
 	})
-	req, _ = http.NewRequest("POST", "/testcsrf", nil)
+	req, _ = http.NewRequest("POST", "/testcsrf/", nil)
 	req.Header.Set("X-CSRF-TOKEN", "dsadsada")
 	req.Header.Set("X-UADMIN-API", session.Key)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
@@ -39,7 +39,7 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 }
 
 func (s *CsrfTestSuite) TestIgnoreCsrfCheck() {
-	req, _ := http.NewRequest("POST", "/ignorecsrfcheck", nil)
+	req, _ := http.NewRequest("POST", "/ignorecsrfcheck/", nil)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Equal(s.T(), w.Code, 200)
 		return w.Code == 200

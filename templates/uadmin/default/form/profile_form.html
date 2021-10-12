@@ -15,9 +15,9 @@
             <button type="button" class="pointer list-group-item search" onclick="$('#myModal').modal('show');"><i class="fa fa-unlock-alt fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Change Password"}}</button>
             {{ $otpRequired := FormFieldValue "OTPRequired" nil }}
             {{if ne $otpRequired false }}
-            <a type="button" style="text-align:left;" id="disable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile?otp_required=0"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Disable 2-Factor Auth"}}</a>
+            <a type="button" style="text-align:left;" id="disable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile/?otp_required=0"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Disable 2-Factor Auth"}}</a>
             {{else}}
-            <a type="button" style="text-align:left;" id="enable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile?otp_required=1"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Enable 2-Factor Auth"}}</a>
+            <a type="button" style="text-align:left;" id="enable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile/?otp_required=1"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Enable 2-Factor Auth"}}</a>
             {{end}}
         </div>
     </div>

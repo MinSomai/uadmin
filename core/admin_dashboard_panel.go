@@ -31,10 +31,10 @@ func (dap *DashboardAdminPanel) FindPageForGormModel(m interface{}) *AdminPage {
 
 func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 	if dap.ListHandler != nil {
-		router.GET(CurrentConfig.D.Uadmin.RootAdminURL, dap.ListHandler)
+		router.GET(CurrentConfig.D.Uadmin.RootAdminURL + "/", dap.ListHandler)
 	}
 	for adminPage := range dap.AdminPages.GetAll() {
-		router.GET(fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug), func(pageTitle string, adminPageRegistry *AdminPageRegistry) func(ctx *gin.Context) {
+		router.GET(fmt.Sprintf("%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug), func(pageTitle string, adminPageRegistry *AdminPageRegistry) func(ctx *gin.Context) {
 			return func(ctx *gin.Context) {
 				type Context struct {
 					AdminContext
@@ -55,7 +55,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 			if subPage.RegisteredHTTPHandlers {
 				continue
 			}
-			router.Any(fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
+			router.Any(fmt.Sprintf("%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					if adminPage.ListHandler != nil {
 						adminPage.ListHandler(ctx)
@@ -95,7 +95,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						c.PermissionForBlueprint = c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
 						c.AdminFilterObjects = adminPage.GetQueryset(adminPage, adminRequestParams)
 						c.AdminModelActionRegistry = adminPage.ModelActionsRegistry
-						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
+						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, IsActive: true})
 						c.AdminPage = adminPage
 						if ctx.Request.Method == "POST" {
@@ -132,7 +132,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					}
 				}
 			}(subPage))
-			router.POST(fmt.Sprintf("%s/%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug, "export"), func(adminPage *AdminPage) func(ctx *gin.Context) {
+			router.POST(fmt.Sprintf("%s/%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug, "export"), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					type Context struct {
 						AdminContext
@@ -172,7 +172,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					ctx.Data(http.StatusOK, "application/octet-stream", b.Bytes())
 				}
 			}(subPage))
-			router.Any(fmt.Sprintf("%s/%s/%s/edit/:id", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
+			router.Any(fmt.Sprintf("%s/%s/%s/edit/:id/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					id := ctx.Param("id")
 					type Context struct {
@@ -193,7 +193,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					}
 
 					c := &Context{}
-					c.ListURL = fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)
+					c.ListURL = fmt.Sprintf("%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)
 					c.PageTitle = adminPage.ModelName
 					c.CurrentAdminContext = c
 					c.ListEditableFormsForInlines = NewFormListEditableCollection()
@@ -267,11 +267,11 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									AddedObjectInPopup.ExecuteTemplate(htmlResponseWriter, "addedobjectinpopup", data)
 									ctx.Data(http.StatusOK, "text/html; charset=utf-8", htmlResponseWriter.Bytes())
 								} else if len(requestForm.Value["save_add_another"]) > 0 {
-									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/new", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug))
+									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/new/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug))
 								} else if len(requestForm.Value["save_continue"]) > 0 {
-									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug, id))
+									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/edit/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug, id))
 								} else {
-									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug))
+									ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug))
 								}
 								return nil
 							}
@@ -299,8 +299,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							}
 						}
 					}
-					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
-					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, URL: fmt.Sprintf("%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)})
+					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
+					c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, URL: fmt.Sprintf("%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug, adminPage.Slug)})
 					if id != "new" {
 						values := reflect.ValueOf(modelI).MethodByName("String").Call([]reflect.Value{})
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{IsActive: true, Name: values[0].String()})
@@ -316,7 +316,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 				}
 			}(subPage))
 			for adminModelAction := range subPage.ModelActionsRegistry.GetAllModelActions() {
-				router.Any(fmt.Sprintf("%s/%s/%s/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *AdminPage, slugifiedModelActionName string) func(ctx *gin.Context) {
+				router.Any(fmt.Sprintf("%s/%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.ModelName, adminModelAction.SlugifiedActionName), func(adminPage *AdminPage, slugifiedModelActionName string) func(ctx *gin.Context) {
 					return func(ctx *gin.Context) {
 						adminPage.HandleModelAction(slugifiedModelActionName, ctx)
 					}
@@ -324,7 +324,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 			}
 			for pageInline := range subPage.InlineRegistry.GetAll() {
 				for inlineAdminModelAction := range pageInline.Actions.GetAllModelActions() {
-					router.Any(fmt.Sprintf("%s/%s/%s/edit/:id/%s", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.ModelName, inlineAdminModelAction.SlugifiedActionName), func(adminPage *AdminPage, adminPageInline *AdminPageInline, slugifiedModelActionName string) func(ctx *gin.Context) {
+					router.Any(fmt.Sprintf("%s/%s/%s/edit/:id/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.ModelName, inlineAdminModelAction.SlugifiedActionName), func(adminPage *AdminPage, adminPageInline *AdminPageInline, slugifiedModelActionName string) func(ctx *gin.Context) {
 						return func(ctx *gin.Context) {
 							adminPage.HandleModelAction(slugifiedModelActionName, ctx)
 						}

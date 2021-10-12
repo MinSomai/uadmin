@@ -1,6 +1,6 @@
 <div class="fixed-top bg-black3 default-padding z-index9 header-container">
     <div class="header-logo" style="display: block-inline;">
-        <a href="{{.RootAdminURL}}">
+        <a href="{{.RootAdminURL}}/">
             <img class="hvr-grow" style="max-height:40px" src="{{.Logo}}">
         </a>
     </div>
@@ -24,7 +24,7 @@
         {{if .UserExists}}
         <div class="admin-button ">
             <span style="margin-left:20px;" class="fontgray pointer hidden-xs" onclick="closetopTabs(this);" data-trigger="admin-toggle" >
-                <a href="{{.RootAdminURL}}/setting/setting" style="margin-left:20px;" class="fontgray pointer">
+                <a href="{{.RootAdminURL}}/setting/setting/" style="text-decoration: none; margin-left:20px;" class="fontgray pointer">
                     <i class="top-panel fa fa-wrench pointer" data-toggle="tooltip" data-placement="bottom" title="{{Tf "uadmin/system" .Language.Code "Settings"}}"></i>&nbsp;
                 </a>
             </span>
@@ -36,22 +36,21 @@
             </button>
             <div style="right:5px;" class="toptabs admin-toggle-size dropdown-menu user-toggle  pull-right">
                 <center>
-                    <p></p>
-                    <table class="table table-hover drop-table">
+                    <table class="table table-hover drop-table user-menu">
                         <tr class="pointer"><td onclick="clickA(this);" >
-                            <a class="no-style" href="{{.RootAdminURL}}/profile">
+                            <a class="no-style" href="{{.RootAdminURL}}/profile/">
                                 <i class="fa fa-user-circle-o fa-fw"></i>
                                 {{.User}}
                             </a>
                         </td></tr>
-                        <tr class="pointer"><td onclick="clickA(this);" ><a  class="no-style" href="{{.RootAdminURL}}/profile#changepass"><i class="fa fa-lock fa-fw"></i> {{Tf "uadmin/system" .Language.Code "Change Password"}}</a></td></tr>
+                        <tr class="pointer"><td onclick="clickA(this);" ><a  class="no-style" href="{{.RootAdminURL}}/profile/#changepass"><i class="fa fa-lock fa-fw"></i> {{Tf "uadmin/system" .Language.Code "Change Password"}}</a></td></tr>
                         <tr class="pointer"><td id="admin-logout" onclick="clickA(this);" ><a class="no-style" href="{{.RootAdminURL}}/logout/"><i class="fa fa-sign-out fa-fw"></i> {{Tf "uadmin/system" .Language.Code "Logout"}}</a></td></tr>
                     </table>
                 </center>
             </div>
         </div>
         {{else}} {{/* if .UserExists */}}
-        <a class="no-style" href="{{.RootAdminURL}}">
+        <a class="no-style" href="{{.RootAdminURL}}/">
             {{Tf "uadmin/system" .Language.Code "signin"}}
         </a>
 
