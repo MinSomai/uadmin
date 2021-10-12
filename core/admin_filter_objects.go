@@ -1,7 +1,7 @@
 package core
 
 type IAdminFilterObjects interface {
-	WithTransaction(handler func(afo1 IAdminFilterObjects) error)
+	WithTransaction(handler func(afo1 IAdminFilterObjects) error) error
 	LoadDataForModelByID(ID interface{}, model interface{})
 	SaveModel(model interface{}) error
 	CreateNew(model interface{}) error
@@ -22,6 +22,7 @@ type IAdminFilterObjects interface {
 	SortBy(field *Field, direction int)
 	FilterByMultipleIds(field *Field, realObjectIds []string)
 	GetDB() IPersistenceStorage
+	GetLastError() error
 }
 
 type IterateAdminObjects struct {

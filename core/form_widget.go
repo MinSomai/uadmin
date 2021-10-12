@@ -371,12 +371,12 @@ func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, curre
 func RenderWidget(renderer ITemplateRenderer, templateName string, data map[string]interface{}, baseFuncMap template.FuncMap) template.HTML {
 	if renderer == nil {
 		r := NewTemplateRenderer("")
-		return template.HTML(r.RenderAsString(CurrentConfig.TemplatesFS, templateName, data, baseFuncMap))
+		return r.RenderAsString(CurrentConfig.TemplatesFS, templateName, data, baseFuncMap)
 	}
-	return template.HTML(renderer.RenderAsString(
+	return renderer.RenderAsString(
 		CurrentConfig.TemplatesFS, templateName,
 		data, baseFuncMap,
-	))
+	)
 }
 
 type TextWidget struct {

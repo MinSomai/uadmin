@@ -111,6 +111,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		}
 		subject := "Password reset for admin panel on the " + core.CurrentConfig.D.Uadmin.SiteName
 		err = utils.SendEmail(core.CurrentConfig.D.Uadmin.EmailFrom, []string{user.GetEmail()}, []string{}, []string{}, subject, templateWriter.String())
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		}
 		return
 	})
 	group.POST("/api/reset-password/", func(ctx *gin.Context) {

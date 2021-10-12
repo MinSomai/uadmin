@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
+	"html/template"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -144,6 +145,7 @@ type ElasticSearchPersistenceStorage struct {
 	ESSearch *elastic.SearchService
 	IndexName string
 	GenModelI func() (interface{}, interface{})
+	LastError error
 }
 
 func NewElasticSearchPersistenceStorage(elasticClient *elastic.Client, indexName string, genModelI func() (interface{}, interface{})) *ElasticSearchPersistenceStorage {
@@ -333,8 +335,12 @@ func (gps *ElasticSearchPersistenceStorage) Use(plugin gorm.Plugin) error {
 func (gps *ElasticSearchPersistenceStorage) Create(value interface{}) IPersistenceStorage {
 	es := gps.ESClient.Index().Index(gps.IndexName)
 	if v1, ok := value.(ElasticModelInterface); ok {
-		res, _ := es.BodyJson(value).Refresh("wait_for").Do(context.Background())
-		v1.SetID(res.Id)
+		res, err := es.BodyJson(value).Refresh("wait_for").Do(context.Background())
+		if err != nil {
+			gps.LastError = err
+		} else {
+			v1.SetID(res.Id)
+		}
 	}
 	return gps
 }
@@ -349,9 +355,13 @@ func (gps *ElasticSearchPersistenceStorage) Save(value interface{}) IPersistence
 		if v1.GetID() != "" {
 			es = es.Id(v1.GetID())
 		}
-		res, _ := es.BodyJson(value).Refresh("wait_for").Do(context.Background())
-		if v1.GetID() == "" {
-			v1.SetID(res.Id)
+		res, err := es.BodyJson(value).Refresh("wait_for").Do(context.Background())
+		if err != nil {
+			gps.LastError = err
+		} else {
+			if v1.GetID() == "" {
+				v1.SetID(res.Id)
+			}
 		}
 	}
 	return gps
@@ -361,15 +371,19 @@ func (gps *ElasticSearchPersistenceStorage) First(dest interface{}, conds ...int
 	if gps.ESSearch == nil {
 		gps.ESSearch = gps.ESClient.Search().Index(gps.IndexName)
 	}
-	searchRes, _ := gps.ESSearch.Query(conds[0].(elastic.Query)).Pretty(true).Do(context.Background())
-	for _, hit := range searchRes.Hits.Hits {
-		if err := json.Unmarshal(hit.Source, dest); err != nil {
-			// Handle error
+	searchRes, err := gps.ESSearch.Query(conds[0].(elastic.Query)).Pretty(true).Do(context.Background())
+	if err != nil {
+		gps.LastError = err
+	} else {
+		for _, hit := range searchRes.Hits.Hits {
+			if err := json.Unmarshal(hit.Source, dest); err != nil {
+				// Handle error
+			}
+			if v1, ok := dest.(ElasticModelInterface); ok {
+				v1.SetID(hit.Id)
+			}
+			// Use v
 		}
-		if v1, ok := dest.(ElasticModelInterface); ok {
-			v1.SetID(hit.Id)
-		}
-		// Use v
 	}
 	return gps
 }
@@ -390,31 +404,33 @@ func (gps *ElasticSearchPersistenceStorage) Find(dest interface{}, conds ...inte
 	searchRes, err := gps.ESSearch.Pretty(true).Do(context.Background())
 	if err != nil {
 		Trail(ERROR, err)
-	}
-	reflectValue := reflect.ValueOf(dest)
-	var (
-		reflectValueType = reflectValue.Type().Elem()
-		isPtr            = reflectValueType.Kind() == reflect.Ptr
-	)
+		gps.LastError = err
+	} else {
+		reflectValue := reflect.ValueOf(dest)
+		var (
+			reflectValueType = reflectValue.Type().Elem()
+			isPtr            = reflectValueType.Kind() == reflect.Ptr
+		)
 
-	if isPtr {
-		reflectValueType = reflectValueType.Elem()
-	}
-	reflectValue = reflect.Indirect(reflectValue)
-	for _, hit := range searchRes.Hits.Hits {
-		modelI, _ := gps.GenModelI()
-		if err = json.Unmarshal(hit.Source, modelI); err != nil {
-			// Handle error
+		if isPtr {
+			reflectValueType = reflectValueType.Elem()
 		}
-		if v1, ok := modelI.(ElasticModelInterface); ok {
-			v1.SetID(hit.Id)
-			reflectValue = reflect.Append(reflectValue, reflect.ValueOf(v1))
+		reflectValue = reflect.Indirect(reflectValue)
+		for _, hit := range searchRes.Hits.Hits {
+			modelI, _ := gps.GenModelI()
+			if err = json.Unmarshal(hit.Source, modelI); err != nil {
+				// Handle error
+			}
+			if v1, ok := modelI.(ElasticModelInterface); ok {
+				v1.SetID(hit.Id)
+				reflectValue = reflect.Append(reflectValue, reflect.ValueOf(v1))
+			}
+			// Use v
 		}
-		// Use v
+		valuePtr := reflect.ValueOf(dest)
+		value := valuePtr.Elem()
+		value.Set(reflectValue)
 	}
-	valuePtr := reflect.ValueOf(dest)
-	value := valuePtr.Elem()
-	value.Set(reflectValue)
 	return gps
 }
 
@@ -448,7 +464,10 @@ func (gps *ElasticSearchPersistenceStorage) UpdateColumns(values interface{}) IP
 
 func (gps *ElasticSearchPersistenceStorage) Delete(value interface{}, conds ...interface{}) IPersistenceStorage {
 	if v1, ok := value.(ElasticModelInterface); ok {
-		gps.ESClient.Delete().Index(gps.IndexName).Id(v1.GetID()).Pretty(true).Do(context.Background())
+		_, err := gps.ESClient.Delete().Index(gps.IndexName).Id(v1.GetID()).Pretty(true).Do(context.Background())
+		if err != nil {
+			gps.LastError = err
+		}
 	}
 	return gps
 }
@@ -457,8 +476,12 @@ func (gps *ElasticSearchPersistenceStorage) Count(count *int64) IPersistenceStor
 	if gps.ESSearch == nil {
 		gps.ESSearch = gps.ESClient.Search().Index(gps.IndexName)
 	}
-	searchRes, _ := gps.ESSearch.Pretty(true).Do(context.Background())
-	*count = searchRes.Hits.TotalHits.Value
+	searchRes, err := gps.ESSearch.Pretty(true).Do(context.Background())
+	if err != nil {
+		gps.LastError = err
+	} else {
+		*count = searchRes.Hits.TotalHits.Value
+	}
 	return gps
 }
 
@@ -510,6 +533,11 @@ func (gps *ElasticSearchPersistenceStorage) Exec(sql string, values ...interface
 	return nil
 }
 
+func (gps *ElasticSearchPersistenceStorage) GetLastError() error {
+	return gps.LastError
+}
+
+
 type ESSortBy struct {
 	Field *Field
 	Direction bool
@@ -530,6 +558,19 @@ type ElasticSearchAdminFilterObjects struct {
 	GenerateModelI        func() (interface{}, interface{})
 	SearchBy []*ESSearchParam
 	SearchString string
+	LastError error
+}
+
+func (afo *ElasticSearchAdminFilterObjects) GetLastError() error {
+	ret := afo.LastError
+	afo.LastError = nil
+	return ret
+}
+
+func (afo *ElasticSearchAdminFilterObjects) SetLastError(err error) {
+	if err != nil {
+		afo.LastError = err
+	}
 }
 
 func (afo *ElasticSearchAdminFilterObjects) FilterByMultipleIds(field *Field, realObjectIds []string) {
@@ -541,6 +582,7 @@ func (afo *ElasticSearchAdminFilterObjects) FilterByMultipleIds(field *Field, re
 		objectInterfaceIds = append(objectInterfaceIds, realObjectId)
 	}
 	afo.SetFullQuerySet(afo.GetFullQuerySet().Where("_id", objectInterfaceIds...))
+	afo.SetLastError(afo.ESQuerySet.GetLastError())
 }
 
 func (afo *ElasticSearchAdminFilterObjects) Search(field *Field, searchString string) {
@@ -556,6 +598,7 @@ func (afo *ElasticSearchAdminFilterObjects) SearchInIndex() {
 	}
 	afo.ESQuerySet.Where(elastic.NewMultiMatchQuery(afo.SearchString, fields...))
 	afo.PaginatedESQuerySet.Where(elastic.NewMultiMatchQuery(afo.SearchString, fields...))
+	afo.SetLastError(afo.PaginatedESQuerySet.GetLastError())
 }
 
 func (afo *ElasticSearchAdminFilterObjects) FilterQs(filterString string) {
@@ -564,6 +607,7 @@ func (afo *ElasticSearchAdminFilterObjects) FilterQs(filterString string) {
 	schema1 := statement.Schema
 	FilterElasticSearchModel(afo.GetFullQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
 	FilterElasticSearchModel(afo.GetPaginatedQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
+	afo.SetLastError(afo.PaginatedESQuerySet.GetLastError())
 }
 
 func (afo *ElasticSearchAdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
@@ -602,13 +646,16 @@ func (afo *ElasticSearchAdminFilterObjects) SetPaginatedQuerySet(storage IPersis
 	afo.PaginatedESQuerySet = storage
 }
 
-func (afo *ElasticSearchAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) {
-	handler(afo)
+func (afo *ElasticSearchAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) error {
+	err := handler(afo)
+	afo.SetLastError(err)
+	return afo.GetLastError()
 }
 
 func (afo *ElasticSearchAdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
 	cond := elastic.NewTermQuery("_id", ID)
 	afo.InitialESQuerySet.First(model, cond)
+	afo.SetLastError(afo.InitialESQuerySet.GetLastError())
 }
 
 func (afo *ElasticSearchAdminFilterObjects) SortBy(field *Field, direction int) {
@@ -625,16 +672,19 @@ func (afo *ElasticSearchAdminFilterObjects) SortBy(field *Field, direction int) 
 
 func (afo *ElasticSearchAdminFilterObjects) SaveModel(model interface{}) error {
 	afo.InitialESQuerySet.Save(model)
+	afo.SetLastError(afo.InitialESQuerySet.GetLastError())
 	return nil
 }
 
 func (afo *ElasticSearchAdminFilterObjects) CreateNew(model interface{}) error {
 	afo.InitialESQuerySet.Create(model)
+	afo.SetLastError(afo.InitialESQuerySet.GetLastError())
 	return nil
 }
 
 func (afo *ElasticSearchAdminFilterObjects) RemoveModelPermanently(model interface{}) error {
 	afo.InitialESQuerySet.Delete(model)
+	afo.SetLastError(afo.InitialESQuerySet.GetLastError())
 	return nil
 }
 
@@ -652,6 +702,7 @@ func (afo *ElasticSearchAdminFilterObjects) GetPaginated() <-chan *IterateAdminO
 		defer close(chnl)
 		_, models := afo.GenerateModelI()
 		afo.PaginatedESQuerySet.Find(models)
+		afo.SetLastError(afo.PaginatedESQuerySet.GetLastError())
 		s := reflect.Indirect(reflect.ValueOf(models))
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
@@ -675,6 +726,7 @@ func (afo *ElasticSearchAdminFilterObjects) IterateThroughWholeQuerySet() <-chan
 		defer close(chnl)
 		_, models := afo.GenerateModelI()
 		afo.ESQuerySet.Find(models)
+		afo.SetLastError(afo.ESQuerySet.GetLastError())
 		s := reflect.Indirect(reflect.ValueOf(models))
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
@@ -718,17 +770,20 @@ func init() {
 		}
 		removalPlan := make([]RemovalTreeList, 0)
 		removalConfirmed := ctx.PostForm("removal_confirmed")
-		afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
+		removalError := afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
 			for modelIterated := range afo.IterateThroughWholeQuerySet() {
 				if v1, ok := modelIterated.Model.(ElasticModelInterface); ok {
 					if removalConfirmed == "" {
 						deletionStringified := []*RemovalTreeNodeStringified{{
-							Explanation: fmt.Sprintf("Delete from index %s - %s", v1.GetIndexName(), v1.String()),
+							Explanation: template.HTML(fmt.Sprintf("Delete from index %s - %s", v1.GetIndexName(), v1.String())),
 							Level:       0,
 						}}
 						removalPlan = append(removalPlan, deletionStringified)
 					} else {
 						afo.GetInitialQuerySet().Delete(modelIterated.Model)
+						if afo.GetInitialQuerySet().GetLastError() != nil{
+							return afo.GetInitialQuerySet().GetLastError()
+						}
 					}
 				}
 			}
@@ -755,6 +810,9 @@ func init() {
 			tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
 			return nil
 		})
+		if removalError != nil {
+			return false, 0
+		}
 		return true, int64(len(ctx.PostForm("object_ids")))
 	}
 	ESGlobalModelActionRegistry.AddModelAction(removalModelAction)

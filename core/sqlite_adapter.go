@@ -20,6 +20,7 @@ import (
 type SqliteAdapter struct {
 	Statement *gorm.Statement
 	DbType    string
+	LastError error
 }
 
 func (d *SqliteAdapter) Equals(name interface{}, args ...interface{}) {
@@ -293,6 +294,10 @@ func (d *SqliteAdapter) StartDBShell(databaseSettings *DBSettings) error {
 		return err
 	}
 	return nil
+}
+
+func (d *SqliteAdapter) GetLastError() error {
+	return d.LastError
 }
 
 func sqliteUadminDatetimeParse(dt string, tzName string, connTzname string) *time.Time {

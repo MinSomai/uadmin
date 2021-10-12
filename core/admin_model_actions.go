@@ -38,7 +38,7 @@ func init() {
 		}
 		removalPlan := make([]RemovalTreeList, 0)
 		removalConfirmed := ctx.PostForm("removal_confirmed")
-		afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
+		removalError := afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
 			for modelIterated := range afo.IterateThroughWholeQuerySet() {
 				removalTreeNode := BuildRemovalTree(afo1.GetUadminDatabase(), modelIterated.Model)
 				if removalConfirmed == "" {
@@ -74,6 +74,9 @@ func init() {
 			tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
 			return nil
 		})
+		if removalError != nil {
+			return false, 0
+		}
 		return true, int64(len(ctx.PostForm("object_ids")))
 	}
 	GlobalModelActionRegistry.AddModelAction(removalModelAction)

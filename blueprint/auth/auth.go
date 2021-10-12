@@ -97,9 +97,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
 				db.Save(user.(*core.User))
-				c.ChangesSaved = true
-				form1.ChangesSaved = true
-				ctx.Redirect(302, ctx.Request.URL.String())
+				if db.Error != nil {
+					formError.GeneralErrors = append(formError.GeneralErrors, db.Error)
+				} else {
+					c.ChangesSaved = true
+					form1.ChangesSaved = true
+					ctx.Redirect(302, ctx.Request.URL.String())
+				}
 				return
 			}
 		}

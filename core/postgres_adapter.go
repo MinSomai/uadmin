@@ -21,6 +21,7 @@ import (
 type PostgresAdapter struct {
 	Statement *gorm.Statement
 	DbType    string
+	LastError error
 }
 
 func (d *PostgresAdapter) Equals(name interface{}, args ...interface{}) {
@@ -364,6 +365,10 @@ func (d *PostgresAdapter) StartDBShell(databaseSettings *DBSettings) error {
 		return err
 	}
 	return nil
+}
+
+func (d *PostgresAdapter) GetLastError() error {
+	return d.LastError
 }
 
 

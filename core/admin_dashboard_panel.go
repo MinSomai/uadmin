@@ -99,7 +99,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, IsActive: true})
 						c.AdminPage = adminPage
 						if ctx.Request.Method == "POST" {
-							c.AdminFilterObjects.WithTransaction(func(afo1 IAdminFilterObjects) error {
+							err := c.AdminFilterObjects.WithTransaction(func(afo1 IAdminFilterObjects) error {
 								postForm, _ := ctx.MultipartForm()
 								ids := postForm.Value["object_id"]
 								for _, objectID := range ids {
@@ -116,8 +116,14 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 										}
 									}
 								}
+								if afo1.GetLastError() != nil {
+									return afo1.GetLastError()
+								}
 								return nil
 							})
+							if err != nil {
+								c.Message = err.Error()
+							}
 						}
 						c.AdminFilterObjects.GetFullQuerySet().Count(&c.TotalRecords)
 						c.TotalPages = int64(math.Ceil(float64(c.TotalRecords / int64(adminPage.Paginator.PerPage))))
@@ -200,7 +206,9 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					modelI, _ := adminPage.GenerateModelI()
 					if id != "new" {
 						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
-						adminPage.GetQueryset(adminPage, adminRequestParams).LoadDataForModelByID(id, modelI)
+						qs := adminPage.GetQueryset(adminPage, adminRequestParams)
+						qs.LoadDataForModelByID(id, modelI)
+						// qs.CloseConnection()
 					}
 					adminRequestParams := NewAdminRequestParams()
 					c.AdminRequestParams = adminRequestParams
@@ -238,13 +246,19 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							modelToSave, _ = adminPage.GenerateModelI()
 						}
 						afo := adminPage.GetQueryset(adminPage, adminRequestParams)
-						afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
+						err := afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
 							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo1)
 							if formError.IsEmpty() {
 								if adminPage.SaveModel != nil {
 									modelToSave = adminPage.SaveModel(modelToSave, ID, afo1)
+									if afo1.GetLastError() != nil {
+										return afo1.GetLastError()
+									}
 								} else {
-									afo.GetInitialQuerySet().Save(modelToSave)
+									afo1.GetInitialQuerySet().Model(modelToSave).Save(modelToSave)
+									if afo1.GetLastError() != nil {
+										return afo1.GetLastError()
+									}
 								}
 								successfulInline := true
 								for inline := range adminPage.InlineRegistry.GetAll() {
@@ -277,6 +291,9 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							}
 							return fmt.Errorf("not successful form validation")
 						})
+						if err != nil {
+							form.FormError.GeneralErrors = append(form.FormError.GeneralErrors, err)
+						}
 					} else {
 						if id != "new" {
 							if !subPage.DoesUserHavePermission(user, "edit") {

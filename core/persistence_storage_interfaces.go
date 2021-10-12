@@ -123,4 +123,5 @@ type IPersistenceStorage interface {
 	RollbackTo(name string) IPersistenceStorage
 	Exec(sql string, values ...interface{}) IPersistenceStorage
 	GetCurrentDB() *gorm.DB
+	GetLastError() error
 }

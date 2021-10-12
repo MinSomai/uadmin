@@ -132,6 +132,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 
 type GormPersistenceStorage struct {
 	Db *gorm.DB
+	LastError error
 }
 
 func NewGormPersistenceStorage(db *gorm.DB) *GormPersistenceStorage {
@@ -139,16 +140,26 @@ func NewGormPersistenceStorage(db *gorm.DB) *GormPersistenceStorage {
 }
 
 func (gps *GormPersistenceStorage) Association(column string) IPersistenceAssociation {
-	return gps.Db.Association(column)
+	ret := gps.Db.Association(column)
+	if ret.Error != nil {
+		gps.LastError = ret.Error
+	}
+	return ret
 }
 
 func (gps *GormPersistenceStorage) Model(value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Model(value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Clauses(conds ...clause.Expression) IPersistenceStorage {
 	gps.Db = gps.Db.Clauses(conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
@@ -158,96 +169,153 @@ func (gps *GormPersistenceStorage) GetCurrentDB() *gorm.DB {
 
 func (gps *GormPersistenceStorage) Table(name string, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Table(name, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Distinct(args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Distinct(args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Select(query interface{}, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Select(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Omit(columns ...string) IPersistenceStorage {
 	gps.Db = gps.Db.Omit(columns...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Where(query interface{}, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Where(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Not(query interface{}, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Not(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Or(query interface{}, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Or(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Joins(query string, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Joins(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Group(name string) IPersistenceStorage {
 	gps.Db = gps.Db.Group(name)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Having(query interface{}, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Having(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Order(value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Order(value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Limit(limit int) IPersistenceStorage {
 	gps.Db = gps.Db.Limit(limit)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Offset(offset int) IPersistenceStorage {
 	gps.Db = gps.Db.Offset(offset)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Scopes(funcs ...func(*gorm.DB) *gorm.DB) IPersistenceStorage {
 	gps.Db = gps.Db.Scopes(funcs...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Preload(query string, args ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Preload(query, args...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Attrs(attrs ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Attrs(attrs...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Assign(attrs ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Assign(attrs...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Unscoped() IPersistenceStorage {
 	gps.Db = gps.Db.Unscoped()
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Raw(sql string, values ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Raw(sql, values...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
@@ -256,27 +324,38 @@ func (gps *GormPersistenceStorage) Migrator() IPersistenceMigrator {
 }
 
 func (gps *GormPersistenceStorage) AutoMigrate(dst ...interface{}) error {
-
 	return gps.Db.AutoMigrate(dst...)
 }
 
 func (gps *GormPersistenceStorage) Session(config *gorm.Session) IPersistenceStorage {
 	gps.Db = gps.Db.Session(config)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) WithContext(ctx context.Context) IPersistenceStorage {
 	gps.Db = gps.Db.WithContext(ctx)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Debug() IPersistenceStorage {
 	gps.Db = gps.Db.Debug()
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Set(key string, value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Set(key, value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
@@ -286,6 +365,9 @@ func (gps *GormPersistenceStorage) Get(key string) (interface{}, bool) {
 
 func (gps *GormPersistenceStorage) InstanceSet(key string, value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.InstanceSet(key, value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
@@ -311,81 +393,129 @@ func (gps *GormPersistenceStorage) Use(plugin gorm.Plugin) error {
 
 func (gps *GormPersistenceStorage) Create(value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Create(value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) CreateInBatches(value interface{}, batchSize int) IPersistenceStorage {
 	gps.Db = gps.Db.CreateInBatches(value, batchSize)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Save(value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Save(value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) First(dest interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.First(dest, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Take(dest interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Take(dest, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Last(dest interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Last(dest, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Find(dest interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Find(dest, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) FindInBatches(dest interface{}, batchSize int, fc func(tx *gorm.DB, batch int) error) IPersistenceStorage {
 	gps.Db = gps.Db.FindInBatches(dest, batchSize, fc)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) FirstOrInit(dest interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.FirstOrInit(dest, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) FirstOrCreate(dest interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.FirstOrCreate(dest, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Update(column string, value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Update(column, value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Updates(values interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Updates(values)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) UpdateColumn(column string, value interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.UpdateColumn(column, value)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) UpdateColumns(values interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.UpdateColumns(values)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Delete(value interface{}, conds ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Delete(value, conds...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Count(count *int64) IPersistenceStorage {
 	gps.Db = gps.Db.Count(count)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
@@ -399,11 +529,17 @@ func (gps *GormPersistenceStorage) Rows() (IPersistenceIterateRows, error) {
 
 func (gps *GormPersistenceStorage) Scan(dest interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Scan(dest)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Pluck(column string, dest interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Pluck(column, dest)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
@@ -417,33 +553,58 @@ func (gps *GormPersistenceStorage) Transaction(fc func(*gorm.DB) error, opts ...
 
 func (gps *GormPersistenceStorage) Begin(opts ...*sql.TxOptions) IPersistenceStorage {
 	gps.Db = gps.Db.Begin(opts...)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Commit() IPersistenceStorage {
 	gps.Db = gps.Db.Commit()
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Rollback() IPersistenceStorage {
 	gps.Db = gps.Db.Rollback()
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) SavePoint(name string) IPersistenceStorage {
 	gps.Db = gps.Db.SavePoint(name)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) RollbackTo(name string) IPersistenceStorage {
 	gps.Db = gps.Db.RollbackTo(name)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
 
 func (gps *GormPersistenceStorage) Exec(sql string, values ...interface{}) IPersistenceStorage {
 	gps.Db = gps.Db.Exec(sql, values)
+	if gps.Db.Error != nil {
+		gps.LastError = gps.Db.Error
+	}
 	return gps
 }
+
+func (gps *GormPersistenceStorage) GetLastError() error {
+	ret := gps.LastError
+	gps.LastError = nil
+	return ret
+}
+
 
 type GormAdminFilterObjects struct {
 	InitialGormQuerySet   IPersistenceStorage
@@ -452,6 +613,19 @@ type GormAdminFilterObjects struct {
 	Model                 interface{}
 	UadminDatabase        *UadminDatabase
 	GenerateModelI        func() (interface{}, interface{})
+	LastError error
+}
+
+func (afo *GormAdminFilterObjects) SetLastError(err error) {
+	if err != nil {
+		afo.LastError = err
+	}
+}
+
+func (afo *GormAdminFilterObjects) GetLastError() error {
+	ret := afo.LastError
+	afo.LastError = nil
+	return ret
 }
 
 func (afo *GormAdminFilterObjects) FilterQs(filterString string) {
@@ -462,7 +636,7 @@ func (afo *GormAdminFilterObjects) FilterQs(filterString string) {
 	afo.SetFullQuerySet(operatorContext.Tx)
 	operatorContext = FilterGormModel(afo.GetUadminDatabase().Adapter, afo.GetPaginatedQuerySet(), schema1, []string{filterString}, afo.GetCurrentModel())
 	afo.SetPaginatedQuerySet(operatorContext.Tx)
-
+	afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
 }
 
 func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
@@ -473,6 +647,7 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 	gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
 	operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
 	afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
+	afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
 }
 
 func (afo *GormAdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
@@ -515,32 +690,43 @@ func (afo *GormAdminFilterObjects) GetDB() IPersistenceStorage {
 	return NewGormPersistenceStorage(afo.UadminDatabase.Db)
 }
 
-func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) {
+func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) error {
 	afo.UadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
-		return handler(&GormAdminFilterObjects{UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter}, GenerateModelI: afo.GenerateModelI})
+		ret := handler(&GormAdminFilterObjects{
+			UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter}, GenerateModelI: afo.GenerateModelI,
+			InitialGormQuerySet: NewGormPersistenceStorage(tx),
+		})
+		afo.SetLastError(ret)
+		return ret
 	})
+	return afo.GetLastError()
 }
 
 func (afo *GormAdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
 	afo.UadminDatabase.Db.Preload(clause.Associations).First(model, ID)
+	afo.SetLastError(afo.UadminDatabase.Db.Error)
 }
 
 func (afo *GormAdminFilterObjects) SaveModel(model interface{}) error {
 	res := afo.UadminDatabase.Db.Save(model)
+	afo.SetLastError(res.Error)
 	return res.Error
 }
 
 func (afo *GormAdminFilterObjects) CreateNew(model interface{}) error {
 	res := afo.UadminDatabase.Db.Model(model).Create(model)
+	afo.SetLastError(res.Error)
 	return res.Error
 }
 
 func (afo *GormAdminFilterObjects) FilterByMultipleIds(field *Field, realObjectIds []string) {
 	afo.SetFullQuerySet(afo.GetFullQuerySet().Where(fmt.Sprintf("%s IN ?", field.DBName), realObjectIds))
+	afo.SetLastError(afo.GormQuerySet.GetLastError())
 }
 
 func (afo *GormAdminFilterObjects) RemoveModelPermanently(model interface{}) error {
 	res := afo.UadminDatabase.Db.Unscoped().Delete(model)
+	afo.SetLastError(res.Error)
 	return res.Error
 }
 
@@ -550,6 +736,7 @@ func (afo *GormAdminFilterObjects) SortBy(field *Field, direction int) {
 		sortBy += " desc"
 	}
 	afo.SetPaginatedQuerySet(afo.GetPaginatedQuerySet().Order(sortBy))
+	afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
 }
 
 func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
@@ -559,6 +746,7 @@ func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 		modelI, models := afo.GenerateModelI()
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.PaginatedGormQuerySet.Preload(clause.Associations).Find(models)
+		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
 		s := reflect.Indirect(reflect.ValueOf(models))
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
@@ -582,6 +770,7 @@ func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *Iterate
 		modelI, models := afo.GenerateModelI()
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.GormQuerySet.Preload(clause.Associations).Find(models)
+		afo.SetLastError(afo.GormQuerySet.GetLastError())
 		s := reflect.Indirect(reflect.ValueOf(models))
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
