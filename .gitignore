@@ -32,3 +32,4 @@ contrib/docker
 /examples/uadmin-example/main
 /examples/es-uadmin-example/main
 /configs/real_demo.yml
+/examples/proofit-example/main
