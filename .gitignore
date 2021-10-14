@@ -29,6 +29,6 @@ uploads/*
 lint.json
 contrib/docker
 /estest
-/uadmin-example/main
-/es-uadmin-example/main
+/examples/uadmin-example/main
+/examples/es-uadmin-example/main
 /configs/real_demo.yml

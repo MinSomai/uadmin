@@ -63,10 +63,10 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, genModelI func() (interfac
 				InitialESQuerySet:   initialQuerySet,
 				ESQuerySet:          esQuerySet,
 				PaginatedESQuerySet: paginatedQuerySet1,
-				Model:                 modelI3,
-				UadminDatabase:        uadminDatabase,
-				GenerateModelI:        genModelI,
-				SearchBy: make([]*ESSearchParam, 0),
+				Model:               modelI3,
+				UadminDatabase:      uadminDatabase,
+				GenerateModelI:      genModelI,
+				SearchBy:            make([]*ESSearchParam, 0),
 			}
 			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
 				url1, _ := url.Parse(adminRequestParams.RequestURL)
@@ -141,8 +141,8 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, genModelI func() (interfac
 }
 
 type ElasticSearchPersistenceStorage struct {
-	ESClient *elastic.Client
-	ESSearch *elastic.SearchService
+	ESClient  *elastic.Client
+	ESSearch  *elastic.SearchService
 	IndexName string
 	GenModelI func() (interface{}, interface{})
 	LastError error
@@ -537,11 +537,10 @@ func (gps *ElasticSearchPersistenceStorage) GetLastError() error {
 	return gps.LastError
 }
 
-
 type ESSortBy struct {
-	Field *Field
-	Direction bool
-	FieldName string
+	Field         *Field
+	Direction     bool
+	FieldName     string
 	SortByKeyword bool
 }
 
@@ -553,12 +552,12 @@ type ElasticSearchAdminFilterObjects struct {
 	InitialESQuerySet   IPersistenceStorage
 	ESQuerySet          IPersistenceStorage
 	PaginatedESQuerySet IPersistenceStorage
-	Model                 interface{}
-	UadminDatabase        *UadminDatabase
-	GenerateModelI        func() (interface{}, interface{})
-	SearchBy []*ESSearchParam
-	SearchString string
-	LastError error
+	Model               interface{}
+	UadminDatabase      *UadminDatabase
+	GenerateModelI      func() (interface{}, interface{})
+	SearchBy            []*ESSearchParam
+	SearchString        string
+	LastError           error
 }
 
 func (afo *ElasticSearchAdminFilterObjects) GetLastError() error {
@@ -664,8 +663,8 @@ func (afo *ElasticSearchAdminFilterObjects) SortBy(field *Field, direction int) 
 		directionB = false
 	}
 	afo.PaginatedESQuerySet.Order(&ESSortBy{
-		Field: field,
-		Direction: directionB,
+		Field:         field,
+		Direction:     directionB,
 		SortByKeyword: true,
 	})
 }
@@ -770,7 +769,7 @@ func init() {
 		}
 		removalPlan := make([]RemovalTreeList, 0)
 		removalConfirmed := ctx.PostForm("removal_confirmed")
-		removalError := afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
+		removalError := afo.WithTransaction(func(afo1 IAdminFilterObjects) error {
 			for modelIterated := range afo.IterateThroughWholeQuerySet() {
 				if v1, ok := modelIterated.Model.(ElasticModelInterface); ok {
 					if removalConfirmed == "" {
@@ -781,7 +780,7 @@ func init() {
 						removalPlan = append(removalPlan, deletionStringified)
 					} else {
 						afo.GetInitialQuerySet().Delete(modelIterated.Model)
-						if afo.GetInitialQuerySet().GetLastError() != nil{
+						if afo.GetInitialQuerySet().GetLastError() != nil {
 							return afo.GetInitialQuerySet().GetLastError()
 						}
 					}

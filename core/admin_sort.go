@@ -7,8 +7,8 @@ type ISortBy interface {
 }
 
 type SortBy struct {
-	Direction int // -1 descending order, 1 ascending order
-	Field     *Field
+	Direction                int // -1 descending order, 1 ascending order
+	Field                    *Field
 	CustomSortImplementation func(afo IAdminFilterObjects, field *Field, direction int)
 }
 

@@ -31,7 +31,7 @@ func (dap *DashboardAdminPanel) FindPageForGormModel(m interface{}) *AdminPage {
 
 func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 	if dap.ListHandler != nil {
-		router.GET(CurrentConfig.D.Uadmin.RootAdminURL + "/", dap.ListHandler)
+		router.GET(CurrentConfig.D.Uadmin.RootAdminURL+"/", dap.ListHandler)
 	}
 	for adminPage := range dap.AdminPages.GetAll() {
 		router.GET(fmt.Sprintf("%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug), func(pageTitle string, adminPageRegistry *AdminPageRegistry) func(ctx *gin.Context) {
@@ -246,7 +246,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							modelToSave, _ = adminPage.GenerateModelI()
 						}
 						afo := adminPage.GetQueryset(adminPage, adminRequestParams)
-						err := afo.WithTransaction(func (afo1 IAdminFilterObjects) error {
+						err := afo.WithTransaction(func(afo1 IAdminFilterObjects) error {
 							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo1)
 							if formError.IsEmpty() {
 								if adminPage.SaveModel != nil {

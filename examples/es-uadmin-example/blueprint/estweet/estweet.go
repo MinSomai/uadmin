@@ -14,7 +14,7 @@ type Blueprint struct {
 type Tweet struct {
 	User    string `json:"user" uadmin:"list,search"`
 	Message string `json:"message" uadmin:"list,search"`
-	ID string
+	ID      string
 }
 
 func (t *Tweet) String() string {

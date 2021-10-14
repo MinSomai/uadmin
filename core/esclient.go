@@ -9,9 +9,9 @@ import (
 )
 
 type ESConfig struct {
-	Host []string `yaml:"host"`
-	Sniff bool `yaml:"sniff"`
-	HealthcheckInterval int `yaml:"healtcheck_interval"`
+	Host                []string `yaml:"host"`
+	Sniff               bool     `yaml:"sniff"`
+	HealthcheckInterval int      `yaml:"healtcheck_interval"`
 }
 
 // Info from config file
@@ -23,8 +23,8 @@ func (ucc *UadminESConfig) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	type rawStuff UadminESConfig
 	raw := rawStuff{
 		ES: &ESConfig{
-			Host: []string{"http://127.0.0.1:9200"},
-			Sniff: false,
+			Host:                []string{"http://127.0.0.1:9200"},
+			Sniff:               false,
 			HealthcheckInterval: 5,
 		},
 	}

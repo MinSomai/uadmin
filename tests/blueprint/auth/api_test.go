@@ -270,7 +270,7 @@ func (s *AuthProviderTestSuite) TestSignupForApi() {
 //}
 
 func (s *AuthProviderTestSuite) TestOpenAdminPage() {
-	req, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL + "/", nil)
+	req, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL+"/", nil)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Body.String(), "uadmin - Admin Login")
 		assert.Equal(s.T(), w.Code, 200)
@@ -282,7 +282,7 @@ func (s *AuthProviderTestSuite) TestOpenAdminPage() {
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Contains(s.T(), w.Header().Get("Set-Cookie"), "uadmin-admin=")
 		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
-		req1, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL + "/", nil)
+		req1, _ := http.NewRequest("GET", core.CurrentConfig.D.Uadmin.RootAdminURL+"/", nil)
 		req1.Header.Set(
 			"Cookie",
 			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),

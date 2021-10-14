@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/es_uadmin_example/blueprint/estweet"
+	"github.com/sergeyglazyrindev/uadmin"
 	"os"
 )
 

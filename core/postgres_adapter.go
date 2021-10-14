@@ -352,7 +352,7 @@ func (d *PostgresAdapter) StartDBShell(databaseSettings *DBSettings) error {
 		"-h", host, "-p", strconv.Itoa(port), databaseSettings.Name,
 	)
 	commandToExecute.Env = os.Environ()
-	commandToExecute.Env = append(commandToExecute.Env, "PGPASSWORD=" + databaseSettings.Password)
+	commandToExecute.Env = append(commandToExecute.Env, "PGPASSWORD="+databaseSettings.Password)
 	// Sets standard output to cmd.stdout writer
 	commandToExecute.Stdout = os.Stdout
 	// Sets standard input to cmd.stdin reader
@@ -371,10 +371,9 @@ func (d *PostgresAdapter) GetLastError() error {
 	return d.LastError
 }
 
-
 func init() {
 	InitializeGlobalAdapterRegistry()
-	GlobalDbAdapterRegistry.RegisterAdapter("postgres", func(db *gorm.DB) IDbAdapter{
+	GlobalDbAdapterRegistry.RegisterAdapter("postgres", func(db *gorm.DB) IDbAdapter {
 		return &PostgresAdapter{
 			DbType: "postgres",
 			Statement: &gorm.Statement{

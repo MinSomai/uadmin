@@ -78,12 +78,12 @@ func GetDisplayName(src string) string {
 }
 
 var FuncMap = template.FuncMap{
-	"Tf":            Tf,
-	"add":           add,
-	"mul":           mul,
-	"safe":          safe,
-	"attr":          attr,
-	"GenerateAttrs": GenerateAttrs,
+	"Tf":             Tf,
+	"add":            add,
+	"mul":            mul,
+	"safe":           safe,
+	"attr":           attr,
+	"GenerateAttrs":  GenerateAttrs,
 	"GetDisplayName": GetDisplayName,
 	//"CSRF": func() string {
 	//	return "dfsafsa"

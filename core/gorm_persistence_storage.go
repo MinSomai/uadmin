@@ -131,7 +131,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 }
 
 type GormPersistenceStorage struct {
-	Db *gorm.DB
+	Db        *gorm.DB
 	LastError error
 }
 
@@ -605,7 +605,6 @@ func (gps *GormPersistenceStorage) GetLastError() error {
 	return ret
 }
 
-
 type GormAdminFilterObjects struct {
 	InitialGormQuerySet   IPersistenceStorage
 	GormQuerySet          IPersistenceStorage
@@ -613,7 +612,7 @@ type GormAdminFilterObjects struct {
 	Model                 interface{}
 	UadminDatabase        *UadminDatabase
 	GenerateModelI        func() (interface{}, interface{})
-	LastError error
+	LastError             error
 }
 
 func (afo *GormAdminFilterObjects) SetLastError(err error) {

@@ -397,7 +397,7 @@ func init() {
 		},
 	})
 	InitializeGlobalAdapterRegistry()
-	GlobalDbAdapterRegistry.RegisterAdapter("sqlite", func(db *gorm.DB) IDbAdapter{
+	GlobalDbAdapterRegistry.RegisterAdapter("sqlite", func(db *gorm.DB) IDbAdapter {
 		return &SqliteAdapter{
 			DbType: "sqlite",
 			Statement: &gorm.Statement{
