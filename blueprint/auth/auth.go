@@ -40,7 +40,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			core.PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
 			tr := core.NewTemplateRenderer("Admin Login")
-			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("login"), c, core.FuncMap)
+			tr.Render(ctx, core.CurrentConfig.GetPathToTemplate("login"), c, core.FuncMap)
 		} else {
 			type Context struct {
 				core.AdminContext
@@ -54,7 +54,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Menu = menu
 			c.CurrentPath = ctx.Request.URL.Path
 			tr := core.NewTemplateRenderer("Dashboard")
-			tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("home"), c, core.FuncMap)
+			tr.Render(ctx, core.CurrentConfig.GetPathToTemplate("home"), c, core.FuncMap)
 		}
 	}
 	// Serve static fs if upload directory is configured. Has to be created in the root of the project.
@@ -109,7 +109,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			}
 		}
 		tr := core.NewTemplateRenderer(fmt.Sprintf("%s's Profile", c.User))
-		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("profile"), c, core.FuncMap)
+		tr.Render(ctx, core.CurrentConfig.GetPathToTemplate("profile"), c, core.FuncMap)
 	})
 }
 

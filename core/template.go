@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"html/template"
-	"io/fs"
 	"strings"
 )
 
 type ITemplateRenderer interface {
 	AddFuncMap(funcName string, concreteFunc interface{})
-	Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap)
-	RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML
+	Render(ctx *gin.Context, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap)
+	RenderAsString(path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML
 }
 
 type IncludeContext struct {
@@ -29,14 +28,14 @@ func (tr *TemplateRenderer) AddFuncMap(funcName string, concreteFunc interface{}
 	tr.funcMap[funcName] = concreteFunc
 }
 
-func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) {
+func (tr *TemplateRenderer) Render(ctx *gin.Context, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) {
 	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) template.HTML {
 		return func(templateName string, data1 ...interface{}) template.HTML {
 			data2 := data
 			if len(data1) == 1 {
 				data2 = data1[0]
 			}
-			return tr.RenderAsString(fsys, CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
+			return tr.RenderAsString(CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
 		}
 	}
 	PageTitle := func() string {
@@ -51,17 +50,17 @@ func (tr *TemplateRenderer) Render(ctx *gin.Context, fsys fs.FS, path string, da
 		funcs1["PageTitle"] = PageTitle
 	}
 	funcs1["Include"] = Include(funcs1)
-	RenderHTML(ctx, fsys, path, data, baseFuncMap, funcs1)
+	RenderHTML(ctx, path, data, baseFuncMap, funcs1)
 }
 
-func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML {
+func (tr *TemplateRenderer) RenderAsString(path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML {
 	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) template.HTML {
 		return func(templateName string, data1 ...interface{}) template.HTML {
 			data2 := data
 			if len(data1) == 1 {
 				data2 = data1[0]
 			}
-			return tr.RenderAsString(fsys, CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
+			return tr.RenderAsString(CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
 		}
 	}
 	PageTitle := func() string {
@@ -77,7 +76,7 @@ func (tr *TemplateRenderer) RenderAsString(fsys fs.FS, path string, data interfa
 	}
 	funcs1["Include"] = Include(funcs1)
 	templateWriter := bytes.NewBuffer([]byte{})
-	RenderHTMLAsString(templateWriter, fsys, path, data, baseFuncMap, funcs1)
+	RenderHTMLAsString(templateWriter, path, data, baseFuncMap, funcs1)
 	return template.HTML(templateWriter.String())
 }
 
@@ -91,7 +90,7 @@ func NewTemplateRenderer(pageTitle string) ITemplateRenderer {
 //to your template, just add them to funcs which will add them to the template with their
 // original function names. If you added anonymous functions, they will be available in your
 // templates as func1, func2 ...etc.
-func RenderHTML(ctx *gin.Context, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) error {
+func RenderHTML(ctx *gin.Context, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) error {
 	var err error
 
 	var funcs1 template.FuncMap
@@ -115,7 +114,7 @@ func RenderHTML(ctx *gin.Context, fsys fs.FS, path string, data interface{}, bas
 	//	http.SetCookie(ctx.Writer, cookie1)
 	//}
 	templateNameParts := strings.Split(path, "/")
-	templateContent, _ := fs.ReadFile(fsys, path)
+	templateContent := CurrentConfig.GetTemplateContent(path)
 	newT, err := template.New(templateNameParts[len(templateNameParts)-1]).Funcs(funcs1).Parse(
 		string(templateContent),
 	)
@@ -140,7 +139,7 @@ func RenderHTML(ctx *gin.Context, fsys fs.FS, path string, data interface{}, bas
 //to your template, just add them to funcs which will add them to the template with their
 // original function names. If you added anonymous functions, they will be available in your
 // templates as func1, func2 ...etc.
-func RenderHTMLAsString(writer *bytes.Buffer, fsys fs.FS, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) error {
+func RenderHTMLAsString(writer *bytes.Buffer, path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) error {
 	var err error
 
 	var funcs1 template.FuncMap
@@ -193,7 +192,7 @@ func RenderHTMLAsString(writer *bytes.Buffer, fsys fs.FS, path string, data inte
 	//	http.SetCookie(ctx.Writer, cookie1)
 	//}
 	templateNameParts := strings.Split(path, "/")
-	templateContent, _ := fs.ReadFile(fsys, path)
+	templateContent := CurrentConfig.GetTemplateContent(path)
 	newT, err := template.New(templateNameParts[len(templateNameParts)-1]).Funcs(funcs1).Parse(
 		string(templateContent),
 	)

@@ -157,6 +157,7 @@ type UadminConfig struct {
 	APISpec                   *loads.Document
 	D                         *UadminConfigurableConfig
 	TemplatesFS               embed.FS
+	OverridenTemplatesFS      *embed.FS
 	LocalizationFS            embed.FS
 	RequiresCsrfCheck         func(c *gin.Context) bool
 	PatternsToIgnoreCsrfCheck *list.List
@@ -168,6 +169,20 @@ type UadminConfig struct {
 
 func (c *UadminConfig) GetPathToTemplate(templateName string) string {
 	return fmt.Sprintf("templates/uadmin/%s/%s.html", c.D.Uadmin.Theme, templateName)
+}
+
+func (c *UadminConfig) GetTemplateContent(templatePath string) []byte {
+	templateContent := make([]byte, 0)
+	var err error
+	if c.OverridenTemplatesFS != nil {
+		templateContent, err = c.OverridenTemplatesFS.ReadFile(templatePath)
+		if err != nil {
+			templateContent, _ = c.TemplatesFS.ReadFile(templatePath)
+		}
+	} else {
+		templateContent, _ = c.TemplatesFS.ReadFile(templatePath)
+	}
+	return templateContent
 }
 
 func (c *UadminConfig) GetPathToUploadDirectory() string {

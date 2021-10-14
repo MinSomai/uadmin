@@ -48,7 +48,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 				c.Menu = menu
 				c.CurrentPath = ctx.Request.URL.Path
 				tr := NewTemplateRenderer(pageTitle)
-				tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("home"), c, FuncMap)
+				tr.Render(ctx, CurrentConfig.GetPathToTemplate("home"), c, FuncMap)
 			}
 		}(adminPage.PageName, adminPage.SubPages))
 		for subPage := range adminPage.SubPages.GetAll() {
@@ -134,7 +134,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						c.InitialOrderList = adminRequestParams.Ordering
 						c.CurrentAdminContext = c
 						tr := NewTemplateRenderer(adminPage.PageName)
-						tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("list"), c, FuncMap)
+						tr.Render(ctx, CurrentConfig.GetPathToTemplate("list"), c, FuncMap)
 					}
 				}
 			}(subPage))
@@ -329,7 +329,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					c.Message = ctx.Query("message")
 					c.AdminModelActionRegistry = adminPage.ModelActionsRegistry
 					tr := NewTemplateRenderer(adminPage.PageName)
-					tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("change"), c, FuncMap)
+					tr.Render(ctx, CurrentConfig.GetPathToTemplate("change"), c, FuncMap)
 				}
 			}(subPage))
 			for adminModelAction := range subPage.ModelActionsRegistry.GetAllModelActions() {

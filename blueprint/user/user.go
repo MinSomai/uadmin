@@ -51,7 +51,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		c := &Context{}
 		core.PopulateTemplateContextForAdminPanel(ctx, c, core.NewAdminRequestParams())
 		tr := core.NewTemplateRenderer("Reset Password")
-		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("resetpassword"), c, core.FuncMap)
+		tr.Render(ctx, core.CurrentConfig.GetPathToTemplate("resetpassword"), c, core.FuncMap)
 	})
 	group.POST("/api/forgot/", func(ctx *gin.Context) {
 		var json ForgotPasswordHandlerParams
@@ -261,7 +261,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//}NewAdminPage
 		ctx.Status(404)
 		tr := core.NewTemplateRenderer("Page not found")
-		tr.Render(ctx, core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("404"), c, core.FuncMap)
+		tr.Render(ctx, core.CurrentConfig.GetPathToTemplate("404"), c, core.FuncMap)
 	})
 	usersAdminPage := core.NewGormAdminPage(
 		nil,

@@ -71,7 +71,7 @@ func init() {
 			PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
 
 			tr := NewTemplateRenderer(fmt.Sprintf("Remove %s ?", ap.ModelName))
-			tr.Render(ctx, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
+			tr.Render(ctx, CurrentConfig.GetPathToTemplate("remove_objects"), c, FuncMap)
 			return nil
 		})
 		if removalError != nil {

@@ -56,10 +56,10 @@ func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) templa
 	func1 := make(template.FuncMap)
 	path := "admin/inlineexampleform"
 	templateName := CurrentConfig.GetPathToTemplate(path)
-	return template.HTML(templateRenderer.RenderAsString(
-		CurrentConfig.TemplatesFS, templateName,
+	return templateRenderer.RenderAsString(
+		templateName,
 		c, FuncMap, func1,
-	))
+	)
 }
 
 func (api *AdminPageInline) GetFormForExample(adminContext IAdminContext) *FormListEditable {

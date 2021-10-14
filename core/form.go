@@ -125,7 +125,7 @@ func (f *Form) Render() template.HTML {
 					if f.ForAdminPanel {
 						path = "admin/form/grouprow"
 					}
-					err := RenderHTMLAsString(templateWriter, CurrentConfig.TemplatesFS, CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)
+					err := RenderHTMLAsString(templateWriter, CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)
 					if err != nil {
 						Trail(CRITICAL, "Error while parsing include of the template %s", "form/grouprow")
 						return ""
@@ -177,7 +177,7 @@ func (f *Form) Render() template.HTML {
 	}
 	templateName := CurrentConfig.GetPathToTemplate(path)
 	return f.Renderer.RenderAsString(
-		CurrentConfig.TemplatesFS, templateName,
+		templateName,
 		f, FuncMap, func1,
 	)
 }
