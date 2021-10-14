@@ -9,6 +9,7 @@ import (
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"gorm.io/gorm/schema"
 	"net/http"
+	"reflect"
 )
 
 type Blueprint struct {
@@ -96,7 +97,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				uadminDatabase := core.NewUadminDatabase()
 				defer uadminDatabase.Close()
 				db := uadminDatabase.Db
-				db.Save(user.(*core.User))
+				db.Save(reflect.ValueOf(user).Interface())
 				if db.Error != nil {
 					formError.GeneralErrors = append(formError.GeneralErrors, db.Error)
 				} else {

@@ -12,6 +12,7 @@ import (
 	"github.com/sergeyglazyrindev/uadmin/utils"
 	"html/template"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -207,8 +208,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		uadminDatabase := core.NewUadminDatabase()
 		defer uadminDatabase.Close()
 		db := uadminDatabase.Db
-		user1 := user.(*core.User)
-		db.Save(user1)
+		db.Save(reflect.ValueOf(user).Interface())
 		ctx.JSON(http.StatusOK, gin.H{"success": true})
 	})
 	group.POST("/api/disable-2fa/", func(ctx *gin.Context) {
@@ -676,7 +676,7 @@ func (b Blueprint) Init() {
 		WidgetType: "image",
 		Name:       "UserPhotoFormOptions",
 		WidgetPopulate: func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
-			photo := renderContext.Model.(*core.User).Photo
+			photo := renderContext.Model.(core.IUser).GetPhoto()
 			if photo == "" {
 				return ""
 			}

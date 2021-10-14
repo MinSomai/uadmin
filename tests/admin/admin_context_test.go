@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -29,7 +30,7 @@ func (suite *AdminPopulateContextModelActionTestSuite) TestPopulateContext() {
 	user.SetActive(true)
 	user.SetIsSuperUser(true)
 	user.SetIsPasswordUsable(true)
-	core.NewUadminDatabase().Db.Create(user.(*core.User))
+	core.NewUadminDatabase().Db.Create(reflect.ValueOf(user).Interface())
 	session.SetUser(user)
 	session.Save()
 	ctx.Request.AddCookie(&http.Cookie{
