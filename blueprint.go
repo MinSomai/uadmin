@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -51,6 +52,10 @@ type CreateBlueprintOptions struct {
 type CreateBlueprint struct {
 }
 
+func prepareBlueprintGoPackageName(blueprintName string) string {
+	return strings.ReplaceAll(blueprintName, "-", "_")
+}
+
 func (command CreateBlueprint) Proceed(subaction string, args []string) error {
 	var opts = &CreateBlueprintOptions{}
 	parser := flags.NewParser(opts, flags.Default)
@@ -66,7 +71,7 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 	if err != nil {
 		return err
 	}
-	name := core.ASCIIRegex.ReplaceAllLiteralString(opts.Name, "")
+	name := prepareBlueprintGoPackageName(core.ASCIIRegex.ReplaceAllLiteralString(opts.Name, ""))
 	bluePrintPath := "blueprint/" + strings.ToLower(name)
 	if _, err := os.Stat(bluePrintPath); os.IsExist(err) {
 		panic(fmt.Sprintf("Blueprint %s does exist", name))
@@ -78,11 +83,17 @@ Please provide flags -n and -m which is name of blueprint and description of blu
 			panic(err)
 		}
 	}
+	read, err := ioutil.ReadFile("go.mod")
+	if err != nil {
+		panic(err)
+	}
+	moduleNameRegexp := regexp.MustCompile("module\\s([^\\s]+)")
+	moduleName := moduleNameRegexp.FindAllSubmatch(read, 1)
 	const blueprint = `package {{.Name}}
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sergeyglazyrindev/uadmin/blueprint/{{.Name}}/migrations"
+	"{{ .ModuleName }}/blueprint/{{.Name}}/migrations"
 	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
@@ -109,8 +120,10 @@ var ConcreteBlueprint = Blueprint{
 	tplData := struct {
 		Name    string
 		Message string
+		ModuleName string
 	}{
 		Name:    name,
+		ModuleName: string(moduleName[0][1]),
 		Message: strings.ReplaceAll(core.ASCIIRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
 	}
 	if err = blueprintTpl.Execute(&blueprintTplBuffer, tplData); err != nil {
