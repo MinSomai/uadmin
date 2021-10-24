@@ -53,7 +53,12 @@ func NewAdminRequestParamsFromGinContext(ctx *gin.Context) *AdminRequestParams {
 		}
 	}
 	ret.RequestURL = ctx.Request.URL.String()
-	ret.Search = ctx.Query("search")
+	// autocomplete search
+	if ctx.Query("term") != "" {
+		ret.Search = ctx.Query("term")
+	} else {
+		ret.Search = ctx.Query("search")
+	}
 	orderingParts := strings.Split(ctx.Query("initialOrder"), ",")
 	currentOrder := ctx.Query("o")
 	currentOrderNameWithoutDirection := currentOrder

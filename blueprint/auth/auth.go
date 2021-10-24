@@ -17,7 +17,7 @@ type Blueprint struct {
 	AuthAdapterRegistry *interfaces3.AuthProviderRegistry
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// register signin adapters http endpoints
 	for adapter := range b.AuthAdapterRegistry.Iterate() {
 		adapterGroup := group.Group("/" + adapter.GetName())
@@ -59,10 +59,10 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 	// Serve static fs if upload directory is configured. Has to be created in the root of the project.
 	if core.CurrentConfig.GetURLToUploadDirectory() != "" {
-		mainRouter.StaticFS(core.CurrentConfig.GetURLToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetURLToUploadDirectory())))
+		app.GetRouter().StaticFS(core.CurrentConfig.GetURLToUploadDirectory(), http.Dir(fmt.Sprintf("./%s", core.CurrentConfig.GetURLToUploadDirectory())))
 	}
 	// profile page for admin panel
-	mainRouter.Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile/", func(ctx *gin.Context) {
+	app.GetRouter().Any(core.CurrentConfig.D.Uadmin.RootAdminURL+"/profile/", func(ctx *gin.Context) {
 		type Context struct {
 			core.AdminContext
 			ID           uint
@@ -113,7 +113,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	})
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) InitApp(app core.IApp) {
 	// register all available auth providers
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthProvider{})
 	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenAuthProvider{})

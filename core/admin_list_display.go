@@ -48,11 +48,13 @@ func (ldr *ListDisplayRegistry) AddField(ld *ListDisplay) {
 }
 
 func (ldr *ListDisplayRegistry) BuildFormForListEditable(adminContext IAdminContext, ID string, model interface{}) *FormListEditable {
-	return NewFormListEditableFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
+	form := NewFormListEditableFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
+	return form
 }
 
 func (ldr *ListDisplayRegistry) BuildListEditableFormForNewModel(adminContext IAdminContext, ID string, model interface{}) *FormListEditable {
-	return NewFormListEditableForNewModelFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
+	form := NewFormListEditableForNewModelFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
+	return form
 }
 
 func (ldr *ListDisplayRegistry) GetAllFields() <-chan *ListDisplay {
@@ -82,6 +84,10 @@ func (ldr *ListDisplayRegistry) GetFieldByDisplayName(displayName string) (*List
 		return nil, fmt.Errorf("found no display field with name %s", displayName)
 	}
 	return listField, nil
+}
+
+func (ldr *ListDisplayRegistry) RemoveFieldByName(fieldName string) {
+	delete(ldr.ListDisplayFields, fieldName)
 }
 
 type ListDisplay struct {
@@ -197,7 +203,7 @@ func NewListDisplayRegistryFromGormModel(modelI interface{}) *ListDisplayRegistr
 		if !strings.Contains(uadminTag, "list") && field.Name != "ID" {
 			continue
 		}
-		uadminField := NewUadminFieldFromGormField(gormModelV, field, nil, true)
+		uadminField := NewUadminFieldForListDisplayFromGormField(gormModelV, field, nil, true)
 		ret.AddField(NewListDisplay(uadminField))
 	}
 	return ret

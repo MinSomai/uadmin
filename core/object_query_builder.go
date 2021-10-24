@@ -22,7 +22,7 @@ type IRegisterDbHandler interface {
 }
 
 type IGormOperator interface {
-	Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext
+	Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext
 	GetName() string
 	RegisterDbHandlers(registerDbHandler IRegisterDbHandler) error
 	TransformValue(value string) interface{}
@@ -43,7 +43,7 @@ func (ego *ExactGormOperator) TransformValue(value string) interface{} {
 	return value
 }
 
-func (ego *ExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *ExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	value1 := TransformValueForOperator(value)
 	adapter.Exact(context, field, value1, SQLConditionBuilder)
 	return context
@@ -64,7 +64,7 @@ func (ego *IExactGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbH
 	return nil
 }
 
-func (ego *IExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *IExactGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	value1 := TransformValueForOperator(value)
 	adapter.IExact(context, field, value1, SQLConditionBuilder)
 	return context
@@ -85,7 +85,7 @@ func (ego *ContainsGormOperator) RegisterDbHandlers(registerDbHandler IRegisterD
 	return nil
 }
 
-func (ego *ContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *ContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Contains(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -105,7 +105,7 @@ func (ego *IContainsGormOperator) RegisterDbHandlers(registerDbHandler IRegister
 	return nil
 }
 
-func (ego *IContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *IContainsGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.IContains(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -125,7 +125,7 @@ func (ego *InGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHandl
 	return nil
 }
 
-func (ego *InGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *InGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.In(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -145,7 +145,7 @@ func (ego *GtGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHandl
 	return nil
 }
 
-func (ego *GtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *GtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Gt(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -165,7 +165,7 @@ func (ego *GteGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHand
 	return nil
 }
 
-func (ego *GteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *GteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Gte(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -185,7 +185,7 @@ func (ego *LtGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHandl
 	return nil
 }
 
-func (ego *LtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *LtGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Lt(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -205,7 +205,7 @@ func (ego *LteGormOperator) GetName() string {
 	return "lte"
 }
 
-func (ego *LteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *LteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Lte(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -225,7 +225,7 @@ func (ego *StartsWithGormOperator) GetName() string {
 	return "startswith"
 }
 
-func (ego *StartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *StartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.StartsWith(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -245,7 +245,7 @@ func (ego *IStartsWithGormOperator) GetName() string {
 	return "istartswith"
 }
 
-func (ego *IStartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *IStartsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.IStartsWith(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -265,7 +265,7 @@ func (ego *EndsWithGormOperator) GetName() string {
 	return "endswith"
 }
 
-func (ego *EndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *EndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.EndsWith(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -285,7 +285,7 @@ func (ego *IEndsWithGormOperator) RegisterDbHandlers(registerDbHandler IRegister
 	return nil
 }
 
-func (ego *IEndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *IEndsWithGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.IEndsWith(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -305,7 +305,7 @@ func (ego *RangeGormOperator) RegisterDbHandlers(registerDbHandler IRegisterDbHa
 	return nil
 }
 
-func (ego *RangeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *RangeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Range(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -325,7 +325,7 @@ func (ego *DateGormOperator) GetName() string {
 	return "date"
 }
 
-func (ego *DateGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *DateGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Date(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -345,7 +345,7 @@ func (ego *YearGormOperator) GetName() string {
 	return "year"
 }
 
-func (ego *YearGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *YearGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Year(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -365,7 +365,7 @@ func (ego *MonthGormOperator) GetName() string {
 	return "month"
 }
 
-func (ego *MonthGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *MonthGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Month(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -385,7 +385,7 @@ func (ego *DayGormOperator) GetName() string {
 	return "day"
 }
 
-func (ego *DayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *DayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Day(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -405,7 +405,7 @@ func (ego *WeekGormOperator) GetName() string {
 	return "week"
 }
 
-func (ego *WeekGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *WeekGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Week(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -425,7 +425,7 @@ func (ego *WeekDayGormOperator) GetName() string {
 	return "week_day"
 }
 
-func (ego *WeekDayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *WeekDayGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.WeekDay(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -445,7 +445,7 @@ func (ego *QuarterGormOperator) GetName() string {
 	return "quarter"
 }
 
-func (ego *QuarterGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *QuarterGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Quarter(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -465,7 +465,7 @@ func (ego *TimeGormOperator) GetName() string {
 	return "time"
 }
 
-func (ego *TimeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *TimeGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Time(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -485,7 +485,7 @@ func (ego *HourGormOperator) GetName() string {
 	return "hour"
 }
 
-func (ego *HourGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *HourGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Hour(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -505,7 +505,7 @@ func (ego *MinuteGormOperator) GetName() string {
 	return "minute"
 }
 
-func (ego *MinuteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *MinuteGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Minute(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -525,7 +525,7 @@ func (ego *SecondGormOperator) GetName() string {
 	return "second"
 }
 
-func (ego *SecondGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *SecondGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Second(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -546,7 +546,7 @@ func (ego *IsNullGormOperator) GetName() string {
 	return "isnull"
 }
 
-func (ego *IsNullGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *IsNullGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.IsNull(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -566,7 +566,7 @@ func (ego *RegexGormOperator) GetName() string {
 	return "regex"
 }
 
-func (ego *RegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *RegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.Regex(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -586,7 +586,7 @@ func (ego *IRegexGormOperator) GetName() string {
 	return "iregex"
 }
 
-func (ego *IRegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) *GormOperatorContext {
+func (ego *IRegexGormOperator) Build(adapter IDbAdapter, context *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) *GormOperatorContext {
 	adapter.IRegex(context, field, value, SQLConditionBuilder)
 	return context
 }
@@ -722,6 +722,10 @@ func FilterGormModel(adapter IDbAdapter, db IPersistenceStorage, schema1 *schema
 		context = operator.Build(adapter, context, uadminField, filterValueTransformed, &SQLConditionBuilder{Type: "and"})
 	}
 	return context
+}
+
+type ISQLConditionBuilder interface {
+	Build(db IPersistenceStorage, query interface{}, args ...interface{}) IPersistenceStorage
 }
 
 type SQLConditionBuilder struct {

@@ -18,7 +18,7 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	approvalAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, make([]interface{}, 0) },
@@ -27,7 +27,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	approvalAdminPage.PageName = "Approvals"
 	approvalAdminPage.Slug = "approval"
 	approvalAdminPage.BlueprintName = "approval"
-	approvalAdminPage.Router = mainRouter
+	approvalAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(approvalAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing approval blueprint: %s", err))
@@ -73,7 +73,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	approvalmodelAdminPage.PageName = "Approval"
 	approvalmodelAdminPage.Slug = "approval"
 	approvalmodelAdminPage.BlueprintName = "approval"
-	approvalmodelAdminPage.Router = mainRouter
+	approvalmodelAdminPage.Router = app.GetRouter()
 	approvalActionListDisplay, _ := approvalmodelAdminPage.ListDisplay.GetFieldByDisplayName("ApprovalAction")
 	approvalActionListDisplay.Populate = func(m interface{}) string {
 		return models.HumanizeApprovalAction(m.(*models.Approval).ApprovalAction)
@@ -100,8 +100,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} { return &models.Approval{} })
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{

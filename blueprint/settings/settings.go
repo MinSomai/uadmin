@@ -14,7 +14,7 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	settingsAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, nil },
@@ -23,7 +23,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingsAdminPage.PageName = "Settings"
 	settingsAdminPage.Slug = "setting"
 	settingsAdminPage.BlueprintName = "setting"
-	settingsAdminPage.Router = mainRouter
+	settingsAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(settingsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
@@ -42,7 +42,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingcategoriesmodelAdminPage.PageName = "Setting categories"
 	settingcategoriesmodelAdminPage.Slug = "settingcategory"
 	settingcategoriesmodelAdminPage.BlueprintName = "setting"
-	settingcategoriesmodelAdminPage.Router = mainRouter
+	settingcategoriesmodelAdminPage.Router = app.GetRouter()
 	err = settingsAdminPage.SubPages.AddAdminPage(settingcategoriesmodelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing settings blueprint: %s", err))
@@ -140,7 +140,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				dataTypeS := form.Value["DataType"][0]
 				dataTypeI, _ := strconv.Atoi(dataTypeS)
 				widgetTypeString := settingmodel.HumanizeDataType(settingmodel.DataType(dataTypeI))
-				widgetType := core.GetWidgetByWidgetType(widgetTypeString)
+				widgetType := core.GetWidgetByWidgetType(widgetTypeString, nil)
 				return widgetType
 			}
 			valueField, _ := form.FieldRegistry.GetByName("Value")
@@ -153,7 +153,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				dataTypeS := form.Value["DataType"][0]
 				dataTypeI, _ := strconv.Atoi(dataTypeS)
 				widgetTypeString := settingmodel.HumanizeDataType(settingmodel.DataType(dataTypeI))
-				widgetType := core.GetWidgetByWidgetType(widgetTypeString)
+				widgetType := core.GetWidgetByWidgetType(widgetTypeString, nil)
 				return widgetType
 			}
 			categoryField, _ := form.FieldRegistry.GetByName("Category")
@@ -193,13 +193,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	settingmodelAdminPage.PageName = "Settings"
 	settingmodelAdminPage.Slug = "setting"
 	settingmodelAdminPage.BlueprintName = "setting"
-	settingmodelAdminPage.Router = mainRouter
+	settingmodelAdminPage.Router = app.GetRouter()
 	dataTypeListDisplay, _ := settingmodelAdminPage.ListDisplay.GetFieldByDisplayName("DataType")
 	dataTypeListDisplay.Populate = func(m interface{}) string {
 		return settingmodel.HumanizeDataType(m.(*settingmodel.Setting).DataType)
 	}
-	categoryListDisplay, _ := settingmodelAdminPage.ListDisplay.GetFieldByDisplayName("Category")
-	categoryListDisplay.Field.FieldConfig.Widget.SetReadonly(true)
+	// categoryListDisplay, _ := settingmodelAdminPage.ListDisplay.GetFieldByDisplayName("Category")
+	// categoryListDisplay.Field.FieldConfig.Widget.SetReadonly(true)
 	//categoryListDisplay.Populate = func(m interface{}) string {
 	//	return m.(*settingmodel.Setting).Category.Name
 	//}
@@ -210,9 +210,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} { return &settingmodel.SettingCategory{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &settingmodel.Setting{} })
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{

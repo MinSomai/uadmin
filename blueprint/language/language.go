@@ -13,7 +13,7 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	languageAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, nil },
@@ -22,7 +22,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	languageAdminPage.PageName = "Languages"
 	languageAdminPage.Slug = "language"
 	languageAdminPage.BlueprintName = "language"
-	languageAdminPage.Router = mainRouter
+	languageAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(languageAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing language blueprint: %s", err))
@@ -56,7 +56,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	languagemodelAdminPage.PageName = "Languages"
 	languagemodelAdminPage.Slug = "language"
 	languagemodelAdminPage.BlueprintName = "language"
-	languagemodelAdminPage.Router = mainRouter
+	languagemodelAdminPage.Router = app.GetRouter()
 	languagemodelAdminPage.NoPermissionToAddNew = true
 	err = languageAdminPage.SubPages.AddAdminPage(languagemodelAdminPage)
 	if err != nil {
@@ -64,8 +64,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} { return &core.Language{} })
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{

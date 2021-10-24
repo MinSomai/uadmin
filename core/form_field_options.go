@@ -1,17 +1,19 @@
 package core
 
 type FieldFormOptions struct {
-	Name           string
-	Initial        interface{}
-	DisplayName    string
-	Validators     *ValidatorRegistry
-	Choices        *FieldChoiceRegistry
-	HelpText       string
-	WidgetType     string
-	ReadOnly       bool
-	Required       bool
-	WidgetPopulate func(renderContext *FormRenderContext, currentField *Field) interface{}
-	IsFk           bool
+	Name            string
+	Initial         interface{}
+	DisplayName     string
+	Validators      *ValidatorRegistry
+	Choices         *FieldChoiceRegistry
+	HelpText        string
+	WidgetType      string
+	ReadOnly        bool
+	Required        bool
+	WidgetPopulate  func(renderContext *FormRenderContext, currentField *Field) interface{}
+	IsFk            bool
+	Autocomplete    bool
+	ListFieldWidget string
 }
 
 func (ffo *FieldFormOptions) GetName() string {
@@ -20,6 +22,14 @@ func (ffo *FieldFormOptions) GetName() string {
 
 func (ffo *FieldFormOptions) IsItFk() bool {
 	return ffo.IsFk
+}
+
+func (ffo *FieldFormOptions) GetListFieldWidget() string {
+	return ffo.ListFieldWidget
+}
+
+func (ffo *FieldFormOptions) GetIsAutocomplete() bool {
+	return ffo.Autocomplete
 }
 
 func (ffo *FieldFormOptions) GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{} {
@@ -98,6 +108,10 @@ func init() {
 		WidgetType: "textarea",
 		ReadOnly:   true,
 	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:       "TextareaFieldOptions",
+		WidgetType: "textarea",
+	})
 	fieldChoiceRegistry := FieldChoiceRegistry{}
 	fieldChoiceRegistry.Choices = make([]*FieldChoice, 0)
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
@@ -163,5 +177,23 @@ func init() {
 	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
 		Name:       "ForeignKeyFieldOptions",
 		WidgetType: "foreignkey",
+	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:            "ForeignKeyWithAutocompleteFieldOptions",
+		WidgetType:      "foreignkey",
+		Autocomplete:    true,
+		ListFieldWidget: "fklink",
+	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:            "ForeignKeyReadonlyFieldOptions",
+		WidgetType:      "foreignkey",
+		ReadOnly:        true,
+		Autocomplete:    true,
+		ListFieldWidget: "fklink",
+	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:       "TextareaReadonlyFieldOptions",
+		WidgetType: "textarea",
+		ReadOnly:   true,
 	})
 }

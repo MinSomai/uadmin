@@ -16,6 +16,11 @@ type DashboardAdminPanel struct {
 	ListHandler func(ctx *gin.Context)
 }
 
+type AutocompleteItemResponse struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+}
+
 func (dap *DashboardAdminPanel) FindPageForGormModel(m interface{}) *AdminPage {
 	mDescription := ProjectModels.GetModelFromInterface(m)
 	for adminPage := range dap.AdminPages.GetAll() {
@@ -44,8 +49,10 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 
 				c := &Context{}
 				PopulateTemplateContextForAdminPanel(ctx, c, NewAdminRequestParams())
-				menu := string(adminPageRegistry.PreparePagesForTemplate(c.UserPermissionRegistry))
-				c.Menu = menu
+				if c.GetUserObject() != nil {
+					menu := string(adminPageRegistry.PreparePagesForTemplate(c.UserPermissionRegistry))
+					c.Menu = menu
+				}
 				c.CurrentPath = ctx.Request.URL.Path
 				tr := NewTemplateRenderer(pageTitle)
 				tr.Render(ctx, CurrentConfig.GetPathToTemplate("home"), c, FuncMap)
@@ -85,6 +92,10 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 						PopulateTemplateContextForAdminPanel(ctx, c, NewAdminRequestParams())
 						user := c.GetUserObject()
+						if user == nil {
+							ctx.AbortWithStatus(409)
+							return
+						}
 						existsAnyPermission := user.BuildPermissionRegistry().IsThereAnyPermissionForBlueprint(adminPage.BlueprintName)
 						if !existsAnyPermission {
 							ctx.AbortWithStatus(409)
@@ -153,8 +164,6 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					}
 					// permissionForBlueprint := c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
 					adminFilterObjects := adminPage.GetQueryset(adminPage, adminRequestParams)
-					_, models := adminFilterObjects.GenerateModelInterface()
-					adminFilterObjects.GetFullQuerySet().Find(models)
 					f := excelize1.NewFile()
 					i := 1
 					currentColumn := 'A'
@@ -178,6 +187,31 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					ctx.Data(http.StatusOK, "application/octet-stream", b.Bytes())
 				}
 			}(subPage))
+			if len(subPage.SearchFields.Fields) > 0 {
+				router.GET(fmt.Sprintf("%s/%s/%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug, "autocomplete"), func(adminPage *AdminPage) func(ctx *gin.Context) {
+					return func(ctx *gin.Context) {
+						type Context struct {
+							AdminContext
+						}
+						c := &Context{}
+						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
+						PopulateTemplateContextForAdminPanel(ctx, c, NewAdminRequestParams())
+						user := c.GetUserObject()
+						if !adminPage.DoesUserHavePermission(user, "read") {
+							ctx.AbortWithStatus(409)
+							return
+						}
+						// permissionForBlueprint := c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
+						adminFilterObjects := adminPage.GetQueryset(adminPage, adminRequestParams)
+						resp := make([]*AutocompleteItemResponse, 0)
+						for iterateAdminObjects := range adminFilterObjects.GetPaginated() {
+							model := iterateAdminObjects.Model.(UadminString)
+							resp = append(resp, &AutocompleteItemResponse{Label: model.String(), Value: iterateAdminObjects.ID})
+						}
+						ctx.JSON(200, resp)
+					}
+				}(subPage))
+			}
 			router.Any(fmt.Sprintf("%s/%s/%s/edit/:id/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.Slug, subPage.Slug), func(adminPage *AdminPage) func(ctx *gin.Context) {
 				return func(ctx *gin.Context) {
 					id := ctx.Param("id")
@@ -226,6 +260,10 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					c.AdminPage = adminPage
 					form.ForAdminPanel = true
 					user := c.GetUserObject()
+					if user == nil {
+						ctx.AbortWithStatus(409)
+						return
+					}
 					if ctx.Request.Method == "POST" {
 						if id != "new" {
 							if !subPage.DoesUserHavePermission(user, "edit") {
@@ -293,6 +331,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						})
 						if err != nil {
 							form.FormError.GeneralErrors = append(form.FormError.GeneralErrors, err)
+						} else {
+							return
 						}
 					} else {
 						if id != "new" {
@@ -371,14 +411,21 @@ func init() {
 	var link = "{{ .Link }}";
 	var ID = "{{ .ID }}";
 	var Name = "{{ .Name }}";
-	var newOption = window.opener.$('<select><option value=""></option></select>');
-	newOption.find('option').attr('value', ID);
-	newOption.find('option').text(Name);
-	newOption.find('option').attr('selected', 'selected');
-	var select = window.opener.$("a[href='{{ .Link }}']").parent().parent().find('.related-target select');
-	select.find('option:selected').removeAttr('selected');
-	select.append(newOption.html());
-	select.trigger('change');
+    var relatedTarget = window.opener.$("a[href='{{ .Link }}']").parent().parent().find('.related-target');
+    if (relatedTarget.find('.hidden-id').length > 0) {
+		var hiddenId = relatedTarget.find('.hidden-id');
+		hiddenId.val(ID);
+		hiddenId.prev().text(Name);
+	} else {
+		var newOption = window.opener.$('<select><option value=""></option></select>');
+		newOption.find('option').attr('value', ID);
+		newOption.find('option').text(Name);
+		newOption.find('option').attr('selected', 'selected');
+		var select = relatedTarget.find('select');
+		select.find('option:selected').removeAttr('selected');
+		select.append(newOption.html());
+		select.trigger('change');
+	}
 	window.close();
 </script>
 </body></html>{{end}}

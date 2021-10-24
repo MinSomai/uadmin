@@ -174,11 +174,16 @@ type AdminPage struct {
 	NoPermissionToAddNew               bool
 	NoPermissionToEdit                 bool
 	PermissionName                     CustomPermission
+	PreloadData                        func(afo IAdminFilterObjects) `json:"-"`
 }
 
 type ModelActionRequestParams struct {
 	ObjectIds     string `form:"object_ids" json:"object_ids" xml:"object_ids"  binding:"required"`
 	RealObjectIds []string
+}
+
+func (ap *AdminPage) GenerateLinkForModelAutocompletion() string {
+	return fmt.Sprintf("%s/%s/%s/autocomplete/", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
 }
 
 func (ap *AdminPage) GenerateLinkToEditModel(gormModelV reflect.Value) string {

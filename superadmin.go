@@ -8,7 +8,6 @@ import (
 	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
 	userblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/user"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"github.com/sergeyglazyrindev/uadmin/utils"
 	"os"
 )
 
@@ -19,7 +18,7 @@ func (c SuperadminCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
 	var isCorrectActionPassed bool = false
-	commandRegistry := &CommandRegistry{
+	commandRegistry := &core.CommandRegistry{
 		Actions: make(map[string]core.ICommand),
 	}
 	commandRegistry.AddAction("create", &CreateSuperadmin{})
@@ -106,7 +105,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		}
 		break
 	}
-	salt := utils.RandStringRunes(appInstance.Config.D.Auth.SaltLength)
+	salt := core.GenerateRandomString(appInstance.Config.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, err := utils2.HashPass(password, salt)
 	if err != nil {

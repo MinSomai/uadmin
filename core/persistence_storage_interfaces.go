@@ -124,4 +124,5 @@ type IPersistenceStorage interface {
 	Exec(sql string, values ...interface{}) IPersistenceStorage
 	GetCurrentDB() *gorm.DB
 	GetLastError() error
+	LoadDataForModelByID(modelI interface{}, ID string) IPersistenceStorage
 }

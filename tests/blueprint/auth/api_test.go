@@ -79,7 +79,7 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		assert.Contains(s.T(), w.Body.String(), "login credentials are incorrect")
 		return strings.Contains(w.Body.String(), "login credentials are incorrect")
 	})
-	salt := utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
+	salt := core.GenerateRandomString(core.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass("123456", salt)
 	user := core.User{
@@ -305,7 +305,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 		sessionKey := strings.Split(strings.Split(w.Header().Get("Set-Cookie"), ";")[0], "=")[1]
 		session, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		session, _ = session.GetByKey(sessionKey)
-		token := utils.GenerateCSRFToken()
+		token := core.GenerateCSRFToken()
 		session.Set("csrf_token", token)
 		session.Save()
 		var jsonStr1 = []byte(`{"email": "uadminapitest@example.com"}`)
@@ -314,7 +314,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 			"Cookie",
 			fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 		)
-		tokenmasked := utils.MaskCSRFToken(token)
+		tokenmasked := core.MaskCSRFToken(token)
 		req1.Header.Set("X-CSRF-TOKEN", tokenmasked)
 		uadmin.TestHTTPResponse(s.T(), s.App, req1, func(w *httptest.ResponseRecorder) bool {
 			isSentEmail := utils.SentEmailsDuringTests.IsAnyEmailSentWithStringInBodyOrSubject(&utils.SentEmail{
@@ -329,7 +329,7 @@ func (s *AuthProviderTestSuite) TestForgotFunctionality() {
 				"Cookie",
 				fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, sessionKey),
 			)
-			tokenmasked1 := utils.MaskCSRFToken(token)
+			tokenmasked1 := core.MaskCSRFToken(token)
 			req2.Header.Set("X-CSRF-TOKEN", tokenmasked1)
 			uadmin.TestHTTPResponse(s.T(), s.App, req2, func(w *httptest.ResponseRecorder) bool {
 				var oneTimeAction1 core.OneTimeAction

@@ -3,9 +3,21 @@
 </script>
 
 <script src="/static-inbuilt/uadmin/assets/js/jquery.min.js" type="text/javascript"></script>
+<script src="/static-inbuilt/uadmin/assets/js/jqueryui/jquery-ui.min.js" type="text/javascript"></script>
 <script type="text/javascript">
     var signedOut = false;
     $(document).ready(function() {
+        $('input.autocomplete').map(function(_, item) {
+           $(item).autocomplete({
+               source: $(item).data('autocompleteurl'),
+               minLength: 3,
+               select: function( event, ui ) {
+                   event.preventDefault();
+                   $('input[name="' + $(item).attr('name') + '-value"]').val(ui.item.value);
+                   $(item).val(ui.item.label);
+               }
+           });
+        });
         $('#admin-logout').click(function(e) {
             e.preventDefault();
             if (signedOut) {

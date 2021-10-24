@@ -64,7 +64,8 @@ func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) templa
 
 func (api *AdminPageInline) GetFormForExample(adminContext IAdminContext) *FormListEditable {
 	modelI, _ := api.GenerateModelI(nil)
-	return api.ListDisplay.BuildListEditableFormForNewModel(adminContext, "toreplacewithid", modelI)
+	form := api.ListDisplay.BuildListEditableFormForNewModel(adminContext, "toreplacewithid", modelI)
+	return form
 }
 
 func (api *AdminPageInline) GetFormIdenForNewItems() string {

@@ -12,7 +12,6 @@ import (
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
 	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"github.com/sergeyglazyrindev/uadmin/utils"
 	"time"
 )
 
@@ -37,7 +36,7 @@ func init() {
 		}
 		if adminRequestParams.GenerateCSRFToken {
 			// generate csrf token for POST requests
-			token := utils.GenerateCSRFToken()
+			token := core.GenerateCSRFToken()
 			currentCsrfToken, _ := session.Get("csrf_token")
 			if currentCsrfToken == "" {
 				session.Set("csrf_token", token)

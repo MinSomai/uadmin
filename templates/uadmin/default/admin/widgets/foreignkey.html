@@ -14,7 +14,7 @@
   <td style="width:80%;" class="search">
     <label class="col-sm-12 control-label form_label visible-xs"><span class="camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</span>:{{ if .Required }}<span style="color:#f00;font-weight:bold;">&nbsp;*</span>{{ end }}</label>
     <div class="col-sm-12 ">
-      <div class="input-group col-sm-12 {{ if .AddNewLink }}related-target{{ end }}">
+      <div class="input-group col-sm-12 {{ if or .AddNewLink .EditUrl }}related-target{{ end }}">
 {{ end }}
       {{ if .FormErrorNotEmpty }}
       {{ range $error := .FormError }}
@@ -23,26 +23,38 @@
       </div>
       {{ end }}
       {{ end }}
-      <select {{ if .Multiple }}multiple{{ end }} name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }}>
-      {{ range $groupName, $groupChoices := .OptGroups }}
-      {{ if $groupName }}<optgroup label="{{ $groupName }}">{{end}}
-      {{ range $i, $option := $groupChoices }}
-      {{Include $option.OptionTemplateName $option }}
-      {{end}}
-      {{ if $groupName }}
-    </optgroup>
-      {{end}}
-      {{end}}
-      </select>
+          {{ if not .AutocompleteUrl }}
+              <select {{ if .Multiple }}multiple{{ end }} name="{{.Name }}" data-placeholder="Select" class="chosen-select form-control" tabindex="2" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }}>
+              {{ range $groupName, $groupChoices := .OptGroups }}
+              {{ if $groupName }}<optgroup label="{{ $groupName }}">{{end}}
+              {{ range $i, $option := $groupChoices }}
+              {{Include $option.OptionTemplateName $option }}
+              {{end}}
+              {{ if $groupName }}
+            </optgroup>
+              {{end}}
+              {{end}}
+              </select>
+          {{ else }}
+              <input class="form-control strings autocomplete" data-autocompleteurl="{{ .AutocompleteUrl }}" name="{{.Name}}" type="text" value="{{.Value}}" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} {{if .ReadOnly}} readonly {{end}} style="border-radius:4px;">
+              <input name="{{.Name}}-value" class="hidden-id" type="hidden" value="{{.ValueID}}" {{if .ReadOnly}} readonly {{end}}>
+          {{ end }}
 {{ if not .ShowOnlyHtmlInput }}
       {{ if .HelpText }}
       <span class="text-muted" style="font-size:12px;"><i class="fa fa-question-circle"></i> {{ .HelpText }}</span>
       {{ end }}
     </div>
-    {{ if .AddNewLink }}
-        <a class="camelcaseFixHrefID  add-related no-style" href="{{ .AddNewLink }}">
-            <i class="fa fa-plus-circle"></i>&nbsp;add new
-        </a>
+    {{if not .ReadOnly}}
+        {{ if .EditUrl }}
+            <a class="camelcaseFixHrefID change-related no-style" href="{{ .EditUrl }}" title="Change" data-href-template="{{ .EditUrl }}">
+                <i class="fa fa-edit"></i>&nbsp;edit
+            </a>
+        {{ end }}
+        {{ if .AddNewLink }}
+            <a class="camelcaseFixHrefID  add-related no-style" href="{{ .AddNewLink }}">
+                <i class="fa fa-plus-circle"></i>&nbsp;add new
+            </a>
+        {{ end }}
     {{ end }}
 
 

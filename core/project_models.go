@@ -9,15 +9,15 @@ import (
 type ModelDescription struct {
 	Model          interface{}
 	Statement      *gorm.Statement
-	GenerateModelI func() interface{}
+	GenerateModelI func() (interface{}, interface{})
 }
 
 type ProjectModelRegistry struct {
 	models map[string]*ModelDescription
 }
 
-func (pmr *ProjectModelRegistry) RegisterModel(generateModelI func() interface{}) {
-	model := generateModelI()
+func (pmr *ProjectModelRegistry) RegisterModel(generateModelI func() (interface{}, interface{})) {
+	model, _ := generateModelI()
 	uadminDatabase := NewUadminDatabaseWithoutConnection()
 	statement := &gorm.Statement{DB: uadminDatabase.Db}
 	statement.Parse(model)
@@ -51,7 +51,7 @@ func (pmr *ProjectModelRegistry) GetModelByName(modelName string) *ModelDescript
 func (pmr *ProjectModelRegistry) GetModelFromInterface(model interface{}) *ModelDescription {
 	v := reflect.ValueOf(model)
 	if v.Kind() == reflect.Ptr {
-		v = reflect.Indirect(v)
+		v = v.Elem()
 	}
 	modelName := v.Type().Name()
 	modelI, _ := pmr.models[modelName]

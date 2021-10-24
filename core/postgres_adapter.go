@@ -87,91 +87,91 @@ func (d *PostgresAdapter) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 	return db, err
 }
 
-func (d *PostgresAdapter) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) = UPPER(?) ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? || '%%' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) LIKE UPPER('%%' || ? || '%%')", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) In(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) In(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s IN ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s > ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s >= ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s < ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s <= ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s LIKE ? || '%%' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) LIKE UPPER(? || '%%') ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) LIKE UPPER('%%' || ?) ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Date(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Date(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s::date = ?::date ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Year(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Year(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName)
 	year := value.(int)
 	startOfTheYear := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -179,73 +179,73 @@ func (d *PostgresAdapter) Year(operatorContext *GormOperatorContext, field *Fiel
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, startOfTheYear, endOfTheYear)
 }
 
-func (d *PostgresAdapter) Month(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Month(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('month' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Day(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Day(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('day' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Week(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Week(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('week' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('dow' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('quarter' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('hour' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('minute' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" EXTRACT('second' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s ~ ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s ~* ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) Time(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Time(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" (%s.%s AT TIME ZONE 'UTC')::time = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *PostgresAdapter) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	isTruthyValue := IsTruthyValue(value)
 	isNull := " IS NULL "
 	if !isTruthyValue {
@@ -255,7 +255,7 @@ func (d *PostgresAdapter) IsNull(operatorContext *GormOperatorContext, field *Fi
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query)
 }
 
-func (d *PostgresAdapter) Range(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *PostgresAdapter) Range(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	s := reflect.ValueOf(value)
 	var f interface{}
 	var second interface{}

@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"html/template"
@@ -103,6 +104,7 @@ type Form struct {
 	Prefix              string
 	RenderContext       *FormRenderContext
 	ChangesSaved        bool
+	Debug               bool
 }
 
 func (f *Form) SetPrefix(prefix string) {
@@ -124,6 +126,13 @@ func (f *Form) Render() template.HTML {
 					path := "form/grouprow"
 					if f.ForAdminPanel {
 						path = "admin/form/grouprow"
+					}
+					if f.Debug {
+						for _, column := range row.Columns {
+							for _, field := range column.Fields {
+								spew.Dump(field.Name, field.FieldConfig.Widget)
+							}
+						}
 					}
 					err := RenderHTMLAsString(templateWriter, CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)
 					if err != nil {
@@ -196,6 +205,9 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *
 		if field.Name == "ID" {
 			continue
 		}
+		if field.ReadOnly {
+			continue
+		}
 		errors := field.ProceedForm(form, afo, renderContext)
 		if len(errors) == 0 {
 			continue
@@ -206,6 +218,9 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *
 	model := valueOfModel.Elem()
 	for _, field := range f.FieldRegistry.GetAllFields() {
 		if field.Name == "ID" {
+			continue
+		}
+		if field.ReadOnly {
 			continue
 		}
 		if !field.FieldConfig.Widget.IsValueChanged() {

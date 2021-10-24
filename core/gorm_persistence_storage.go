@@ -19,6 +19,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 		stmt := &gorm.Statement{DB: uadminDatabase.Db}
 		stmt.Parse(modelI4)
 		modelName = strings.ToLower(stmt.Schema.Name)
+		ProjectModels.RegisterModel(genModelI)
 	}
 	var form *Form
 	var listDisplay *ListDisplayRegistry
@@ -50,6 +51,9 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				UadminDatabase:        uadminDatabase,
 				GenerateModelI:        genModelI,
 			}
+			if adminPage.PreloadData != nil {
+				adminPage.PreloadData(ret)
+			}
 			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
 				url1, _ := url.Parse(adminRequestParams.RequestURL)
 				queryParams, _ := url.ParseQuery(url1.RawQuery)
@@ -74,6 +78,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				}
 				ret.SetPaginatedQuerySet(ret.GetPaginatedQuerySet().Where(searchFilterObjects.GetPaginatedQuerySet().GetCurrentDB()))
 				ret.SetFullQuerySet(ret.GetFullQuerySet().Where(searchFilterObjects.GetFullQuerySet().GetCurrentDB()))
+				searchFilterObjects.AddNeededJoinsIfNecessary(ret)
 			}
 			if adminRequestParams != nil && adminRequestParams.Paginator.PerPage > 0 {
 				perPage = adminRequestParams.Paginator.PerPage
@@ -605,6 +610,12 @@ func (gps *GormPersistenceStorage) GetLastError() error {
 	return ret
 }
 
+func (gps *GormPersistenceStorage) LoadDataForModelByID(modelI interface{}, ID string) IPersistenceStorage {
+	modelDescription := ProjectModels.GetModelFromInterface(modelI)
+	gps.Db.Where(fmt.Sprintf("\"%s\" = ?", modelDescription.Statement.Schema.PrimaryFields[0].DBName), ID).Preload(clause.Associations).First(modelI)
+	return gps
+}
+
 type GormAdminFilterObjects struct {
 	InitialGormQuerySet   IPersistenceStorage
 	GormQuerySet          IPersistenceStorage
@@ -613,12 +624,33 @@ type GormAdminFilterObjects struct {
 	UadminDatabase        *UadminDatabase
 	GenerateModelI        func() (interface{}, interface{})
 	LastError             error
+	NeededJoins           []string
 }
 
 func (afo *GormAdminFilterObjects) SetLastError(err error) {
 	if err != nil {
 		afo.LastError = err
 	}
+}
+
+func (afo *GormAdminFilterObjects) AddNeededJoinsIfNecessary(afo1 IAdminFilterObjects) {
+	if afo.NeededJoins == nil {
+		return
+	}
+	if len(afo.NeededJoins) == 0 {
+		return
+	}
+	for _, join := range afo.NeededJoins {
+		afo1.SetFullQuerySet(afo1.GetFullQuerySet().Joins(join))
+		afo1.SetPaginatedQuerySet(afo1.GetPaginatedQuerySet().Joins(join))
+	}
+}
+
+func (afo *GormAdminFilterObjects) StoreNeededJoin(join string) {
+	if afo.NeededJoins == nil {
+		afo.NeededJoins = make([]string, 0)
+	}
+	afo.NeededJoins = append(afo.NeededJoins, join)
 }
 
 func (afo *GormAdminFilterObjects) GetLastError() error {
@@ -639,14 +671,72 @@ func (afo *GormAdminFilterObjects) FilterQs(filterString string) {
 }
 
 func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
-	operator := IContainsGormOperator{}
-	gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
-	operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
-	afo.SetFullQuerySet(gormOperatorContext.Tx)
-	gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
-	operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
-	afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
-	afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
+	fieldType := field.FieldType.Kind()
+	if fieldType == reflect.Ptr {
+		fieldType = field.FieldType.Elem().Kind()
+	}
+	if fieldType == reflect.Struct {
+		mReflectValue := reflect.ValueOf(field.FieldConfig.Widget.GetValue())
+		mInterface := mReflectValue.Interface()
+		adminPage := CurrentDashboardAdminPanel.FindPageForGormModel(mInterface)
+		joinModelI := ProjectModels.GetModelFromInterface(mInterface)
+		model, _ := joinModelI.GenerateModelI()
+		model1, _ := joinModelI.GenerateModelI()
+		currentModelDesc := ProjectModels.GetModelFromInterface(afo.GetCurrentModel())
+		relation := field.Schema.Relationships
+		relationsString := []string{}
+		for _, relation1 := range relation.Relations {
+			for _, reference := range relation1.References {
+				relationsString = append(
+					relationsString,
+					fmt.Sprintf(
+						"%s.%s = %s.%s",
+						joinModelI.Statement.Table, reference.PrimaryKey.DBName, currentModelDesc.Statement.Table,
+						reference.ForeignKey.DBName,
+					),
+				)
+			}
+		}
+		if field.NotNull {
+			afo.StoreNeededJoin(
+				fmt.Sprintf(
+					"INNER JOIN %s on %s",
+					joinModelI.Statement.Table, strings.Join(relationsString, " AND "),
+				),
+			)
+		} else {
+			afo.StoreNeededJoin(
+				fmt.Sprintf(
+					"LEFT JOIN %s on %s",
+					joinModelI.Statement.Table, strings.Join(relationsString, " AND "),
+				),
+			)
+		}
+		fullGormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), model)
+		paginatedGormOperatorContext := NewGormOperatorContext(afo.GetPaginatedQuerySet(), model1)
+		for searchField := range adminPage.SearchFields.GetAll() {
+			if searchField.Field.FieldType.Kind() == reflect.Struct {
+				afo.Search(searchField.Field, searchString)
+				continue
+			}
+			operator := IContainsGormOperator{}
+			operator.Build(afo.GetUadminDatabase().Adapter, fullGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
+			operator = IContainsGormOperator{}
+			operator.Build(afo.GetUadminDatabase().Adapter, paginatedGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
+		}
+		afo.SetFullQuerySet(fullGormOperatorContext.Tx)
+		afo.SetPaginatedQuerySet(fullGormOperatorContext.Tx)
+		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
+	} else {
+		operator := IContainsGormOperator{}
+		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
+		afo.SetFullQuerySet(gormOperatorContext.Tx)
+		gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
+		afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
+		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
+	}
 }
 
 func (afo *GormAdminFilterObjects) GetPaginatedQuerySet() IPersistenceStorage {
@@ -702,7 +792,8 @@ func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilte
 }
 
 func (afo *GormAdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
-	afo.UadminDatabase.Db.Preload(clause.Associations).First(model, ID)
+	modelDescription := ProjectModels.GetModelFromInterface(model)
+	afo.UadminDatabase.Db.Preload(clause.Associations).Where(fmt.Sprintf(" \"%s\" = ?", modelDescription.Statement.Schema.PrimaryFields[0].Name), ID).First(model)
 	afo.SetLastError(afo.UadminDatabase.Db.Error)
 }
 

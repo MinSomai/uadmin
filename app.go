@@ -25,10 +25,34 @@ type App struct {
 	Config              *core.UadminConfig
 	Database            *core.Database
 	Router              *gin.Engine
-	CommandRegistry     *CommandRegistry
+	CommandRegistry     *core.CommandRegistry
 	BlueprintRegistry   core.IBlueprintRegistry
 	DashboardAdminPanel *core.DashboardAdminPanel
 	RouterInitialized   bool
+}
+
+func (a *App) GetConfig() *core.UadminConfig {
+	return a.Config
+}
+
+func (a *App) GetDatabase() *core.Database {
+	return a.Database
+}
+
+func (a *App) GetRouter() *gin.Engine {
+	return a.Router
+}
+
+func (a *App) GetCommandRegistry() *core.CommandRegistry {
+	return a.CommandRegistry
+}
+
+func (a *App) GetBlueprintRegistry() core.IBlueprintRegistry {
+	return a.BlueprintRegistry
+}
+
+func (a *App) GetDashboardAdminPanel() *core.DashboardAdminPanel {
+	return a.DashboardAdminPanel
 }
 
 var appInstance *App
@@ -41,7 +65,7 @@ func NewApp(environment string, dontInitialize ...bool) *App {
 		a.Config = core.NewConfig("configs/" + environment + ".yml")
 		a.Config.TemplatesFS = templatesRoot
 		a.Config.LocalizationFS = localizationRoot
-		a.CommandRegistry = &CommandRegistry{
+		a.CommandRegistry = &core.CommandRegistry{
 			Actions: make(map[string]core.ICommand),
 		}
 		core.CurrentDatabaseSettings = &core.DatabaseSettings{
@@ -84,11 +108,11 @@ func StoreCurrentApp(app *App) {
 	appInstance = app
 }
 
-func (a App) Initialize() {
-	a.BlueprintRegistry.Initialize()
+func (a *App) Initialize() {
+	a.BlueprintRegistry.Initialize(a)
 }
 
-func (a App) RegisterBaseBlueprints() {
+func (a *App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(userblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(sessionsblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(settingsblueprint.ConcreteBlueprint)
@@ -99,15 +123,15 @@ func (a App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(authblueprint.ConcreteBlueprint)
 }
 
-func (a App) RegisterBlueprint(blueprint core.IBlueprint) {
+func (a *App) RegisterBlueprint(blueprint core.IBlueprint) {
 	a.BlueprintRegistry.Register(blueprint)
 }
 
-func (a App) RegisterCommand(name string, command core.ICommand) {
+func (a *App) RegisterCommand(name string, command core.ICommand) {
 	a.CommandRegistry.AddAction(name, command)
 }
 
-func (a App) RegisterBaseCommands() {
+func (a *App) RegisterBaseCommands() {
 	a.RegisterCommand("migrate", &MigrateCommand{})
 	a.RegisterCommand("blueprint", &BlueprintCommand{})
 	a.RegisterCommand("swagger", &SwaggerCommand{})
@@ -121,7 +145,7 @@ func (a App) RegisterBaseCommands() {
 	a.RegisterCommand("shell", &ShellCommand{})
 }
 
-func (a App) ExecuteCommand() {
+func (a *App) ExecuteCommand() {
 	var action string
 	var isCorrectActionPassed bool = false
 	var help string
@@ -153,15 +177,15 @@ Please provide what do you want to do ?
 	}
 }
 
-func (a App) TriggerCommandExecution(action string, subaction string, params []string) {
+func (a *App) TriggerCommandExecution(action string, subaction string, params []string) {
 	a.CommandRegistry.RunAction(action, subaction, params)
 }
 
-func (a App) StartAdmin() {
+func (a *App) StartAdmin() {
 	// useradmin.RegisterAdminPart()
 }
 
-func (a App) StartAPI() {
+func (a *App) StartAPI() {
 	a.Initialize()
 	// _ = a.Router.Run(":" + strconv.Itoa(a.Config.D.API.ListenPort))
 }
@@ -184,7 +208,7 @@ func (c uadminStaticFS) Open(name string) (fs.File, error) {
 	return c.content.Open(path.Join("static", name))
 }
 
-func (a App) InitializeRouter() {
+func (a *App) InitializeRouter() {
 	if a.RouterInitialized {
 		return
 	}
@@ -193,11 +217,11 @@ func (a App) InitializeRouter() {
 	fs1 := nethttp.FS(staticFiles)
 	// Serve static files
 	a.Router.StaticFS("/static-inbuilt/", fs1)
-	a.BlueprintRegistry.InitializeRouting(a.Router)
+	a.BlueprintRegistry.InitializeRouting(a, a.Router)
 	a.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
 	a.RouterInitialized = true
 }
 
-func (a App) BaseAPIUrl() string {
+func (a *App) BaseAPIUrl() string {
 	return ":" + strconv.Itoa(a.Config.D.API.ListenPort)
 }

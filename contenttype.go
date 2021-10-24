@@ -13,7 +13,7 @@ func (c ContentTypeCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
 	var isCorrectActionPassed bool = false
-	commandRegistry := &CommandRegistry{
+	commandRegistry := &core.CommandRegistry{
 		Actions: make(map[string]core.ICommand),
 	}
 

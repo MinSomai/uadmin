@@ -84,9 +84,10 @@ type IWidget interface {
 	GetRenderer() ITemplateRenderer
 	GetFieldDisplayName() string
 	GetName() string
+	CloneAllOtherImportantSettings(widget IWidget)
 }
 
-func GetWidgetByWidgetType(widgetType string) IWidget {
+func GetWidgetByWidgetType(widgetType string, fieldOptions IFieldFormOptions) IWidget {
 	var widget IWidget
 	//case 1:
 	//	return &core.TextWidget{}
@@ -130,15 +131,22 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 		widget = &DynamicWidget{}
 	case "foreignkey":
 		widget = &ForeignKeyWidget{}
+		if fieldOptions != nil && fieldOptions.GetIsAutocomplete() {
+			widget.(*ForeignKeyWidget).Autocomplete = fieldOptions.GetIsAutocomplete()
+		}
 	case "choose_from_select":
 		widget = &ChooseFromSelectWidget{}
 	case "fklink":
 		widget = &FkLinkWidget{}
+		widget.SetReadonly(true)
 		widget.SetPopulate(func(renderContext *FormRenderContext, currentField *Field) interface{} {
 			gormModelV := reflect.Indirect(reflect.ValueOf(renderContext.Model))
+			if gormModelV.FieldByName(currentField.Name).IsZero() {
+				return ""
+			}
 			adminPage := CurrentDashboardAdminPanel.FindPageForGormModel(gormModelV.FieldByName(currentField.Name).Interface())
 			if adminPage != nil {
-				link := adminPage.GenerateLinkToEditModel(gormModelV)
+				link := adminPage.GenerateLinkToEditModel(gormModelV.FieldByName(currentField.Name))
 				fkModel := reflect.New(reflect.TypeOf(gormModelV.FieldByName(currentField.Name).Interface()))
 				fkModel.Elem().Set(reflect.ValueOf(gormModelV.FieldByName(currentField.Name).Interface()))
 				stringRepresentation := fkModel.MethodByName("String").Call([]reflect.Value{})
@@ -151,6 +159,7 @@ func GetWidgetByWidgetType(widgetType string) IWidget {
 		})
 	case "textarea":
 		widget = &TextareaWidget{}
+		widget.SetAttr("style", "width: 60%;height: 200px;")
 	case "select":
 		widget = &SelectWidget{}
 	case "datetime":
@@ -208,6 +217,10 @@ func (w *Widget) IsReadOnly() bool {
 
 func (w *Widget) IsValueConfigured() bool {
 	return w.ValueConfigured
+}
+
+func (w *Widget) CloneAllOtherImportantSettings(widget IWidget) {
+	widget.SetPopulate(w.Populate)
 }
 
 func (w *Widget) IsValueChanged() bool {
@@ -423,7 +436,7 @@ func (tw *DynamicWidget) GetTemplateName() string {
 func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	var realWidget IWidget
 	if formRenderContext.Ctx.Query("widgetType") != "" {
-		realWidget = GetWidgetByWidgetType(formRenderContext.Ctx.Query("widgetType"))
+		realWidget = GetWidgetByWidgetType(formRenderContext.Ctx.Query("widgetType"), nil)
 	} else {
 		realWidget = tw.GetRealWidget(formRenderContext, currentField)
 	}
@@ -452,7 +465,7 @@ func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentFie
 func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	var realWidget IWidget
 	if renderContext.Ctx.Query("widgetType") != "" {
-		realWidget = GetWidgetByWidgetType(renderContext.Ctx.Query("widgetType"))
+		realWidget = GetWidgetByWidgetType(renderContext.Ctx.Query("widgetType"), nil)
 	} else {
 		realWidget = tw.GetRealWidgetForFormProceeding(form, afo)
 	}
@@ -479,6 +492,7 @@ func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 
 type FkLinkWidget struct {
 	Widget
+	Context string
 }
 
 func (w *FkLinkWidget) GetWidgetType() WidgetType {
@@ -497,7 +511,7 @@ func (w *FkLinkWidget) GetTemplateName() string {
 }
 
 func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
-	if w.IsReadOnly() {
+	if w.IsReadOnly() && w.Context != "edit" {
 		return template.HTML(w.Populate(formRenderContext, currentField).(string))
 	}
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
@@ -1077,6 +1091,12 @@ type SelectWidget struct {
 	DontValidateForExistence bool
 }
 
+func (w *SelectWidget) CloneAllOtherImportantSettings(widget IWidget) {
+	widget1 := widget.(*SelectWidget)
+	widget1.OptGroups = w.OptGroups
+	widget1.Populate = w.Populate
+}
+
 func (w *SelectWidget) GetWidgetType() WidgetType {
 	return SelectWidgetType
 }
@@ -1173,6 +1193,7 @@ type ForeignKeyWidget struct {
 	AddNewLink               string
 	GetQuerySet              func(formRenderContext *FormRenderContext) IPersistenceStorage
 	GenerateModelInterface   func() (interface{}, interface{})
+	Autocomplete             bool
 }
 
 func (w *ForeignKeyWidget) GetWidgetType() WidgetType {
@@ -1190,41 +1211,88 @@ func (w *ForeignKeyWidget) GetTemplateName() string {
 	return CurrentConfig.GetPathToTemplate(w.TemplateName)
 }
 
+func (w *ForeignKeyWidget) CloneAllOtherImportantSettings(widget IWidget) {
+	widget1 := widget.(*ForeignKeyWidget)
+	widget1.GetQuerySet = w.GetQuerySet
+	widget1.AddNewLink = w.AddNewLink
+	widget1.GenerateModelInterface = w.GenerateModelInterface
+	widget1.Autocomplete = w.Autocomplete
+	widget1.Populate = w.Populate
+}
+
 func (w *ForeignKeyWidget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {
 	var value interface{}
 	if w.Populate != nil {
 		value = w.Populate(formRenderContext, currentField)
 	} else {
-		value = strconv.FormatUint(uint64(GetID(reflect.Indirect(reflect.ValueOf(w.Value)))), 10)
-	}
-	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
-	for optGroupName, optGroups := range w.OptGroups {
-		optGroupSstringified[optGroupName] = make([]*SelectOptGroupStringified, 0)
-		for _, optGroup := range optGroups {
-			value1 := TransformValueForWidget(optGroup.Value).(string)
-			optionTemplateName := "widgets/select.option"
-			if w.IsForAdmin {
-				optionTemplateName = "admin/" + optionTemplateName
-			}
-			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
-				OptLabel:           optGroup.OptLabel,
-				Value:              value1,
-				Selected:           value1 == value,
-				OptionTemplateName: optionTemplateName,
-				Attrs:              make(map[string]string),
-			})
+		if !reflect.ValueOf(w.Value).IsZero() {
+			value = GetID(reflect.Indirect(reflect.ValueOf(w.Value)))
 		}
 	}
-	w.SetAttr("data-selected", value.(string))
+	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
+	autocompleteURL := ""
+	editURL := ""
+	valueID := ""
+	valueHTML := ""
+	valueS := TransformValueForListDisplay(value)
+	if !w.Autocomplete {
+		for optGroupName, optGroups := range w.OptGroups {
+			optGroupSstringified[optGroupName] = make([]*SelectOptGroupStringified, 0)
+			for _, optGroup := range optGroups {
+				value1 := TransformValueForWidget(optGroup.Value).(string)
+				optionTemplateName := "widgets/select.option"
+				if w.IsForAdmin {
+					optionTemplateName = "admin/" + optionTemplateName
+				}
+				optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
+					OptLabel:           optGroup.OptLabel,
+					Value:              value1,
+					Selected:           value1 == valueS,
+					OptionTemplateName: optionTemplateName,
+					Attrs:              make(map[string]string),
+				})
+			}
+		}
+		w.SetAttr("data-selected", TransformValueForListDisplay(value))
+	} else {
+		modelI, _ := w.GenerateModelInterface()
+		modelDescription := ProjectModels.GetModelFromInterface(modelI)
+		adminPage := CurrentDashboardAdminPanel.AdminPages.GetByModelName(modelDescription.Statement.Schema.Name)
+		autocompleteURL = adminPage.GenerateLinkForModelAutocompletion()
+		valueID = ""
+		if !reflect.ValueOf(w.Value).IsZero() {
+			valueID = TransformValueForListDisplay(GetID(reflect.ValueOf(w.Value)))
+			if valueID == "0" {
+				valueID = ""
+			}
+		}
+		if valueID != "" {
+			queryset := w.GetDbHandler(formRenderContext)
+			queryset.LoadDataForModelByID(modelI, TransformValueForListDisplay(GetID(reflect.ValueOf(w.Value))))
+			valueHTML = modelI.(UadminString).String()
+			editURL = adminPage.GenerateLinkToEditModel(reflect.ValueOf(w.Value))
+		}
+	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
 		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
 		"FieldDisplayName": w.FieldDisplayName, "ReadOnly": w.ReadOnly,
+		"AutocompleteUrl": autocompleteURL,
+		"ValueID":         valueID,
+		"Value":           valueHTML,
+		"EditUrl":         editURL,
 	}
 }
 
+func (w *ForeignKeyWidget) GetDbHandler(formRenderContext *FormRenderContext) IPersistenceStorage {
+	if w.GetQuerySet == nil {
+		uadminDatabase := NewUadminDatabase()
+		return NewGormPersistenceStorage(uadminDatabase.Db)
+	}
+	return w.GetQuerySet(formRenderContext)
+}
 func (w *ForeignKeyWidget) BuildChoices(formRenderContext *FormRenderContext) {
-	queryset := w.GetQuerySet(formRenderContext)
+	queryset := w.GetDbHandler(formRenderContext)
 	w.OptGroups = make(map[string][]*SelectOptGroup)
 	w.OptGroups[""] = make([]*SelectOptGroup, 0)
 	_, models := w.GenerateModelInterface()
@@ -1232,7 +1300,7 @@ func (w *ForeignKeyWidget) BuildChoices(formRenderContext *FormRenderContext) {
 	list := reflect.Indirect(reflect.ValueOf(models))
 	for i := 0; i < list.Len(); i++ {
 		modelStringified := reflect.ValueOf(list.Index(i).Interface()).MethodByName("String").Call([]reflect.Value{})[0].Interface()
-		modelID := strconv.FormatUint(uint64(GetID(list.Index(i))), 10)
+		modelID := GetID(list.Index(i))
 		w.OptGroups[""] = append(w.OptGroups[""], &SelectOptGroup{
 			OptLabel: modelStringified.(string),
 			Value:    modelID,
@@ -1243,7 +1311,9 @@ func (w *ForeignKeyWidget) BuildChoices(formRenderContext *FormRenderContext) {
 
 func (w *ForeignKeyWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("13", w.FieldDisplayName)
-	w.BuildChoices(formRenderContext)
+	if !w.Autocomplete {
+		w.BuildChoices(formRenderContext)
+	}
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["AddNewLink"] = w.AddNewLink
@@ -1255,40 +1325,52 @@ func (w *ForeignKeyWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 	if w.ReadOnly {
 		return nil
 	}
-	v, ok := form.Value[w.GetHTMLInputName()]
+	v := make([]string, 0)
+	ok := false
+	if !w.Autocomplete {
+		v, ok = form.Value[w.GetHTMLInputName()]
+	} else {
+		v, ok = form.Value[w.GetHTMLInputName()+"-value"]
+	}
 	if !ok {
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
-	w.BuildChoices(renderContext)
+	w.SetValue(v[0])
 	foundNotExistent := false
 	var notExistentValue string
-	if !w.DontValidateForExistence {
-		optValues := []string{}
-		for _, optGroup := range w.OptGroups {
-			for _, optGroupOption := range optGroup {
-				optValues = append(optValues, optGroupOption.Value.(string))
+	if !w.Autocomplete {
+		w.BuildChoices(renderContext)
+		if !w.DontValidateForExistence {
+			optValues := []string{}
+			for _, optGroup := range w.OptGroups {
+				for _, optGroupOption := range optGroup {
+					optValues = append(optValues, TransformValueForListDisplay(optGroupOption.Value))
+				}
 			}
-		}
-		for _, v1 := range v {
-			if !Contains(optValues, v1) {
-				foundNotExistent = true
-				notExistentValue = v1
-				break
+			for _, v1 := range v {
+				if !Contains(optValues, v1) {
+					foundNotExistent = true
+					notExistentValue = v1
+					break
+				}
 			}
 		}
 	}
+	if v[0] == "" {
+		return nil
+	}
 	var c int64
-	queryset := w.GetQuerySet(renderContext)
+	queryset := w.GetDbHandler(renderContext)
 	modelI, _ := w.GenerateModelInterface()
 	queryset.Model(modelI).Count(&c)
 	if c == 0 {
 		return fmt.Errorf("no object found to be used for this field")
 	}
-	w.SetValue(v[0])
 	if foundNotExistent {
 		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
 	}
-	w.SetOutputValue(v[0])
+	queryset.LoadDataForModelByID(modelI, v[0])
+	w.SetOutputValue(modelI)
 	return nil
 }
 
@@ -1852,7 +1934,7 @@ func (w *FileWidget) Render(formRenderContext *FormRenderContext, currentField *
 	}
 	vI := reflect.ValueOf(w.Value)
 	if w.Value != nil && !vI.IsZero() {
-		data["UploadedFile"] = storage.GetUploadURL() + w.Value.(string)
+		data["UploadedFile"] = storage.GetUploadURL() + "/" + w.Value.(string)
 		data["IsItImage"] = strings.Contains(w.Attrs["accept"], "image/")
 	}
 	data["Value"] = w.Value

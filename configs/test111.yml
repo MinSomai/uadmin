@@ -20,4 +20,4 @@ uadmin:
   secure_cookie: false
   http_only_cookie: false
   debug_tests: false
-  upload_path: upload-for-tests/
+  upload_path: upload-for-tests

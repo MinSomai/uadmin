@@ -43,8 +43,8 @@ type ChangePasswordHandlerParams struct {
 	ConfirmedPassword string `form:"confirm_password" json:"confirm_password" xml:"confirm_password"  binding:"required"`
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
-	mainRouter.GET("/reset-password/", func(ctx *gin.Context) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
+	app.GetRouter().GET("/reset-password/", func(ctx *gin.Context) {
 		type Context struct {
 			core.AdminContext
 		}
@@ -97,7 +97,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		var oneTimeAction = core.OneTimeAction{
 			User:       *user.(*core.User),
 			ExpiresOn:  actionExpiresAt,
-			Code:       utils.RandStringRunesForOneTimeAction(32),
+			Code:       core.GenerateRandomString(32, &core.OnlyLetersNumbersStringAlphabet),
 			ActionType: 1,
 		}
 
@@ -200,7 +200,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		//	return
 		//}
 		if user.GetSalt() == "" {
-			user.SetSalt(utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength))
+			user.SetSalt(core.GenerateRandomString(core.CurrentConfig.D.Auth.SaltLength))
 		}
 		hashedPassword, err = utils2.HashPass(json.Password, user.GetSalt())
 		user.SetPassword(hashedPassword)
@@ -239,7 +239,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		db.Save(&user)
 		ctx.JSON(http.StatusOK, gin.H{"success": true})
 	})
-	mainRouter.NoRoute(func(ctx *gin.Context) {
+	app.GetRouter().NoRoute(func(ctx *gin.Context) {
 		if strings.HasPrefix(ctx.Request.RequestURI, "/static-inbuilt/") || strings.HasSuffix(ctx.Request.RequestURI, ".css") ||
 			strings.HasSuffix(ctx.Request.RequestURI, ".js") || strings.HasSuffix(ctx.Request.RequestURI, ".map") {
 			ctx.Abort()
@@ -271,7 +271,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usersAdminPage.PageName = "Users"
 	usersAdminPage.Slug = "users"
 	usersAdminPage.BlueprintName = "user"
-	usersAdminPage.Router = mainRouter
+	usersAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(usersAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
@@ -298,6 +298,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 						model.UserGroups = make([]core.UserGroup, 0)
 					}
 					for _, ID := range vTmp {
+						if ID == "" {
+							continue
+						}
 						afo.GetUadminDatabase().Db.First(&usergroup, ID)
 						if usergroup.ID != 0 {
 							model.UserGroups = append(model.UserGroups, *usergroup)
@@ -384,6 +387,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 						model.Permissions = make([]core.Permission, 0)
 					}
 					for _, ID := range vTmp {
+						if ID == "" {
+							continue
+						}
 						afo.GetUadminDatabase().Db.First(&permission, ID)
 						if permission.ID != 0 {
 							model.Permissions = append(model.Permissions, *permission)
@@ -465,7 +471,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 				vI, _ := v.(string)
 				if vI != "" {
 					if user.Salt == "" {
-						user.Salt = utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
+						user.Salt = core.GenerateRandomString(core.CurrentConfig.D.Auth.SaltLength)
 					}
 					hashedPassword, _ := utils2.HashPass(vI, user.Salt)
 					user.IsPasswordUsable = true
@@ -480,7 +486,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usermodelAdminPage.PageName = "Users"
 	usermodelAdminPage.Slug = "user"
 	usermodelAdminPage.BlueprintName = "user"
-	usermodelAdminPage.Router = mainRouter
+	usermodelAdminPage.Router = app.GetRouter()
 	listFilter := &core.ListFilter{
 		URLFilteringParam: "IsSuperUser__exact",
 		Title:             "Is super user ?",
@@ -512,6 +518,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 						model.Permissions = make([]core.Permission, 0)
 					}
 					for _, ID := range vTmp {
+						if ID == "" {
+							continue
+						}
 						afo.GetUadminDatabase().Db.First(&permission, ID)
 						if permission.ID != 0 {
 							model.Permissions = append(model.Permissions, *permission)
@@ -593,18 +602,16 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	usergroupsAdminPage.PageName = "User groups"
 	usergroupsAdminPage.Slug = "usergroup"
 	usergroupsAdminPage.BlueprintName = "user"
-	usergroupsAdminPage.Router = mainRouter
+	usergroupsAdminPage.Router = app.GetRouter()
 	err = usersAdminPage.SubPages.AddAdminPage(usergroupsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing user blueprint: %s", err))
 	}
 }
 
-func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} { return &core.OneTimeAction{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &core.User{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &core.UserGroup{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &core.Permission{} })
+func (b Blueprint) InitApp(app core.IApp) {
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.OneTimeAction{}, &[]*core.OneTimeAction{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.Permission{}, &[]*core.Permission{} })
 
 	core.UadminValidatorRegistry.AddValidator("username-unique", func(i interface{}, o interface{}) error {
 		uadminDatabase := core.NewUadminDatabase()
@@ -671,11 +678,11 @@ func (b Blueprint) Init() {
 		isValidPassword := validator(i, o)
 		return isValidPassword == nil
 	})
-	fsStorage := core.NewFsStorage()
 	core.UadminFormCongirurableOptionInstance.AddFieldFormOptions(&core.FieldFormOptions{
 		WidgetType: "image",
 		Name:       "UserPhotoFormOptions",
 		WidgetPopulate: func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+			fsStorage := core.NewFsStorage()
 			photo := renderContext.Model.(core.IUser).GetPhoto()
 			if photo == "" {
 				return ""

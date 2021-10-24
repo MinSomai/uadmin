@@ -52,7 +52,7 @@ uadmin:
   secure_cookie: false
   http_only_cookie: false
   debug_tests: false
-  upload_path: upload-for-tests/
+  upload_path: upload-for-tests
 ```
 And there's a lot of options that could be configured through config file.  
 You may provide default database alias and slave. This is typical configuration to have a cluster with slaves and one master. So it should suit most of the real use cases.  

@@ -68,91 +68,91 @@ func (d *SqliteAdapter) GetDb(alias string, dryRun bool) (*gorm.DB, error) {
 	return db, err
 }
 
-func (d *SqliteAdapter) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Exact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) IExact(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) = UPPER(?) ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Contains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) IContains(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) LIKE '%%' || UPPER(?) || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) In(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) In(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s IN ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Gt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s > ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Gte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s >= ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Lt(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s < ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Lte(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s <= ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) StartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s LIKE ? || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) IStartsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) LIKE UPPER(?) || '%%' ESCAPE '\\' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) EndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s LIKE '%%' || ? ESCAPE '\\' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) IEndsWith(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" UPPER(%s.%s) LIKE '%%' || UPPER(?) ESCAPE '\\' ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Date(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Date(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_cast_date(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Year(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Year(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" %s.%s BETWEEN ? AND ? ", operatorContext.TableName, field.DBName)
 	year := value.(int)
 	startOfTheYear := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -160,73 +160,73 @@ func (d *SqliteAdapter) Year(operatorContext *GormOperatorContext, field *Field,
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, startOfTheYear, endOfTheYear)
 }
 
-func (d *SqliteAdapter) Month(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Month(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('month', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Day(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Day(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Week(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Week(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('week', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) WeekDay(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('week_day', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('quarter', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Hour(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('hour', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Minute(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('minute', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_extract('second', %s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Regex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_regex(%s.%s, ?) ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) IRegex(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_regex(%s.%s, '(?i)' || ?) ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) Time(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Time(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	query := fmt.Sprintf(" uadmin_datetime_cast_time(%s.%s, 'UTC', 'UTC') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
 
-func (d *SqliteAdapter) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) IsNull(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	isTruthyValue := IsTruthyValue(value)
 	isNull := " IS NULL "
 	if !isTruthyValue {
@@ -236,7 +236,7 @@ func (d *SqliteAdapter) IsNull(operatorContext *GormOperatorContext, field *Fiel
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query)
 }
 
-func (d *SqliteAdapter) Range(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder *SQLConditionBuilder) {
+func (d *SqliteAdapter) Range(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
 	s := reflect.ValueOf(value)
 	var f interface{}
 	var second interface{}

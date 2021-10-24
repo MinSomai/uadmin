@@ -70,6 +70,13 @@ func SetUpStructField(structF reflect.Value, v interface{}) error {
 		case ContentType:
 			v := v.(ContentType)
 			structF.Set(reflect.ValueOf(v))
+		default:
+			v1 := reflect.ValueOf(v)
+			if v1.Kind() == reflect.Ptr {
+				structF.Set(v1.Elem())
+			} else {
+				structF.Set(v1)
+			}
 		}
 	}
 	return nil

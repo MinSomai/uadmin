@@ -288,6 +288,20 @@
         var formToAddHtml = formToAdd.html();
         formToAddHtml = $(formToAddHtml.replaceAll('toreplacewithid', 'new' + currentInlineNewNumber.toString()));
         inlineCont.find('.items-cont').prepend(formToAddHtml);
+        formToAddHtml.find("input").map(function(_, item) {
+            $(item).removeAttr("autocomplete");
+        });
+        $(formToAddHtml).find(".autocomplete").map(function(_, item) {
+            $(item).autocomplete({
+                source: $(item).data('autocompleteurl'),
+                minLength: 3,
+                select: function( event, ui ) {
+                    event.preventDefault();
+                    $('input[name="' + $(item).attr('name') + '-value"]').val(ui.item.value);
+                    $(item).val(ui.item.label);
+                }
+            });
+        });
         inlineNewNumbers[inlineId] = currentInlineNewNumber;
         inlineCont.trigger(inlineId + ':inline:addednew', inlineCont, formToAddHtml);
     })

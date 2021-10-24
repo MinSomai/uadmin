@@ -98,6 +98,13 @@ func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interf
 				formError.AddGeneralError(fmt.Errorf("can't set field %s for model", field.Name))
 				continue
 			}
+			if field.SetUpField != nil {
+				err := field.SetUpField(field.FieldConfig.Widget, gormModel, field.FieldConfig.Widget.GetOutputValue(), nil)
+				if err != nil {
+					formError.AddGeneralError(err)
+				}
+				continue
+			}
 			err := SetUpStructField(modelF, field.FieldConfig.Widget.GetOutputValue())
 			if err != nil {
 				formError.AddGeneralError(err)
@@ -124,6 +131,8 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%s_%s", ID, name))
 			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
+			fieldFromNewForm.SetUpField = ld.Field.SetUpField
+			ld.Field.FieldConfig.Widget.CloneAllOtherImportantSettings(fieldFromNewForm.FieldConfig.Widget)
 			ret.FieldRegistry.AddField(fieldFromNewForm)
 		}
 	}
@@ -150,6 +159,8 @@ func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, pref
 			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%s_%s", ID, name))
 			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
+			fieldFromNewForm.SetUpField = ld.Field.SetUpField
+			ld.Field.FieldConfig.Widget.CloneAllOtherImportantSettings(fieldFromNewForm.FieldConfig.Widget)
 			ret.FieldRegistry.AddField(fieldFromNewForm)
 		}
 	}

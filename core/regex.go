@@ -6,6 +6,7 @@ import (
 )
 
 var ASCIIRegex = regexp.MustCompile("[[:^ascii:]]")
+var WhitespaceRegex = regexp.MustCompile("\\s+")
 
 func PrepareStringToBeUsedForHTMLID(text string) string {
 	text = ASCIIRegex.ReplaceAllLiteralString(text, "")

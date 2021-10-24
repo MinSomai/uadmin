@@ -537,6 +537,12 @@ func (gps *ElasticSearchPersistenceStorage) GetLastError() error {
 	return gps.LastError
 }
 
+func (gps *ElasticSearchPersistenceStorage) LoadDataForModelByID(modelI interface{}, ID string) IPersistenceStorage {
+	cond := elastic.NewTermQuery("_id", ID)
+	gps.First(modelI, cond)
+	return gps
+}
+
 type ESSortBy struct {
 	Field         *Field
 	Direction     bool

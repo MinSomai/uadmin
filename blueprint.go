@@ -19,7 +19,7 @@ func (c BlueprintCommand) Proceed(subaction string, args []string) error {
 	var action string
 	var help string
 	var isCorrectActionPassed bool = false
-	commandRegistry := &CommandRegistry{
+	commandRegistry := &core.CommandRegistry{
 		Actions: make(map[string]core.ICommand),
 	}
 
@@ -101,10 +101,10 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{
@@ -118,13 +118,13 @@ var ConcreteBlueprint = Blueprint{
 	var blueprintTplBuffer bytes.Buffer
 	blueprintTpl := template.Must(template.New("blueprintmain").Parse(blueprint))
 	tplData := struct {
-		Name    string
-		Message string
+		Name       string
+		Message    string
 		ModuleName string
 	}{
-		Name:    name,
+		Name:       name,
 		ModuleName: string(moduleName[0][1]),
-		Message: strings.ReplaceAll(core.ASCIIRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
+		Message:    strings.ReplaceAll(core.ASCIIRegex.ReplaceAllLiteralString(opts.Message, ""), `"`, `\"`),
 	}
 	if err = blueprintTpl.Execute(&blueprintTplBuffer, tplData); err != nil {
 		panic(err)

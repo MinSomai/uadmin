@@ -27,7 +27,7 @@ func (suite *ConcreteTestSuite) TearDownSuite() {
 func (suite *ConcreteTestSuite) TestRouterInitialization() {
 	// suite.app.Router = gin.Default()
 	routergroup := suite.App.Router.Group("/" + "user")
-	ConcreteBlueprint.InitRouter(suite.App.Router, routergroup)
+	ConcreteBlueprint.InitRouter(suite.App, routergroup)
 	req, _ := http.NewRequest("GET", "/user/visit/", nil)
 	uadmin.TestHTTPResponse(suite.T(), suite.App, req, func(w *httptest.ResponseRecorder) bool {
 		return visited

@@ -12,7 +12,7 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// initialize administrator page for this blueprint.
 	todosAdminPage := core.NewGormAdminPage(
 		nil,
@@ -22,7 +22,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	todosAdminPage.PageName = "Example"
 	todosAdminPage.Slug = "example"
 	todosAdminPage.BlueprintName = "example"
-	todosAdminPage.Router = mainRouter
+	todosAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(todosAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing blueprint: %s", err))
@@ -43,16 +43,14 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	todosModelAdminPage.PageName = "Todos"
 	todosModelAdminPage.Slug = "todo"
 	todosModelAdminPage.BlueprintName = "example"
-	todosModelAdminPage.Router = mainRouter
+	todosModelAdminPage.Router = app.GetRouter()
 	err = todosAdminPage.SubPages.AddAdminPage(todosModelAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing blueprint: %s", err))
 	}
 }
 
-func (b Blueprint) Init() {
-	// if you want to use admin page for your model, please make sure you registered your model in project models.
-	core.ProjectModels.RegisterModel(func() interface{} { return &models.Todo{} })
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{

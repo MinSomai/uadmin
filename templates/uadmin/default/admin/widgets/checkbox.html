@@ -29,7 +29,7 @@
                     </div>
                 {{ end }}
             {{ end }}
-            <div onclick="$(this).find('input').click();" class="material-switch" style="padding-left:15px;padding-top:5px">
+            <div onclick="$(this).find('input').attr('checked', 'checked');" class="material-switch" style="padding-left:15px;padding-top:5px">
                 <input name="{{ .Name }}" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} type="checkbox">
                 <label class="label-primary"></label>
             </div>

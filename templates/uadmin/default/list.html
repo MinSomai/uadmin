@@ -100,7 +100,7 @@
                             {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.ID $iterateAdminObjects.Model}}
                             {{range $field := $listDisplay.GetAllFields}}
                                 <td>
-                                    {{if eq $i 0}}{{ if not $noPermissionToEdit }}<a class="bold clickable Row_id no-style" href="{{$currentURL}}/edit/{{$iterateAdminObjects.ID}}/">{{ end }}{{ end }}
+                                    {{if eq $i 0}}{{ if not $noPermissionToEdit }}<a class="bold clickable Row_id no-style" href="{{$currentURL}}edit/{{$iterateAdminObjects.ID}}/">{{ end }}{{ end }}
                                     {{ if $field.Field }}
                                         {{ $fieldExistsInTheForm := $form.ExistsField $field }}
                                         {{ if $fieldExistsInTheForm }}

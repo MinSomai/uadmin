@@ -812,4 +812,11 @@ $(document).ready(function() {
     win.focus();
     return false;
   });
+  $('body').delegate('.change-related', 'click', function(ev) {
+    ev.preventDefault();
+    var name = $(ev.currentTarget).attr('href').replace(/[^a-zA-Z0-9]+/g, '');
+    var win = window.open($(ev.currentTarget).attr('href'), name, 'height=500,width=800,resizable=yes,scrollbars=yes');
+    win.focus();
+    return false;
+  });
 });

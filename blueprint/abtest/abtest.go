@@ -18,7 +18,7 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// add new gorm admin page for blueprint
 	abTestAdminPage := core.NewGormAdminPage(
 		nil,
@@ -28,7 +28,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abTestAdminPage.PageName = "AB Tests"
 	abTestAdminPage.Slug = "abtest"
 	abTestAdminPage.BlueprintName = "abtest"
-	abTestAdminPage.Router = mainRouter
+	abTestAdminPage.Router = app.GetRouter()
 
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(abTestAdminPage)
 	if err != nil {
@@ -81,7 +81,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	abtestmodelAdminPage.PageName = "AB Tests"
 	abtestmodelAdminPage.Slug = "abtest"
 	abtestmodelAdminPage.BlueprintName = "abtest"
-	abtestmodelAdminPage.Router = mainRouter
+	abtestmodelAdminPage.Router = app.GetRouter()
 	// customize list display for abtest admin page
 	typeListDisplay, _ := abtestmodelAdminPage.ListDisplay.GetFieldByDisplayName("Type")
 	// custom populate method for type list display
@@ -137,10 +137,9 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) InitApp(app core.IApp) {
 	// add models to ProjectModels, so we can determine admin pages for these models, etc
-	core.ProjectModels.RegisterModel(func() interface{} { return &abtestmodel.ABTestValue{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &abtestmodel.ABTest{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{} })
 }
 
 var ConcreteBlueprint = Blueprint{

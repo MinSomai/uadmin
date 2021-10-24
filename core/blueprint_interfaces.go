@@ -16,8 +16,8 @@ type IBlueprint interface {
 	GetName() string
 	GetDescription() string
 	GetMigrationRegistry() IMigrationRegistry
-	InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup)
-	Init()
+	InitRouter(app IApp, group *gin.RouterGroup)
+	InitApp(app IApp)
 }
 
 type IBlueprintRegistry interface {
@@ -27,8 +27,8 @@ type IBlueprintRegistry interface {
 	GetMigrationTree() IMigrationTree
 	TraverseMigrations() <-chan *TraverseMigrationResult
 	TraverseMigrationsDownTo(downToMigration int64) <-chan *TraverseMigrationResult
-	InitializeRouting(router *gin.Engine)
-	Initialize()
+	InitializeRouting(app IApp, router *gin.Engine)
+	Initialize(app IApp)
 	ResetMigrationTree()
 }
 
@@ -42,7 +42,7 @@ func (b Blueprint) GetName() string {
 	return b.Name
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app IApp, group *gin.RouterGroup) {
 	panic(fmt.Errorf("has to be redefined in concrete blueprint"))
 }
 
@@ -50,7 +50,7 @@ func (b Blueprint) GetDescription() string {
 	return b.Description
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) InitApp(app IApp) {
 
 }
 
@@ -277,10 +277,10 @@ func (r BlueprintRegistry) TraverseMigrations() <-chan *TraverseMigrationResult 
 	return chnl
 }
 
-func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
+func (r BlueprintRegistry) InitializeRouting(app IApp, router *gin.Engine) {
 	for blueprint := range r.Iterate() {
 		routergroup := router.Group("/" + blueprint.GetName())
-		blueprint.InitRouter(router, routergroup)
+		blueprint.InitRouter(app, routergroup)
 	}
 	router.GET("/ping/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -295,11 +295,11 @@ func (r BlueprintRegistry) InitializeRouting(router *gin.Engine) {
 	})
 }
 
-func (r BlueprintRegistry) Initialize() {
+func (r BlueprintRegistry) Initialize(app IApp) {
 	ClearProjectModels()
-	ProjectModels.RegisterModel(func() interface{} { return &ContentType{} })
+	ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &ContentType{}, &[]*ContentType{} })
 	for blueprint := range r.Iterate() {
-		blueprint.Init()
+		blueprint.InitApp(app)
 	}
 }
 

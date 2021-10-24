@@ -12,7 +12,7 @@ type Blueprint struct {
 	core.Blueprint
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	logAdminPage := core.NewGormAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, nil },
@@ -21,7 +21,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	logAdminPage.PageName = "Logs"
 	logAdminPage.Slug = "log"
 	logAdminPage.BlueprintName = "logging"
-	logAdminPage.Router = mainRouter
+	logAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(logAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing log blueprint: %s", err))
@@ -58,7 +58,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	logmodelAdminPage.PageName = "Logs"
 	logmodelAdminPage.Slug = "log"
 	logmodelAdminPage.BlueprintName = "logging"
-	logmodelAdminPage.Router = mainRouter
+	logmodelAdminPage.Router = app.GetRouter()
 	contentTypeListDisplay, _ := logmodelAdminPage.ListDisplay.GetFieldByDisplayName("ContentType")
 	contentTypeListDisplay.Populate = func(m interface{}) string {
 		return m.(*logmodel.Log).ContentType.String()
@@ -75,8 +75,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init() {
-	core.ProjectModels.RegisterModel(func() interface{} { return &logmodel.Log{} })
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{

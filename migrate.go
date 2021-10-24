@@ -29,7 +29,7 @@ type MigrateCommand struct {
 func (c MigrateCommand) Proceed(subaction string, args []string) error {
 	var help string
 	var isCorrectActionPassed bool = false
-	commandRegistry := &CommandRegistry{
+	commandRegistry := &core.CommandRegistry{
 		Actions: make(map[string]core.ICommand),
 	}
 
@@ -360,6 +360,9 @@ func (command UpMigration) Proceed(subaction string, args []string) error {
 						AppliedAt:     time.Now(),
 					},
 				)
+			}
+			if res == nil {
+				color.Blue("Applied migration %s", traverseMigrationResult.Node.GetMigration().GetName())
 			}
 			return res
 		})

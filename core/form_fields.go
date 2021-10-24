@@ -95,12 +95,19 @@ func (f *Field) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, rende
 
 type ValidationError []error
 
-func NewFieldFromGormField(gormField *schema.Field, forcedWidgetType string) *Field {
+func NewFieldForListDisplayFromGormField(gormField *schema.Field, fieldOptions IFieldFormOptions) *Field {
 	var widget IWidget
+	forcedWidgetType := ""
+	if fieldOptions != nil && fieldOptions.GetListFieldWidget() != "" {
+		forcedWidgetType = fieldOptions.GetListFieldWidget()
+	}
+	if forcedWidgetType == "" && fieldOptions != nil && fieldOptions.GetWidgetType() != "" {
+		forcedWidgetType = fieldOptions.GetWidgetType()
+	}
 	if gormField.PrimaryKey {
-		widget = GetWidgetByWidgetType("hidden")
+		widget = GetWidgetByWidgetType("hidden", nil)
 	} else if forcedWidgetType != "" {
-		widget = GetWidgetByWidgetType(forcedWidgetType)
+		widget = GetWidgetByWidgetType(forcedWidgetType, fieldOptions)
 	} else {
 		uadminFieldType := GetUadminFieldTypeFromGormField(gormField)
 		widget = GetWidgetFromUadminFieldTypeAndGormField(uadminFieldType, gormField)
@@ -126,19 +133,103 @@ func NewFieldFromGormField(gormField *schema.Field, forcedWidgetType string) *Fi
 	return field
 }
 
+func NewFieldFromGormField(gormField *schema.Field, fieldOptions IFieldFormOptions) *Field {
+	var widget IWidget
+	forcedWidgetType := ""
+	if fieldOptions != nil && fieldOptions.GetWidgetType() != "" {
+		forcedWidgetType = fieldOptions.GetWidgetType()
+	}
+	if gormField.PrimaryKey {
+		widget = GetWidgetByWidgetType("hidden", nil)
+	} else if forcedWidgetType != "" {
+		widget = GetWidgetByWidgetType(forcedWidgetType, fieldOptions)
+	} else {
+		uadminFieldType := GetUadminFieldTypeFromGormField(gormField)
+		widget = GetWidgetFromUadminFieldTypeAndGormField(uadminFieldType, gormField)
+	}
+	widget.InitializeAttrs()
+	widget.SetName(gormField.Name)
+	if gormField.NotNull && !gormField.HasDefaultValue {
+		widget.SetRequired()
+	}
+	if gormField.Unique {
+		widget.SetRequired()
+	}
+	if !gormField.PrimaryKey {
+		widget.SetValue(gormField.DefaultValueInterface)
+	}
+	field := &Field{
+		Field:           *gormField,
+		UadminFieldType: GetUadminFieldTypeFromGormField(gormField),
+		FieldConfig:     &FieldConfig{Widget: widget},
+		Required:        gormField.NotNull && !gormField.HasDefaultValue,
+		DisplayName:     gormField.Name,
+	}
+	return field
+}
+
+func NewUadminFieldForListDisplayFromGormField(gormModelV reflect.Value, field *schema.Field, r ITemplateRenderer, renderForAdmin bool) *Field {
+	uadminformtag := field.Tag.Get("uadminform")
+	var fieldOptions IFieldFormOptions
+	var uadminField *Field
+	if uadminformtag != "" {
+		fieldOptions = UadminFormCongirurableOptionInstance.GetFieldFormOptions(uadminformtag)
+		uadminField = NewFieldForListDisplayFromGormField(field, fieldOptions)
+	} else {
+		if field.PrimaryKey {
+			fieldOptions = UadminFormCongirurableOptionInstance.GetFieldFormOptions("ReadonlyField")
+			uadminField = NewFieldFromGormField(field, fieldOptions)
+		} else {
+			uadminField = NewFieldFromGormField(field, nil)
+		}
+	}
+	uadminField.DisplayName = field.Name
+	if renderForAdmin {
+		uadminField.FieldConfig.Widget.RenderForAdmin()
+	}
+	if fieldOptions != nil {
+		uadminField.Initial = fieldOptions.GetInitial()
+		if fieldOptions.GetDisplayName() != "" {
+			uadminField.DisplayName = fieldOptions.GetDisplayName()
+		}
+		if fieldOptions.GetWidgetPopulate() != nil {
+			uadminField.FieldConfig.Widget.SetPopulate(fieldOptions.GetWidgetPopulate())
+		}
+		uadminField.Validators = fieldOptions.GetValidators()
+		uadminField.Choices = fieldOptions.GetChoices()
+		uadminField.HelpText = fieldOptions.GetHelpText()
+		uadminField.WidgetType = fieldOptions.GetWidgetType()
+		uadminField.ReadOnly = fieldOptions.GetReadOnly()
+		uadminField.FieldConfig.Widget.SetReadonly(uadminField.ReadOnly)
+		if fieldOptions.GetIsRequired() {
+			uadminField.FieldConfig.Widget.SetRequired()
+		}
+		if fieldOptions.GetHelpText() != "" {
+			uadminField.FieldConfig.Widget.SetHelpText(fieldOptions.GetHelpText())
+		}
+	}
+	uadminField.FieldConfig.Widget.RenderUsingRenderer(r)
+	uadminField.FieldConfig.Widget.SetFieldDisplayName(field.Name)
+	isTruthyValue := IsTruthyValue(gormModelV.FieldByName(field.Name).Interface())
+	if isTruthyValue {
+		uadminField.FieldConfig.Widget.SetValue(gormModelV.FieldByName(field.Name).Interface())
+	}
+	return uadminField
+}
+
 func NewUadminFieldFromGormField(gormModelV reflect.Value, field *schema.Field, r ITemplateRenderer, renderForAdmin bool) *Field {
 	uadminformtag := field.Tag.Get("uadminform")
 	var fieldOptions IFieldFormOptions
 	var uadminField *Field
 	if uadminformtag != "" {
 		fieldOptions = UadminFormCongirurableOptionInstance.GetFieldFormOptions(uadminformtag)
-		uadminField = NewFieldFromGormField(field, fieldOptions.GetWidgetType())
+		uadminField = NewFieldFromGormField(field, fieldOptions)
 	} else {
 		if field.PrimaryKey {
 			fieldOptions = UadminFormCongirurableOptionInstance.GetFieldFormOptions("ReadonlyField")
-			uadminField = NewFieldFromGormField(field, fieldOptions.GetWidgetType())
+			uadminField = NewFieldFromGormField(field, fieldOptions)
 		} else {
-			uadminField = NewFieldFromGormField(field, "")
+			uadminField = NewFieldFromGormField(field, nil)
 		}
 	}
 	uadminField.DisplayName = field.Name

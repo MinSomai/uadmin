@@ -5,7 +5,6 @@ import (
 	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/blueprint/sessions/migrations"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"github.com/sergeyglazyrindev/uadmin/utils"
 	"strings"
 )
 
@@ -14,9 +13,9 @@ type Blueprint struct {
 	SessionAdapterRegistry *interfaces2.SessionProviderRegistry
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// function to verify CSRF
-	mainRouter.Use(func() gin.HandlerFunc {
+	app.GetRouter().Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {
 			if !core.CurrentConfig.RequiresCsrfCheck(c) {
 				c.Next()
@@ -78,7 +77,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			c.Next()
 		}
 	}())
-	mainRouter.Use(func() gin.HandlerFunc {
+	app.GetRouter().Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {
 			if !strings.HasPrefix(c.Request.URL.Path, core.CurrentConfig.D.Uadmin.RootAdminURL) {
 				c.Next()
@@ -102,6 +101,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			if session.IsExpired() && c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL+"/" {
 				if !strings.Contains(c.Request.URL.Path, "resetpassword") {
 					c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
+					c.Abort()
 					return
 				}
 			}
@@ -109,6 +109,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 			if c.Request.URL.Path != core.CurrentConfig.D.Uadmin.RootAdminURL+"/" && (user == nil || (!user.GetIsStaff() && !user.GetIsSuperUser())) {
 				if !strings.Contains(c.Request.URL.Path, "resetpassword") {
 					c.Redirect(302, core.CurrentConfig.D.Uadmin.RootAdminURL)
+					c.Abort()
 					return
 				}
 			}
@@ -119,13 +120,13 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 		sessionAdapter, _ := ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		session, _ := sessionAdapter.GetByKey(Key)
 		csrfToken, _ := session.Get("csrf_token")
-		return utils.MaskCSRFToken(csrfToken)
+		return core.MaskCSRFToken(csrfToken)
 	}
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) InitApp(app core.IApp) {
 	b.SessionAdapterRegistry.RegisterNewAdapter(&interfaces2.DbSession{}, true)
-	core.ProjectModels.RegisterModel(func() interface{} { return &core.Session{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.Session{}, &[]*core.Session{} })
 }
 
 var ConcreteBlueprint = Blueprint{

@@ -33,7 +33,7 @@ func (t *Tweet) GetIndexName() string {
 	return "tweets"
 }
 
-func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
+func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	tweetsAdminPage := core.NewElasticSearchAdminPage(
 		nil,
 		func() (interface{}, interface{}) { return nil, nil },
@@ -42,7 +42,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	tweetsAdminPage.PageName = "Tweets"
 	tweetsAdminPage.Slug = "tweets"
 	tweetsAdminPage.BlueprintName = "tweets"
-	tweetsAdminPage.Router = mainRouter
+	tweetsAdminPage.Router = app.GetRouter()
 	err := core.CurrentDashboardAdminPanel.AdminPages.AddAdminPage(tweetsAdminPage)
 	if err != nil {
 		panic(fmt.Errorf("error initializing tweets blueprint: %s", err))
@@ -60,7 +60,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	tweetsmodelAdminPage.PageName = "Tweets"
 	tweetsmodelAdminPage.Slug = "tweet"
 	tweetsmodelAdminPage.BlueprintName = "tweets"
-	tweetsmodelAdminPage.Router = mainRouter
+	tweetsmodelAdminPage.Router = app.GetRouter()
 	tweetsmodelAdminPage.ModelName = "tweet"
 	IDListDisplayField, _ := tweetsmodelAdminPage.ListDisplay.GetFieldByDisplayName("ID")
 	IDListDisplayField.SortBy.SetSortCustomImplementation(func(afo core.IAdminFilterObjects, field *core.Field, direction int) {
@@ -79,7 +79,7 @@ func (b Blueprint) InitRouter(mainRouter *gin.Engine, group *gin.RouterGroup) {
 	}
 }
 
-func (b Blueprint) Init() {
+func (b Blueprint) InitApp(app core.IApp) {
 }
 
 var ConcreteBlueprint = Blueprint{

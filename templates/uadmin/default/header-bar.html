@@ -13,7 +13,7 @@
             {{ if eq $breadcrumbNumber 1 }}
             {{ end }}
                 <a href="{{ $breadcrumb.URL }}" class="no-style fontwhite">
-                  <span {{ if $breadcrumb.IsActive }}class="active"{{ end }}>{{ if $breadcrumb.Icon }}<i class="fa fa-{{ $breadcrumb.Icon }}"></i>{{ end }}{{Tf "uadmin/system" $language.Code $breadcrumb.Name }}</span>
+                  <span {{ if $breadcrumb.IsActive }}class="active"{{ end }}>{{ if $breadcrumb.Icon }}<i class="fa fa-{{ $breadcrumb.Icon }}"></i>{{ end }}{{Tf "uadmin/system" $language.Code (SplitCamelCase $breadcrumb.Name) }}</span>
                 </a>
             {{ $breadcrumbNumber = (add $breadcrumbNumber 1) }}
         {{ end }}

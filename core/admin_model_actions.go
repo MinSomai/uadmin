@@ -342,7 +342,8 @@ func BuildRemovalTree(uadminDatabase *UadminDatabase, model interface{}, level .
 				if !foundRelation {
 					continue
 				}
-				db := uadminDatabase.Db.Model(modelDescription.GenerateModelI())
+				modelI, _ := modelDescription.GenerateModelI()
+				db := uadminDatabase.Db.Model(modelI)
 				if relationShip.Field.NotNull {
 					db = db.Joins(
 						fmt.Sprintf(
@@ -363,7 +364,7 @@ func BuildRemovalTree(uadminDatabase *UadminDatabase, model interface{}, level .
 
 				rows, _ := db.Unscoped().Preload(primaryStructField).Where(fmt.Sprintf("%s.%s = ?", modelInfo.Statement.Table, primaryKeyName), Idv).Rows()
 				for rows.Next() {
-					newModel1 := modelDescription.GenerateModelI()
+					newModel1, _ := modelDescription.GenerateModelI()
 					uadminDatabase.Db.ScanRows(rows, newModel1)
 					removalTreeNode.Next = append(removalTreeNode.Next, BuildRemovalTree(uadminDatabase, newModel1, realLevel))
 				}

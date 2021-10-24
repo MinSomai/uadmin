@@ -128,7 +128,7 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
-	salt := utils.RandStringRunes(core.CurrentConfig.D.Auth.SaltLength)
+	salt := core.GenerateRandomString(core.CurrentConfig.D.Auth.SaltLength)
 	// hashedPassword, err := utils2.HashPass(password, salt)
 	hashedPassword, _ := utils2.HashPass(json.Password, salt)
 	user := core.User{
@@ -169,11 +169,9 @@ func (ap *DirectAuthForAdminProvider) Logout(c *gin.Context) {
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter, err = sessionAdapter.GetByKey(cookie)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
-		return
+	if err == nil {
+		sessionAdapter.Delete()
 	}
-	sessionAdapter.Delete()
 	timeInPast := time.Now().Add(-10 * time.Minute)
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     cookieName,

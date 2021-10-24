@@ -3,7 +3,7 @@ package sessions
 import (
 	"github.com/sergeyglazyrindev/uadmin"
 	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
-	"github.com/sergeyglazyrindev/uadmin/utils"
+	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -17,11 +17,11 @@ type CsrfTestSuite struct {
 
 func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 	session := interfaces2.NewSession()
-	token := utils.GenerateCSRFToken()
+	token := core.GenerateCSRFToken()
 	session.SetData("csrf_token", token)
 	s.UadminDatabase.Db.Create(session)
 	req, _ := http.NewRequest("POST", "/testcsrf/", nil)
-	tokenmasked := utils.MaskCSRFToken(token)
+	tokenmasked := core.MaskCSRFToken(token)
 	req.Header.Set("X-CSRF-TOKEN", tokenmasked)
 	req.Header.Set("X-UADMIN-API", session.Key)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {

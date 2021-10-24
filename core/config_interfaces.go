@@ -150,6 +150,8 @@ type IFieldFormOptions interface {
 	GetIsRequired() bool
 	GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{}
 	IsItFk() bool
+	GetIsAutocomplete() bool
+	GetListFieldWidget() string
 }
 
 // Info from config file

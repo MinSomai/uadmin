@@ -20,10 +20,10 @@ func (s *BuildRemovalTreeTestSuite) SetupTest() {
 	s.UadminDatabase.Db.AutoMigrate(&UserContentType{})
 	s.UadminDatabase.Db.AutoMigrate(&OneTimeActionContentType{})
 	s.UadminDatabase.Db.AutoMigrate(&SessionContentType{})
-	core.ProjectModels.RegisterModel(func() interface{} { return &SessionContentType{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &OneTimeActionContentType{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &UserContentType{} })
-	core.ProjectModels.RegisterModel(func() interface{} { return &UserGroupContentType{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &SessionContentType{}, &[]*SessionContentType{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &OneTimeActionContentType{}, &[]*OneTimeActionContentType{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &UserContentType{}, &[]*UserContentType{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &UserGroupContentType{}, &[]*UserGroupContentType{} })
 }
 
 func (s *BuildRemovalTreeTestSuite) ConfigureData(uadminDatabase *core.UadminDatabase) {
