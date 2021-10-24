@@ -8,7 +8,7 @@ Admin filter objects implements core.IAdminFilterObjects interface.
 
 ```go
 type IAdminFilterObjects interface {
-	WithTransaction(handler func(afo1 IAdminFilterObjects) error)
+	WithTransaction(handler func(afo1 IAdminFilterObjects) error) error
 	LoadDataForModelByID(ID interface{}, model interface{})
 	SaveModel(model interface{}) error
 	CreateNew(model interface{}) error
@@ -24,7 +24,13 @@ type IAdminFilterObjects interface {
 	SetInitialQuerySet(IPersistenceStorage)
 	GenerateModelInterface() (interface{}, interface{})
 	RemoveModelPermanently(model interface{}) error
+	FilterQs(filterString string)
+	Search(field *Field, searchString string)
+	SortBy(field *Field, direction int)
+	FilterByMultipleIds(field *Field, realObjectIds []string)
+	GetDB() IPersistenceStorage
+	GetLastError() error
 }
 ```
-Right now uadmin supports only objects that stored in database and we use gorm to interact with database.
-But later on we want to provide implementations for the objects stored in NoSQL, like Mongo, etc
+Right now uadmin supports only objects that stored in database or elasticsearch and we use corresponding go package to interact with storage.
+Later on we want to provide implementations for the objects stored in NoSQL, like Mongo, etc
