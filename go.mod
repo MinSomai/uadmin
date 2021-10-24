@@ -4,7 +4,9 @@ go 1.16
 
 require (
 	github.com/360EntSecGroup-Skylar/excelize/v2 v2.4.0
+	github.com/aaronland/go-ucd-username v1.0.0
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
+	github.com/aws/aws-sdk-go v1.40.43
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deckarep/golang-set v1.7.1
@@ -35,6 +37,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/olivere/elastic/v7 v7.0.29
 	github.com/pquerna/otp v1.3.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v0.0.0-20180427012116-c95755e4bcd7 // indirect
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/stretchr/testify v1.7.0
