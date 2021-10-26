@@ -31,10 +31,10 @@ func (suite *AdminPaginationTestSuite) TestPagination() {
 	adminUserPage, _ := adminUserBlueprintPage.SubPages.GetBySlug("user")
 	var users = core.GenerateBunchOfUserModels()
 	adminRequestParams := core.NewAdminRequestParams()
-	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
+	adminUserPage.GetQueryset(nil, adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
 	assert.Equal(suite.T(), reflect.Indirect(reflect.ValueOf(users)).Len(), core.CurrentConfig.D.Uadmin.AdminPerPage)
 	adminRequestParams.Paginator.Offset = 88
-	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
+	adminUserPage.GetQueryset(nil, adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
 	assert.Greater(suite.T(), reflect.Indirect(reflect.ValueOf(users)).Len(), core.CurrentConfig.D.Uadmin.AdminPerPage)
 }
 

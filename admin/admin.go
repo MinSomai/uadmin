@@ -17,6 +17,9 @@ import (
 
 func init() {
 	core.PopulateTemplateContextForAdminPanel = func(ctx *gin.Context, context core.IAdminContext, adminRequestParams *core.AdminRequestParams) {
+		if ctx == nil {
+			return
+		}
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
 		var cookieName string
 		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName

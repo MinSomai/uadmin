@@ -36,6 +36,9 @@ func NewAdminRequestParamsFromGinContext(ctx *gin.Context) *AdminRequestParams {
 		NeedAllLanguages:  false,
 		Paginator:         &AdminRequestPaginator{},
 	}
+	if ctx == nil {
+		return ret
+	}
 	if ctx.Query("perpage") != "" {
 		perPage, _ := strconv.Atoi(ctx.Query("perpage"))
 		ret.Paginator.PerPage = perPage

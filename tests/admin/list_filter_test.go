@@ -39,7 +39,7 @@ func (suite *AdminListFilterTestSuite) TestFiltering() {
 		URLFilteringParam: "Username__exact",
 	}
 	adminUserPage.ListFilter.Add(listFilter)
-	adminUserPage.GetQueryset(adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
+	adminUserPage.GetQueryset(nil, adminUserPage, adminRequestParams).GetPaginatedQuerySet().Find(users)
 	assert.Equal(suite.T(), reflect.Indirect(reflect.ValueOf(users)).Len(), 1)
 }
 

@@ -45,7 +45,7 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, genModelI func() (interfac
 		SubPages:       NewAdminPageRegistry(),
 		GenerateModelI: genModelI,
 		ParentPage:     parentPage,
-		GetQueryset: func(adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
+		GetQueryset: func(adminContext IAdminContext, adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
 			var paginatedQuerySet IPersistenceStorage
 			var perPage int

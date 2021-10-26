@@ -62,7 +62,7 @@ func (suite *FilterOptionTestSuite) Test() {
 		return core.FetchOptionsFromGormModelFromDateTimeField(afo, "created_at")
 	}
 	adminUserPage.FilterOptions.AddFilterOption(newFilterOption)
-	assert.True(suite.T(), len(adminUserPage.FetchFilterOptions()) > 0)
+	assert.True(suite.T(), len(adminUserPage.FetchFilterOptions(nil)) > 0)
 	suite.UadminDatabase.Db.Unscoped().Where("1 = 1").Delete(core.GenerateUserModel())
 	userModel = core.GenerateUserModel()
 	userModel.SetUsername("adminfilteroptionA")
@@ -109,7 +109,7 @@ func (suite *FilterOptionTestSuite) Test() {
 	}
 	adminUserPage.FilterOptions = core.NewFilterOptionsRegistry()
 	adminUserPage.FilterOptions.AddFilterOption(newFilterOption)
-	assert.True(suite.T(), len(adminUserPage.FetchFilterOptions()) > 0)
+	assert.True(suite.T(), len(adminUserPage.FetchFilterOptions(nil)) > 0)
 }
 
 // In order for 'go test' to run this suite, we need to create

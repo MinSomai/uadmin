@@ -104,7 +104,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						c.Message = ctx.Query("message")
 						c.NoPermissionToEdit = adminPage.NoPermissionToEdit
 						c.PermissionForBlueprint = c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
-						c.AdminFilterObjects = adminPage.GetQueryset(adminPage, adminRequestParams)
+						c.AdminFilterObjects = adminPage.GetQueryset(c, adminPage, adminRequestParams)
 						c.AdminModelActionRegistry = adminPage.ModelActionsRegistry
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.BlueprintName, URL: fmt.Sprintf("%s/%s/", CurrentConfig.D.Uadmin.RootAdminURL, adminPage.ParentPage.Slug)})
 						c.BreadCrumbs.AddBreadCrumb(&AdminBreadcrumb{Name: adminPage.ModelName, IsActive: true})
@@ -163,7 +163,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						return
 					}
 					// permissionForBlueprint := c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
-					adminFilterObjects := adminPage.GetQueryset(adminPage, adminRequestParams)
+					adminFilterObjects := adminPage.GetQueryset(c, adminPage, adminRequestParams)
 					f := excelize1.NewFile()
 					i := 1
 					currentColumn := 'A'
@@ -202,7 +202,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							return
 						}
 						// permissionForBlueprint := c.UserPermissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
-						adminFilterObjects := adminPage.GetQueryset(adminPage, adminRequestParams)
+						adminFilterObjects := adminPage.GetQueryset(c, adminPage, adminRequestParams)
 						resp := make([]*AutocompleteItemResponse, 0)
 						for iterateAdminObjects := range adminFilterObjects.GetPaginated() {
 							model := iterateAdminObjects.Model.(UadminString)
@@ -240,7 +240,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					modelI, _ := adminPage.GenerateModelI()
 					if id != "new" {
 						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
-						qs := adminPage.GetQueryset(adminPage, adminRequestParams)
+						qs := adminPage.GetQueryset(c, adminPage, adminRequestParams)
 						qs.LoadDataForModelByID(id, modelI)
 						// qs.CloseConnection()
 					}
@@ -283,7 +283,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						} else {
 							modelToSave, _ = adminPage.GenerateModelI()
 						}
-						afo := adminPage.GetQueryset(adminPage, adminRequestParams)
+						afo := adminPage.GetQueryset(c, adminPage, adminRequestParams)
 						err := afo.WithTransaction(func(afo1 IAdminFilterObjects) error {
 							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo1)
 							if formError.IsEmpty() {
@@ -350,7 +350,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							if id == "new" {
 								continue
 							}
-							for iterateAdminObjects := range inline.GetAll(c.Model, c.AdminRequestParams) {
+							for iterateAdminObjects := range inline.GetAll(c, c.Model, c.AdminRequestParams) {
 								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.ID, iterateAdminObjects.Model)
 								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, iterateAdminObjects.ID, listEditable)
 							}

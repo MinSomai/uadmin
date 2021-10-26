@@ -34,7 +34,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 		SubPages:       NewAdminPageRegistry(),
 		GenerateModelI: genModelI,
 		ParentPage:     parentPage,
-		GetQueryset: func(adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
+		GetQueryset: func(adminContext IAdminContext, adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
 			db := uadminDatabase.Db
 			var paginatedQuerySet IPersistenceStorage
@@ -115,6 +115,9 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 						}
 					}
 				}
+			}
+			if adminPage.CustomizeQuerySet != nil {
+				adminPage.CustomizeQuerySet(adminContext, ret, adminRequestParams)
 			}
 			return ret
 		},

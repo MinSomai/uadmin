@@ -127,7 +127,7 @@ type AdminPage struct {
 	Model                              interface{}                                               `json:"-"`
 	GenerateModelI                     func() (interface{}, interface{})                         `json:"-"`
 	GenerateForm                       func(modelI interface{}, ctx IAdminContext) *Form         `json:"-"`
-	GetQueryset                        func(*AdminPage, *AdminRequestParams) IAdminFilterObjects `json:"-"`
+	GetQueryset                        func(IAdminContext, *AdminPage, *AdminRequestParams) IAdminFilterObjects `json:"-"`
 	ModelActionsRegistry               *AdminModelActionRegistry                                 `json:"-"`
 	FilterOptions                      *FilterOptionsRegistry                                    `json:"-"`
 	ActionsSelectionCounter            bool                                                      `json:"-"`
@@ -175,6 +175,7 @@ type AdminPage struct {
 	NoPermissionToEdit                 bool
 	PermissionName                     CustomPermission
 	PreloadData                        func(afo IAdminFilterObjects) `json:"-"`
+	CustomizeQuerySet                  func(adminContext IAdminContext, afo IAdminFilterObjects, requestParams *AdminRequestParams) `json:"-"`
 }
 
 type ModelActionRequestParams struct {
@@ -210,7 +211,10 @@ func (ap *AdminPage) GenerateLinkToAddNewModel() string {
 }
 
 func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context) {
-	afo := ap.GetQueryset(ap, nil)
+	adminContext := &AdminContext{}
+	adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
+	PopulateTemplateContextForAdminPanel(ctx, adminContext, adminRequestParams)
+	afo := ap.GetQueryset(adminContext, ap, adminRequestParams)
 	var json1 ModelActionRequestParams
 	if ctx.GetHeader("Content-Type") == "application/json" {
 		if err := ctx.ShouldBindJSON(&json1); err != nil {
@@ -244,8 +248,11 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 	}
 }
 
-func (ap *AdminPage) FetchFilterOptions() []*DisplayFilterOption {
-	afo := ap.GetQueryset(ap, nil)
+func (ap *AdminPage) FetchFilterOptions(ctx *gin.Context, ) []*DisplayFilterOption {
+	adminContext := &AdminContext{}
+	adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
+	PopulateTemplateContextForAdminPanel(ctx, adminContext, adminRequestParams)
+	afo := ap.GetQueryset(adminContext, ap, adminRequestParams)
 	filterOptions := make([]*DisplayFilterOption, 0)
 	for filterOption := range ap.FilterOptions.GetAll() {
 		filterOptions = append(filterOptions, filterOption.FetchOptions(afo)...)
