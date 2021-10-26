@@ -206,8 +206,12 @@ func (ap *AdminPage) DoesUserHavePermission(u IUser, permissionNameL ...CustomPe
 	return userPerm.DoesUserHaveRightFor(permissionName)
 }
 
-func (ap *AdminPage) GenerateLinkToAddNewModel() string {
-	return fmt.Sprintf("%s/%s/%s/edit/new/?_to_field=id&_popup=1", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
+func (ap *AdminPage) GenerateLinkToAddNewModel(inPopup bool) string {
+	url := fmt.Sprintf("%s/%s/%s/edit/new/", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.Slug)
+	if inPopup {
+		url += "?_to_field=id&_popup=1"
+	}
+	return url
 }
 
 func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context) {

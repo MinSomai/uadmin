@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"reflect"
 	"strings"
@@ -69,12 +68,12 @@ func (f *FormListEditable) ExistsField(ld *ListDisplay) bool {
 	return err == nil
 }
 
-func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *gin.Context) *FormError {
+func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interface{}, adminContext IAdminContext) *FormError {
 	formError := &FormError{
 		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
-	renderContext := &FormRenderContext{Ctx: ctx}
+	renderContext := &FormRenderContext{Ctx: adminContext.GetCtx()}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
 		errors := field.ProceedForm(form, nil, renderContext)
 		if len(errors) == 0 {

@@ -118,7 +118,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									afo1.LoadDataForModelByID(objectID, objectModel)
 									modelI, _ := c.AdminFilterObjects.GenerateModelInterface()
 									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", objectID, modelI, adminPage.ListDisplay)
-									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel, ctx)
+									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel, c)
 									if formListEditableErr.IsEmpty() {
 										dbRes := afo1.SaveModel(objectModel)
 										if dbRes != nil {
@@ -285,7 +285,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						}
 						afo := adminPage.GetQueryset(c, adminPage, adminRequestParams)
 						err := afo.WithTransaction(func(afo1 IAdminFilterObjects) error {
-							formError := form.ProceedRequest(requestForm, modelToSave, ctx, afo1)
+							formError := form.ProceedRequest(requestForm, modelToSave, c, afo1)
 							if formError.IsEmpty() {
 								if adminPage.SaveModel != nil {
 									modelToSave = adminPage.SaveModel(modelToSave, ID, afo1)
@@ -300,7 +300,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								}
 								successfulInline := true
 								for inline := range adminPage.InlineRegistry.GetAll() {
-									inlineListEditableCollection, formError1 := inline.ProceedRequest(afo1, ctx, requestForm, modelToSave, adminRequestParams, c)
+									inlineListEditableCollection, formError1 := inline.ProceedRequest(afo1, requestForm, modelToSave, c)
 									if formError1 != nil {
 										successfulInline = false
 									}
@@ -350,7 +350,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							if id == "new" {
 								continue
 							}
-							for iterateAdminObjects := range inline.GetAll(c, c.Model, c.AdminRequestParams) {
+							for iterateAdminObjects := range inline.GetAll(c, c.Model) {
 								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.ID, iterateAdminObjects.Model)
 								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, iterateAdminObjects.ID, listEditable)
 							}

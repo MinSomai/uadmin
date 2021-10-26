@@ -43,6 +43,8 @@ type IAdminContext interface {
 	GetPostForm() *multipart.Form
 	GetCtx() *gin.Context
 	SetCtx(ctx *gin.Context)
+	SetAdminRequestParams(rp *AdminRequestParams)
+	GetAdminRequestParams() *AdminRequestParams
 }
 
 type AdminContext struct {
@@ -73,6 +75,7 @@ type AdminContext struct {
 	ID                     uint
 	FormD                  *multipart.Form
 	Ctx                    *gin.Context
+	AdminRequestParams     *AdminRequestParams
 }
 
 func (c *AdminContext) SetID(ID uint) {
@@ -81,6 +84,14 @@ func (c *AdminContext) SetID(ID uint) {
 
 func (c *AdminContext) GetCtx() *gin.Context {
 	return c.Ctx
+}
+
+func (c *AdminContext) SetAdminRequestParams(rp *AdminRequestParams) {
+	c.AdminRequestParams = rp
+}
+
+func (c *AdminContext) GetAdminRequestParams() *AdminRequestParams {
+	return c.AdminRequestParams
 }
 
 func (c *AdminContext) SetCtx(ctx *gin.Context) {

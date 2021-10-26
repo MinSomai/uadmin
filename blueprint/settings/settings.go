@@ -178,7 +178,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			categoryWidget.RenderUsingRenderer(initializedwidgetForCategory.GetRenderer())
 			categoryWidget.SetName(initializedwidgetForCategory.GetName())
 			categoryWidget.SetFieldDisplayName(initializedwidgetForCategory.GetFieldDisplayName())
-			categoryWidget.AddNewLink = settingcategoriesmodelAdminPage.GenerateLinkToAddNewModel()
+			categoryWidget.AddNewLink = settingcategoriesmodelAdminPage.GenerateLinkToAddNewModel(true)
 			categoryField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 				m1 := modelI.(*settingmodel.Setting)
 				categoryID, _ := strconv.Atoi(v.(string))

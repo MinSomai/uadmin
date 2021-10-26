@@ -84,6 +84,7 @@ func init() {
 		breadcrumbs := core.NewAdminBreadCrumbsRegistry()
 		breadcrumbs.AddBreadCrumb(&core.AdminBreadcrumb{Name: "Dashboard", URL: core.CurrentConfig.D.Uadmin.RootAdminURL, Icon: "home"})
 		context.SetBreadCrumbs(breadcrumbs)
+		context.SetAdminRequestParams(adminRequestParams)
 	}
 	core.GenerateUserModel = func() core.IUser {
 		return &core.User{}

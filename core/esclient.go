@@ -1,3 +1,5 @@
+// +build elasticsearch
+
 package core
 
 import (

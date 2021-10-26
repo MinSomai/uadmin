@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"mime/multipart"
 	"strings"
@@ -21,7 +20,7 @@ func init() {
 type AdminPageInline struct {
 	Ordering          int
 	GenerateModelI    func(m interface{}) (interface{}, interface{})
-	GetQueryset       func(adminContext IAdminContext, afo IAdminFilterObjects, model interface{}, rp *AdminRequestParams) IAdminFilterObjects
+	GetQueryset       func(adminContext IAdminContext, afo IAdminFilterObjects, model interface{}) IAdminFilterObjects
 	Actions           *AdminModelActionRegistry
 	EmptyValueDisplay string
 	ExcludeFields     IFieldRegistry
@@ -76,15 +75,15 @@ func (api *AdminPageInline) GetInlineID() string {
 	return PrepareStringToBeUsedForHTMLID(api.VerboseNamePlural)
 }
 
-func (api *AdminPageInline) GetAll(adminContext IAdminContext, model interface{}, rp *AdminRequestParams) <-chan *IterateAdminObjects {
-	qs := api.GetQueryset(adminContext, nil, model, rp)
+func (api *AdminPageInline) GetAll(adminContext IAdminContext, model interface{}) <-chan *IterateAdminObjects {
+	qs := api.GetQueryset(adminContext, nil, model)
 	return qs.IterateThroughWholeQuerySet()
 }
 
-func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Context, f *multipart.Form, model interface{}, rp *AdminRequestParams, adminContext IAdminContext) (InlineFormListEditableCollection, error) {
+func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart.Form, model interface{}, adminContext IAdminContext) (InlineFormListEditableCollection, error) {
 	collection := make(InlineFormListEditableCollection)
 	var firstEditableField *ListDisplay
-	qs := api.GetQueryset(adminContext, afo, model, rp)
+	qs := api.GetQueryset(adminContext, afo, model)
 	for ld := range api.ListDisplay.GetAllFields() {
 		if ld.IsEditable {
 			firstEditableField = ld
@@ -136,7 +135,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, ctx *gin.Con
 				form.FormError.AddGeneralError(removalError)
 			}
 		} else {
-			formError := form.ProceedRequest(f, modelI, ctx)
+			formError := form.ProceedRequest(f, modelI, adminContext)
 			if removalError != nil {
 				formError.AddGeneralError(formError)
 			}
@@ -169,7 +168,7 @@ func NewAdminPageInline(
 	inlineIden string,
 	inlineType InlineType,
 	generateModelI func(m interface{}) (interface{}, interface{}),
-	getQuerySet func(adminContext IAdminContext, afo IAdminFilterObjects, model interface{}, rp *AdminRequestParams) IAdminFilterObjects,
+	getQuerySet func(adminContext IAdminContext, afo IAdminFilterObjects, model interface{}) IAdminFilterObjects,
 ) *AdminPageInline {
 	modelI, _ := generateModelI(nil)
 	ld := NewListDisplayRegistryFromGormModelForInlines(modelI)

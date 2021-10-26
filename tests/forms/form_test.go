@@ -48,7 +48,7 @@ func (s *FormTestSuite) TestFormBuilder() {
 	form2.Value["LastName"] = []string{"last name"}
 	form2.Value["Email"] = []string{"email@example.com"}
 	form2.Value["OTPRequired"] = []string{"yes"}
-	formError := form1.ProceedRequest(form2, user, nil)
+	formError := form1.ProceedRequest(form2, user, &core.AdminContext{})
 	assert.Equal(s.T(), user.Username, "username")
 	assert.True(s.T(), formError.IsEmpty())
 }

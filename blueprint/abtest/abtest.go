@@ -102,7 +102,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				return &abtestmodel.ABTestValue{ABTestID: mO.ID}, &[]*abtestmodel.ABTestValue{}
 			}
 			return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{}
-		}, func(adminContext core.IAdminContext, afo core.IAdminFilterObjects, model interface{}, rp *core.AdminRequestParams) core.IAdminFilterObjects {
+		}, func(adminContext core.IAdminContext, afo core.IAdminFilterObjects, model interface{}) core.IAdminFilterObjects {
 			abTest := model.(*abtestmodel.ABTest)
 			var db *core.UadminDatabase
 			if afo == nil {

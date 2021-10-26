@@ -191,7 +191,7 @@ func (f *Form) Render() template.HTML {
 	)
 }
 
-func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *gin.Context, afoP ...IAdminFilterObjects) *FormError {
+func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, adminContext IAdminContext, afoP ...IAdminFilterObjects) *FormError {
 	var afo IAdminFilterObjects
 	if len(afoP) > 0 {
 		afo = afoP[0]
@@ -200,7 +200,7 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, ctx *
 		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
-	renderContext := &FormRenderContext{Ctx: ctx}
+	renderContext := &FormRenderContext{Ctx: adminContext.GetCtx()}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
 		if field.Name == "ID" {
 			continue

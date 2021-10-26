@@ -92,7 +92,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		c.User = user.GetUsername()
 		if ctx.Request.Method == "POST" {
 			requestForm, _ := ctx.MultipartForm()
-			formError := form1.ProceedRequest(requestForm, user, ctx)
+			formError := form1.ProceedRequest(requestForm, user, c)
 			if formError.IsEmpty() {
 				uadminDatabase := core.NewUadminDatabase()
 				defer uadminDatabase.Close()
