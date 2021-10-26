@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
@@ -704,7 +705,13 @@ func (afo *ElasticSearchAdminFilterObjects) GetDB() IPersistenceStorage {
 func (afo *ElasticSearchAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
-		defer close(chnl)
+		defer func() {
+			if r := recover(); r != nil {
+				afo.SetLastError(errors.New("issue while iterating objects"))
+				Trail(CRITICAL, "Recovering from panic in GetPaginated error is: %v \n", r)
+			}
+			close(chnl)
+		}()
 		_, models := afo.GenerateModelI()
 		afo.PaginatedESQuerySet.Find(models)
 		afo.SetLastError(afo.PaginatedESQuerySet.GetLastError())
@@ -728,7 +735,13 @@ func (afo *ElasticSearchAdminFilterObjects) GetPaginated() <-chan *IterateAdminO
 func (afo *ElasticSearchAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
-		defer close(chnl)
+		defer func() {
+			if r := recover(); r != nil {
+				afo.SetLastError(errors.New("issue while iterating objects"))
+				Trail(CRITICAL, "Recovering from panic in IterateThroughWholeQuerySet error is: %v \n", r)
+			}
+			close(chnl)
+		}()
 		_, models := afo.GenerateModelI()
 		afo.ESQuerySet.Find(models)
 		afo.SetLastError(afo.ESQuerySet.GetLastError())

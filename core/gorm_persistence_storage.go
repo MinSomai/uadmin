@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -835,7 +836,13 @@ func (afo *GormAdminFilterObjects) SortBy(field *Field, direction int) {
 func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
-		defer close(chnl)
+		defer func() {
+			if r := recover(); r != nil {
+				afo.SetLastError(errors.New("issue while iterating objects"))
+				Trail(CRITICAL, "Recovering from panic in GetPaginated error is: %v \n", r)
+			}
+			close(chnl)
+		}()
 		modelI, models := afo.GenerateModelI()
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.PaginatedGormQuerySet.Preload(clause.Associations).Find(models)
@@ -859,7 +866,13 @@ func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *IterateAdminObjects {
 	chnl := make(chan *IterateAdminObjects)
 	go func() {
-		defer close(chnl)
+		defer func() {
+			if r := recover(); r != nil {
+				afo.SetLastError(errors.New("issue while iterating objects"))
+				Trail(CRITICAL, "Recovering from panic in IterateThroughWholeQuerySet error is: %v \n", r)
+			}
+			close(chnl)
+		}()
 		modelI, models := afo.GenerateModelI()
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.GormQuerySet.Preload(clause.Associations).Find(models)

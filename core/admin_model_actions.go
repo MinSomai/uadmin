@@ -167,7 +167,12 @@ func (amar *AdminModelActionRegistry) GetAllModelActions() <-chan *AdminModelAct
 func (amar *AdminModelActionRegistry) GetAllModelActionsForUser(user IUser, adminPage *AdminPage) <-chan *AdminModelAction {
 	chnl := make(chan *AdminModelAction)
 	go func() {
-		defer close(chnl)
+		defer func() {
+			if r := recover(); r != nil {
+				Trail(CRITICAL, "Recovering from panic in GetAllModelActionsForUser error is: %v \n", r)
+			}
+			close(chnl)
+		}()
 		permissionRegistry := user.BuildPermissionRegistry()
 		mActions := make([]*AdminModelAction, 0)
 		userPerm := permissionRegistry.GetPermissionForBlueprint(adminPage.BlueprintName, adminPage.ModelName)
