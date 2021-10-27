@@ -222,7 +222,7 @@ func (d *PostgresAdapter) Minute(operatorContext *GormOperatorContext, field *Fi
 }
 
 func (d *PostgresAdapter) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
-	query := fmt.Sprintf(" EXTRACT('second' FROM %s.%s AT TIME ZONE 'UTC')::integer = ? ", operatorContext.TableName, field.DBName)
+	query := fmt.Sprintf(" FLOOR(EXTRACT('second' FROM %s.%s AT TIME ZONE 'UTC')) = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
