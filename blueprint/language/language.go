@@ -1,6 +1,7 @@
 package language
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sergeyglazyrindev/uadmin/blueprint/language/migrations"
@@ -46,7 +47,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				lang := &core.Language{}
 				uadminDatabase.Db.Where(&core.Language{Default: true}).First(lang)
 				if lang.ID != 0 && ID != strconv.Itoa(int(lang.ID)) {
-					return fmt.Errorf("only one default language could be configured")
+					return errors.New("only one default language could be configured")
 				}
 				return nil
 			})

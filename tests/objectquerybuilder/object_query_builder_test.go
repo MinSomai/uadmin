@@ -294,7 +294,7 @@ func (suite *ObjectQueryBuilderTestSuite) TestQuarter() {
 	gormOperatorContext := core.NewGormOperatorContext(core.NewGormPersistenceStorage(suite.UadminDatabase.Db), &core.User{})
 	operator.Build(
 		suite.UadminDatabase.Adapter, gormOperatorContext, &core.Field{Field: *gormOperatorContext.Statement.Schema.FieldsByName["CreatedAt"]},
-		math.Ceil(float64(suite.createdUser.CreatedAt.Month()/3)), core.NewSQLConditionBuilder("and"),
+		int(math.Ceil(float64(suite.createdUser.CreatedAt.Month()/3))), core.NewSQLConditionBuilder("and"),
 	)
 	gormOperatorContext.Tx.First(&u)
 	assert.Equal(suite.T(), u.ID, suite.createdUser.ID)

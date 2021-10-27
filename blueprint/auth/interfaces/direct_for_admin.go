@@ -8,7 +8,6 @@ import (
 	sessioninterfaces "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	user2 "github.com/sergeyglazyrindev/uadmin/blueprint/user"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"github.com/sergeyglazyrindev/uadmin/utils"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/url"
@@ -44,7 +43,7 @@ func (ap *DirectAuthForAdminProvider) GetUserFromRequest(c *gin.Context) core.IU
 func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	var json LoginParamsForUadminAdmin
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	uadminDatabase := core.NewUadminDatabase()
@@ -53,24 +52,24 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 	var user = core.GenerateUserModel()
 	db.Model(core.User{}).Where(&core.User{Username: json.SigninField}).First(user)
 	if user.GetID() == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("login credentials are incorrect."))
 		return
 	}
 	if !user.GetActive() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user is inactive"))
 		return
 	}
 	if !user.GetIsSuperUser() && !user.GetIsStaff() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have an access to admin panel"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user doesn't have an access to admin panel"))
 		return
 	}
 	if !user.GetIsPasswordUsable() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user doesn't have a password"))
 		return
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(json.Password+user.GetSalt()))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect."})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("login credentials are incorrect."))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
@@ -96,12 +95,12 @@ func (ap *DirectAuthForAdminProvider) Signin(c *gin.Context) {
 func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	var json SignupParamsForUadminAdmin
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	_, err := govalidator.ValidateStruct(&json)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	passwordValidationStruct := &user2.PasswordValidationStruct{
@@ -110,7 +109,7 @@ func (ap *DirectAuthForAdminProvider) Signup(c *gin.Context) {
 	}
 	_, err = govalidator.ValidateStruct(passwordValidationStruct)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	//if utils.Contains(config.CurrentConfig.D.Auth.Twofactor_auth_required_for_signin_adapters, ap.GetName()) {
@@ -159,11 +158,11 @@ func (ap *DirectAuthForAdminProvider) Logout(c *gin.Context) {
 	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err = c.Cookie(cookieName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	if cookie == "" {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse("empty cookie passed"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("empty cookie passed"))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
@@ -192,22 +191,22 @@ func (ap *DirectAuthForAdminProvider) IsAuthenticated(c *gin.Context) {
 	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err := c.Cookie(cookieName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	if cookie == "" {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse("empty cookie passed"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("empty cookie passed"))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter, err = sessionAdapter.GetByKey(cookie)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	if sessionAdapter.IsExpired() {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse("session expired"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("session expired"))
 		return
 	}
 	c.JSON(http.StatusOK, getUserForUadminPanel(sessionAdapter.GetUser()))

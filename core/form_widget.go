@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
@@ -435,8 +436,8 @@ func (tw *DynamicWidget) GetTemplateName() string {
 
 func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	var realWidget IWidget
-	if formRenderContext.Ctx.Query("widgetType") != "" {
-		realWidget = GetWidgetByWidgetType(formRenderContext.Ctx.Query("widgetType"), nil)
+	if formRenderContext.Context.GetCtx().Query("widgetType") != "" {
+		realWidget = GetWidgetByWidgetType(formRenderContext.Context.GetCtx().Query("widgetType"), nil)
 	} else {
 		realWidget = tw.GetRealWidget(formRenderContext, currentField)
 	}
@@ -464,8 +465,8 @@ func (tw *DynamicWidget) Render(formRenderContext *FormRenderContext, currentFie
 
 func (tw *DynamicWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	var realWidget IWidget
-	if renderContext.Ctx.Query("widgetType") != "" {
-		realWidget = GetWidgetByWidgetType(renderContext.Ctx.Query("widgetType"), nil)
+	if renderContext.Context.GetCtx().Query("widgetType") != "" {
+		realWidget = GetWidgetByWidgetType(renderContext.Context.GetCtx().Query("widgetType"), nil)
 	} else {
 		realWidget = tw.GetRealWidgetForFormProceeding(form, afo)
 	}
@@ -561,7 +562,7 @@ func (w *NumberWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 		return fmt.Errorf("field %s is required", w.FieldDisplayName)
 	}
 	if !govalidator.IsInt(v[0]) {
-		return fmt.Errorf("should be a number")
+		return errors.New("should be a number")
 	}
 	w.SetOutputValue(w.TransformValueForOutput(v[0]))
 	return nil
@@ -637,7 +638,7 @@ func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects,
 		return fmt.Errorf("field %s is required", w.FieldDisplayName)
 	}
 	if !govalidator.IsEmail(v[0]) {
-		return fmt.Errorf("should be an email")
+		return errors.New("should be an email")
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -709,7 +710,7 @@ func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, r
 		}
 	}
 	if !govalidator.IsURL(url) {
-		return fmt.Errorf("should be an url")
+		return errors.New("should be an url")
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -2704,7 +2705,7 @@ func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 	w.MonthValue = vMonth[0]
 	vDay, ok := form.Value[w.GetHTMLInputName()+"_day"]
 	if !ok {
-		return fmt.Errorf("no month has been submitted for field %s", w.FieldDisplayName)
+		return fmt.Errorf("no day has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DayValue = vDay[0]
 	if w.Required && (w.YearValue == "" || w.MonthValue == "" || w.DayValue == "") {

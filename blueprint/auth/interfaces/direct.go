@@ -9,7 +9,6 @@ import (
 	sessioninterfaces "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	user2 "github.com/sergeyglazyrindev/uadmin/blueprint/user"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"github.com/sergeyglazyrindev/uadmin/utils"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/url"
@@ -45,7 +44,7 @@ func (ap *DirectAuthProvider) GetUserFromRequest(c *gin.Context) core.IUser {
 func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	var json LoginParams
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	db := core.NewUadminDatabase()
@@ -55,29 +54,29 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	directAPISigninByField := core.CurrentConfig.D.Uadmin.DirectAPISigninByField
 	db.Db.Model(core.User{}).Where(fmt.Sprintf("%s = ?", directAPISigninByField), json.SigninField).First(&user)
 	if user.ID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("login credentials are incorrect"))
 		return
 	}
 	if !user.Active {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "this user is inactive"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user is inactive"))
 		return
 	}
 	if !user.IsPasswordUsable {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "this user doesn't have a password"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user doesn't have a password"))
 		return
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password+user.Salt))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "login credentials are incorrect"})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("login credentials are incorrect"))
 		return
 	}
 	if user.GeneratedOTPToVerify != "" {
 		if json.OTP == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "otp is required"})
+			c.JSON(http.StatusBadRequest, core.APIBadResponse("otp is required"))
 			return
 		}
 		if user.GeneratedOTPToVerify != json.OTP {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "otp provided by user is wrong"})
+			c.JSON(http.StatusBadRequest, core.APIBadResponse("otp provided by user is wrong"))
 			return
 		}
 		user.GeneratedOTPToVerify = ""
@@ -105,12 +104,12 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	var json SignupParams
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	_, err := govalidator.ValidateStruct(&json)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	passwordValidationStruct := &user2.PasswordValidationStruct{
@@ -119,7 +118,7 @@ func (ap *DirectAuthProvider) Signup(c *gin.Context) {
 	}
 	_, err = govalidator.ValidateStruct(passwordValidationStruct)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	//if utils.Contains(config.CurrentConfig.D.Auth.Twofactor_auth_required_for_signin_adapters, ap.GetName()) {
@@ -167,11 +166,11 @@ func (ap *DirectAuthProvider) Logout(c *gin.Context) {
 	cookieName = core.CurrentConfig.D.Uadmin.APICookieName
 	cookie, err = c.Cookie(cookieName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	if cookie == "" {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse("empty cookie passed"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("empty cookie passed"))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
@@ -200,22 +199,22 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 	cookieName = core.CurrentConfig.D.Uadmin.APICookieName
 	cookie, err := c.Cookie(cookieName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	if cookie == "" {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse("empty cookie passed"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("empty cookie passed"))
 		return
 	}
 	sessionAdapterRegistry := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry
 	sessionAdapter, _ := sessionAdapterRegistry.GetDefaultAdapter()
 	sessionAdapter, err = sessionAdapter.GetByKey(cookie)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		return
 	}
 	if sessionAdapter.IsExpired() {
-		c.JSON(http.StatusBadRequest, utils.APIBadResponse("session expired"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponse("session expired"))
 		return
 	}
 	c.JSON(http.StatusOK, GetUserForAPI(sessionAdapter.GetUser()))

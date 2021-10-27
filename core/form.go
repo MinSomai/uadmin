@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"html/template"
 	"mime/multipart"
@@ -14,7 +13,7 @@ import (
 
 type FormRenderContext struct {
 	Model interface{}
-	Ctx   *gin.Context
+	Context IAdminContext
 }
 
 func NewFormRenderContext() *FormRenderContext {
@@ -42,7 +41,7 @@ type GrouppedFieldsRegistry struct {
 func (tfr *GrouppedFieldsRegistry) GetGroupByName(name string) (*GrouppedFields, error) {
 	gf, ok := tfr.GrouppedFields[name]
 	if !ok {
-		return nil, fmt.Errorf("No field %s found", name)
+		return nil, fmt.Errorf("no field %s found", name)
 	}
 	return gf, nil
 }
@@ -200,7 +199,7 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, admin
 		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
-	renderContext := &FormRenderContext{Ctx: adminContext.GetCtx()}
+	renderContext := &FormRenderContext{Context: adminContext}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
 		if field.Name == "ID" {
 			continue
@@ -316,7 +315,7 @@ func NewFormFromModelFromGinContext(contextFromGin IAdminContext, gormModel inte
 	form.RequestContext["OTPImage"] = ""
 	form.RequestContext["SessionKey"] = contextFromGin.GetSessionKey()
 	form.RequestContext["ID"] = contextFromGin.GetID()
-	form.RenderContext = &FormRenderContext{Ctx: contextFromGin.GetCtx(), Model: gormModel}
+	form.RenderContext = &FormRenderContext{Context: contextFromGin, Model: gormModel}
 	contextFromGin.SetForm(form)
 	return form
 }

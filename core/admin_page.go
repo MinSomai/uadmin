@@ -222,12 +222,12 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 	var json1 ModelActionRequestParams
 	if ctx.GetHeader("Content-Type") == "application/json" {
 		if err := ctx.ShouldBindJSON(&json1); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, APIBadResponse(err.Error()))
 			return
 		}
 	} else {
 		if err := ctx.ShouldBind(&json1); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, APIBadResponse(err.Error()))
 			return
 		}
 	}

@@ -1,6 +1,7 @@
 package uadmin
 
 import (
+	"errors"
 	"fmt"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/sergeyglazyrindev/uadmin/utils"
@@ -212,7 +213,7 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 						}
 						method.Func.Call([]reflect.Value{reflect.ValueOf(currentsuite)})
 						// return nil will commit the whole transaction
-						return fmt.Errorf("dont commit")
+						return errors.New("dont commit")
 					})
 					core.UadminTestDatabase.Adapter.ClearTestDatabase()
 					core.UadminTestDatabase = nil

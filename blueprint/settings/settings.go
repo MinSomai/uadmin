@@ -82,8 +82,8 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			//}
 
 			dataTypeWidget.Populate = func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
-				if renderContext.Ctx != nil && renderContext.Ctx.Query("widgetType") != "" {
-					dataType := settingmodel.DataTypeFromString(renderContext.Ctx.Query("widgetType"))
+				if renderContext.Context.GetCtx() != nil && renderContext.Context.GetCtx().Query("widgetType") != "" {
+					dataType := settingmodel.DataTypeFromString(renderContext.Context.GetCtx().Query("widgetType"))
 					return strconv.Itoa(int(dataType))
 				}
 				m1 := renderContext.Model.(*settingmodel.Setting)
@@ -162,10 +162,6 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			// configure foreign key widget for category field
 			categoryWidget.GenerateModelInterface = func() (interface{}, interface{}) {
 				return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
-			}
-			categoryWidget.GetQuerySet = func(formRenderContext *core.FormRenderContext) core.IPersistenceStorage {
-				uadminDatabase := core.NewUadminDatabase()
-				return core.NewGormPersistenceStorage(uadminDatabase.Db)
 			}
 			categoryField.FieldConfig.Widget = categoryWidget
 			categoryWidget.RenderForAdmin()

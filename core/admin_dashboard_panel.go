@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	excelize1 "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/gin-gonic/gin"
@@ -81,6 +82,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							ListEditableFormError    bool
 							AdminModelActionRegistry *AdminModelActionRegistry
 							Message                  string
+							Error                    string
 							CurrentAdminContext      IAdminContext
 							NoPermissionToAddNew     bool
 							AdminPage                *AdminPage
@@ -133,7 +135,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								return nil
 							})
 							if err != nil {
-								c.Message = err.Error()
+								c.Error = err.Error()
 							}
 						}
 						c.AdminFilterObjects.GetFullQuerySet().Count(&c.TotalRecords)
@@ -219,6 +221,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						AdminContext
 						AdminModelActionRegistry    *AdminModelActionRegistry
 						Message                     string
+						Error                       string
 						PermissionForBlueprint      *UserPerm
 						Form                        *Form
 						Model                       interface{}
@@ -307,7 +310,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									c.ListEditableFormsForInlines.AddForInlineWholeCollection(inline.Prefix, inlineListEditableCollection)
 								}
 								if !successfulInline {
-									return fmt.Errorf("error while submitting inlines")
+									return errors.New("error while submitting inlines")
 								}
 								if ctx.Query("_popup") == "1" {
 									mID := GetID(reflect.ValueOf(modelToSave))
@@ -327,7 +330,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								}
 								return nil
 							}
-							return fmt.Errorf("not successful form validation")
+							return errors.New("not successful form validation")
 						})
 						if err != nil {
 							form.FormError.GeneralErrors = append(form.FormError.GeneralErrors, err)

@@ -2,6 +2,7 @@ package uadmin
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
@@ -464,7 +465,7 @@ func (command DetermineConflictsMigration) Proceed(subaction string, args []stri
 		core.Trail(core.WARNING, "Not applied migration: %s", traverseMigrationResult.Node.GetMigration().GetName())
 	}
 	if !isEverythingOk {
-		return fmt.Errorf("determined some problems with migrations")
+		return errors.New("determined some problems with migrations")
 	}
 	return nil
 }

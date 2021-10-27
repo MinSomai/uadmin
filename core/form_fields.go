@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"gorm.io/gorm/schema"
 	"mime/multipart"
@@ -303,7 +304,7 @@ func (fr *FieldRegistry) GetPrimaryKey() (*Field, error) {
 			return field, nil
 		}
 	}
-	return nil, fmt.Errorf("no primary key found for model")
+	return nil, errors.New("no primary key found for model")
 }
 
 func (fr *FieldRegistry) AddField(field *Field) {

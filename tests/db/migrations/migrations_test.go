@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"fmt"
+	"errors"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
@@ -135,7 +135,7 @@ func (suite *MigrationTestSuite) TestBuildTreeWithNoUserBlueprint() {
 	blueprintRegistry := core.NewBlueprintRegistry()
 	blueprintRegistry.Register(Test1Blueprint)
 	for res := range blueprintRegistry.TraverseMigrations() {
-		assert.Equal(suite.T(), res.Error, fmt.Errorf("Couldn't find blueprint with name user"))
+		assert.Equal(suite.T(), res.Error, errors.New("Couldn't find blueprint with name user"))
 		return
 	}
 	assert.True(suite.T(), false)

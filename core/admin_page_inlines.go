@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"mime/multipart"
@@ -159,7 +160,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart
 		}
 	}
 	if err {
-		return collection, fmt.Errorf("error while validating inlines")
+		return collection, errors.New("error while validating inlines")
 	}
 	return collection, nil
 }

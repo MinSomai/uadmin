@@ -204,7 +204,7 @@ func (d *PostgresAdapter) WeekDay(operatorContext *GormOperatorContext, field *F
 }
 
 func (d *PostgresAdapter) Quarter(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
-	query := fmt.Sprintf(" EXTRACT('quarter' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	query := fmt.Sprintf(" EXTRACT('quarter' FROM %s.%s AT TIME ZONE 'UTC') = ? + 1", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
@@ -222,7 +222,7 @@ func (d *PostgresAdapter) Minute(operatorContext *GormOperatorContext, field *Fi
 }
 
 func (d *PostgresAdapter) Second(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
-	query := fmt.Sprintf(" EXTRACT('second' FROM %s.%s AT TIME ZONE 'UTC') = ? ", operatorContext.TableName, field.DBName)
+	query := fmt.Sprintf(" EXTRACT('second' FROM %s.%s AT TIME ZONE 'UTC')::integer = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }
@@ -240,7 +240,7 @@ func (d *PostgresAdapter) IRegex(operatorContext *GormOperatorContext, field *Fi
 }
 
 func (d *PostgresAdapter) Time(operatorContext *GormOperatorContext, field *Field, value interface{}, SQLConditionBuilder ISQLConditionBuilder) {
-	query := fmt.Sprintf(" (%s.%s AT TIME ZONE 'UTC')::time = ? ", operatorContext.TableName, field.DBName)
+	query := fmt.Sprintf(" to_char((%s.%s AT TIME ZONE 'UTC')::time, 'HH24:MI') = ? ", operatorContext.TableName, field.DBName)
 	args := value
 	operatorContext.Tx = SQLConditionBuilder.Build(operatorContext.Tx, query, args)
 }

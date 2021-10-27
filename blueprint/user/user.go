@@ -56,13 +56,13 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	group.POST("/api/forgot/", func(ctx *gin.Context) {
 		var json ForgotPasswordHandlerParams
 		if err := ctx.ShouldBindJSON(&json); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		var err1 error
 		_, err1 = govalidator.ValidateStruct(&json)
 		if err1 != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err1.Error()))
 			return
 		}
 		uadminDatabase := core.NewUadminDatabase()
@@ -71,14 +71,14 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		user := core.GenerateUserModel()
 		db.Model(core.GenerateUserModel()).Where(&core.User{Email: json.Email}).First(user)
 		if user.GetID() == 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "User with this email not found"})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse("User with this email not found"))
 			return
 		}
 		templateWriter := bytes.NewBuffer([]byte{})
 		template1, err := template.ParseFS(core.CurrentConfig.TemplatesFS, core.CurrentConfig.GetPathToTemplate("email/forgot"))
 		if err != nil {
 			core.Trail(core.ERROR, "RenderHTML unable to parse %s. %s", core.CurrentConfig.GetPathToTemplate("email/forgot"), err)
-			ctx.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		type Context struct {
@@ -106,27 +106,27 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		c.URL = link
 		err = template1.Execute(templateWriter, c)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			core.Trail(core.ERROR, "RenderHTML unable to parse %s. %s", core.CurrentConfig.GetPathToTemplate("email/forgot"), err)
 			return
 		}
 		subject := "Password reset for admin panel on the " + core.CurrentConfig.D.Uadmin.SiteName
 		err = utils.SendEmail(core.CurrentConfig.D.Uadmin.EmailFrom, []string{user.GetEmail()}, []string{}, []string{}, subject, templateWriter.String())
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, utils.APIBadResponse(err.Error()))
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 		}
 		return
 	})
 	group.POST("/api/reset-password/", func(ctx *gin.Context) {
 		var json ResetPasswordHandlerParams
 		if err := ctx.ShouldBindJSON(&json); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		var err1 error
 		_, err1 = govalidator.ValidateStruct(&json)
 		if err1 != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err1.Error()))
 			return
 		}
 		uadminDatabase := core.NewUadminDatabase()
@@ -135,11 +135,11 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		var oneTimeAction core.OneTimeAction
 		db.Model(core.OneTimeAction{}).Where(&core.OneTimeAction{Code: json.Code, IsUsed: false}).Preload("User").First(&oneTimeAction)
 		if oneTimeAction.ID == 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "No such code found"})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse("No such code found"))
 			return
 		}
 		if oneTimeAction.ExpiresOn.Before(time.Now()) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Code is expired"})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse("Code is expired"))
 			return
 		}
 		passwordValidationStruct := &PasswordValidationStruct{
@@ -148,12 +148,12 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		}
 		_, err := govalidator.ValidateStruct(passwordValidationStruct)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		hashedPassword, err := utils2.HashPass(json.Password, oneTimeAction.User.Salt)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		oneTimeAction.User.Password = hashedPassword
@@ -165,13 +165,13 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	group.POST("/api/change-password/", func(ctx *gin.Context) {
 		var json ChangePasswordHandlerParams
 		if err := ctx.ShouldBindJSON(&json); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		var err1 error
 		_, err1 = govalidator.ValidateStruct(&json)
 		if err1 != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err1.Error()))
 			return
 		}
 		passwordValidationStruct := &PasswordValidationStruct{
@@ -180,7 +180,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		}
 		_, err := govalidator.ValidateStruct(passwordValidationStruct)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		sessionAdapter, _ := sessionsblueprint.ConcreteBlueprint.SessionAdapterRegistry.GetDefaultAdapter()
@@ -191,7 +191,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		user := session.GetUser()
 		hashedPassword, err := utils2.HashPass(json.OldPassword, user.GetSalt())
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponse(err.Error()))
 			return
 		}
 		// @todo, get it back once stabilize pass api

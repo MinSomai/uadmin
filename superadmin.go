@@ -1,6 +1,7 @@
 package uadmin
 
 import (
+	"errors"
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/jessevdk/go-flags"
@@ -100,7 +101,7 @@ Please provide flags -n and -e which are username and email of the user respecti
 		}
 		_, err = govalidator.ValidateStruct(passwordValidationStruct)
 		if err != nil {
-			core.Trail(core.ERROR, fmt.Errorf("please try to to repeat password again"))
+			core.Trail(core.ERROR, errors.New("please try to to repeat password again"))
 			continue
 		}
 		break

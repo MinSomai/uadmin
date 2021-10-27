@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,7 @@ func (b Blueprint) GetName() string {
 }
 
 func (b Blueprint) InitRouter(app IApp, group *gin.RouterGroup) {
-	panic(fmt.Errorf("has to be redefined in concrete blueprint"))
+	panic(errors.New("has to be redefined in concrete blueprint"))
 }
 
 func (b Blueprint) GetDescription() string {

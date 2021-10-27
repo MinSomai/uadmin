@@ -1,7 +1,7 @@
 package storages
 
 import (
-	"fmt"
+	"errors"
 	"github.com/sergeyglazyrindev/uadmin"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +24,7 @@ func (suite *FsStorageTestSuite) SetupTest() {
 func (suite *FsStorageTestSuite) TearDownSuite() {
 	err := os.RemoveAll(core.CurrentConfig.GetPathToUploadDirectory())
 	if err != nil {
-		assert.True(suite.T(), false, fmt.Errorf("Couldnt remove directory for file uploading"))
+		assert.True(suite.T(), false, errors.New("Couldnt remove directory for file uploading"))
 	}
 	uadmin.ClearTestApp()
 }
