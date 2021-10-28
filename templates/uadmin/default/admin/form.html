@@ -3,7 +3,7 @@
     {{ if .FormError }}
     {{ range $generalError := .FormError.GeneralErrors }}
     <div class="error-cont">
-        <span>{{ $generalError }}</span>
+        <span>{{ Translate $generalError }}</span>
     </div>
     {{ end }}
     {{ end }}
@@ -16,7 +16,7 @@
             <div class="pull-right">
 
                 <button type="submit" class="return_url_hide no-borderradius btn btn-primary" style="display:inline-block;" name="save" value="">
-                    Save
+                    {{ Translate "Save"}}
                 </button>
             </div>
         </div>

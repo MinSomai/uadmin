@@ -220,7 +220,7 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 	PopulateTemplateContextForAdminPanel(ctx, adminContext, adminRequestParams)
 	afo := ap.GetQueryset(adminContext, ap, adminRequestParams)
 	var json1 ModelActionRequestParams
-	if ctx.GetHeader("Content-Type") == "application/json" {
+	if strings.Contains(ctx.GetHeader("Content-Type"), "application/json") {
 		if err := ctx.ShouldBindJSON(&json1); err != nil {
 			ctx.JSON(http.StatusBadRequest, APIBadResponse(err.Error()))
 			return
@@ -241,7 +241,7 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 		primaryKeyField, _ := ap.Form.FieldRegistry.GetPrimaryKey()
 		afo.FilterByMultipleIds(primaryKeyField, json1.RealObjectIds)
 		modelAction, _ := ap.ModelActionsRegistry.GetModelActionByName(modelActionName)
-		if ctx.GetHeader("Content-Type") == "application/json" {
+		if strings.Contains(ctx.GetHeader("Content-Type"), "application/json") {
 			_, affectedRows := modelAction.Handler(ap, afo, ctx)
 			ctx.JSON(http.StatusOK, gin.H{"Affected": strconv.Itoa(int(affectedRows))})
 		} else {

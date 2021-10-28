@@ -35,30 +35,8 @@ func (tr *TemplateRenderer) Render(ctx *gin.Context, path string, data interface
 			if len(data1) == 1 {
 				data2 = data1[0]
 			}
-			return tr.RenderAsString(CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
-		}
-	}
-	PageTitle := func() string {
-		return fmt.Sprintf("%s - %s", CurrentConfig.D.Uadmin.SiteName, tr.pageTitle)
-	}
-	var funcs1 template.FuncMap
-	if len(funcs) == 0 {
-		funcs1 = make(template.FuncMap)
-		funcs1["PageTitle"] = PageTitle
-	} else {
-		funcs1 = funcs[0]
-		funcs1["PageTitle"] = PageTitle
-	}
-	funcs1["Include"] = Include(funcs1)
-	RenderHTML(ctx, path, data, baseFuncMap, funcs1)
-}
-
-func (tr *TemplateRenderer) RenderAsString(path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML {
-	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) template.HTML {
-		return func(templateName string, data1 ...interface{}) template.HTML {
-			data2 := data
-			if len(data1) == 1 {
-				data2 = data1[0]
+			for rendererTemplateFuncName, rendererTemplateFunc := range tr.funcMap {
+				funcs1[rendererTemplateFuncName] = rendererTemplateFunc
 			}
 			return tr.RenderAsString(CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
 		}
@@ -73,6 +51,40 @@ func (tr *TemplateRenderer) RenderAsString(path string, data interface{}, baseFu
 	} else {
 		funcs1 = funcs[0]
 		funcs1["PageTitle"] = PageTitle
+	}
+	for rendererTemplateFuncName, rendererTemplateFunc := range tr.funcMap {
+		funcs1[rendererTemplateFuncName] = rendererTemplateFunc
+	}
+	funcs1["Include"] = Include(funcs1)
+	RenderHTML(ctx, path, data, baseFuncMap, funcs1)
+}
+
+func (tr *TemplateRenderer) RenderAsString(path string, data interface{}, baseFuncMap template.FuncMap, funcs ...template.FuncMap) template.HTML {
+	Include := func(funcs1 template.FuncMap) func(templateName string, data1 ...interface{}) template.HTML {
+		return func(templateName string, data1 ...interface{}) template.HTML {
+			data2 := data
+			if len(data1) == 1 {
+				data2 = data1[0]
+			}
+			for rendererTemplateFuncName, rendererTemplateFunc := range tr.funcMap {
+				funcs1[rendererTemplateFuncName] = rendererTemplateFunc
+			}
+			return tr.RenderAsString(CurrentConfig.GetPathToTemplate(templateName), data2, baseFuncMap, funcs1)
+		}
+	}
+	PageTitle := func() string {
+		return fmt.Sprintf("%s - %s", CurrentConfig.D.Uadmin.SiteName, tr.pageTitle)
+	}
+	var funcs1 template.FuncMap
+	if len(funcs) == 0 {
+		funcs1 = make(template.FuncMap)
+		funcs1["PageTitle"] = PageTitle
+	} else {
+		funcs1 = funcs[0]
+		funcs1["PageTitle"] = PageTitle
+	}
+	for rendererTemplateFuncName, rendererTemplateFunc := range tr.funcMap {
+		funcs1[rendererTemplateFuncName] = rendererTemplateFunc
 	}
 	funcs1["Include"] = Include(funcs1)
 	templateWriter := bytes.NewBuffer([]byte{})

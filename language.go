@@ -270,6 +270,7 @@ Please provide flag -c which is code of the language
 	if !found {
 		return fmt.Errorf("language %s doesn't exists", opts.Code)
 	}
+	core.Trail(core.OK, "Language has been added, active it in admin panel")
 	return nil
 }
 

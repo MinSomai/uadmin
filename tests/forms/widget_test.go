@@ -438,7 +438,8 @@ func (w *WidgetTestSuite) TestClearableFileWidget() {
 	}
 	widget.SetName("dsadas")
 	renderedWidget := widget.Render(core.NewFormRenderContext(), nil)
-	assert.Contains(w.T(), renderedWidget, "<p class=\"file-upload\">test: <br>\nupload your image:\n")
+	assert.Contains(w.T(), renderedWidget, "<p class=\"file-upload\">test:")
+	assert.Contains(w.T(), renderedWidget, "upload your image:")
 	//     <input type="file" name="dsadas" test="test1"></p>
 	widget = &core.ClearableFileWidget{
 		Widget: core.Widget{

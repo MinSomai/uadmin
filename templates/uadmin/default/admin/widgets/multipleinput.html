@@ -2,7 +2,7 @@
   {{ $groupIndex := 0 }}
   {{ $radioId := $.Id }}
   {{ range $groupName, $groupChoices := .OptGroups }}
-    {{ if $groupName }}<li>{{ $groupName }}<ul{{ if $radioId }} id="{{ $radioId }}_{{ $groupIndex }}"{{ end }}>{{ end }}
+    {{ if $groupName }}<li>{{ Translate $groupName }}<ul{{ if $radioId }} id="{{ $radioId }}_{{ $groupIndex }}"{{ end }}>{{ end }}
       {{ range $i, $option := $groupChoices }}
         <li>{{Include $option.OptionTemplateName $option }}</li>
       {{end}}

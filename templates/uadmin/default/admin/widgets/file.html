@@ -2,7 +2,7 @@
 {{ if ne .Type "hidden" }}
 {{ if .FieldDisplayName }}
 <td class="hidden-xs">
-    <label {{ if .HelpText }}data-toggle="tooltip" data-placement="bottom" data-original-title="{{ .HelpText }}"{{ end }} class="col-sm-12 control-label form_label"><span class="camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</span>:
+    <label {{ if .HelpText }}data-toggle="tooltip" data-placement="bottom" data-original-title="{{ Translate .HelpText }}"{{ end }} class="col-sm-12 control-label form_label"><span class="camelcaseFix">{{ GetDisplayName (Translate .FieldDisplayName) }}</span>:
         <span class="{{ if .HelpText }}text-muted{{ end }}" style="font-size:12px;">
                         {{ if .HelpText }}
                             <i class="fa fa-question-circle"></i>:
@@ -25,7 +25,7 @@
 
                     <label class="input-group-btn">
                                     <span class="btn btn-primary">
-                                      Browse… <input name="{{ .Name }}" type="file" style="display: none;" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} >
+                                      {{ Translate "Browse"}}… <input name="{{ .Name }}" type="file" style="display: none;" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} >
                                     </span>
                     </label>
                     <input type="text" class="form-control" readonly="" id="{{ .Name }}-filename" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} >
@@ -38,7 +38,7 @@
                             {{ end }}
                         {{ else }}
                             {{ if .UploadedFile }}
-                                <a href="{{ .UploadedFile }}" download>Download file {{ .Value }}</a>
+                                <a href="{{ .UploadedFile }}" download>{{ Translate "Download file"}} {{ .Value }}</a>
                             {{ end }}
                         {{ end }}
                     </div>

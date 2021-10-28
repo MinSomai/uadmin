@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"gorm.io/gorm"
 	"html/template"
@@ -41,7 +40,7 @@ type GrouppedFieldsRegistry struct {
 func (tfr *GrouppedFieldsRegistry) GetGroupByName(name string) (*GrouppedFields, error) {
 	gf, ok := tfr.GrouppedFields[name]
 	if !ok {
-		return nil, fmt.Errorf("no field %s found", name)
+		return nil, NewHTTPErrorResponse("field_not_found", "no field %s found", name)
 	}
 	return gf, nil
 }
@@ -133,12 +132,12 @@ func (f *Form) Render() template.HTML {
 							}
 						}
 					}
-					err := RenderHTMLAsString(templateWriter, CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)
-					if err != nil {
-						Trail(CRITICAL, "Error while parsing include of the template %s", "form/grouprow")
-						return ""
-					}
-					ret = append(ret, templateWriter.String())
+					//err := f.Renderer.RenderAsString(CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)
+					//if err != nil {
+					//	Trail(CRITICAL, "Error while parsing include of the template %s", "form/grouprow")
+					//	return ""
+					//}
+					ret = append(ret, string(f.Renderer.RenderAsString(CurrentConfig.GetPathToTemplate(path), data2, FuncMap, funcs1)))
 				}
 			}
 			return template.HTML(strings.Join(ret, "\n"))
@@ -174,6 +173,12 @@ func (f *Form) Render() template.HTML {
 	func1["FormFieldValue"] = FieldValue
 	func1["GetRenderContext"] = func() *FormRenderContext {
 		return f.RenderContext
+	}
+	f.Renderer.AddFuncMap("Translate", func(v interface{}) string {
+		return Tf(f.RenderContext.Context.GetLanguage().Code, v)
+	})
+	for _, field := range f.FieldRegistry.GetAllFields() {
+		field.FieldConfig.Widget.RenderUsingRenderer(f.Renderer)
 	}
 	func1["RenderFieldGroups"] = RenderFieldGroups(func1)
 	path := "form"
@@ -227,7 +232,9 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, admin
 		}
 		modelF := model.FieldByName(field.Name)
 		if !modelF.IsValid() {
-			formError.AddGeneralError(fmt.Errorf("not valid field %s for model", field.Name))
+			formError.AddGeneralError(
+				NewHTTPErrorResponse("field_invalid", "not valid field %s for model", field.Name),
+			)
 			continue
 		}
 		if !formError.IsEmpty() {
@@ -241,7 +248,9 @@ func (f *Form) ProceedRequest(form *multipart.Form, gormModel interface{}, admin
 			continue
 		}
 		if !modelF.CanSet() {
-			formError.AddGeneralError(fmt.Errorf("can't set field %s for model", field.Name))
+			formError.AddGeneralError(
+				NewHTTPErrorResponse("cant_set_field", "can't set field %s for model", field.Name),
+			)
 			continue
 		}
 		err := SetUpStructField(modelF, field.FieldConfig.Widget.GetOutputValue())

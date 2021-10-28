@@ -275,7 +275,7 @@ type FieldRegistry struct {
 func (fr *FieldRegistry) GetByName(name string) (*Field, error) {
 	f, ok := fr.Fields[name]
 	if !ok {
-		return nil, fmt.Errorf("no field %s found", name)
+		return nil, NewHTTPErrorResponse("field_not_found", "no field %s found", name)
 	}
 	return f, nil
 }

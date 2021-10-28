@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"html/template"
 	"mime/multipart"
@@ -56,6 +55,9 @@ func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) templa
 	func1 := make(template.FuncMap)
 	path := "admin/inlineexampleform"
 	templateName := CurrentConfig.GetPathToTemplate(path)
+	templateRenderer.AddFuncMap("Translate", func(v interface{}) string {
+		return Tf(adminContext.GetLanguage().Code, v)
+	})
 	return templateRenderer.RenderAsString(
 		templateName,
 		c, FuncMap, func1,
@@ -65,6 +67,14 @@ func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) templa
 func (api *AdminPageInline) GetFormForExample(adminContext IAdminContext) *FormListEditable {
 	modelI, _ := api.GenerateModelI(nil)
 	form := api.ListDisplay.BuildListEditableFormForNewModel(adminContext, "toreplacewithid", modelI)
+	r := NewTemplateRenderer("")
+	r.AddFuncMap("Translate", func(v interface{}) string {
+		return Tf(adminContext.GetLanguage().Code, v)
+	})
+	for _, field := range form.FieldRegistry.GetAllFields() {
+		field.FieldConfig.Widget.RenderUsingRenderer(r)
+	}
+	//	return r.RenderAsString(templateName, data, baseFuncMap)
 	return form
 }
 
@@ -160,7 +170,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart
 		}
 	}
 	if err {
-		return collection, errors.New("error while validating inlines")
+		return collection, NewHTTPErrorResponse("inline_validation_error", "error while validating inlines")
 	}
 	return collection, nil
 }

@@ -13,7 +13,7 @@
             {{ if eq $breadcrumbNumber 1 }}
             {{ end }}
                 <a href="{{ $breadcrumb.URL }}" class="no-style fontwhite">
-                  <span {{ if $breadcrumb.IsActive }}class="active"{{ end }}>{{ if $breadcrumb.Icon }}<i class="fa fa-{{ $breadcrumb.Icon }}"></i>{{ end }}{{Tf "uadmin/system" $language.Code (SplitCamelCase $breadcrumb.Name) }}</span>
+                  <span {{ if $breadcrumb.IsActive }}class="active"{{ end }}>{{ if $breadcrumb.Icon }}<i class="fa fa-{{ $breadcrumb.Icon }}"></i>{{ end }}{{Tf $language.Code (SplitCamelCase $breadcrumb.Name) }}</span>
                 </a>
             {{ $breadcrumbNumber = (add $breadcrumbNumber 1) }}
         {{ end }}
@@ -25,7 +25,7 @@
         <div class="admin-button ">
             <span style="margin-left:20px;" class="fontgray pointer hidden-xs" onclick="closetopTabs(this);" data-trigger="admin-toggle" >
                 <a href="{{.RootAdminURL}}/setting/setting/" style="text-decoration: none; margin-left:20px;" class="fontgray pointer">
-                    <i class="top-panel fa fa-wrench pointer" data-toggle="tooltip" data-placement="bottom" title="{{Tf "uadmin/system" .Language.Code "Settings"}}"></i>&nbsp;
+                    <i class="top-panel fa fa-wrench pointer" data-toggle="tooltip" data-placement="bottom" title="{{Tf .Language.Code "Settings"}}"></i>&nbsp;
                 </a>
             </span>
             <div style="" id="headtab-container" class="toptabs admin-toggle-size dropdown-menu admin-toggle admin-toggle-padding pull-right">
@@ -43,15 +43,15 @@
                                 {{.User}}
                             </a>
                         </td></tr>
-                        <tr class="pointer"><td onclick="clickA(this);" ><a  class="no-style" href="{{.RootAdminURL}}/profile/#changepass"><i class="fa fa-lock fa-fw"></i> {{Tf "uadmin/system" .Language.Code "Change Password"}}</a></td></tr>
-                        <tr class="pointer"><td id="admin-logout" onclick="clickA(this);" ><a class="no-style" href="{{.RootAdminURL}}/logout/"><i class="fa fa-sign-out fa-fw"></i> {{Tf "uadmin/system" .Language.Code "Logout"}}</a></td></tr>
+                        <tr class="pointer"><td onclick="clickA(this);" ><a  class="no-style" href="{{.RootAdminURL}}/profile/#changepass"><i class="fa fa-lock fa-fw"></i> {{Tf .Language.Code "changepassword"}}</a></td></tr>
+                        <tr class="pointer"><td id="admin-logout" onclick="clickA(this);" ><a class="no-style" href="{{.RootAdminURL}}/logout/"><i class="fa fa-sign-out fa-fw"></i> {{Tf .Language.Code "Logout"}}</a></td></tr>
                     </table>
                 </center>
             </div>
         </div>
         {{else}} {{/* if .UserExists */}}
         <a class="no-style" href="{{.RootAdminURL}}/">
-            {{Tf "uadmin/system" .Language.Code "signin"}}
+            {{Tf .Language.Code "signin"}}
         </a>
 
         {{end}}

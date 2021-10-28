@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	excelize1 "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/gin-gonic/gin"
@@ -310,7 +309,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									c.ListEditableFormsForInlines.AddForInlineWholeCollection(inline.Prefix, inlineListEditableCollection)
 								}
 								if !successfulInline {
-									return errors.New("error while submitting inlines")
+									return NewHTTPErrorResponse("error_inline_submit", "error while submitting inlines")
 								}
 								if ctx.Query("_popup") == "1" {
 									mID := GetID(reflect.ValueOf(modelToSave))
@@ -330,7 +329,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								}
 								return nil
 							}
-							return errors.New("not successful form validation")
+							return NewHTTPErrorResponse("not_successful_form_validation", "not successful form validation")
 						})
 						if err != nil {
 							form.FormError.GeneralErrors = append(form.FormError.GeneralErrors, err)

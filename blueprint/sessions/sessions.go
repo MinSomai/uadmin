@@ -26,7 +26,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				return
 			}
 			contentType := c.Request.Header.Get("Content-Type")
-			if contentType == "application/json" {
+			if strings.Contains(contentType, "application/json") {
 				c.Next()
 				return
 			}
@@ -84,7 +84,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				return
 			}
 			contentType := c.Request.Header.Get("Content-Type")
-			if contentType == "application/json" {
+			if strings.Contains(contentType, "application/json") {
 				c.Next()
 				return
 			}

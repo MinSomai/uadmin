@@ -2,7 +2,7 @@
     {{ if ne .Type "hidden" }}
       {{ if .FieldDisplayName }}<div class="form-group search">
         <div class="input-group">
-            <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</span>
+            <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{ GetDisplayName (Translate .FieldDisplayName) }}</span>
       {{ end }}
     {{ end }}
 {{ end }}

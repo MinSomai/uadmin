@@ -11,13 +11,13 @@
                 </center>
               </span>
             {{ end }}
-            <button type="submit" class="pointer list-group-item search"> <i class="fa fa-save fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Save Changes"}}</button>
-            <button type="button" class="pointer list-group-item search" onclick="$('#myModal').modal('show');"><i class="fa fa-unlock-alt fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Change Password"}}</button>
+            <button type="submit" class="pointer list-group-item search"> <i class="fa fa-save fa-fw" aria-hidden="true"></i>&nbsp; {{Translate "Save Changes"}}</button>
+            <button type="button" class="pointer list-group-item search" onclick="$('#myModal').modal('show');"><i class="fa fa-unlock-alt fa-fw" aria-hidden="true"></i>&nbsp; {{Translate "changepassword"}}</button>
             {{ $otpRequired := FormFieldValue "OTPRequired" nil }}
             {{if ne $otpRequired false }}
-            <a type="button" style="text-align:left;" id="disable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile/?otp_required=0"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Disable 2-Factor Auth"}}</a>
+            <a type="button" style="text-align:left;" id="disable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile/?otp_required=0"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Translate "Disable 2-Factor Auth"}}</a>
             {{else}}
-            <a type="button" style="text-align:left;" id="enable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile/?otp_required=1"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Tf "uadmin/system" .RequestContext.Language.Code "Enable 2-Factor Auth"}}</a>
+            <a type="button" style="text-align:left;" id="enable2FactorAuth" class="btn pointer list-group-item search" href="{{.RequestContext.RootURL}}/profile/?otp_required=1"><i class="fa fa-lock fa-fw" aria-hidden="true"></i>&nbsp; {{Translate "Enable 2-Factor Auth"}}</a>
             {{end}}
         </div>
     </div>
@@ -27,7 +27,7 @@
             {{ if .RequestContext.OTPImage }}
             <div class="form-group search">
                 <div class="input-group">
-                    <span style="min-width:140px;" class="input-group-addon camelcaseFix">2FA Verification</span>
+                    <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Translate "2FA Verification"}}</span>
                     <img src="{{ .RequestContext.OTPImage }}">
                 </div>
             </div>
@@ -35,12 +35,12 @@
         </div>
         {{if .ErrorMessage}}
         <div class="alert alert-warning">
-            <strong><i class="fa fa-exclamation"></i></strong>&nbsp;{{.ErrorMessage}}
+            <strong><i class="fa fa-exclamation"></i></strong>&nbsp;{{Translate .ErrorMessage}}
         </div>
         {{end}}
         {{if .ChangesSaved}}
         <div class="alert alert-info">
-            <strong>{{Tf "uadmin/system" .RequestContext.Language.Code "Info:"}}</strong>&nbsp;&nbsp;{{Tf "uadmin/system" .RequestContext.Language.Code "Changes Successfully Applied!"}}
+            <strong>{{Translate "Info:"}}</strong>&nbsp;&nbsp;{{Translate "Changes Successfully Applied"}}!
         </div>
         {{end}}
     </div>

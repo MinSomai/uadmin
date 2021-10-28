@@ -41,8 +41,8 @@ func (s *AuthProviderTestSuite) TestDirectAuthProviderForUadminAdmin() {
 		fmt.Sprintf("%s=%s", core.CurrentConfig.D.Uadmin.AdminCookieName, "test"),
 	)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
-		assert.Contains(s.T(), w.Body.String(), "no session with key test found")
-		return strings.Contains(w.Body.String(), "no session with key test found")
+		assert.Contains(s.T(), w.Body.String(), "no session with key")
+		return strings.Contains(w.Body.String(), "no session with key")
 	})
 	sessionsblueprint1, _ := s.App.BlueprintRegistry.GetByName("sessions")
 	sessionAdapterRegistry := sessionsblueprint1.(sessionsblueprint.Blueprint).SessionAdapterRegistry

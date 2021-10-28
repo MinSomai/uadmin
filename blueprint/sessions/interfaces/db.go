@@ -1,7 +1,6 @@
 package interfaces
 
 import (
-	"fmt"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"time"
 )
@@ -59,7 +58,7 @@ func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
 	var session core.Session
 	db.Db.Model(&core.Session{}).Where(&core.Session{Key: sessionKey}).Preload("User").First(&session)
 	if session.ID == 0 {
-		return nil, fmt.Errorf("no session with key %s found", sessionKey)
+		return nil, core.NewHTTPErrorResponse("session_not_found", "no session with key %s found", sessionKey)
 	}
 	return &DbSession{
 		session: &session,

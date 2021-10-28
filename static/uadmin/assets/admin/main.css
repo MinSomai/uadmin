@@ -848,3 +848,7 @@ a.selector-clearall {
 .uploaded-file {
   margin-top: 5px;
 }
+.uadmin-alert {
+  display: flex;
+  align-items: center;
+}

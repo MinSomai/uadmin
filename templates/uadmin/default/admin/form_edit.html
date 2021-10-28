@@ -5,7 +5,7 @@
     {{ if .FormError }}
         {{ range $generalError := .FormError.GeneralErrors }}
         <div class="error-cont">
-            <span>{{ $generalError }}</span>
+            <span>{{ Translate $generalError }}</span>
         </div>
         {{ end }}
     {{ end }}

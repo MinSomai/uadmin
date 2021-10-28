@@ -1,3 +1,3 @@
-{{ if .UrlValid }}<p class="url">{{ .CurrentLabel }} <a href="{{ .Href }}">{{ .Value }}</a><br>{{ .ChangeLabel }} {{ end }}
+{{ if .UrlValid }}<p class="url">{{ Translate .CurrentLabel }} <a href="{{ .Href }}">{{ .Value }}</a><br>{{ Translate .ChangeLabel }} {{ end }}
     {{Include "admin/widgets/input" }}
 {{ if .UrlValid }}</p>{{ end }}

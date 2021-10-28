@@ -26,17 +26,23 @@
             <div class="tab-content">
                 <ul class="nav nav-tabs admin_font nab-tabs capitalized bold" id="TabNavigation" role="tablist">
                     <li id="trigger_General-Data" class="tab_button nav-item active">
-                        <a style="margin:0px;" id="trigger_General-Data-tab" href="#General-Data" class="camelcaseFix trigger_hash nav-link active" aria-controls="General-Data" role="tab" data-toggle="tab" aria-selected="true">{{ .PageTitle }}</a>
+                        <a style="margin:0px;" id="trigger_General-Data-tab" href="#General-Data" class="camelcaseFix trigger_hash nav-link active" aria-controls="General-Data" role="tab" data-toggle="tab" aria-selected="true">{{Tf .Language.Code .PageTitle}}</a>
                     </li>
+                    {{$Language := .Language}}
                     {{ range $inline := .AdminPageInlineRegistry.GetAll }}
-                        <li id="trigger_{{  $inline.GetInlineID }}" class="tab_button nav-item camelcaseFix trigger_hash nav-link"><a style="margin:0px;" href="#{{  $inline.GetInlineID }}" class="camelcaseFix trigger_hash nav-link" aria-selected="false" aria-controls="{{  $inline.GetInlineID }}" role="tab" id="trigger_{{  $inline.GetInlineID }}-tab" data-toggle="tab">{{  $inline.VerboseNamePlural }}</a></li>
+                        <li id="trigger_{{  $inline.GetInlineID }}" class="tab_button nav-item camelcaseFix trigger_hash nav-link"><a style="margin:0px;" href="#{{  $inline.GetInlineID }}" class="camelcaseFix trigger_hash nav-link" aria-selected="false" aria-controls="{{  $inline.GetInlineID }}" role="tab" id="trigger_{{  $inline.GetInlineID }}-tab" data-toggle="tab">{{Tf $Language.Code $inline.VerboseNamePlural}}</a></li>
                     {{ end }}
                 </ul>
                 <div class="tab-content" id="TabNavigationContent">
                     <div id="General-Data" class="tab-pane active" role="tabpanel" aria-labelledby="trigger_General-Data-tab">
                         {{ if .Message }}
-                        <div class="alert alert-info">
-                            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{ .Message }}</span>
+                        <div class="uadmin-alert alert alert-info">
+                            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{Tf $Language.Code .Message}}</span>
+                        </div>
+                        {{ end }}
+                        {{ if .Error }}
+                        <div class="uadmin-alert alert alert-danger">
+                            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{Tf $Language.Code .Error}}</span>
                         </div>
                         {{ end }}
                         {{$userObject := .GetUserObject }}
@@ -48,7 +54,7 @@
                                         {{ if $adminModelAction.Placement.DisplayOnEditPage }}
                                             {{ if ne $idValue 0 }}
                                                 <a class="btn btn-primary pull-right" href="{{.CurrentURL}}/{{ $adminModelAction.SlugifiedActionName }}/">
-                                                    {{ $adminModelAction.ActionName }}
+                                                    {{Tf $Language.Code $adminModelAction.ActionName}}
                                                 </a>
                                             {{ end }}
                                         {{ end }}
@@ -70,11 +76,11 @@
                             </div>
                             <div class="add-new-inline col-xs-12" style="padding:0px;">
                                 <a class="hidden-sm hidden-md hidden-lg btn-xs btn btn-primary search pull-right" href="javascript:void(0)">
-                                    <i class="fa fa-plus"></i> Add New {{ $inline.VerboseName }}
+                                    <i class="fa fa-plus"></i> {{Tf $Language.Code "Add New"}} {{Tf $Language.Code $inline.VerboseName}}
                                 </a>
 
                                 <a class="hidden-xs btn btn-primary search pull-right" href="javascript:void(0)">
-                                    <i class="fa fa-plus"></i> Add New {{ $inline.VerboseName }}
+                                    <i class="fa fa-plus"></i> {{Tf $Language.Code "Add New"}} {{Tf $Language.Code $inline.VerboseName}}
                                 </a>
                             </div>
                             <!-- // @todo handle stackedinline -->
@@ -83,11 +89,11 @@
                                     <thead class="admin_font" >
                                         <tr class="table-header capitalized">
                                             <th class="checkbox-container" style="width: 90px;">
-                                                <input class="main_check" type="checkbox"> Delete ?
+                                                <input class="main_check" type="checkbox"> {{Tf $Language.Code "Delete" }} ?
                                             </th>
                                             {{range $inline.ListDisplay.GetAllFields}}
                                                 <th class="pointer">
-                                                    {{ GetDisplayName .DisplayName}}
+                                                    {{Tf $Language.Code (GetDisplayName .DisplayName) }}
                                                 </th>
                                             {{end}}
                                         </tr>
@@ -100,7 +106,9 @@
                                                     <td colspan="{{ add $listDisplay.GetFieldsCount 1 }}">
                                                         {{ range $generalError := $form.FormError.GeneralErrors }}
                                                             <div class="error-cont">
-                                                                <span>{{ $generalError }}</span>
+                                                                <span>
+                                                                    {{Tf $Language.Code $generalError }}
+                                                                </span>
                                                             </div>
                                                         {{ end }}
                                                     </td>
@@ -166,20 +174,20 @@
                 <div>
                     {{ if .ID }}
                     <div class="col-sm-4 col-xs-2">
-                        <button onclick="$('#delete-object-form').submit(); return false;" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;Delete object</button>
+                        <button onclick="$('#delete-object-form').submit(); return false;" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;{{Tf $Language.Code "Delete object" }}</button>
                     </div>
                     {{ end }}
                 </div>
                 <div class="pull-right">
 
                     <button type="submit" class="return_url_hide no-borderradius btn btn-primary" style="display:inline-block;" name="save" value="">
-                        Save
+                        {{Tf $Language.Code "Save" }}
                     </button>
                     <button type="submit" class="return_url_hide no-borderradius btn btn-primary" style="display:inline-block;" name="save_add_another" value="">
-                        Save and Add Another
+                        {{Tf $Language.Code "Save and Add Another" }}
                     </button>
                     <button type="submit" class="no-borderradius btn btn-primary" style="display:inline-block;" name="save_continue" value="continue">
-                        Save and Continue
+                        {{Tf $Language.Code "Save and Continue" }}
                     </button>
 
                 </div>

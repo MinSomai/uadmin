@@ -42,9 +42,9 @@
 </style>
 <div class="container-fluid main-content admin-page">
     <div class="col-xs-12 justify-content-md-center" style="position:relative;padding:0px;margin:0px 0px 0px 0px; bottom:65px; top:30px;">
-        <h1>Are you sure?</h1>
-        <p>Are you sure you want to delete selected {{ .AdminPage.ModelName }} ? All of the following objects and their related items will be deleted:</p>
-        <h2>Objects</h2>
+        <h1>{{Tf .Language.Code "Are you sure"}}?</h1>
+        <p>{{Tf .Language.Code "Are you sure you want to delete selected"}} {{Tf .Language.Code .AdminPage.ModelName}} ? {{Tf .Language.Code "All of the following objects and their related items will be deleted:"}}</p>
+        <h2>{{Tf .Language.Code "Objects"}}</h2>
         <form method="POST">
             <input type="hidden" name="csrf-token" value="{{CSRF .SessionKey}}" />
             <input type="hidden" name="object_ids" value="{{ .ObjectIds }}" />
@@ -63,8 +63,8 @@
             {{ end }}
             </ul>
             <div class="cta">
-                <input type="submit" value="Yes, I'm sure" />
-                <a href="#" class="button cancel-link">No, take me back</a>
+                <input type="submit" value="{{Tf .Language.Code "Yes, I'm sure"}}" />
+                <a href="#" class="button cancel-link">{{Tf .Language.Code "No, take me back"}}</a>
             </div>
         </form>
     </div>

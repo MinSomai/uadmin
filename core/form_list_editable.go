@@ -90,11 +90,15 @@ func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interf
 				continue
 			}
 			if !modelF.IsValid() {
-				formError.AddGeneralError(fmt.Errorf("not valid field %s for model", field.Name))
+				formError.AddGeneralError(
+					NewHTTPErrorResponse("field_invalid", "not valid field %s for model", field.Name),
+				)
 				continue
 			}
 			if !modelF.CanSet() {
-				formError.AddGeneralError(fmt.Errorf("can't set field %s for model", field.Name))
+				formError.AddGeneralError(
+					NewHTTPErrorResponse("cant_set_field", "can't set field %s for model", field.Name),
+				)
 				continue
 			}
 			if field.SetUpField != nil {

@@ -30,26 +30,26 @@
                 </div>
               <div class="form-group search">
                 <div class="input-group">
-                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf "uadmin/system" .Language.Code "Old Password"}}</span>
+                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf .Language.Code "Old Password"}}</span>
                   <input class="form-control" name="oldPassword" type="password" value="" >
                 </div>
               </div>
               <div class="form-group search">
                 <div class="input-group">
-                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf "uadmin/system" .Language.Code "New Password"}}</span>
+                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf .Language.Code "New Password"}}</span>
                   <input class="form-control" name="newPassword" type="password" value="" >
                 </div>
               </div>
               <div class="form-group search">
                 <div class="input-group">
-                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf "uadmin/system" .Language.Code "Confirm Password"}}</span>
+                  <span style="min-width:140px;" class="input-group-addon camelcaseFix">{{Tf .Language.Code "Confirm Password"}}</span>
                   <input class="form-control" name="confirmPassword" type="password" value="" >
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="submit" class="btn btn-primary" name="save" value="password">{{Tf "uadmin/system" .Language.Code "Apply Changes"}}</button>
-              <button type="button" class="btn btn-default close_modal_btn" data-dismiss="modal">{{Tf "uadmin/system" .Language.Code "Close"}}</button>
+              <button type="submit" class="btn btn-primary" name="save" value="password">{{Tf .Language.Code "Apply Changes"}}</button>
+              <button type="button" class="btn btn-default close_modal_btn" data-dismiss="modal">{{Tf .Language.Code "Close"}}</button>
             </div>
           </form>
         </div>
@@ -102,7 +102,7 @@
             },
             error: function(xhr) {
                 $('.change-password-error').toggleClass('hidden', false);
-                $('.change-password-error span').html(JSON.parse(xhr.responseText).error);
+                $('.change-password-error span').html(Translate(JSON.parse(xhr.responseText)));
             }
         });
         console.log('change password');

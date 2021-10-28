@@ -86,6 +86,9 @@ var FuncMap = template.FuncMap{
 	"GenerateAttrs":  GenerateAttrs,
 	"GetDisplayName": GetDisplayName,
 	"SplitCamelCase": HumanizeCamelCase,
+	//"Translate": func (v interface{}) string {
+	//	return v.(string)
+	//},
 	//"CSRF": func() string {
 	//	return "dfsafsa"
 	//	// return authapi.GetSession(r)

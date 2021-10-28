@@ -54,29 +54,29 @@ func (ap *DirectAuthProvider) Signin(c *gin.Context) {
 	directAPISigninByField := core.CurrentConfig.D.Uadmin.DirectAPISigninByField
 	db.Db.Model(core.User{}).Where(fmt.Sprintf("%s = ?", directAPISigninByField), json.SigninField).First(&user)
 	if user.ID == 0 {
-		c.JSON(http.StatusBadRequest, core.APIBadResponse("login credentials are incorrect"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("login_credentials_incorrect", "login credentials are incorrect"))
 		return
 	}
 	if !user.Active {
-		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user is inactive"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("user_inactive", "this user is inactive"))
 		return
 	}
 	if !user.IsPasswordUsable {
-		c.JSON(http.StatusBadRequest, core.APIBadResponse("this user doesn't have a password"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("password_is_not_configured", "this user doesn't have a password"))
 		return
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(json.Password+user.Salt))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, core.APIBadResponse("login credentials are incorrect"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("login_credentials_incorrect", "login credentials are incorrect"))
 		return
 	}
 	if user.GeneratedOTPToVerify != "" {
 		if json.OTP == "" {
-			c.JSON(http.StatusBadRequest, core.APIBadResponse("otp is required"))
+			c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("otp_required", "otp is required"))
 			return
 		}
 		if user.GeneratedOTPToVerify != json.OTP {
-			c.JSON(http.StatusBadRequest, core.APIBadResponse("otp provided by user is wrong"))
+			c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("otp_is_wrong", "otp provided by user is wrong"))
 			return
 		}
 		user.GeneratedOTPToVerify = ""
@@ -214,7 +214,7 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 		return
 	}
 	if sessionAdapter.IsExpired() {
-		c.JSON(http.StatusBadRequest, core.APIBadResponse("session expired"))
+		c.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("session_expired", "session expired"))
 		return
 	}
 	c.JSON(http.StatusOK, GetUserForAPI(sessionAdapter.GetUser()))

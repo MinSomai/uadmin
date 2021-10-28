@@ -5,22 +5,28 @@
         height: auto;
     }
 </style>
+{{ $Language := .Language }}
 <div class="container-fluid main-content admin-page">
     <div class="col-xs-12 justify-content-md-center" style="position:relative;padding:0px;margin:0px 0px 0px 0px; bottom:65px; top:30px;">
         {{ if .Message }}
-        <div class="alert alert-info">
-            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{ .Message }}</span>
+        <div class="uadmin-alert alert alert-info">
+            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{Tf $Language.Code .Message }}</span>
+        </div>
+        {{ end }}
+        {{ if .Error }}
+        <div class="uadmin-alert alert alert-danger">
+            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{Tf $Language.Code .Error }}</span>
         </div>
         {{ end }}
         <div class="col-xs-9 col-sm-8" style="padding:0px;">
             <form method="GET" id="search-form">
                 <div id="search_box" class="input-group search" style="float:left;">
                     <input type="text" class="form-control camelcaseFixPlaceHolder"
-                           id="search" name="search" placeholder="Search..." value="{{ .Search }}">
+                           id="search" name="search" placeholder="{{Tf $Language.Code "Search" }}..." value="{{ .Search }}">
                     <span class="input-group-addon"><i class="fa fa-search fa-fw"></i></span>
                 </div>
                 {{ if .Search }}
-                    <a href="javascript:void(0)" onclick="$('#search').val('');$('#search-form').submit();">Clear</a>
+                    <a href="javascript:void(0)" onclick="$('#search').val('');$('#search-form').submit();">{{Tf $Language.Code "Clear" }}</a>
                 {{ end }}
             </form>
         </div>
@@ -43,12 +49,12 @@
                 <input type="hidden" name="object_ids" value="" />
                 <div class="col-xs-12" style="padding:0px;margin:0px;margin-top:5px;" >
                     <select class="form-control" id="model-actions">
-                        <option>Choose action</option>
+                        <option>{{Tf $Language.Code "Choose action" }}</option>
                         {{ end }}
 
                         {{ range $adminModelAction := .AdminModelActionRegistry.GetAllModelActionsForUser $userObject $adminPage }}
                         {{ if $adminModelAction.Placement.ShowOnTheListPage }}
-                        <option {{ if $adminModelAction.RequiresExtraSteps }}data-extrasteps="1"{{ end }} name="{{ $adminModelAction.SlugifiedActionName }}" data-description="{{ $adminModelAction.Description }}" data-method="{{ $adminModelAction.RequestMethod }}">{{ $adminModelAction.ActionName }}</option>
+                        <option {{ if $adminModelAction.RequiresExtraSteps }}data-extrasteps="1"{{ end }} name="{{ $adminModelAction.SlugifiedActionName }}" data-description="{{ $adminModelAction.Description }}" data-method="{{ $adminModelAction.RequestMethod }}">{{Tf $Language.Code $adminModelAction.ActionName }}</option>
                         {{ end }}
                         {{ end }}
 
@@ -123,7 +129,7 @@
                 </table>
                 {{ if .ListDisplay.IsThereAnyEditable }}
                         <div style="margin: 10px; text-align: center;">
-                            <input value="Save" type="submit" class="btn btn-primary" />
+                            <input value="{{Tf $Language.Code "Save" }}" type="submit" class="btn btn-primary" />
                         </div>
                     </form>
                 {{ end }}
@@ -133,16 +139,16 @@
                 {{ $fullUrl := .FullURL }}
                 {{range $lf := .ListFilter.Iterate}}
                 <div class="form-group" class="categorical_filter_fields" style="background:#efefef;padding:10px;">
-                    <label class="camelcaseFix">{{ .Title }}</label>&nbsp;&nbsp;&nbsp;
-                    <i style="font-size:18px;" class="fa fa-info-circle pointer" data-toggle="tooltip" data-placement="bottom" title="Filter By {{ .Title }}"></i><br/>
+                    <label class="camelcaseFix">{{Tf $Language.Code .Title }}</label>&nbsp;&nbsp;&nbsp;
+                    <i style="font-size:18px;" class="fa fa-info-circle pointer" data-toggle="tooltip" data-placement="bottom" title="{{Tf $Language.Code "Filter By" }} {{Tf $Language.Code .Title }}"></i><br/>
                     {{if $lf.IsItActive $fullUrl }}
-                    <a href="{{ $lf.GetURLToClearFilter $fullUrl }}">All</a><br/>
+                    <a href="{{ $lf.GetURLToClearFilter $fullUrl }}">{{Tf $Language.Code "All" }}</a><br/>
                     {{end}}
                     {{ range $i, $option := .OptionsToShow }}
                     {{if $lf.IsThatOptionActive $option $fullUrl }}
-                    {{ $option.DisplayAs }}<br/>
+                    {{Tf $Language.Code $option.DisplayAs }}<br/>
                     {{else}}
-                    <a href="{{ $lf.GetURLForOption $option $fullUrl }}">{{ $option.DisplayAs }}</a><br/>
+                    <a href="{{ $lf.GetURLForOption $option $fullUrl }}">{{Tf $Language.Code $option.DisplayAs }}</a><br/>
                     {{end}}
                     {{ end }}
                 </div>
@@ -152,12 +158,6 @@
         </div>
     </div>
     <div class="fixed-bottom bg-footer default-padding z-index9 admin_font bold">
-<!--        {{ if .PermissionForBlueprint.HasDeletePermission }}-->
-<!--        <div class="col-sm-4 col-xs-2">-->
-<!--            <button onclick="BuildDeleteList('item_check')" class="hidden-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i>&nbsp;{{Tf "uadmin/system" .Language.Code "Delete Selected"}}</button>-->
-<!--            <button onclick="BuildDeleteList('item_check')" class="hidden-sm hidden-md hidden-lg btn-xs btn btn-danger capitalized"><i class="fa fa-trash fa-fw"></i></button>-->
-<!--        </div>-->
-<!--        {{end}}-->
         <div class="col-sm-8 col-xs-10">
             <center><ul id="pagination_container" class="pagination pagination-sm pagination-xs" style="margin:0px;"></ul></center>
         </div>
@@ -168,7 +168,7 @@
                     <input type="hidden" class="form-control camelcaseFixPlaceHolder"
                            name="export" placeholder="Search..." value="true" />
                     <button type="submit" class="btn btn-success search pull-right">
-                        <i class="fa fa-table"></i> {{Tf "uadmin/system" .Language.Code "Excel"}}
+                        <i class="fa fa-table"></i> {{Tf .Language.Code "Excel"}}
                     </button>
                 </form>
             </div>
@@ -205,12 +205,12 @@
     $('#action-form').submit(function(ev) {
         if (!$('#model-actions').children("option:selected").length) {
             ev.preventDefault();
-            alert('Please choose any action');
+            alert(Translate('Please choose any action'));
             return;
         }
         if (!$('.item_check:checked').length) {
             ev.preventDefault();
-            alert('Please choose at least one object');
+            alert(Translate('Please choose at least one object'));
             return;
         }
         var form = $('#action-form');
@@ -241,7 +241,7 @@
                 },
                 error: function(xhr) {
                     hide_loading(300);
-                    // @todo, show error message
+                    alert(Translate(JSON.parse(xhr.responseText)));
                 }
             });
             return;

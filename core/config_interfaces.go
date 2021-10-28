@@ -161,6 +161,7 @@ type UadminConfig struct {
 	TemplatesFS               embed.FS
 	OverridenTemplatesFS      *embed.FS
 	LocalizationFS            embed.FS
+	CustomLocalizationFS      *embed.FS
 	RequiresCsrfCheck         func(c *gin.Context) bool
 	PatternsToIgnoreCsrfCheck *list.List
 	ErrorHandleFunc           func(int, string, string)

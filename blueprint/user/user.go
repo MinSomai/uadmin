@@ -71,7 +71,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		user := core.GenerateUserModel()
 		db.Model(core.GenerateUserModel()).Where(&core.User{Email: json.Email}).First(user)
 		if user.GetID() == 0 {
-			ctx.JSON(http.StatusBadRequest, core.APIBadResponse("User with this email not found"))
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("user_not_found", "User with this email not found"))
 			return
 		}
 		templateWriter := bytes.NewBuffer([]byte{})
@@ -135,11 +135,11 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 		var oneTimeAction core.OneTimeAction
 		db.Model(core.OneTimeAction{}).Where(&core.OneTimeAction{Code: json.Code, IsUsed: false}).Preload("User").First(&oneTimeAction)
 		if oneTimeAction.ID == 0 {
-			ctx.JSON(http.StatusBadRequest, core.APIBadResponse("No such code found"))
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("code_not_found", "No such code found"))
 			return
 		}
 		if oneTimeAction.ExpiresOn.Before(time.Now()) {
-			ctx.JSON(http.StatusBadRequest, core.APIBadResponse("Code is expired"))
+			ctx.JSON(http.StatusBadRequest, core.APIBadResponseWithCode("code_expired", "Code is expired"))
 			return
 		}
 		passwordValidationStruct := &PasswordValidationStruct{
@@ -369,14 +369,14 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 					return ret
 				}
 				userGroupsWidget.LeftSelectTitle = "Available groups"
-				userGroupsWidget.LeftSelectHelp = "This is the list of available groups. You may choose some by selecting them in the box below and then clicking the \"Choose\" arrow between the two boxes."
-				userGroupsWidget.LeftSearchSelectHelp = "Type into this box to filter down the list of available groups."
+				userGroupsWidget.LeftSelectHelp = "available_groups_left"
+				userGroupsWidget.LeftSearchSelectHelp = "available_groups_search_help"
 				userGroupsWidget.LeftHelpChooseAll = "Click to choose all groups at once."
 				userGroupsWidget.RightSelectTitle = "Chosen groups"
-				userGroupsWidget.RightSelectHelp = "This is the list of chosen groups. You may remove some by selecting them in the box below and then clicking the \"Remove\" arrow between the two boxes."
+				userGroupsWidget.RightSelectHelp = "chosen_groups_left"
 				userGroupsWidget.RightSearchSelectHelp = ""
 				userGroupsWidget.RightHelpChooseAll = "Click to remove all chosen groups at once."
-				userGroupsWidget.HelpText = "The groups this user belongs to. A user will get all permissions granted to each of their groups. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+				userGroupsWidget.HelpText = "group_widget_help"
 				permissionsField, _ := form.FieldRegistry.GetByName("Permissions")
 				permissionsField.SetUpField = func(w core.IWidget, modelI interface{}, v interface{}, afo core.IAdminFilterObjects) error {
 					model := modelI.(*core.User)
@@ -414,14 +414,14 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 					return ret
 				}
 				permissionsWidget.LeftSelectTitle = "Available user permissions"
-				permissionsWidget.LeftSelectHelp = "This is the list of available user permissions. You may choose some by selecting them in the box below and then clicking the \"Choose\" arrow between the two boxes."
-				permissionsWidget.LeftSearchSelectHelp = "Type into this box to filter down the list of available user permissions."
+				permissionsWidget.LeftSelectHelp = "available_permissions_left"
+				permissionsWidget.LeftSearchSelectHelp = "available_permissions_search_help"
 				permissionsWidget.LeftHelpChooseAll = "Click to choose all user permissions at once."
 				permissionsWidget.RightSelectTitle = "Chosen user permissions"
-				permissionsWidget.RightSelectHelp = "This is the list of chosen user permissions. You may remove some by selecting them in the box below and then clicking the \"Remove\" arrow between the two boxes."
+				permissionsWidget.RightSelectHelp = "chosen_permissions_left"
 				permissionsWidget.RightSearchSelectHelp = ""
 				permissionsWidget.RightHelpChooseAll = "Click to remove all chosen user permissions at once."
-				permissionsWidget.HelpText = "Specific permissions for this user. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+				permissionsWidget.HelpText = "permission_widget_help"
 				permissionsWidget.PopulateRightSide = func() []*core.SelectOptGroup {
 					ret := make([]*core.SelectOptGroup, 0)
 					user := modelI.(*core.User)
@@ -545,14 +545,14 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 					return ret
 				}
 				permissionsWidget.LeftSelectTitle = "Available permissions"
-				permissionsWidget.LeftSelectHelp = "This is the list of available permissions. You may choose some by selecting them in the box below and then clicking the \"Choose\" arrow between the two boxes."
-				permissionsWidget.LeftSearchSelectHelp = "Type into this box to filter down the list of available user permissions."
+				permissionsWidget.LeftSelectHelp = "available_permissions_left"
+				permissionsWidget.LeftSearchSelectHelp = "available_permissions_search_help"
 				permissionsWidget.LeftHelpChooseAll = "Click to choose all user permissions at once."
 				permissionsWidget.RightSelectTitle = "Chosen permissions"
-				permissionsWidget.RightSelectHelp = "This is the list of chosen permissions. You may remove some by selecting them in the box below and then clicking the \"Remove\" arrow between the two boxes."
+				permissionsWidget.RightSelectHelp = "chosen_permissions_left"
 				permissionsWidget.RightSearchSelectHelp = ""
 				permissionsWidget.RightHelpChooseAll = "Click to remove all chosen permissions at once."
-				permissionsWidget.HelpText = "Specific permissions for this user. Hold down \"Control\", or \"Command\" on a Mac, to select more than one."
+				permissionsWidget.HelpText = "permission_widget_help"
 				permissionsWidget.PopulateRightSide = func() []*core.SelectOptGroup {
 					ret := make([]*core.SelectOptGroup, 0)
 					user := modelI.(*core.UserGroup)
@@ -622,7 +622,7 @@ func (b Blueprint) InitApp(app core.IApp) {
 		if cUsers == 0 {
 			return nil
 		}
-		return fmt.Errorf("user with name %s is already registered", i.(string))
+		return core.NewHTTPErrorResponse("user_name_already_registered", "user with name %s is already registered", i.(string))
 	})
 
 	core.UadminValidatorRegistry.AddValidator("email-unique", func(i interface{}, o interface{}) error {
@@ -634,7 +634,7 @@ func (b Blueprint) InitApp(app core.IApp) {
 		if cUsers == 0 {
 			return nil
 		}
-		return fmt.Errorf("user with email %s is already registered", i.(string))
+		return core.NewHTTPErrorResponse("user_email_already_registered", "user with email %s is already registered", i.(string))
 	})
 
 	core.UadminValidatorRegistry.AddValidator("username-uadmin", func(i interface{}, o interface{}) error {
@@ -642,7 +642,7 @@ func (b Blueprint) InitApp(app core.IApp) {
 		maxLength := core.CurrentConfig.D.Auth.MaxUsernameLength
 		currentUsername := i.(string)
 		if maxLength < len(currentUsername) || len(currentUsername) < minLength {
-			return fmt.Errorf("length of the username has to be between %d and %d symbols", minLength, maxLength)
+			return core.NewHTTPErrorResponse("username_length_error", "length of the username has to be between %s and %s symbols", strconv.Itoa(minLength), strconv.Itoa(maxLength))
 		}
 		return nil
 	})
@@ -650,10 +650,10 @@ func (b Blueprint) InitApp(app core.IApp) {
 	core.UadminValidatorRegistry.AddValidator("password-uadmin", func(i interface{}, o interface{}) error {
 		passwordStruct := o.(PasswordValidationStruct)
 		if passwordStruct.Password != passwordStruct.ConfirmedPassword {
-			return fmt.Errorf("password doesn't equal to confirmed password")
+			return core.NewHTTPErrorResponse("password_not_equal", "password doesn't equal to confirmed password")
 		}
 		if len(passwordStruct.Password) < core.CurrentConfig.D.Auth.MinPasswordLength {
-			return fmt.Errorf("length of the password has to be at least %d symbols", core.CurrentConfig.D.Auth.MinPasswordLength)
+			return core.NewHTTPErrorResponse("password_length_error", "length of the password has to be at least %d symbols", strconv.Itoa(core.CurrentConfig.D.Auth.MinPasswordLength))
 		}
 		return nil
 	})

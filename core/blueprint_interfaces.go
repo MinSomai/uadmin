@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	mapset "github.com/deckarep/golang-set"
@@ -287,6 +288,18 @@ func (r BlueprintRegistry) InitializeRouting(app IApp, router *gin.Engine) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
+	})
+	router.GET("/localization/", func(ctx *gin.Context) {
+		type Context struct {
+			AdminContext
+		}
+		c := &Context{}
+		adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
+		PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
+		langMap := ReadLocalization(c.GetLanguage().Code)
+		langMapB, _ := json.Marshal(langMap)
+		ctx.Header("Content-Type", "application/javascript")
+		ctx.String(200, fmt.Sprintf("setLocalization(%s)", string(langMapB)))
 	})
 	router.POST("/testcsrf/", func(c *gin.Context) {
 		c.String(200, "csrf token test passed")

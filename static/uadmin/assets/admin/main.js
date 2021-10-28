@@ -92,14 +92,14 @@ function setHomeTabs(me, container, extclass){
     content += '      <center><br>';
     content += '        <img onerror="this.src=\'/static-inbuilt/uadmin/assets/admin/images/icons/model.png\';" src="'+icon+'"';
     if (tooltip != ""){
-      content += '           data-toggle="tooltip" data-placement="top" title="'+tooltip+'" >';
+      content += '           data-toggle="tooltip" data-placement="top" title="'+Translate(tooltip)+'" >';
     } else {
       content += '>';
     }
     content += '      </center>';
     content += '      <h5 class="bold  capitalized admin_font">';
     content += '        <center>';
-    content += '          <span class="camelcaseFix">'+name+'</span>';
+    content += '          <span class="camelcaseFix">'+Translate(name)+'</span>';
     content += '        </center>';
     content += '      </h5>';
     content += '      <br>';

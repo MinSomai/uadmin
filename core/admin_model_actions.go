@@ -53,7 +53,7 @@ func init() {
 			}
 			if removalConfirmed != "" {
 				query := ctx.Request.URL.Query()
-				query.Set("message", "Objects were removed succesfully")
+				query.Set("message", Tf(c.Language.Code, "Objects were removed succesfully"))
 				ctx.Redirect(http.StatusFound, fmt.Sprintf("%s/%s/%s/?%s", CurrentConfig.D.Uadmin.RootAdminURL, ap.ParentPage.Slug, ap.ModelName, query.Encode()))
 				return nil
 			}

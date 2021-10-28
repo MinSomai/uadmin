@@ -2,7 +2,6 @@ package core
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
@@ -309,7 +308,7 @@ func (w *Widget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, rend
 	}
 	w.SetValue(v[0])
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -357,7 +356,7 @@ func (w *Widget) Render(formRenderContext *FormRenderContext, currentField *Fiel
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {
@@ -382,9 +381,15 @@ func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, curre
 	}
 }
 
-func RenderWidget(renderer ITemplateRenderer, templateName string, data map[string]interface{}, baseFuncMap template.FuncMap) template.HTML {
+func RenderWidget(formRenderContext *FormRenderContext, renderer ITemplateRenderer, templateName string, data map[string]interface{}, baseFuncMap template.FuncMap) template.HTML {
 	if renderer == nil {
 		r := NewTemplateRenderer("")
+		r.AddFuncMap("Translate", func(v interface{}) string {
+			if formRenderContext.Context != nil && formRenderContext.Context.GetLanguage() != nil {
+				return Tf(formRenderContext.Context.GetLanguage().Code, v)
+			}
+			return v.(string)
+		})
 		return r.RenderAsString(templateName, data, baseFuncMap)
 	}
 	return renderer.RenderAsString(
@@ -417,7 +422,7 @@ func (tw *TextWidget) Render(formRenderContext *FormRenderContext, currentField 
 	data := tw.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = tw.GetWidgetType()
 	data["ShowOnlyHtmlInput"] = tw.ShowOnlyHTMLInput
-	return RenderWidget(tw.Renderer, tw.GetTemplateName(), data, tw.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
+	return RenderWidget(formRenderContext, tw.Renderer, tw.GetTemplateName(), data, tw.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
 }
 
 type DynamicWidget struct {
@@ -518,7 +523,7 @@ func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap) // tw.Value, tw.Widget.GetAttrs()
 }
 
 type NumberWidget struct {
@@ -546,7 +551,7 @@ func (w *NumberWidget) Render(formRenderContext *FormRenderContext, currentField
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *NumberWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -559,10 +564,10 @@ func (w *NumberWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 	}
 	w.SetValue(v[0])
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	if !govalidator.IsInt(v[0]) {
-		return errors.New("should be a number")
+		return NewHTTPErrorResponse("should_be_number", "should be a number")
 	}
 	w.SetOutputValue(w.TransformValueForOutput(v[0]))
 	return nil
@@ -622,7 +627,7 @@ func (w *EmailWidget) Render(formRenderContext *FormRenderContext, currentField 
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -635,10 +640,10 @@ func (w *EmailWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects,
 	}
 	w.SetValue(v[0])
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	if !govalidator.IsEmail(v[0]) {
-		return errors.New("should be an email")
+		return NewHTTPErrorResponse("should_be_email", "should be an email")
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -687,7 +692,7 @@ func (w *URLWidget) Render(formRenderContext *FormRenderContext, currentField *F
 	} else {
 		data["ChangeLabel"] = w.ChangeLabel
 	}
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -700,7 +705,7 @@ func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, r
 	}
 	w.SetValue(v[0])
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	url := v[0]
 	if w.AppendHTTPSAutomatically {
@@ -710,7 +715,7 @@ func (w *URLWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, r
 		}
 	}
 	if !govalidator.IsURL(url) {
-		return errors.New("should be an url")
+		return NewHTTPErrorResponse("should_be_url", "should be an url")
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -742,7 +747,7 @@ func (w *PasswordWidget) Render(formRenderContext *FormRenderContext, currentFie
 	data["Type"] = w.GetWidgetType()
 	data["DisplayName"] = w.FieldDisplayName
 	data["Value"] = ""
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -758,10 +763,10 @@ func (w *PasswordWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 		return fmt.Errorf("no field with name %s has been submitted", w.FieldDisplayName)
 	}
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	if len(v[0]) < CurrentConfig.D.Auth.MinPasswordLength {
-		return fmt.Errorf("length of the password has to be at least %d symbols", CurrentConfig.D.Auth.MinPasswordLength)
+		return NewHTTPErrorResponse("password_length_error", "length of the password has to be at least %d symbols", strconv.Itoa(CurrentConfig.D.Auth.MinPasswordLength))
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -791,7 +796,7 @@ func (w *HiddenWidget) Render(formRenderContext *FormRenderContext, currentField
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *HiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -804,7 +809,7 @@ func (w *HiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 	}
 	w.SetValue(v[0])
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -838,7 +843,7 @@ func (w *DateWidget) Render(formRenderContext *FormRenderContext, currentField *
 	}
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *DateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -851,7 +856,7 @@ func (w *DateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, 
 	}
 	w.DateValue = v[0]
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	d, err := time.Parse(CurrentConfig.D.Uadmin.DateFormat, v[0])
 	if err != nil {
@@ -907,7 +912,7 @@ func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentFie
 	}
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *DateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -920,7 +925,7 @@ func (w *DateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	}
 	w.DateTimeValue = v[0]
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	d, err := time.Parse(CurrentConfig.D.Uadmin.DateTimeFormat, v[0])
 	if err != nil {
@@ -958,7 +963,7 @@ func (w *TimeWidget) Render(formRenderContext *FormRenderContext, currentField *
 	}
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *TimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -971,7 +976,7 @@ func (w *TimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, 
 	}
 	w.TimeValue = v[0]
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	d, err := time.Parse(CurrentConfig.D.Uadmin.TimeFormat, v[0])
 	if err != nil {
@@ -1005,7 +1010,7 @@ func (w *TextareaWidget) Render(formRenderContext *FormRenderContext, currentFie
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *TextareaWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1018,7 +1023,7 @@ func (w *TextareaWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjec
 	}
 	w.SetValue(v[0])
 	if w.Required && v[0] == "" {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -1058,7 +1063,7 @@ func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentFie
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *CheckboxWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1151,7 +1156,7 @@ func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1181,7 +1186,7 @@ func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 	}
 	w.SetValue(v[0])
 	if foundNotExistent {
-		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -1319,7 +1324,7 @@ func (w *ForeignKeyWidget) Render(formRenderContext *FormRenderContext, currentF
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["AddNewLink"] = w.AddNewLink
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *ForeignKeyWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1365,10 +1370,10 @@ func (w *ForeignKeyWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 	modelI, _ := w.GenerateModelInterface()
 	queryset.Model(modelI).Count(&c)
 	if c == 0 {
-		return fmt.Errorf("no object found to be used for this field")
+		return NewHTTPErrorResponse("object_not_found", "no object found to be used for this field")
 	}
 	if foundNotExistent {
-		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
 	queryset.LoadDataForModelByID(modelI, v[0])
 	w.SetOutputValue(modelI)
@@ -1477,7 +1482,7 @@ func (w *ContentTypeSelectorWidget) Render(formRenderContext *FormRenderContext,
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *ContentTypeSelectorWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1567,7 +1572,7 @@ func (w *NullBooleanWidget) Render(formRenderContext *FormRenderContext, current
 	data := w.GetDataForRendering(formRenderContext, currentField)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *NullBooleanWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1595,7 +1600,7 @@ func (w *NullBooleanWidget) ProceedForm(form *multipart.Form, afo IAdminFilterOb
 	}
 	w.SetValue(v[0])
 	if foundNotExistent {
-		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -1654,7 +1659,7 @@ func (w *SelectMultipleWidget) Render(formRenderContext *FormRenderContext, curr
 	data := w.GetDataForRendering(formRenderContext)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *SelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1682,7 +1687,7 @@ func (w *SelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilte
 	}
 	w.SetValue(v)
 	if foundNotExistent {
-		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
 	w.SetOutputValue(v)
 	return nil
@@ -1773,7 +1778,7 @@ func (w *RadioSelectWidget) Render(formRenderContext *FormRenderContext, current
 	data := w.GetDataForRendering(formRenderContext)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1801,7 +1806,7 @@ func (w *RadioSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterOb
 	}
 	w.SetValue(v[0])
 	if foundNotExistent {
-		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
 	w.SetOutputValue(v[0])
 	return nil
@@ -1870,7 +1875,7 @@ func (w *CheckboxSelectMultipleWidget) Render(formRenderContext *FormRenderConte
 	data := w.GetDataForRendering(formRenderContext)
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *CheckboxSelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -1898,7 +1903,7 @@ func (w *CheckboxSelectMultipleWidget) ProceedForm(form *multipart.Form, afo IAd
 	}
 	w.SetValue(v)
 	if foundNotExistent {
-		return fmt.Errorf("value %s is not valid for the field %s", notExistentValue, w.FieldDisplayName)
+		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
 	w.SetOutputValue(v)
 	return nil
@@ -1941,7 +1946,7 @@ func (w *FileWidget) Render(formRenderContext *FormRenderContext, currentField *
 	data["Value"] = w.Value
 	data["ShowOnlyHtmlInput"] = w.ShowOnlyHTMLInput
 	data["Type"] = w.GetWidgetType()
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *FileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2051,7 +2056,7 @@ func (w *ClearableFileWidget) Render(formRenderContext *FormRenderContext, curre
 	data["Id"] = w.ID
 	data["ClearCheckboxLabel"] = w.ClearCheckboxLabel
 	data["InputText"] = w.InputText
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *ClearableFileWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2142,7 +2147,7 @@ func (w *MultipleInputHiddenWidget) Render(formRenderContext *FormRenderContext,
 		subwidgets = append(subwidgets, vd)
 	}
 	data["Subwidgets"] = subwidgets
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *MultipleInputHiddenWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2281,7 +2286,7 @@ func (w *ChooseFromSelectWidget) Render(formRenderContext *FormRenderContext, cu
 	vd2["SelectorGeneralClass"] = "selector-chosen related-target"
 	subwidgets = append(subwidgets, vd2)
 	data["Subwidgets"] = subwidgets
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *ChooseFromSelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2379,7 +2384,7 @@ func (w *SplitDateTimeWidget) Render(formRenderContext *FormRenderContext, curre
 	vd1["TemplateName"] = templateName
 	subwidgets = append(subwidgets, vd1)
 	data["Subwidgets"] = subwidgets
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2388,16 +2393,16 @@ func (w *SplitDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilter
 	}
 	vDate, ok := form.Value[w.GetHTMLInputName()+"_date"]
 	if !ok {
-		return fmt.Errorf("no date has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_date", "no date has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DateValue = vDate[0]
 	vTime, ok := form.Value[w.GetHTMLInputName()+"_time"]
 	if !ok {
-		return fmt.Errorf("no time has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_time", "no time has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.TimeValue = vTime[0]
 	if w.Required && (vDate[0] == "" || vTime[0] == "") {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	d, err := time.Parse(w.DateFormat, vDate[0])
 	if err != nil {
@@ -2483,7 +2488,7 @@ func (w *SplitHiddenDateTimeWidget) Render(formRenderContext *FormRenderContext,
 	vd1["TemplateName"] = templateName
 	subwidgets = append(subwidgets, vd1)
 	data["Subwidgets"] = subwidgets
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2492,16 +2497,16 @@ func (w *SplitHiddenDateTimeWidget) ProceedForm(form *multipart.Form, afo IAdmin
 	}
 	vDate, ok := form.Value[w.GetHTMLInputName()+"_date"]
 	if !ok {
-		return fmt.Errorf("no date has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_date", "no date has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DateValue = vDate[0]
 	vTime, ok := form.Value[w.GetHTMLInputName()+"_time"]
 	if !ok {
-		return fmt.Errorf("no time has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_time", "no time has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.TimeValue = vTime[0]
 	if w.Required && (vDate[0] == "" || vTime[0] == "") {
-		return fmt.Errorf("field %s is required", w.FieldDisplayName)
+		return NewHTTPErrorResponse("field_required", "field %s is required", w.FieldDisplayName)
 	}
 	d, err := time.Parse(w.DateFormat, vDate[0])
 	if err != nil {
@@ -2686,7 +2691,7 @@ func (w *SelectDateWidget) Render(formRenderContext *FormRenderContext, currentF
 		}
 	}
 	data["Subwidgets"] = subwidgets
-	return RenderWidget(w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
+	return RenderWidget(formRenderContext, w.Renderer, w.GetTemplateName(), data, w.BaseFuncMap)
 }
 
 func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
@@ -2695,33 +2700,33 @@ func (w *SelectDateWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObj
 	}
 	vYear, ok := form.Value[w.GetHTMLInputName()+"_year"]
 	if !ok {
-		return fmt.Errorf("no year has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_year", "no year has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.YearValue = vYear[0]
 	vMonth, ok := form.Value[w.GetHTMLInputName()+"_month"]
 	if !ok {
-		return fmt.Errorf("no month has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_month", "no month has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.MonthValue = vMonth[0]
 	vDay, ok := form.Value[w.GetHTMLInputName()+"_day"]
 	if !ok {
-		return fmt.Errorf("no day has been submitted for field %s", w.FieldDisplayName)
+		return NewHTTPErrorResponse("no_day", "no day has been submitted for field %s", w.FieldDisplayName)
 	}
 	w.DayValue = vDay[0]
 	if w.Required && (w.YearValue == "" || w.MonthValue == "" || w.DayValue == "") {
-		return fmt.Errorf("either year, month, value is empty")
+		return NewHTTPErrorResponse("either_year_month_value_empty", "either year, month, value is empty")
 	}
 	day, err := strconv.Atoi(w.DayValue)
 	if err != nil {
-		return fmt.Errorf("incorrect day")
+		return NewHTTPErrorResponse("incorrect_day", "incorrect day")
 	}
 	month, err := strconv.Atoi(w.MonthValue)
 	if err != nil {
-		return fmt.Errorf("incorrect month")
+		return NewHTTPErrorResponse("incorrect_month", "incorrect month")
 	}
 	year, err := strconv.Atoi(w.YearValue)
 	if err != nil {
-		return fmt.Errorf("incorrect year")
+		return NewHTTPErrorResponse("incorrect_year", "incorrect year")
 	}
 	d := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 	w.SetOutputValue(&d)

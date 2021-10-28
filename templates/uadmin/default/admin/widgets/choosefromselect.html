@@ -1,5 +1,5 @@
 <td class="hidden-xs">
-    <label {{ if .HelpText }}data-toggle="tooltip" data-placement="bottom" data-original-title="{{ .HelpText }}"{{ end }} class="col-sm-12 control-label form_label"><span class="camelcaseFix">{{ GetDisplayName .FieldDisplayName }}</span>:
+    <label {{ if .HelpText }}data-toggle="tooltip" data-placement="bottom" data-original-title="{{ Translate .HelpText }}"{{ end }} class="col-sm-12 control-label form_label"><span class="camelcaseFix">{{ GetDisplayName (Translate .FieldDisplayName) }}</span>:
         <span class="{{ if .HelpText }}text-muted{{ end }}" style="font-size:12px;">
                         {{ if .HelpText }}
                             <i class="fa fa-question-circle"></i>:
@@ -16,21 +16,21 @@
         {{ if .FormErrorNotEmpty }}
         {{ range $error := .FormError }}
         <div class="error-cont">
-            <span>{{ $error }}</span>
+            <span>{{ Translate $error }}</span>
         </div>
         {{ end }}
         {{ end }}
         {{ range $index, $widget := .Subwidgets }}
             <div class="select {{ $widget.SelectorGeneralClass }}">{{ Include $widget.TemplateName $widget }}</div>
             {{ if $widget.GenerateSelector }}
-                <ul class="selector-chooser"><li><a title="Choose" href="#" class="selector-add">Choose</a></li><li><a title="Remove" href="#" class="selector-remove">Remove</a></li></ul>
+                <ul class="selector-chooser"><li><a title="{{ Translate "Choose" }}" href="#" class="selector-add">{{ Translate "Choose" }}</a></li><li><a title="{{ Translate "Remove" }}" href="#" class="selector-remove">{{ Translate "Remove" }}</a></li></ul>
             {{ end }}
         {{ end }}
         {{ if .AddNewLink }}
-            <a class="related-widget-wrapper-link add-related" href="{{ .AddNewLink }}" title="{{ .AddNewTitle }}"><img src="/static-inbuilt/uadmin/icon-addlink.svg" alt="Add"></a>
+            <a class="related-widget-wrapper-link add-related" href="{{ .AddNewLink }}" title="{{ Translate .AddNewTitle }}"><img src="/static-inbuilt/uadmin/icon-addlink.svg" alt="{{ Translate "Add" }}"></a>
         {{ end }}
     </div>
     {{ if .HelpText }}
-    <div class="help">{{ .HelpText }}</div>
+    <div class="help">{{ Translate .HelpText }}</div>
     {{ end }}
 </td>
