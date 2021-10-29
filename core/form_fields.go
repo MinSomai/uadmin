@@ -237,6 +237,7 @@ func NewUadminFieldFromGormField(gormModelV reflect.Value, field *schema.Field, 
 	if renderForAdmin {
 		uadminField.FieldConfig.Widget.RenderForAdmin()
 	}
+	uadminField.Validators = NewValidatorRegistry()
 	if fieldOptions != nil {
 		uadminField.Initial = fieldOptions.GetInitial()
 		if fieldOptions.GetDisplayName() != "" {
