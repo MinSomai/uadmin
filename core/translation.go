@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"reflect"
 	"strings"
+	"sync"
 )
 
 // GetLanguage returns the language of the request
@@ -91,6 +92,29 @@ func ReadLocalization(languageCode string) translationLoaded {
 }
 const translateMe = "Translate me ---> "
 
+// SafeCounter is safe to use concurrently.
+type NotTranslatedDataImplementation struct {
+	mu sync.Mutex
+	D  map[string][]string
+}
+
+func (ntdi *NotTranslatedDataImplementation) Store(lang string, term string) {
+	ntdi.mu.Lock()
+	if ntdi.D[lang] == nil {
+		ntdi.D[lang] = make([]string, 0)
+	}
+	ntdi.D[lang] = append(ntdi.D[lang], term)
+	ntdi.mu.Unlock()
+}
+
+var NotTranslatedData *NotTranslatedDataImplementation
+
+func init() {
+	NotTranslatedData = &NotTranslatedDataImplementation{
+		D: make(map[string][]string),
+	}
+}
+
 // @todo, redo
 // Tf is a function for translating strings into any given language
 // Parameters:
@@ -108,13 +132,12 @@ func Tf(lang string, iTerm interface{}, args ...interface{}) string {
 	itemV := &HTTPErrorResponse{}
 	if iTermReflectV.Kind() == reflect.String {
 		term = iTerm.(string)
-	} else {
-		if itemV1, ok := iTerm.(*HTTPErrorResponse); ok {
-			httpErrorResponse = true
-			itemV = itemV1
-			term = itemV1.Code
-		}
-
+	} else if itemV1, ok := iTerm.(*HTTPErrorResponse); ok {
+		httpErrorResponse = true
+		itemV = itemV1
+		term = itemV1.Code
+	} else if itermE, ok := iTerm.(error); ok {
+		term = itermE.Error()
 	}
 	if lang == "" {
 		lang = GetDefaultLanguage().Code
@@ -137,6 +160,9 @@ func Tf(lang string, iTerm interface{}, args ...interface{}) string {
 	}
 	// If it doesn't exist then add it to the file
 	if lang != "en" {
+		if CurrentConfig.D.Debug {
+			NotTranslatedData.Store(lang, term)
+		}
 		if httpErrorResponse {
 			langMap[term] = translateMe + itemV.Message
 			if len(itemV.Params) > 0 {

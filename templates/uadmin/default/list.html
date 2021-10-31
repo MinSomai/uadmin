@@ -15,7 +15,7 @@
         {{ end }}
         {{ if .Error }}
         <div class="uadmin-alert alert alert-danger">
-            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{Tf $Language.Code .Error }}</span>
+            <strong><i class="fa fa-info-circle fa-2x"></i></strong>&nbsp;&nbsp;<span>{{Tf $Language.Code .Error.Error }}</span>
         </div>
         {{ end }}
         <div class="col-xs-9 col-sm-8" style="padding:0px;">
@@ -96,6 +96,7 @@
                     {{$currentURL := .CurrentURL}}
                     {{$currentAdminContext := .CurrentAdminContext }}
                     {{$noPermissionToEdit := .NoPermissionToEdit }}
+                    {{$Error := .Error }}
                     {{range $iterateAdminObjects := .AdminFilterObjects.GetPaginated}}
                         <tr>
                             <td onclick="$('.main_check').prop('checked', false);">
@@ -103,7 +104,7 @@
                                 <input  class="item_check" type="checkbox" value="{{ $iterateAdminObjects.ID }}">
                             </td>
                             {{$i  := 0 }}
-                            {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.ID $iterateAdminObjects.Model}}
+                            {{ $form := $listDisplay.BuildFormForListEditable $currentAdminContext $iterateAdminObjects.ID $iterateAdminObjects.Model $Error}}
                             {{range $field := $listDisplay.GetAllFields}}
                                 <td>
                                     {{if eq $i 0}}{{ if not $noPermissionToEdit }}<a class="bold clickable Row_id no-style" href="{{$currentURL}}edit/{{$iterateAdminObjects.ID}}/">{{ end }}{{ end }}

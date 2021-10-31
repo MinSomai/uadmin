@@ -4,9 +4,6 @@
     .hide-text {
         color: rgba(0,0,0,0) !important;
     }
-    .error-cont {
-        color: red;
-    }
     .add-new-inline {
         margin: 10px 0;
     }
@@ -137,7 +134,7 @@
                                             </tr>
                                         {{end}}
                                         {{ if $ID }}
-                                            {{ range $iterateAdminObjects := ($inline.GetAll $model $requestParams) }}
+                                            {{ range $iterateAdminObjects := ($inline.GetAll $currentAdminContext $model) }}
                                                 <tr>
                                                     <td onclick="$(this).parent().parent().parent().find('.main_check').prop('checked', false);">
                                                         <input  type="hidden" name="{{ $inline.GetInlineID}}-object_id-{{ $iterateAdminObjects.ID }}">

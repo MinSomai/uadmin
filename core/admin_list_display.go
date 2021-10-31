@@ -47,8 +47,8 @@ func (ldr *ListDisplayRegistry) AddField(ld *ListDisplay) {
 	ld.Ordering = ldr.MaxOrdering
 }
 
-func (ldr *ListDisplayRegistry) BuildFormForListEditable(adminContext IAdminContext, ID string, model interface{}) *FormListEditable {
-	form := NewFormListEditableFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr)
+func (ldr *ListDisplayRegistry) BuildFormForListEditable(adminContext IAdminContext, ID string, model interface{}, formError error) *FormListEditable {
+	form := NewFormListEditableFromListDisplayRegistry(adminContext, ldr.Prefix, ID, model, ldr, formError)
 	return form
 }
 

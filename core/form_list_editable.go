@@ -75,11 +75,12 @@ func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interf
 	}
 	renderContext := &FormRenderContext{Context: adminContext}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
-		errors := field.ProceedForm(form, nil, renderContext)
-		if len(errors) == 0 {
+		errors1 := field.ProceedForm(form, nil, renderContext)
+		if len(errors1) == 0 {
 			continue
 		}
-		formError.FieldError[fieldName] = errors
+		field.FieldConfig.Widget.SetErrors(errors1)
+		formError.FieldError[fieldName] = errors1
 	}
 	if formError.IsEmpty() {
 		valueOfModel := reflect.ValueOf(gormModel)
@@ -124,6 +125,10 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 	modelForm.ForAdminPanel = true
 	ret := &FormListEditable{FieldRegistry: NewFieldRegistry()}
 	ret.SetPrefix(prefix)
+	renderer := NewTemplateRenderer("")
+	renderer.AddFuncMap("Translate", func(v interface{}) string {
+		return Tf(adminContext.GetLanguage().Code, v)
+	})
 	for ld := range listDisplayRegistry.GetAllFields() {
 		if ld.IsEditable && ld.Field.Name != "ID" {
 			fieldFromNewForm, _ := modelForm.FieldRegistry.GetByName(ld.Field.Name)
@@ -134,6 +139,7 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%s_%s", ID, name))
 			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
+			fieldFromNewForm.FieldConfig.Widget.RenderUsingRenderer(renderer)
 			fieldFromNewForm.SetUpField = ld.Field.SetUpField
 			ld.Field.FieldConfig.Widget.CloneAllOtherImportantSettings(fieldFromNewForm.FieldConfig.Widget)
 			ret.FieldRegistry.AddField(fieldFromNewForm)
@@ -147,11 +153,28 @@ func NewFormListEditableForNewModelFromListDisplayRegistry(adminContext IAdminCo
 	return ret
 }
 
-func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, prefix string, ID string, model interface{}, listDisplayRegistry *ListDisplayRegistry) *FormListEditable {
+func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, prefix string, ID string, model interface{}, listDisplayRegistry *ListDisplayRegistry, formError error) *FormListEditable {
 	modelForm := NewFormFromModel(model, []string{}, []string{}, false, "")
 	modelForm.ForAdminPanel = true
 	ret := &FormListEditable{FieldRegistry: NewFieldRegistry()}
 	ret.SetPrefix(prefix)
+	renderer := NewTemplateRenderer("")
+	renderer.AddFuncMap("Translate", func(v interface{}) string {
+		return Tf(adminContext.GetLanguage().Code, v)
+	})
+	if formError != nil {
+		if formErrorT, ok := formError.(*FormError); ok {
+			modelForm.FormError = formErrorT
+		}
+	}
+	if modelForm.FormError == nil {
+		ret.FormError = &FormError{
+			FieldError:    make(map[string]ValidationError),
+			GeneralErrors: make(ValidationError, 0),
+		}
+	} else {
+		ret.FormError = modelForm.FormError
+	}
 	for ld := range listDisplayRegistry.GetAllFields() {
 		if ld.IsEditable && ld.Field.Name != "ID" {
 			fieldFromNewForm, _ := modelForm.FieldRegistry.GetByName(ld.Field.Name)
@@ -162,15 +185,20 @@ func NewFormListEditableFromListDisplayRegistry(adminContext IAdminContext, pref
 			fieldFromNewForm.FieldConfig.Widget.SetName(fmt.Sprintf("%s_%s", ID, name))
 			fieldFromNewForm.FieldConfig.Widget.SetShowOnlyHTMLInput()
 			fieldFromNewForm.FieldConfig.Widget.RenderForAdmin()
+			fieldFromNewForm.FieldConfig.Widget.RenderUsingRenderer(renderer)
 			fieldFromNewForm.SetUpField = ld.Field.SetUpField
 			ld.Field.FieldConfig.Widget.CloneAllOtherImportantSettings(fieldFromNewForm.FieldConfig.Widget)
+			if formError != nil {
+				if formErrorT, ok := formError.(*FormError); ok {
+					fieldError, ok := formErrorT.FieldError[ld.Field.Name]
+					if ok {
+						fieldFromNewForm.FieldConfig.Widget.SetErrors(fieldError)
+					}
+				}
+			}
 			ret.FieldRegistry.AddField(fieldFromNewForm)
 		}
 	}
 	ret.FormRenderContext = &FormRenderContext{Model: model}
-	ret.FormError = &FormError{
-		FieldError:    make(map[string]ValidationError),
-		GeneralErrors: make(ValidationError, 0),
-	}
 	return ret
 }

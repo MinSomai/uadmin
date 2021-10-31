@@ -41,11 +41,16 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			}
 			serverKey = c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.APICookieName))
 			if serverKey == "" {
-				if c.Query("for-uadmin-panel") == "1" {
+				if c.Query("for-uadmin-panel") == "1" || strings.Contains(c.Request.URL.String(), core.CurrentConfig.D.Uadmin.RootAdminURL){
 					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
 				} else {
 					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.APICookieName)
 				}
+			}
+			if serverKey == "" {
+				c.String(400, "No user session found")
+				c.Abort()
+				return
 			}
 			defaultSessionAdapter, _ := b.SessionAdapterRegistry.GetDefaultAdapter()
 			session, _ := defaultSessionAdapter.GetByKey(serverKey)
@@ -91,6 +96,10 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			serverKey := c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.APICookieName))
 			if serverKey == "" {
 				serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
+			}
+			if serverKey == "" {
+				c.Next()
+				return
 			}
 			defaultSessionAdapter, _ := b.SessionAdapterRegistry.GetDefaultAdapter()
 			session, _ := defaultSessionAdapter.GetByKey(serverKey)

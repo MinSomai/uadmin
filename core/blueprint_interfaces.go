@@ -93,6 +93,10 @@ func (r BlueprintRegistry) Register(blueprint IBlueprint) {
 	r.RegisteredBlueprints[blueprint.GetName()] = blueprint
 }
 
+func (r BlueprintRegistry) DeRegister(blueprint IBlueprint) {
+	delete(r.RegisteredBlueprints, blueprint.GetName())
+}
+
 func (r BlueprintRegistry) GetMigrationTree() IMigrationTree {
 	return r.MigrationTree
 }
@@ -301,6 +305,13 @@ func (r BlueprintRegistry) InitializeRouting(app IApp, router *gin.Engine) {
 		ctx.Header("Content-Type", "application/javascript")
 		ctx.String(200, fmt.Sprintf("setLocalization(%s)", string(langMapB)))
 	})
+	if CurrentConfig.D.Debug {
+		router.GET("/get_not_translated/", func(ctx *gin.Context) {
+			notTranslated, _ := json.Marshal(NotTranslatedData.D)
+			ctx.Header("Content-Type", "application/json")
+			ctx.String(200, string(notTranslated))
+		})
+	}
 	router.POST("/testcsrf/", func(c *gin.Context) {
 		c.String(200, "csrf token test passed")
 	})

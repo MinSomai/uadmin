@@ -22,3 +22,4 @@ swagger:
   api_editor_listen_port: 8083
 uadmin:
   secure_cookie: true
+debug: true

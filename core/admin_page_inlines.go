@@ -127,7 +127,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart
 		isNew := false
 		if !strings.Contains(inlineID, "new") {
 			qs.LoadDataForModelByID(realInlineID[0], modelI)
-			form = api.ListDisplay.BuildFormForListEditable(adminContext, realInlineID[0], modelI)
+			form = api.ListDisplay.BuildFormForListEditable(adminContext, realInlineID[0], modelI, nil)
 			collection[realInlineID[0]] = form
 			if len(inlineIDToRemove) > 0 {
 				removalError = qs.RemoveModelPermanently(modelI)
@@ -167,6 +167,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart
 					}
 				}
 			}
+			collection[realInlineID[0]].FormError = formError
 		}
 	}
 	if err {
@@ -185,7 +186,7 @@ func NewAdminPageInline(
 	ld := NewListDisplayRegistryFromGormModelForInlines(modelI)
 	ld.SetPrefix(PrepareStringToBeUsedForHTMLID(inlineIden))
 	ret := &AdminPageInline{
-		Actions:           NewAdminModelActionRegistry(),
+		Actions:           NewEmptyModelActionRegistry(),
 		ExcludeFields:     NewFieldRegistry(),
 		FieldsToShow:      NewFieldRegistry(),
 		Validators:        NewValidatorRegistry(),

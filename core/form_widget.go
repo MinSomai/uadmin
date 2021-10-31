@@ -221,6 +221,7 @@ func (w *Widget) IsValueConfigured() bool {
 
 func (w *Widget) CloneAllOtherImportantSettings(widget IWidget) {
 	widget.SetPopulate(w.Populate)
+	widget.SetErrors(w.ValidationErrors)
 }
 
 func (w *Widget) IsValueChanged() bool {
@@ -1095,12 +1096,15 @@ type SelectWidget struct {
 	Widget
 	OptGroups                map[string][]*SelectOptGroup
 	DontValidateForExistence bool
+	Multiple bool
 }
 
 func (w *SelectWidget) CloneAllOtherImportantSettings(widget IWidget) {
 	widget1 := widget.(*SelectWidget)
 	widget1.OptGroups = w.OptGroups
 	widget1.Populate = w.Populate
+	widget1.Multiple = w.Multiple
+	widget.SetErrors(w.ValidationErrors)
 }
 
 func (w *SelectWidget) GetWidgetType() WidgetType {
@@ -1120,10 +1124,14 @@ func (w *SelectWidget) GetTemplateName() string {
 
 func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {
 	var value interface{}
+	realV := make([]string, 0)
 	if w.Populate != nil {
 		value = w.Populate(formRenderContext, currentField)
 	} else {
 		value = TransformValueForWidget(w.Value)
+	}
+	if w.Multiple {
+		realV = value.([]string)
 	}
 	optGroupSstringified := make(map[string][]*SelectOptGroupStringified)
 	for optGroupName, optGroups := range w.OptGroups {
@@ -1134,16 +1142,30 @@ func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext,
 			if w.IsForAdmin {
 				optionTemplateName = "admin/" + optionTemplateName
 			}
-			optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
-				OptLabel:           optGroup.OptLabel,
-				Value:              value1,
-				Selected:           value1 == value,
-				OptionTemplateName: optionTemplateName,
-				Attrs:              make(map[string]string),
-			})
+			if w.Multiple {
+				optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
+					OptLabel:           optGroup.OptLabel,
+					Value:              value1,
+					Selected:           Contains(realV, value1),
+					OptionTemplateName: optionTemplateName,
+					Attrs:              make(map[string]string),
+				})
+			} else {
+				optGroupSstringified[optGroupName] = append(optGroupSstringified[optGroupName], &SelectOptGroupStringified{
+					OptLabel:           optGroup.OptLabel,
+					Value:              value1,
+					Selected:           value1 == value,
+					OptionTemplateName: optionTemplateName,
+					Attrs:              make(map[string]string),
+				})
+			}
 		}
 	}
-	w.SetAttr("data-selected", value.(string))
+	if w.Multiple {
+		w.SetAttr("multiple", "true")
+	} else {
+		w.SetAttr("data-selected", value.(string))
+	}
 	return map[string]interface{}{
 		"Attrs": w.GetAttrs(),
 		"Name":  w.GetHTMLInputName(), "OptGroups": optGroupSstringified,
@@ -1184,11 +1206,19 @@ func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects
 			}
 		}
 	}
-	w.SetValue(v[0])
+	if w.Multiple {
+		w.SetValue(v)
+	} else {
+		w.SetValue(v[0])
+	}
 	if foundNotExistent {
 		return NewHTTPErrorResponse("value_invalid_for_field", "not valid value %s for the field %s", notExistentValue, w.FieldDisplayName)
 	}
-	w.SetOutputValue(v[0])
+	if w.Multiple {
+		w.SetOutputValue(v)
+	} else {
+		w.SetOutputValue(v[0])
+	}
 	return nil
 }
 
@@ -1224,6 +1254,7 @@ func (w *ForeignKeyWidget) CloneAllOtherImportantSettings(widget IWidget) {
 	widget1.GenerateModelInterface = w.GenerateModelInterface
 	widget1.Autocomplete = w.Autocomplete
 	widget1.Populate = w.Populate
+	widget.SetErrors(w.ValidationErrors)
 }
 
 func (w *ForeignKeyWidget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {

@@ -81,7 +81,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							ListEditableFormError    bool
 							AdminModelActionRegistry *AdminModelActionRegistry
 							Message                  string
-							Error                    string
+							Error                    error
 							CurrentAdminContext      IAdminContext
 							NoPermissionToAddNew     bool
 							AdminPage                *AdminPage
@@ -118,7 +118,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 									objectModel, _ := c.AdminFilterObjects.GenerateModelInterface()
 									afo1.LoadDataForModelByID(objectID, objectModel)
 									modelI, _ := c.AdminFilterObjects.GenerateModelInterface()
-									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", objectID, modelI, adminPage.ListDisplay)
+									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", objectID, modelI, adminPage.ListDisplay, nil)
 									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel, c)
 									if formListEditableErr.IsEmpty() {
 										dbRes := afo1.SaveModel(objectModel)
@@ -126,6 +126,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 											c.ListEditableFormError = true
 											return dbRes
 										}
+									} else {
+										return formListEditableErr
 									}
 								}
 								if afo1.GetLastError() != nil {
@@ -134,7 +136,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								return nil
 							})
 							if err != nil {
-								c.Error = err.Error()
+								c.Error = err
 							}
 						}
 						c.AdminFilterObjects.GetFullQuerySet().Count(&c.TotalRecords)
@@ -353,7 +355,7 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 								continue
 							}
 							for iterateAdminObjects := range inline.GetAll(c, c.Model) {
-								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.ID, iterateAdminObjects.Model)
+								listEditable := inline.ListDisplay.BuildFormForListEditable(c, iterateAdminObjects.ID, iterateAdminObjects.Model, nil)
 								c.ListEditableFormsForInlines.AddForInline(inline.Prefix, iterateAdminObjects.ID, listEditable)
 							}
 						}

@@ -119,6 +119,7 @@ type UadminConfigurableConfig struct {
 	Admin   *UadminAdminOptions   `yaml:"admin"`
 	API     *UadminAPIOptions     `yaml:"api"`
 	Swagger *UadminSwaggerOptions `yaml:"swagger"`
+	Debug bool `yaml:"debug"`
 }
 
 type FieldChoice struct {

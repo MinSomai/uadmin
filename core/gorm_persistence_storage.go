@@ -686,16 +686,19 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 		joinModelI := ProjectModels.GetModelFromInterface(mInterface)
 		model, _ := joinModelI.GenerateModelI()
 		model1, _ := joinModelI.GenerateModelI()
-		currentModelDesc := ProjectModels.GetModelFromInterface(afo.GetCurrentModel())
 		relation := field.Schema.Relationships
 		relationsString := []string{}
 		for _, relation1 := range relation.Relations {
 			for _, reference := range relation1.References {
+				if joinModelI.Statement.Schema.Table != reference.PrimaryKey.Schema.Table &&
+					joinModelI.Statement.Schema.Table != reference.ForeignKey.Schema.Table {
+					continue
+				}
 				relationsString = append(
 					relationsString,
 					fmt.Sprintf(
 						"%s.%s = %s.%s",
-						joinModelI.Statement.Table, reference.PrimaryKey.DBName, currentModelDesc.Statement.Table,
+						reference.PrimaryKey.Schema.Table, reference.PrimaryKey.DBName, reference.ForeignKey.Schema.Table,
 						reference.ForeignKey.DBName,
 					),
 				)
@@ -784,7 +787,7 @@ func (afo *GormAdminFilterObjects) GetDB() IPersistenceStorage {
 }
 
 func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) error {
-	afo.UadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
+	afo.UadminDatabase.Db.Session(&gorm.Session{FullSaveAssociations: true}).Transaction(func(tx *gorm.DB) error {
 		ret := handler(&GormAdminFilterObjects{
 			UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter}, GenerateModelI: afo.GenerateModelI,
 			InitialGormQuerySet: NewGormPersistenceStorage(tx),

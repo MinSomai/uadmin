@@ -102,3 +102,16 @@ li[role='presentation']:last-child > a {
     width: auto;
     margin-left: 10px;
 }
+.error-cont {
+    display: flex;
+    align-items: center;
+    background-image: linear-gradient(to bottom,#f2dede 0,#e7c3c3 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff2dede', endColorstr='#ffe7c3c3', GradientType=0);
+    background-repeat: repeat-x;
+    color: #a94442;
+    background-color: #f2dede;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border: 1px solid #dca7a7;
+    border-radius: 4px;
+}

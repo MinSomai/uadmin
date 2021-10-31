@@ -76,7 +76,17 @@ func (fe *FormError) IsEmpty() bool {
 	return len(fe.FieldError) == 0 && len(fe.GeneralErrors) == 0
 }
 
+func (fe *FormError) String() string {
+	if len(fe.GeneralErrors) > 0 {
+		return fe.GeneralErrors[0].Error()
+	}
+	return "Form validation not successful"
+}
+
 func (fe *FormError) Error() string {
+	if len(fe.GeneralErrors) > 0 {
+		return fe.GeneralErrors[0].Error()
+	}
 	return "Form validation not successful"
 }
 

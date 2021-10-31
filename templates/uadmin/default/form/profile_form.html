@@ -1,6 +1,15 @@
 <form method="POST" action="" enctype="multipart/form-data">
     <input type="hidden" name="csrf-token" value="{{CSRF .RequestContext.SessionKey}}" />
     <br/>
+    {{ if .FormError }}
+            {{ range $generalError := .FormError.GeneralErrors }}
+            <div class="error-cont">
+                                                                <span>
+                                                                    {{Translate $generalError }}
+                                                                </span>
+            </div>
+            {{ end }}
+    {{ end }}
     <div class="col-sm-3">
         <br />
         <div class="list-group">
