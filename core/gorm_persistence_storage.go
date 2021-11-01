@@ -850,6 +850,9 @@ func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.PaginatedGormQuerySet.Preload(clause.Associations).Find(models)
 		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
+		if afo.PaginatedGormQuerySet.GetLastError() != nil {
+			panic(afo.PaginatedGormQuerySet.GetLastError())
+		}
 		s := reflect.Indirect(reflect.ValueOf(models))
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
@@ -880,6 +883,9 @@ func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *Iterate
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.GormQuerySet.Preload(clause.Associations).Find(models)
 		afo.SetLastError(afo.GormQuerySet.GetLastError())
+		if afo.GormQuerySet.GetLastError() != nil {
+			panic(afo.GormQuerySet.GetLastError())
+		}
 		s := reflect.Indirect(reflect.ValueOf(models))
 		for i := 0; i < s.Len(); i++ {
 			model := s.Index(i).Interface()
