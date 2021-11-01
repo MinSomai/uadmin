@@ -1,13 +1,11 @@
 package proofit_example
 
 import (
-	"fmt"
-	abtestmodel "github.com/sergeyglazyrindev/uadmin/blueprint/abtest/models"
-	"github.com/sergeyglazyrindev/uadmin/blueprint/approval/models"
-	logmodel "github.com/sergeyglazyrindev/uadmin/blueprint/logging/models"
+	nestedset "github.com/griffinqiu/go-nested-set"
+	models2 "github.com/sergeyglazyrindev/proofit-example/blueprint/proofitcore/models"
+	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"strconv"
-	"time"
 )
 
 type CreateFakedDataCommand struct {
@@ -15,64 +13,45 @@ type CreateFakedDataCommand struct {
 
 func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 	uadminDatabase := core.NewUadminDatabase()
+	for i := range core.GenerateNumberSequence(1, 10) {
+		uadminDatabase.Db.Create(&models2.ScienceCategory{Name: "category_" + strconv.Itoa(i)})
+	}
 	for i := range core.GenerateNumberSequence(1, 100) {
-		userModel := &core.User{
-			Email:     fmt.Sprintf("admin_%d@example.com", i),
-			Username:  "admin_" + strconv.Itoa(i),
-			FirstName: "firstname_" + strconv.Itoa(i),
-			LastName:  "lastname_" + strconv.Itoa(i),
-		}
-		uadminDatabase.Db.Create(&userModel)
-		oneTimeAction := &core.OneTimeAction{
-			User:      *userModel,
-			ExpiresOn: time.Now(),
-			Code:      strconv.Itoa(i),
-		}
-		uadminDatabase.Db.Create(&oneTimeAction)
-		session := &core.Session{
-			User:      userModel,
-			LoginTime: time.Now(),
-			LastLogin: time.Now(),
-		}
-		uadminDatabase.Db.Create(&session)
+		salt := core.GenerateRandomString(currentApp.Config.D.Auth.SaltLength)
+		// hashedPassword, err := utils2.HashPass(password, salt)
+		hashedPassword, _ := utils2.HashPass("password_" + strconv.Itoa(i), salt)
+		user := core.GenerateUserModel()
+		user.SetFirstName("First name " + strconv.Itoa(i))
+		user.SetLastName("Last name " + strconv.Itoa(i))
+		user.SetUsername("username-" + strconv.Itoa(i))
+		user.SetEmail("username-" + strconv.Itoa(i) + "@proofit.com")
+		user.SetPassword(hashedPassword)
+		user.SetActive(true)
+		user.SetIsStaff(true)
+		user.SetSalt(salt)
+		user.SetIsPasswordUsable(true)
+		uadminDatabase.Db.Create(user)
+		uadminDatabase.Db.Create(&models2.Expert{UserID: user.GetID()})
 	}
-	var contentTypes []*core.ContentType
-	uadminDatabase.Db.Find(&contentTypes)
-	for _, contentType := range contentTypes {
-		logModel := logmodel.Log{
-			Username:      "admin",
-			ContentTypeID: contentType.ID,
-		}
-		uadminDatabase.Db.Create(&logModel)
-		approvalModel := models.Approval{
-			ContentTypeID:       contentType.ID,
-			ModelPK:             uint(1),
-			ColumnName:          "Email",
-			OldValue:            "admin@example.com",
-			NewValue:            "admin1@example.com",
-			NewValueDescription: "changing email",
-			ChangedBy:           "superuser",
-			ChangeDate:          time.Now(),
-		}
-		uadminDatabase.Db.Create(&approvalModel)
-		abTestModel := abtestmodel.ABTest{
-			Name:          "test_1",
-			ContentTypeID: contentType.ID,
-		}
-		uadminDatabase.Db.Create(&abTestModel)
-		for i := range core.GenerateNumberSequence(0, 100) {
-			abTestValueModel := abtestmodel.ABTestValue{
-				ABTest: abTestModel,
-				Value:  strconv.Itoa(i),
-			}
-			uadminDatabase.Db.Create(&abTestValueModel)
-		}
+	for i := range core.GenerateNumberSequence(1, 10) {
+		uadminDatabase.Db.Create(&models2.ScienceTerm{Alias: "axiom_" + strconv.Itoa(i), Type: 1, ScienceCategoryID: uint(i)})
 	}
-	for i := range core.GenerateNumberSequence(1, 20) {
-		groupModel := core.UserGroup{
-			GroupName: fmt.Sprintf("Group name %d", i),
-		}
-		uadminDatabase.Db.Create(&groupModel)
+	for i := range core.GenerateNumberSequence(1, 10) {
+		uadminDatabase.Db.Create(&models2.ScienceTerm{Alias: "law_" + strconv.Itoa(i), Type: 2, ScienceCategoryID: uint(i)})
+	}
+	for i := range core.GenerateNumberSequence(1, 10) {
+		uadminDatabase.Db.Create(&models2.ScienceTerm{Alias: "deduction_" + strconv.Itoa(i), Type: 3, ScienceCategoryID: uint(i)})
+	}
+	for i := range core.GenerateNumberSequence(1, 10) {
+		uadminDatabase.Db.Create(&models2.ScienceTerm{Alias: "induction_" + strconv.Itoa(i), Type: 4, ScienceCategoryID: uint(i)})
+	}
+	for i := range core.GenerateNumberSequence(1, 100) {
+		discussion := &models2.Discussion{AuthorID: uint(i)}
+		uadminDatabase.Db.Create(discussion)
+		discussionComment := &models2.DiscussionComment{DiscussionID: discussion.ID, AuthorID: uint(i % 10) + 1}
+		nestedset.Create(uadminDatabase.Db, discussionComment, nil)
+		discussionComment1 := &models2.DiscussionComment{DiscussionID: discussion.ID, AuthorID: uint(((i + 1) % 10) + 1)}
+		nestedset.Create(uadminDatabase.Db, discussionComment1, discussionComment)
 	}
 	uadminDatabase.Close()
 	return nil

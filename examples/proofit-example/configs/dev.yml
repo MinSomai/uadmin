@@ -1,8 +1,10 @@
 test: "aaa"
 db:
   default:
-    type: "sqlite"
-    name: "uadmin.db"
+    type: "postgres"
+    name: "proofit"
+    password: "123456"
+    user: "proofit"
 auth:
   jwt_secret_token: "jdnfksdmfksd"
   max_username_length: 40

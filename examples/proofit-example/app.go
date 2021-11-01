@@ -23,8 +23,11 @@ func NewProofitApp(environment string) *uadmin.App {
 	app1.Initialize()
 	app1.InitializeRouter()
 	core.CurrentConfig.OverridenTemplatesFS = &templatesRoot
+	currentApp = app1
 	return app1
 }
 
 //go:embed templates
 var templatesRoot embed.FS
+
+var currentApp *uadmin.App

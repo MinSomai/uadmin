@@ -18,8 +18,8 @@ type ScienceCategory struct {
 type ScienceCategoryLocalized struct {
 	core.Model
 	ScienceCategory ScienceCategory
-	ScienceCategoryID uint
-	LanguageCode string `gorm:"size=4" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	ScienceCategoryID uint `gorm:"index:sciencecategory_localized_lang_categoryid,unique"`
+	LanguageCode string `gorm:"size=4;index:sciencecategory_localized_lang_categoryid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
 	Name        string `gorm:"not null" uadmin:"inline"`
 	Description string `uadminform:"TextareaFieldOptions" uadmin:"inline"`
 }
@@ -83,7 +83,7 @@ type ScienceTerm struct {
 	Alias             string          `uadmin:"list,search" gorm:"uniqueIndex;not null"`
 	Type              ScienceTermType `uadmin:"list,search" uadminform:"SelectFieldOptions"`
 	Discussion        *Discussion     `uadmin:"list" uadminform:"ForeignKeyWithAutocompleteFieldOptions"`
-	DiscussionID      uint            `gorm:"default:null;uniqueIndex;" uadmin:"search"`
+	DiscussionID      sql.NullInt64            `gorm:"default:null;uniqueIndex;" uadmin:"search"`
 	ScienceCategory   ScienceCategory `uadmin:"list,search" uadminform:"ForeignKeyWithAutocompleteFieldOptions"`
 	ScienceCategoryID uint
 }
@@ -91,8 +91,8 @@ type ScienceTerm struct {
 type ScienceTermLocalized struct {
 	core.Model
 	ScienceTerm ScienceTerm
-	ScienceTermID uint
-	LanguageCode string `gorm:"size=4" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	ScienceTermID uint `gorm:"index:scienceterm_localized_lang_termid,unique"`
+	LanguageCode string `gorm:"size=4;index:scienceterm_localized_lang_termid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
 	ShortDescription  string          `uadmin:"inline" uadminform:"TextareaFieldOptions"`
 	Description       string          `uadmin:"inline" uadminform:"TextareaFieldOptions"`
 }
@@ -150,8 +150,8 @@ type Discussion struct {
 type DiscussionLocalized struct {
 	core.Model
 	Discussion Discussion
-	DiscussionID uint
-	LanguageCode string `gorm:"size=4" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	DiscussionID uint `gorm:"index:discussion_localized_lang_discussionid,unique"`
+	LanguageCode string `gorm:"size=4;index:discussion_localized_lang_discussionid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
 	Subject  string `uadmin:"inline"`
 }
 
@@ -161,7 +161,7 @@ func (d *Discussion) String() string {
 }
 
 type DiscussionComment struct {
-	ID            uint       `gorm:"primarykey" nestedset:"id"`
+	ID            int       `gorm:"primarykey" nestedset:"id"`
 	Discussion    Discussion `uadmin:"list,search" uadminform:"ForeignKeyReadonlyFieldOptions"`
 	DiscussionID  uint       `nestedset:"scope" uadmin:"search"`
 	CreatedAt     time.Time
@@ -185,8 +185,8 @@ func (d *DiscussionComment) String() string {
 type DiscussionCommentLocalized struct {
 	core.Model
 	DiscussionComment DiscussionComment
-	DiscussionCommentID uint
-	LanguageCode string `gorm:"size=4" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	DiscussionCommentID int `gorm:"index:discussion_comment_localized_lang_discussionid,unique"`
+	LanguageCode string `gorm:"size=4;index:discussion_comment_localized_lang_discussionid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
 	Subject       string             `uadmin:"inline"`
 	Body          string             `uadmin:"inline" uadminform:"TextareaFieldOptions"`
 	Approved bool
@@ -215,7 +215,7 @@ type DiscussionCommentReview struct {
 	Author              Expert `uadmin:"inline" uadminform:"ForeignKeyWithAutocompleteFieldOptions"`
 	AuthorID            uint   `gorm:"index:discussion_comment_review_author"`
 	DiscussionComment   DiscussionComment
-	DiscussionCommentID uint `gorm:"index:discussion_comment_review_author"`
+	DiscussionCommentID int `gorm:"index:discussion_comment_review_author"`
 }
 
 type ProofItApp struct {
