@@ -800,7 +800,7 @@ func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilte
 
 func (afo *GormAdminFilterObjects) LoadDataForModelByID(ID interface{}, model interface{}) {
 	modelDescription := ProjectModels.GetModelFromInterface(model)
-	afo.UadminDatabase.Db.Preload(clause.Associations).Where(fmt.Sprintf(" \"%s\" = ?", modelDescription.Statement.Schema.PrimaryFields[0].Name), ID).First(model)
+	afo.UadminDatabase.Db.Preload(clause.Associations).Where(fmt.Sprintf(" \"%s\" = ?", modelDescription.Statement.Schema.PrimaryFields[0].DBName), ID).First(model)
 	afo.SetLastError(afo.UadminDatabase.Db.Error)
 }
 
