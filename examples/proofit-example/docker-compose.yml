@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:12
+    command: postgres -c 'max_connections=200'
+    stdin_open: true
+    tty: true
+    env_file:
+      - database.env
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+  proofit:
+    image: proofit/proofit:test
+    ports:
+      - 8081:8080
+    links:
+      - postgres
+    # entrypoint: /proofit-example/proofit-example migrate up
+volumes:
+  database-data: # named volumes can be managed easier using docker-compose
