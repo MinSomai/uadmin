@@ -32,6 +32,7 @@ type IBlueprintRegistry interface {
 	InitializeRouting(app IApp, router *gin.Engine)
 	Initialize(app IApp)
 	ResetMigrationTree()
+	DeRegister(blueprint IBlueprint)
 }
 
 type Blueprint struct {
