@@ -19,6 +19,7 @@ func NewProofitApp(environment string) *uadmin.App {
 	app1.BlueprintRegistry.DeRegister(approval.ConcreteBlueprint)
 	app1.BlueprintRegistry.DeRegister(logblueprint.ConcreteBlueprint)
 	app1.BlueprintRegistry.DeRegister(settingsblueprint.ConcreteBlueprint)
+	app1.RegisterCommand("generate-fake-data", &CreateFakedDataCommand{})
 	app1.Initialize()
 	app1.InitializeRouter()
 	core.CurrentConfig.OverridenTemplatesFS = &templatesRoot
