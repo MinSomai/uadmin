@@ -54,7 +54,7 @@ type translationLoaded map[string]string
 
 var langMapCache map[string]translationLoaded
 
-func ReadLocalization(languageCode string) translationLoaded {
+func readLocalization(languageCode string) translationLoaded {
 	langMap, ok := langMapCache[languageCode]
 	if ok {
 		return langMap
@@ -90,6 +90,7 @@ func ReadLocalization(languageCode string) translationLoaded {
 	langMapCache[languageCode] = ret
 	return ret
 }
+
 const translateMe = "Translate me ---> "
 
 // SafeCounter is safe to use concurrently.
@@ -149,7 +150,7 @@ func Tf(lang string, iTerm interface{}, args ...interface{}) string {
 	}
 	langMap, ok := langMapCache[lang]
 	if !ok {
-		langMap = ReadLocalization(lang)
+		langMap = readLocalization(lang)
 	}
 	// If the term exists, then return it
 	if val, ok := langMap[term]; ok {

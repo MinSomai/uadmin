@@ -1096,7 +1096,7 @@ type SelectWidget struct {
 	Widget
 	OptGroups                map[string][]*SelectOptGroup
 	DontValidateForExistence bool
-	Multiple bool
+	Multiple                 bool
 }
 
 func (w *SelectWidget) CloneAllOtherImportantSettings(widget IWidget) {

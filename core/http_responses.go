@@ -14,9 +14,9 @@ func APIBadResponse(error string) gin.H {
 }
 
 type HTTPErrorResponse struct {
-	Code string
+	Code    string
 	Message string
-	Params []interface{}
+	Params  []interface{}
 }
 
 func (her *HTTPErrorResponse) Error() string {
@@ -35,4 +35,3 @@ func APIBadResponseWithCode(code string, error string, params ...string) gin.H {
 func APISuccessResp() gin.H {
 	return gin.H{"status": true}
 }
-

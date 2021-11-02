@@ -124,13 +124,13 @@ func (apr *AdminPageRegistry) PreparePagesForTemplate(permRegistry *UserPermRegi
 }
 
 type AdminPage struct {
-	Model                              interface{}                                               `json:"-"`
-	GenerateModelI                     func() (interface{}, interface{})                         `json:"-"`
-	GenerateForm                       func(modelI interface{}, ctx IAdminContext) *Form         `json:"-"`
+	Model                              interface{}                                                              `json:"-"`
+	GenerateModelI                     func() (interface{}, interface{})                                        `json:"-"`
+	GenerateForm                       func(modelI interface{}, ctx IAdminContext) *Form                        `json:"-"`
 	GetQueryset                        func(IAdminContext, *AdminPage, *AdminRequestParams) IAdminFilterObjects `json:"-"`
-	ModelActionsRegistry               *AdminModelActionRegistry                                 `json:"-"`
-	FilterOptions                      *FilterOptionsRegistry                                    `json:"-"`
-	ActionsSelectionCounter            bool                                                      `json:"-"`
+	ModelActionsRegistry               *AdminModelActionRegistry                                                `json:"-"`
+	FilterOptions                      *FilterOptionsRegistry                                                   `json:"-"`
+	ActionsSelectionCounter            bool                                                                     `json:"-"`
 	BlueprintName                      string
 	EmptyValueDisplay                  string                   `json:"-"`
 	ExcludeFields                      IFieldRegistry           `json:"-"`
@@ -174,7 +174,7 @@ type AdminPage struct {
 	NoPermissionToAddNew               bool
 	NoPermissionToEdit                 bool
 	PermissionName                     CustomPermission
-	PreloadData                        func(afo IAdminFilterObjects) `json:"-"`
+	PreloadData                        func(afo IAdminFilterObjects)                                                                `json:"-"`
 	CustomizeQuerySet                  func(adminContext IAdminContext, afo IAdminFilterObjects, requestParams *AdminRequestParams) `json:"-"`
 }
 
@@ -252,7 +252,7 @@ func (ap *AdminPage) HandleModelAction(modelActionName string, ctx *gin.Context)
 	}
 }
 
-func (ap *AdminPage) FetchFilterOptions(ctx *gin.Context, ) []*DisplayFilterOption {
+func (ap *AdminPage) FetchFilterOptions(ctx *gin.Context) []*DisplayFilterOption {
 	adminContext := &AdminContext{}
 	adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 	PopulateTemplateContextForAdminPanel(ctx, adminContext, adminRequestParams)

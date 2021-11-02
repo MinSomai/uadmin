@@ -301,7 +301,7 @@ func (r BlueprintRegistry) InitializeRouting(app IApp, router *gin.Engine) {
 		c := &Context{}
 		adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 		PopulateTemplateContextForAdminPanel(ctx, c, adminRequestParams)
-		langMap := ReadLocalization(c.GetLanguage().Code)
+		langMap := readLocalization(c.GetLanguage().Code)
 		langMapB, _ := json.Marshal(langMap)
 		ctx.Header("Content-Type", "application/javascript")
 		ctx.String(200, fmt.Sprintf("setLocalization(%s)", string(langMapB)))

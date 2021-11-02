@@ -11,17 +11,17 @@ import (
 
 type ScienceCategory struct {
 	core.Model
-	Name        string `gorm:"not null" uadmin:"list,search"`
-	Icon        string `uadminform:"ScienceCategoryPhotoFormOptions" gorm:"default:''"`
+	Name string `gorm:"not null" uadmin:"list,search"`
+	Icon string `uadminform:"ScienceCategoryPhotoFormOptions" gorm:"default:''"`
 }
 
 type ScienceCategoryLocalized struct {
 	core.Model
-	ScienceCategory ScienceCategory
-	ScienceCategoryID uint `gorm:"index:sciencecategory_localized_lang_categoryid,unique"`
-	LanguageCode string `gorm:"size=4;index:sciencecategory_localized_lang_categoryid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
-	Name        string `gorm:"not null" uadmin:"inline"`
-	Description string `uadminform:"TextareaFieldOptions" uadmin:"inline"`
+	ScienceCategory   ScienceCategory
+	ScienceCategoryID uint   `gorm:"index:sciencecategory_localized_lang_categoryid,unique"`
+	LanguageCode      string `gorm:"size=4;index:sciencecategory_localized_lang_categoryid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	Name              string `gorm:"not null" uadmin:"inline"`
+	Description       string `uadminform:"TextareaFieldOptions" uadmin:"inline"`
 }
 
 func (sc *ScienceCategory) String() string {
@@ -83,18 +83,18 @@ type ScienceTerm struct {
 	Alias             string          `uadmin:"list,search" gorm:"uniqueIndex;not null"`
 	Type              ScienceTermType `uadmin:"list,search" uadminform:"SelectFieldOptions"`
 	Discussion        *Discussion     `uadmin:"list" uadminform:"ForeignKeyWithAutocompleteFieldOptions"`
-	DiscussionID      sql.NullInt64            `gorm:"default:null;uniqueIndex;" uadmin:"search"`
+	DiscussionID      sql.NullInt64   `gorm:"default:null;uniqueIndex;" uadmin:"search"`
 	ScienceCategory   ScienceCategory `uadmin:"list,search" uadminform:"ForeignKeyWithAutocompleteFieldOptions"`
 	ScienceCategoryID uint
 }
 
 type ScienceTermLocalized struct {
 	core.Model
-	ScienceTerm ScienceTerm
-	ScienceTermID uint `gorm:"index:scienceterm_localized_lang_termid,unique"`
-	LanguageCode string `gorm:"size=4;index:scienceterm_localized_lang_termid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
-	ShortDescription  string          `uadmin:"inline" uadminform:"TextareaFieldOptions"`
-	Description       string          `uadmin:"inline" uadminform:"TextareaFieldOptions"`
+	ScienceTerm      ScienceTerm
+	ScienceTermID    uint   `gorm:"index:scienceterm_localized_lang_termid,unique"`
+	LanguageCode     string `gorm:"size=4;index:scienceterm_localized_lang_termid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	ShortDescription string `uadmin:"inline" uadminform:"TextareaFieldOptions"`
+	Description      string `uadmin:"inline" uadminform:"TextareaFieldOptions"`
 }
 
 func (st *ScienceTerm) String() string {
@@ -119,8 +119,8 @@ func (st *ScienceTerm) BeforeCreate(tx *gorm.DB) error {
 
 type Expert struct {
 	core.Model
-	User   core.User `uadmin:"list,search" uadminform:"FkReadonlyFieldOptions"`
-	UserID uint      `gorm:"uniqueIndex"`
+	User      core.User       `uadmin:"list,search" uadminform:"FkReadonlyFieldOptions"`
+	UserID    uint            `gorm:"uniqueIndex"`
 	Languages []core.Language `gorm:"foreignKey:ID;many2many:expert_languages;"`
 }
 
@@ -149,10 +149,10 @@ type Discussion struct {
 
 type DiscussionLocalized struct {
 	core.Model
-	Discussion Discussion
-	DiscussionID uint `gorm:"index:discussion_localized_lang_discussionid,unique"`
+	Discussion   Discussion
+	DiscussionID uint   `gorm:"index:discussion_localized_lang_discussionid,unique"`
 	LanguageCode string `gorm:"size=4;index:discussion_localized_lang_discussionid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
-	Subject  string `uadmin:"inline"`
+	Subject      string `uadmin:"inline"`
 }
 
 func (d *Discussion) String() string {
@@ -161,7 +161,7 @@ func (d *Discussion) String() string {
 }
 
 type DiscussionComment struct {
-	ID            int       `gorm:"primarykey" nestedset:"id"`
+	ID            int        `gorm:"primarykey" nestedset:"id"`
 	Discussion    Discussion `uadmin:"list,search" uadminform:"ForeignKeyReadonlyFieldOptions"`
 	DiscussionID  uint       `nestedset:"scope" uadmin:"search"`
 	CreatedAt     time.Time
@@ -184,12 +184,12 @@ func (d *DiscussionComment) String() string {
 
 type DiscussionCommentLocalized struct {
 	core.Model
-	DiscussionComment DiscussionComment
-	DiscussionCommentID int `gorm:"index:discussion_comment_localized_lang_discussionid,unique"`
-	LanguageCode string `gorm:"size=4;index:discussion_comment_localized_lang_discussionid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
-	Subject       string             `uadmin:"inline"`
-	Body          string             `uadmin:"inline" uadminform:"TextareaFieldOptions"`
-	Approved bool
+	DiscussionComment   DiscussionComment
+	DiscussionCommentID int    `gorm:"index:discussion_comment_localized_lang_discussionid,unique"`
+	LanguageCode        string `gorm:"size=4;index:discussion_comment_localized_lang_discussionid,unique;" uadmin:"inline" uadminform:"RequiredSelectFieldOptions"`
+	Subject             string `uadmin:"inline"`
+	Body                string `uadmin:"inline" uadminform:"TextareaFieldOptions"`
+	Approved            bool
 }
 
 type ExpertReview struct {
@@ -222,10 +222,10 @@ type ProofItApp struct {
 	ID        string `sql:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `sql:"index"`
-	Name      string         `uadmin:"list"`
-	PublicKey string         `uadminform:"ReadonlyField" gorm:"uniqueIndex;not null"`
-	SecretKey string         `uadminform:"ReadonlyField" gorm:"uniqueIndex;not null"`
+	DeletedAt gorm.DeletedAt  `sql:"index"`
+	Name      string          `uadmin:"list"`
+	PublicKey string          `uadminform:"ReadonlyField" gorm:"uniqueIndex;not null"`
+	SecretKey string          `uadminform:"ReadonlyField" gorm:"uniqueIndex;not null"`
 	Languages []core.Language `gorm:"foreignKey:ID;many2many:proofitapp_languages;"`
 }
 

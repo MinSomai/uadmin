@@ -19,7 +19,7 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 	for i := range core.GenerateNumberSequence(1, 100) {
 		salt := core.GenerateRandomString(currentApp.Config.D.Auth.SaltLength)
 		// hashedPassword, err := utils2.HashPass(password, salt)
-		hashedPassword, _ := utils2.HashPass("password_" + strconv.Itoa(i), salt)
+		hashedPassword, _ := utils2.HashPass("password_"+strconv.Itoa(i), salt)
 		user := core.GenerateUserModel()
 		user.SetFirstName("First name " + strconv.Itoa(i))
 		user.SetLastName("Last name " + strconv.Itoa(i))
@@ -48,7 +48,7 @@ func (c CreateFakedDataCommand) Proceed(subaction string, args []string) error {
 	for i := range core.GenerateNumberSequence(1, 100) {
 		discussion := &models2.Discussion{AuthorID: uint(i)}
 		uadminDatabase.Db.Create(discussion)
-		discussionComment := &models2.DiscussionComment{DiscussionID: discussion.ID, AuthorID: uint(i % 10) + 1}
+		discussionComment := &models2.DiscussionComment{DiscussionID: discussion.ID, AuthorID: uint(i%10) + 1}
 		nestedset.Create(uadminDatabase.Db, discussionComment, nil)
 		discussionComment1 := &models2.DiscussionComment{DiscussionID: discussion.ID, AuthorID: uint(((i + 1) % 10) + 1)}
 		nestedset.Create(uadminDatabase.Db, discussionComment1, discussionComment)

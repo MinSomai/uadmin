@@ -11,7 +11,7 @@ import (
 )
 
 type FormRenderContext struct {
-	Model interface{}
+	Model   interface{}
 	Context IAdminContext
 }
 

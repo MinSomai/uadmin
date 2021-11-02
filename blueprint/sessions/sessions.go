@@ -41,7 +41,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			}
 			serverKey = c.Request.Header.Get("X-" + strings.ToUpper(core.CurrentConfig.D.Uadmin.APICookieName))
 			if serverKey == "" {
-				if c.Query("for-uadmin-panel") == "1" || strings.Contains(c.Request.URL.String(), core.CurrentConfig.D.Uadmin.RootAdminURL){
+				if c.Query("for-uadmin-panel") == "1" || strings.Contains(c.Request.URL.String(), core.CurrentConfig.D.Uadmin.RootAdminURL) {
 					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.AdminCookieName)
 				} else {
 					serverKey, _ = c.Cookie(core.CurrentConfig.D.Uadmin.APICookieName)
