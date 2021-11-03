@@ -14,7 +14,7 @@ import (
 
 type Blueprint struct {
 	core.Blueprint
-	AuthAdapterRegistry *interfaces3.AuthProviderRegistry
+	AuthAdapterRegistry *core.AuthProviderRegistry
 }
 
 func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
@@ -126,5 +126,5 @@ var ConcreteBlueprint = Blueprint{
 		Description:       "blueprint for auth functionality",
 		MigrationRegistry: migrations.BMigrationRegistry,
 	},
-	AuthAdapterRegistry: interfaces3.NewAuthProviderRegistry(),
+	AuthAdapterRegistry: core.NewAuthProviderRegistry(),
 }

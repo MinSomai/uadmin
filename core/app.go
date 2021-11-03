@@ -11,4 +11,5 @@ type IApp interface {
 	GetCommandRegistry() *CommandRegistry
 	GetBlueprintRegistry() IBlueprintRegistry
 	GetDashboardAdminPanel() *DashboardAdminPanel
+	GetAuthAdapterRegistry() *AuthProviderRegistry
 }

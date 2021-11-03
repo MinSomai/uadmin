@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	utils2 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/utils"
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
-	sessioninterfaces "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	user2 "github.com/sergeyglazyrindev/uadmin/blueprint/user"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"golang.org/x/crypto/bcrypt"
@@ -219,7 +218,7 @@ func getUserForUadminPanel(user core.IUser) *gin.H {
 	return &gin.H{"name": user.GetUsername(), "id": user.GetID(), "for-uadmin-panel": true}
 }
 
-func (ap *DirectAuthForAdminProvider) GetSession(c *gin.Context) sessioninterfaces.ISessionProvider {
+func (ap *DirectAuthForAdminProvider) GetSession(c *gin.Context) core.ISessionProvider {
 	var cookieName string
 	cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 	cookie, err := c.Cookie(cookieName)

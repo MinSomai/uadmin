@@ -8,38 +8,21 @@ import (
 	"fmt"
 	"github.com/sergeyglazyrindev/uadmin/blueprint/auth/services"
 	"github.com/sergeyglazyrindev/uadmin/core"
-	"time"
 )
 
-type ISessionProvider interface {
-	GetKey() string
-	Create() ISessionProvider
-	GetByKey(key string) (ISessionProvider, error)
-	GetName() string
-	IsExpired() bool
-	Delete() bool
-	Set(name string, value string)
-	Get(name string) (string, error)
-	ClearAll() bool
-	GetUser() core.IUser
-	SetUser(user core.IUser)
-	Save() bool
-	ExpiresOn(*time.Time)
-}
-
 type SessionProviderRegistry struct {
-	registeredSessionAdapters map[string]ISessionProvider
+	registeredSessionAdapters map[string]core.ISessionProvider
 	defaultAdapter            string
 }
 
-func (r *SessionProviderRegistry) RegisterNewAdapter(adapter ISessionProvider, defaultAdapter bool) {
+func (r *SessionProviderRegistry) RegisterNewAdapter(adapter core.ISessionProvider, defaultAdapter bool) {
 	r.registeredSessionAdapters[adapter.GetName()] = adapter
 	if defaultAdapter {
 		r.defaultAdapter = adapter.GetName()
 	}
 }
 
-func (r *SessionProviderRegistry) GetAdapter(name string) (ISessionProvider, error) {
+func (r *SessionProviderRegistry) GetAdapter(name string) (core.ISessionProvider, error) {
 	adapter, ok := r.registeredSessionAdapters[name]
 	if ok {
 		return adapter, nil
@@ -47,7 +30,7 @@ func (r *SessionProviderRegistry) GetAdapter(name string) (ISessionProvider, err
 	return nil, fmt.Errorf("adapter with name %s not found", name)
 }
 
-func (r *SessionProviderRegistry) GetDefaultAdapter() (ISessionProvider, error) {
+func (r *SessionProviderRegistry) GetDefaultAdapter() (core.ISessionProvider, error) {
 	adapter, ok := r.registeredSessionAdapters[r.defaultAdapter]
 	if ok {
 		return adapter, nil
@@ -57,7 +40,7 @@ func (r *SessionProviderRegistry) GetDefaultAdapter() (ISessionProvider, error) 
 
 func NewSessionRegistry() *SessionProviderRegistry {
 	return &SessionProviderRegistry{
-		registeredSessionAdapters: make(map[string]ISessionProvider),
+		registeredSessionAdapters: make(map[string]core.ISessionProvider),
 		defaultAdapter:            "",
 	}
 }

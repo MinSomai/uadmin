@@ -122,3 +122,19 @@ func LoadSessions() {
 	//	// services.CachedSessions[s.Key] = s
 	//}
 }
+
+type ISessionProvider interface {
+	GetKey() string
+	Create() ISessionProvider
+	GetByKey(key string) (ISessionProvider, error)
+	GetName() string
+	IsExpired() bool
+	Delete() bool
+	Set(name string, value string)
+	Get(name string) (string, error)
+	ClearAll() bool
+	GetUser() IUser
+	SetUser(user IUser)
+	Save() bool
+	ExpiresOn(*time.Time)
+}

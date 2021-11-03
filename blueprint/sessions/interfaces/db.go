@@ -52,7 +52,7 @@ func (s *DbSession) GetUser() core.IUser {
 	return s.session.User
 }
 
-func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
+func (s *DbSession) GetByKey(sessionKey string) (core.ISessionProvider, error) {
 	db := core.NewUadminDatabase()
 	defer db.Close()
 	var session core.Session
@@ -65,7 +65,7 @@ func (s *DbSession) GetByKey(sessionKey string) (ISessionProvider, error) {
 	}, nil
 }
 
-func (s *DbSession) Create() ISessionProvider {
+func (s *DbSession) Create() core.ISessionProvider {
 	session := NewSession()
 	db := core.NewUadminDatabase()
 	defer db.Close()

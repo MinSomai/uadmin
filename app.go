@@ -112,6 +112,10 @@ func (a *App) Initialize() {
 	a.BlueprintRegistry.Initialize(a)
 }
 
+func (a *App) GetAuthAdapterRegistry() *core.AuthProviderRegistry {
+	return authblueprint.ConcreteBlueprint.AuthAdapterRegistry
+}
+
 func (a *App) RegisterBaseBlueprints() {
 	a.BlueprintRegistry.Register(userblueprint.ConcreteBlueprint)
 	a.BlueprintRegistry.Register(sessionsblueprint.ConcreteBlueprint)
@@ -143,6 +147,7 @@ func (a *App) RegisterBaseCommands() {
 	a.RegisterCommand("language", &LanguageCommand{})
 	a.RegisterCommand("dbshell", &DbShellCommand{})
 	a.RegisterCommand("shell", &ShellCommand{})
+	a.RegisterCommand("microservice-example", &MicroserviceExampleCommand{})
 }
 
 func (a *App) ExecuteCommand() {

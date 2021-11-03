@@ -1,23 +1,16 @@
-package interfaces
-
-/*
-	Package contains sign in providers, like: token signin, token with expiration, direct signin (by username or email).
-	Currently usable only: direct signin and direct signin for admin panel
-*/
+package core
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	sessioninterfaces "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
-	"github.com/sergeyglazyrindev/uadmin/core"
 )
 
 type IAuthProvider interface {
-	GetUserFromRequest(c *gin.Context) core.IUser
+	GetUserFromRequest(c *gin.Context) IUser
 	Signin(c *gin.Context)
 	Logout(c *gin.Context)
 	IsAuthenticated(c *gin.Context)
-	GetSession(c *gin.Context) sessioninterfaces.ISessionProvider
+	GetSession(c *gin.Context) ISessionProvider
 	GetName() string
 	Signup(c *gin.Context)
 }

@@ -10,7 +10,6 @@ to expand uadmin functionality, etc
 import (
 	"github.com/gin-gonic/gin"
 	sessionsblueprint "github.com/sergeyglazyrindev/uadmin/blueprint/sessions"
-	interfaces2 "github.com/sergeyglazyrindev/uadmin/blueprint/sessions/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"time"
 )
@@ -25,7 +24,7 @@ func init() {
 		cookieName = core.CurrentConfig.D.Uadmin.AdminCookieName
 		// in admin panel we determine user's session using cookies
 		cookie, _ := ctx.Cookie(cookieName)
-		var session interfaces2.ISessionProvider
+		var session core.ISessionProvider
 		if cookie != "" {
 			session, _ = sessionAdapter.GetByKey(cookie)
 		}
