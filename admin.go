@@ -57,6 +57,7 @@ const welcomeMessage = "" +
 	colors.FGBlueB + `\__,_/` + colors.FGNormal + `_/  |_\__,_/_/ /_/ /_/_/_/ /_/` + "\n"
 
 func (command ServeAdminServer) Proceed(subaction string, args []string) error {
+	appInstance.InitializeRouter()
 	migrateCommand := MigrateCommand{}
 	err := migrateCommand.Proceed("determine-conflicts", []string{})
 	if err != nil {
