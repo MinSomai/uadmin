@@ -1,10 +1,20 @@
 const path = require('path');
+const webpack = require('webpack');
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 module.exports = {
-  mode: "production", // "production" | "development" | "none"
+  mode: "production", // "production" | "development" | "none",
+  module: {
+  rules: [{
+    test: require.resolve('jquery'),
+    use: [{
+        loader: 'expose-loader',
+        options: {exposes: ['$', 'jQuery']}
+    }]
+  }],  
+  },
   entry: [
-       './js/sprintf.js', './assets/js/tether.min.js', './assets/bootstrap/3.3.7/js/bootstrap.min.js',
+       './node_modules/jquery/dist/jquery.min.js', './node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js', './js/sprintf.js', './assets/js/tether.min.js', './assets/bootstrap/3.3.7/js/bootstrap.min.js',
        './assets/js/wow.js', './assets/spinner/src/jRoll.js', './assets/js/floatHead.min.js', './assets/js/staticdata.js',
        './js/notify.min.js', './assets/chosen/docsupport/prism.js', './assets/cropper/cropper.min.js'
    ],  
@@ -35,5 +45,13 @@ module.exports = {
     /* Advanced output configuration (click to show) */
     /* Expert output configuration 1 (on own risk) */
     /* Expert output configuration 2 (on own risk) */
-  }
+  },
+  plugins: [
+      new webpack.ProvidePlugin({
+          $: "jquery",
+          jquery: "jquery",
+          "window.jQuery": "jquery",
+          jQuery:"jquery"
+      })  
+  ]
 }
