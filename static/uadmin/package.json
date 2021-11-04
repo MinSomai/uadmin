@@ -5,8 +5,11 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
+    "bootstrap": "^3.3.7",
     "bootstrap-datepicker": "^1.9.0",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.49",
     "jquery": "^3.6.0",
-    "moment": "2.24.0"
+    "jquery-ui": "^1.13.0",
+    "moment": "^2.24.0"
   }
 }
