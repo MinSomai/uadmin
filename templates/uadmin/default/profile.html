@@ -74,7 +74,7 @@
             processData: false,
             contentType:"application/json; charset=utf-8",
             data: "",
-            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', $('input[name="csrf_token"]').val());},
+            beforeSend: function(xhr){xhr.setRequestHeader('CSRF-TOKEN', $('input[name="csrf_token"]').val());},
             success: function() {
                 location.reload();
             },
@@ -95,7 +95,7 @@
                 password: form.find('input[name="newPassword"]').val(),
                 confirm_password: form.find('input[name="confirmPassword"]').val(),
             }),
-            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
+            beforeSend: function(xhr){xhr.setRequestHeader('CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
             success: function() {
                 $('.change-password-error').toggleClass('hidden', true);
                 $('#myModal').modal('toggle');
@@ -115,7 +115,7 @@
             processData: false,
             contentType:"application/json; charset=utf-8",
             data: "",
-            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', $('input[name="csrf_token"]').val());},
+            beforeSend: function(xhr){xhr.setRequestHeader('CSRF-TOKEN', $('input[name="csrf_token"]').val());},
             success: function() {
                 location.reload();
             },

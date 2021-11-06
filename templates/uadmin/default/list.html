@@ -235,7 +235,7 @@
                 data: JSON.stringify({
                     object_ids: objectIds.join(',')
                 }),
-                beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf-token"]').val());},
+                beforeSend: function(xhr){xhr.setRequestHeader('CSRF-TOKEN', form.find('input[name="csrf-token"]').val());},
                 success: function() {
                     hide_loading(300);
                     // @todo, show success message

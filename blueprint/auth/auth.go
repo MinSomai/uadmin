@@ -18,6 +18,7 @@ type Blueprint struct {
 }
 
 func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
+	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthForAdminProvider{})
 	// register signin adapters http endpoints
 	for adapter := range b.AuthAdapterRegistry.Iterate() {
 		adapterGroup := group.Group("/" + adapter.GetName())
@@ -114,10 +115,6 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) InitApp(app core.IApp) {
-	// register all available auth providers
-	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthProvider{})
-	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenAuthProvider{})
-	b.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthForAdminProvider{})
 }
 
 var ConcreteBlueprint = Blueprint{

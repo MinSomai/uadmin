@@ -1,6 +1,8 @@
 package core
 
 import (
+	"crypto/rand"
+	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -530,7 +532,18 @@ func (m *OneTimeAction) String() string {
 type UserAuthToken struct {
 	Model
 	User            User
-	UserID          uint
-	Token           string
-	SessionDuration time.Duration
+	UserID          uint `gorm:"uniqueIndex"`
+	Token           string `gorm:"uniqueIndex,size:40"`
+	SessionExpiresAt sql.NullInt64
+}
+
+func (uat *UserAuthToken) BeforeCreate(tx *gorm.DB) error {
+	if uat.Token == "" {
+		token := make([]byte, 40)
+		_, err := rand.Reader.Read(token)
+		if err == nil {
+			uat.Token = string(token)
+		}
+	}
+	return nil
 }

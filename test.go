@@ -3,6 +3,8 @@ package uadmin
 import (
 	"errors"
 	"fmt"
+	"github.com/sergeyglazyrindev/uadmin/blueprint/auth"
+	interfaces3 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"github.com/sergeyglazyrindev/uadmin/utils"
 	"github.com/stretchr/testify/suite"
@@ -336,6 +338,11 @@ func NewFullAppForTests() *App {
 	StoreCurrentApp(a)
 	appForTests = a
 	a.Initialize()
+	authBlueprintInterface, _ := a.BlueprintRegistry.GetByName("auth")
+	authBlueprint := authBlueprintInterface.(auth.Blueprint)
+	authBlueprint.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.DirectAuthProvider{})
+	authBlueprint.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenAuthProvider{})
+	authBlueprint.AuthAdapterRegistry.RegisterNewAdapter(&interfaces3.TokenWithExpirationAuthProvider{})
 	a.InitializeRouter()
 	// appForTests.DashboardAdminPanel.RegisterHTTPHandlers(a.Router)
 	return a

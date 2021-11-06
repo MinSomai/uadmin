@@ -177,7 +177,7 @@
                 signinfield: form.find('input[name="username"]').val(),
                 password: form.find('input[name="password"]').val()
             }),
-            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
+            beforeSend: function(xhr){xhr.setRequestHeader('CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
             success: function() {
                 $('.error-cont').toggleClass('hidden', true);
                 hide_loading(300);
@@ -201,7 +201,7 @@
             data: JSON.stringify({
                 email: form.find('input[name="email"]').val()
             }),
-            beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
+            beforeSend: function(xhr){xhr.setRequestHeader('CSRF-TOKEN', form.find('input[name="csrf_token"]').val());},
             success: function() {
                 $('.error-cont-for-forgot-password').toggleClass('hidden', true);
                 hide_loading(300);

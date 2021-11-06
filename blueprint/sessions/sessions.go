@@ -32,7 +32,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			}
 			var serverKey string
 			var csrfTokenFromRequest string
-			csrfTokenFromRequest = c.Request.Header.Get("X-CSRF-TOKEN")
+			csrfTokenFromRequest = c.Request.Header.Get("CSRF-TOKEN")
 			if csrfTokenFromRequest == "" {
 				csrfTokenFromRequest, _ = c.Cookie("csrf_token")
 				if csrfTokenFromRequest == "" {

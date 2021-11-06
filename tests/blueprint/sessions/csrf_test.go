@@ -22,14 +22,14 @@ func (s *CsrfTestSuite) TestSuccessfulCsrfCheck() {
 	s.UadminDatabase.Db.Create(session)
 	req, _ := http.NewRequest("POST", "/testcsrf/", nil)
 	tokenmasked := core.MaskCSRFToken(token)
-	req.Header.Set("X-CSRF-TOKEN", tokenmasked)
+	req.Header.Set("CSRF-TOKEN", tokenmasked)
 	req.Header.Set("X-UADMIN-API", session.Key)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		assert.Equal(s.T(), w.Code, 200)
 		return w.Code == 200
 	})
 	req, _ = http.NewRequest("POST", "/testcsrf/", nil)
-	req.Header.Set("X-CSRF-TOKEN", "dsadsada")
+	req.Header.Set("CSRF-TOKEN", "dsadsada")
 	req.Header.Set("X-UADMIN-API", session.Key)
 	uadmin.TestHTTPResponse(s.T(), s.App, req, func(w *httptest.ResponseRecorder) bool {
 		body := w.Body.String()

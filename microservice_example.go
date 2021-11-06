@@ -45,6 +45,7 @@ package uadmin
 import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	interfaces3 "github.com/sergeyglazyrindev/uadmin/blueprint/auth/interfaces"
 	"github.com/sergeyglazyrindev/uadmin/core"
 	"os"
 )
@@ -56,17 +57,15 @@ type MicroserviceExample struct {
 // A ValidationError is an error that is used when the required input fails validation.
 // swagger:response validationError
 type ValidationError struct {
-	// The error message
-	// in: body
-	Body struct {
-		// The validation message
-		//
-		// Required: true
-		// Example: Expected type int
-		Message string
-		// An optional field name to which this validation applies
-		FieldName string
-	}
+	Code    string
+	Message string
+	Params  []string
+}
+
+// A GeneralError is an error that is used when something strange happened
+// swagger:response generalError
+type GeneralError struct {
+	Error    string
 }
 
 type MicroserviceExampleCommand struct {
@@ -116,6 +115,7 @@ func (command MicroserviceExampleStartCommand) Proceed(subaction string, args []
 	if err != nil {
 		return err
 	}
+	appInstance.GetAuthAdapterRegistry().RegisterNewAdapter(&interfaces3.TokenAuthProvider{})
 	microservice := &MicroserviceExample{Microservice: core.Microservice{
 		Port: 8089, AuthBackend: "token", Name: "Example microservice",
 		Prefix: "ExampleMicroservice", SwaggerPort: 8090,
