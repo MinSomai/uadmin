@@ -1,7 +1,6 @@
 package core
 
 import (
-	"crypto/rand"
 	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
@@ -539,11 +538,7 @@ type UserAuthToken struct {
 
 func (uat *UserAuthToken) BeforeCreate(tx *gorm.DB) error {
 	if uat.Token == "" {
-		token := make([]byte, 40)
-		_, err := rand.Reader.Read(token)
-		if err == nil {
-			uat.Token = string(token)
-		}
+		uat.Token = GenerateRandomString(40)
 	}
 	return nil
 }

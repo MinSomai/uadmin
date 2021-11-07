@@ -20,6 +20,8 @@ func NewProofitApp(environment string) *uadmin.App {
 	app1.BlueprintRegistry.DeRegister(logblueprint.ConcreteBlueprint)
 	app1.BlueprintRegistry.DeRegister(settingsblueprint.ConcreteBlueprint)
 	app1.RegisterCommand("generate-fake-data", &CreateFakedDataCommand{})
+	app1.RegisterCommand("proofit-api", &ProofitStartMicroserviceCommand{})
+	app1.GetAuthAdapterRegistry().RegisterNewAdapter(&TokenWithExpirationAuthProvider{})
 	app1.Initialize()
 	core.CurrentConfig.OverridenTemplatesFS = &templatesRoot
 	currentApp = app1
