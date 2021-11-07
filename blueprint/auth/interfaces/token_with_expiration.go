@@ -17,7 +17,7 @@ type TokenWithExpirationAuthProvider struct {
 }
 
 func (ap *TokenWithExpirationAuthProvider) GetUserFromRequest(c *gin.Context) core.IUser {
-	header := c.GetHeader(TOKEN_HEADER_NAME)
+	header := c.GetHeader(tokenHeaderName)
 	if header == "" {
 		return nil
 	}

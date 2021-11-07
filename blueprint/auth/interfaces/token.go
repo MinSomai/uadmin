@@ -11,13 +11,13 @@ import (
 	"net/http"
 )
 
-const TOKEN_HEADER_NAME = "AUTH-TOKEN"
+const tokenHeaderName = "AUTH-TOKEN"
 
 type TokenAuthProvider struct {
 }
 
 func (ap *TokenAuthProvider) GetUserFromRequest(c *gin.Context) core.IUser {
-	header := c.GetHeader(TOKEN_HEADER_NAME)
+	header := c.GetHeader(tokenHeaderName)
 	if header == "" {
 		return nil
 	}
