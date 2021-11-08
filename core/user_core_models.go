@@ -542,3 +542,10 @@ func (uat *UserAuthToken) BeforeCreate(tx *gorm.DB) error {
 	}
 	return nil
 }
+
+func (uat *UserAuthToken) IsExpired() bool {
+	if !uat.SessionExpiresAt.Valid {
+		return false
+	}
+	return uat.SessionExpiresAt.Int64 < time.Now().Unix()
+}
