@@ -52,8 +52,8 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 				UadminDatabase:        uadminDatabase,
 				GenerateModelI:        genModelI,
 			}
-			if adminPage.PreloadData != nil {
-				adminPage.PreloadData(ret)
+			if adminPage.EnhanceQuerySet != nil {
+				adminPage.EnhanceQuerySet(ret)
 			}
 			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
 				url1, _ := url.Parse(adminRequestParams.RequestURL)

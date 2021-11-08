@@ -196,4 +196,8 @@ func init() {
 		WidgetType: "textarea",
 		ReadOnly:   true,
 	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:       "EmailFieldOptions",
+		WidgetType: "email",
+	})
 }

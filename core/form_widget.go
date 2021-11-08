@@ -129,6 +129,8 @@ func GetWidgetByWidgetType(widgetType string, fieldOptions IFieldFormOptions) IW
 		widget = &PasswordWidget{}
 	case "dynamic":
 		widget = &DynamicWidget{}
+	case "email":
+		widget = &EmailWidget{}
 	case "foreignkey":
 		widget = &ForeignKeyWidget{}
 		if fieldOptions != nil && fieldOptions.GetIsAutocomplete() {
