@@ -123,7 +123,8 @@ func (command MicroserviceExampleStartCommand) Proceed(subaction string, args []
 	if opts.StartSwagger {
 		return microservice.StartSwagger(appInstance)
 	} else {
-		microservice.Start(appInstance)
+		r := microservice.RegisterEndpoints(appInstance)
+		microservice.Start(r)
 	}
 	return nil
 }

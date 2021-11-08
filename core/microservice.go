@@ -10,20 +10,6 @@ import (
 	"os/exec"
 )
 
-type IMicroserviceRegistry interface {
-	GetMicroserviceByName() IMicroservice
-	RegisterMicroservice(microService IMicroservice)
-}
-
-type MicroserviceRegistry struct {
-	registeredMicroservices map[string]IMicroservice
-}
-
-type IMicroservice interface {
-	GetName() string
-	Start()
-}
-
 type Microservice struct {
 	Name        string
 	Prefix      string
@@ -34,8 +20,7 @@ type Microservice struct {
 	IncludeTags []string
 }
 
-func (m Microservice) Start(app IApp) {
-	fmt.Printf("Please open following url in browser http://localhost:%d/\n", m.Port)
+func (m Microservice) RegisterEndpoints(app IApp) *gin.Engine {
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -50,6 +35,10 @@ func (m Microservice) Start(app IApp) {
 		adapterGroup.POST("/logout/", authAdapter.Logout)
 		adapterGroup.GET("/status/", authAdapter.IsAuthenticated)
 	}
+	return r
+}
+
+func (m Microservice) Start(r *gin.Engine) {
 	r.Run(fmt.Sprintf(":%d", m.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
