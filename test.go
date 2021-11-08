@@ -161,12 +161,12 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 					uadminDatabase := core.NewUadminDatabase()
 					uadminDatabase.Adapter.SetTimeZone(uadminDatabase.Db, "UTC")
 					core.UadminTestDatabase = uadminDatabase
-					upCommand := MigrateCommand{}
-					upCommand.Proceed("up", make([]string, 0))
 					reflect.ValueOf(currentsuite).MethodByName("StoreDatabase").Call([]reflect.Value{reflect.ValueOf(uadminDatabase)})
 					if setupTestSuite, ok := currentsuite.(suite.SetupTestSuite); ok {
 						setupTestSuite.SetupTest()
 					}
+					upCommand := MigrateCommand{}
+					upCommand.Proceed("up", make([]string, 0))
 					if beforeTestSuite, ok := currentsuite.(suite.BeforeTest); ok {
 						beforeTestSuite.BeforeTest(methodFinder.Elem().Name(), method.Name)
 					}
@@ -197,6 +197,9 @@ func RunTests(t *testing.T, currentsuite suite.TestingSuite) {
 					core.UadminTestDatabase = uadminDatabase
 					uadminDatabase.Adapter.SetIsolationLevelForTests(uadminDatabase.Db)
 					uadminDatabase.Adapter.SetTimeZone(uadminDatabase.Db, "UTC")
+					if setupTestSuite, ok := currentsuite.(suite.SetupTestSuite); ok {
+						setupTestSuite.SetupTest()
+					}
 					upCommand := MigrateCommand{}
 					upCommand.Proceed("up", make([]string, 0))
 					uadminDatabase.Db.Transaction(func(tx *gorm.DB) error {
