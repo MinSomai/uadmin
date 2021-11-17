@@ -36,7 +36,7 @@ func (t *Tweet) GetIndexName() string {
 func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	tweetsAdminPage := core.NewElasticSearchAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, nil },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	tweetsAdminPage.PageName = "Tweets"
@@ -50,7 +50,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	var tweetsmodelAdminPage *core.AdminPage
 	tweetsmodelAdminPage = core.NewElasticSearchAdminPage(
 		tweetsAdminPage,
-		func() (interface{}, interface{}) { return &Tweet{}, &[]*Tweet{} },
+		&Tweet{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"User", "Message"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -80,6 +80,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) InitApp(app core.IApp) {
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &Tweet{}, &[]*Tweet{} })
 }
 
 var ConcreteBlueprint = Blueprint{

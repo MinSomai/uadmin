@@ -16,7 +16,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// initialize administrator page for this blueprint.
 	todosAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, nil },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	todosAdminPage.PageName = "Example"
@@ -30,9 +30,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// initialize administrator page for your specific model.
 	todosModelAdminPage := core.NewGormAdminPage(
 		todosAdminPage,
-		func() (interface{}, interface{}) {
-			return &models.Todo{}, &[]*models.Todo{}
-		},
+		&models.Todo{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			// define fields that you want to have in your admin panel
 			fields := []string{"TaskAlias", "TaskDescription"}
@@ -51,6 +49,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) InitApp(app core.IApp) {
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &models.Todo{}, &[]*models.Todo{} })
 }
 
 var ConcreteBlueprint = Blueprint{
