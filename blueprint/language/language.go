@@ -16,7 +16,7 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	languageAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, nil },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	languageAdminPage.PageName = "Languages"
@@ -29,7 +29,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	}
 	languagemodelAdminPage := core.NewGormAdminPage(
 		languageAdminPage,
-		func() (interface{}, interface{}) { return &core.Language{}, &[]*core.Language{} },
+		&core.Language{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"EnglishName", "Name", "Flag", "Code", "RTL", "Default", "Active", "AvailableInGui"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -65,6 +65,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) InitApp(app core.IApp) {
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.Language{}, &[]*core.Language{} })
 }
 
 var ConcreteBlueprint = Blueprint{

@@ -21,7 +21,7 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	approvalAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, make([]interface{}, 0) },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	approvalAdminPage.PageName = "Approvals"
@@ -34,7 +34,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	}
 	approvalmodelAdminPage := core.NewGormAdminPage(
 		approvalAdminPage,
-		func() (interface{}, interface{}) { return &models.Approval{}, &[]*models.Approval{} },
+		&models.Approval{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"ContentType", "ModelPK", "ColumnName", "OldValue", "NewValue", "NewValueDescription", "ChangedBy", "ChangeDate", "ApprovalAction", "ApprovalBy", "ApprovalDate"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -101,6 +101,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) InitApp(app core.IApp) {
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &models.Approval{}, &[]*models.Approval{} })
 }
 
 var ConcreteBlueprint = Blueprint{

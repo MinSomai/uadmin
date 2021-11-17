@@ -114,10 +114,11 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 							err := c.AdminFilterObjects.WithTransaction(func(afo1 IAdminFilterObjects) error {
 								postForm, _ := ctx.MultipartForm()
 								ids := postForm.Value["object_id"]
+								modelDesc := ProjectModels.GetModelFromInterface(c.AdminFilterObjects.GetCurrentModel())
 								for _, objectID := range ids {
-									objectModel, _ := c.AdminFilterObjects.GenerateModelInterface()
+									objectModel, _ := modelDesc.GenerateModelI()
 									afo1.LoadDataForModelByID(objectID, objectModel)
-									modelI, _ := c.AdminFilterObjects.GenerateModelInterface()
+									modelI, _ := modelDesc.GenerateModelI()
 									listEditableForm := NewFormListEditableFromListDisplayRegistry(c, "", objectID, modelI, adminPage.ListDisplay, nil)
 									formListEditableErr := listEditableForm.ProceedRequest(postForm, objectModel, c)
 									if formListEditableErr.IsEmpty() {
@@ -241,7 +242,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 					c.PageTitle = adminPage.ModelName
 					c.CurrentAdminContext = c
 					c.ListEditableFormsForInlines = NewFormListEditableCollection()
-					modelI, _ := adminPage.GenerateModelI()
+					modelDesc := ProjectModels.GetModelFromInterface(adminPage.Model)
+					modelI, _ := modelDesc.GenerateModelI()
 					if id != "new" {
 						adminRequestParams := NewAdminRequestParamsFromGinContext(ctx)
 						qs := adminPage.GetQueryset(c, adminPage, adminRequestParams)
@@ -285,7 +287,8 @@ func (dap *DashboardAdminPanel) RegisterHTTPHandlers(router *gin.Engine) {
 						if id != "new" {
 							modelToSave = modelI
 						} else {
-							modelToSave, _ = adminPage.GenerateModelI()
+							modelDesc1 := ProjectModels.GetModelFromInterface(adminPage.Model)
+							modelToSave, _ = modelDesc1.GenerateModelI()
 						}
 						afo := adminPage.GetQueryset(c, adminPage, adminRequestParams)
 						err := afo.WithTransaction(func(afo1 IAdminFilterObjects) error {

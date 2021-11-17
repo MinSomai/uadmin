@@ -125,7 +125,6 @@ func (apr *AdminPageRegistry) PreparePagesForTemplate(permRegistry *UserPermRegi
 
 type AdminPage struct {
 	Model                              interface{}                                                              `json:"-"`
-	GenerateModelI                     func() (interface{}, interface{})                                        `json:"-"`
 	GenerateForm                       func(modelI interface{}, ctx IAdminContext) *Form                        `json:"-"`
 	GetQueryset                        func(IAdminContext, *AdminPage, *AdminRequestParams) IAdminFilterObjects `json:"-"`
 	ModelActionsRegistry               *AdminModelActionRegistry                                                `json:"-"`

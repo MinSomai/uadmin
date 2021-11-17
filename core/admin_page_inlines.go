@@ -19,7 +19,7 @@ func init() {
 
 type AdminPageInline struct {
 	Ordering          int
-	GenerateModelI    func(m interface{}) (interface{}, interface{})
+	GenerateModelI    func(m interface{}) interface{}
 	GetQueryset       func(adminContext IAdminContext, afo IAdminFilterObjects, model interface{}) IAdminFilterObjects
 	Actions           *AdminModelActionRegistry
 	EmptyValueDisplay string
@@ -65,7 +65,7 @@ func (api *AdminPageInline) RenderExampleForm(adminContext IAdminContext) templa
 }
 
 func (api *AdminPageInline) GetFormForExample(adminContext IAdminContext) *FormListEditable {
-	modelI, _ := api.GenerateModelI(nil)
+	modelI := api.GenerateModelI(nil)
 	form := api.ListDisplay.BuildListEditableFormForNewModel(adminContext, "toreplacewithid", modelI)
 	r := NewTemplateRenderer("")
 	r.AddFuncMap("Translate", func(v interface{}) string {
@@ -122,7 +122,7 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart
 		inlineID := strings.TrimPrefix(fieldName, firstEditableField.Prefix+"-")
 		inlineID = strings.TrimSuffix(inlineID, "-"+firstEditableField.Field.FieldConfig.Widget.GetHTMLInputName())
 		realInlineID := strings.Split(inlineID, "_")
-		modelI, _ := api.GenerateModelI(model)
+		modelI := api.GenerateModelI(model)
 		inlineIDToRemove := f.Value[firstEditableField.Prefix+"-"+"object_id-to-remove-"+realInlineID[0]]
 		isNew := false
 		if !strings.Contains(inlineID, "new") {
@@ -179,10 +179,10 @@ func (api *AdminPageInline) ProceedRequest(afo IAdminFilterObjects, f *multipart
 func NewAdminPageInline(
 	inlineIden string,
 	inlineType InlineType,
-	generateModelI func(m interface{}) (interface{}, interface{}),
+	generateModelI func(m interface{}) interface{},
 	getQuerySet func(adminContext IAdminContext, afo IAdminFilterObjects, model interface{}) IAdminFilterObjects,
 ) *AdminPageInline {
-	modelI, _ := generateModelI(nil)
+	modelI := generateModelI(nil)
 	ld := NewListDisplayRegistryFromGormModelForInlines(modelI)
 	ld.SetPrefix(PrepareStringToBeUsedForHTMLID(inlineIden))
 	ret := &AdminPageInline{
@@ -193,7 +193,7 @@ func NewAdminPageInline(
 		Classes:           make([]string, 0),
 		InlineType:        inlineType,
 		ListDisplay:       ld,
-		GenerateModelI:    generateModelI,
+		GenerateModelI: generateModelI,
 		GetQueryset:       getQuerySet,
 		VerboseNamePlural: inlineIden,
 	}

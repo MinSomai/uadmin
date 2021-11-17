@@ -22,7 +22,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// add new gorm admin page for blueprint
 	abTestAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, nil },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	abTestAdminPage.PageName = "AB Tests"
@@ -37,7 +37,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// add abtest gorm page
 	abtestmodelAdminPage := core.NewGormAdminPage(
 		abTestAdminPage,
-		func() (interface{}, interface{}) { return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{} },
+		&abtestmodel.ABTest{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"ContentType", "Type", "Name", "Field", "PrimaryKey", "Active", "Group", "StaticPath"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -96,12 +96,12 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	// initialize inline for abtest, it shows all abtest values that belong to the current abtest object
 	abTestValueInline := core.NewAdminPageInline(
 		"AB Test Values",
-		core.TabularInline, func(m interface{}) (interface{}, interface{}) {
+		core.TabularInline, func(m interface{}) interface{} {
 			if m != nil {
 				mO := m.(*abtestmodel.ABTest)
-				return &abtestmodel.ABTestValue{ABTestID: mO.ID}, &[]*abtestmodel.ABTestValue{}
+				return &abtestmodel.ABTestValue{ABTestID: mO.ID}
 			}
-			return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{}
+			return &abtestmodel.ABTestValue{}
 		}, func(adminContext core.IAdminContext, afo core.IAdminFilterObjects, model interface{}) core.IAdminFilterObjects {
 			abTest := model.(*abtestmodel.ABTest)
 			var db *core.UadminDatabase
@@ -114,9 +114,6 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				GormQuerySet:   core.NewGormPersistenceStorage(db.Db.Model(&abtestmodel.ABTestValue{}).Where(&abtestmodel.ABTestValue{ABTestID: abTest.ID})),
 				Model:          &abtestmodel.ABTestValue{},
 				UadminDatabase: db,
-				GenerateModelI: func() (interface{}, interface{}) {
-					return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{}
-				},
 			}
 		},
 	)
@@ -140,6 +137,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 func (b Blueprint) InitApp(app core.IApp) {
 	// add models to ProjectModels, so we can determine admin pages for these models, etc
 	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &abtestmodel.ABTestValue{}, &[]*abtestmodel.ABTestValue{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &abtestmodel.ABTest{}, &[]*abtestmodel.ABTest{} })
 }
 
 var ConcreteBlueprint = Blueprint{

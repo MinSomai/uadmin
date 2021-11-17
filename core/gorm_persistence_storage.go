@@ -12,20 +12,22 @@ import (
 	"strings"
 )
 
-func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, interface{}), generateForm func(modelI interface{}, ctx IAdminContext) *Form) *AdminPage {
-	modelI4, _ := genModelI()
+func NewGormAdminPage(parentPage *AdminPage, modelI interface{}, generateForm func(modelI interface{}, ctx IAdminContext) *Form) *AdminPage {
 	modelName := ""
-	if modelI4 != nil {
-		uadminDatabase := NewUadminDatabaseWithoutConnection()
-		stmt := &gorm.Statement{DB: uadminDatabase.Db}
-		stmt.Parse(modelI4)
-		modelName = strings.ToLower(stmt.Schema.Name)
-		ProjectModels.RegisterModel(genModelI)
-	}
 	var form *Form
 	var listDisplay *ListDisplayRegistry
 	var searchFieldRegistry *SearchFieldRegistry
-	if modelI4 != nil {
+	generateModelI := func() (interface{}, interface{}) {return nil, nil}
+	if modelI != nil {
+		modelDesc := ProjectModels.GetModelFromInterface(modelI)
+		generateModelI = modelDesc.GenerateModelI
+		modelI4, _ := generateModelI()
+		if modelI4 != nil {
+			uadminDatabase := NewUadminDatabaseWithoutConnection()
+			stmt := &gorm.Statement{DB: uadminDatabase.Db}
+			stmt.Parse(modelI4)
+			modelName = strings.ToLower(stmt.Schema.Name)
+		}
 		form = NewFormFromModelFromGinContext(&AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
 		listDisplay = NewListDisplayRegistryFromGormModel(modelI4)
 		searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
@@ -33,24 +35,22 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 	return &AdminPage{
 		Form:           form,
 		SubPages:       NewAdminPageRegistry(),
-		GenerateModelI: genModelI,
 		ParentPage:     parentPage,
 		GetQueryset: func(adminContext IAdminContext, adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
 			db := uadminDatabase.Db
 			var paginatedQuerySet IPersistenceStorage
 			var perPage int
-			modelI, _ := genModelI()
-			modelI1, _ := genModelI()
-			modelI2, _ := genModelI()
-			modelI3, _ := genModelI()
+			modelI, _ := generateModelI()
+			modelI1, _ := generateModelI()
+			modelI2, _ := generateModelI()
+			modelI3, _ := generateModelI()
 			ret := &GormAdminFilterObjects{
 				InitialGormQuerySet:   NewGormPersistenceStorage(db.Model(modelI)),
 				GormQuerySet:          NewGormPersistenceStorage(db.Model(modelI1)),
 				PaginatedGormQuerySet: NewGormPersistenceStorage(db.Model(modelI2)),
 				Model:                 modelI3,
 				UadminDatabase:        uadminDatabase,
-				GenerateModelI:        genModelI,
 			}
 			if adminPage.EnhanceQuerySet != nil {
 				adminPage.EnhanceQuerySet(ret)
@@ -72,7 +72,6 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 					PaginatedGormQuerySet: NewGormPersistenceStorage(db),
 					Model:                 modelI3,
 					UadminDatabase:        uadminDatabase,
-					GenerateModelI:        genModelI,
 				}
 				for filter := range adminPage.SearchFields.GetAll() {
 					filter.Search(searchFilterObjects, adminRequestParams.Search)
@@ -122,7 +121,7 @@ func NewGormAdminPage(parentPage *AdminPage, genModelI func() (interface{}, inte
 			}
 			return ret
 		},
-		Model:                   modelI4,
+		Model:                   modelI,
 		ModelName:               modelName,
 		Validators:              NewValidatorRegistry(),
 		ExcludeFields:           NewFieldRegistry(),
@@ -626,7 +625,6 @@ type GormAdminFilterObjects struct {
 	PaginatedGormQuerySet IPersistenceStorage
 	Model                 interface{}
 	UadminDatabase        *UadminDatabase
-	GenerateModelI        func() (interface{}, interface{})
 	LastError             error
 	NeededJoins           []string
 }
@@ -758,10 +756,6 @@ func (afo *GormAdminFilterObjects) SetFullQuerySet(storage IPersistenceStorage) 
 	afo.GormQuerySet = storage
 }
 
-func (afo *GormAdminFilterObjects) GenerateModelInterface() (interface{}, interface{}) {
-	return afo.GenerateModelI()
-}
-
 func (afo *GormAdminFilterObjects) GetInitialQuerySet() IPersistenceStorage {
 	return afo.InitialGormQuerySet
 }
@@ -789,7 +783,7 @@ func (afo *GormAdminFilterObjects) GetDB() IPersistenceStorage {
 func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) error {
 	afo.UadminDatabase.Db.Session(&gorm.Session{FullSaveAssociations: true}).Transaction(func(tx *gorm.DB) error {
 		ret := handler(&GormAdminFilterObjects{
-			UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter}, GenerateModelI: afo.GenerateModelI,
+			UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter},
 			InitialGormQuerySet: NewGormPersistenceStorage(tx),
 		})
 		afo.SetLastError(ret)
@@ -846,7 +840,8 @@ func (afo *GormAdminFilterObjects) GetPaginated() <-chan *IterateAdminObjects {
 			}
 			close(chnl)
 		}()
-		modelI, models := afo.GenerateModelI()
+		modelDesc := ProjectModels.GetModelFromInterface(afo.Model)
+		modelI, models := modelDesc.GenerateModelI()
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.PaginatedGormQuerySet.Preload(clause.Associations).Find(models)
 		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
@@ -879,7 +874,8 @@ func (afo *GormAdminFilterObjects) IterateThroughWholeQuerySet() <-chan *Iterate
 			}
 			close(chnl)
 		}()
-		modelI, models := afo.GenerateModelI()
+		modelDesc := ProjectModels.GetModelFromInterface(afo.Model)
+		modelI, models := modelDesc.GenerateModelI()
 		modelDescription := ProjectModels.GetModelFromInterface(modelI)
 		afo.GormQuerySet.Preload(clause.Associations).Find(models)
 		afo.SetLastError(afo.GormQuerySet.GetLastError())

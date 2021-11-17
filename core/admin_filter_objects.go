@@ -15,7 +15,6 @@ type IAdminFilterObjects interface {
 	GetCurrentModel() interface{}
 	GetInitialQuerySet() IPersistenceStorage
 	SetInitialQuerySet(IPersistenceStorage)
-	GenerateModelInterface() (interface{}, interface{})
 	RemoveModelPermanently(model interface{}) error
 	FilterQs(filterString string)
 	Search(field *Field, searchString string)

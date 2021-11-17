@@ -265,7 +265,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	})
 	usersAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, nil },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	usersAdminPage.PageName = "Users"
@@ -279,7 +279,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	var usermodelAdminPage *core.AdminPage
 	usermodelAdminPage = core.NewGormAdminPage(
 		usersAdminPage,
-		func() (interface{}, interface{}) { return &core.User{}, &[]*core.User{} },
+		&core.User{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Username", "FirstName", "LastName", "Email", "Active", "IsStaff", "IsSuperUser", "Password", "Photo", "LastLogin", "ExpiresOn"}
 			if ctx.GetUserObject().GetIsSuperUser() {
@@ -500,7 +500,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	}
 	usergroupsAdminPage := core.NewGormAdminPage(
 		usersAdminPage,
-		func() (interface{}, interface{}) { return &core.UserGroup{}, &[]*core.UserGroup{} },
+		&core.UserGroup{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"GroupName"}
 			if ctx.GetUserObject().GetIsSuperUser() {
@@ -612,6 +612,8 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 func (b Blueprint) InitApp(app core.IApp) {
 	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.OneTimeAction{}, &[]*core.OneTimeAction{} })
 	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.Permission{}, &[]*core.Permission{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.User{}, &[]*core.User{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &core.UserGroup{}, &[]*core.UserGroup{} })
 
 	core.UadminValidatorRegistry.AddValidator("username-unique", func(i interface{}, o interface{}) error {
 		uadminDatabase := core.NewUadminDatabase()

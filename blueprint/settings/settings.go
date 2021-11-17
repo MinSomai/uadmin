@@ -17,7 +17,7 @@ type Blueprint struct {
 func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	settingsAdminPage := core.NewGormAdminPage(
 		nil,
-		func() (interface{}, interface{}) { return nil, nil },
+		nil,
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form { return nil },
 	)
 	settingsAdminPage.PageName = "Settings"
@@ -30,9 +30,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	}
 	settingcategoriesmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
-		func() (interface{}, interface{}) {
-			return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
-		},
+		&settingmodel.SettingCategory{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Name", "Icon"}
 			form := core.NewFormFromModelFromGinContext(ctx, modelI, make([]string, 0), fields, true, "", true)
@@ -49,7 +47,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 	}
 	settingmodelAdminPage := core.NewGormAdminPage(
 		settingsAdminPage,
-		func() (interface{}, interface{}) { return &settingmodel.Setting{}, &[]*settingmodel.Setting{} },
+		&settingmodel.Setting{},
 		func(modelI interface{}, ctx core.IAdminContext) *core.Form {
 			fields := []string{"Name", "DefaultValue", "DataType", "Value", "Help", "Category", "Code"}
 			settingModel := modelI.(*settingmodel.Setting)
@@ -207,6 +205,8 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 }
 
 func (b Blueprint) InitApp(app core.IApp) {
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &settingmodel.Setting{}, &[]*settingmodel.Setting{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{} })
 }
 
 var ConcreteBlueprint = Blueprint{

@@ -27,24 +27,29 @@ type ElasticModelInterface interface {
 	String() string
 }
 
-func NewElasticSearchAdminPage(parentPage *AdminPage, genModelI func() (interface{}, interface{}), generateForm func(modelI interface{}, ctx IAdminContext) *Form) *AdminPage {
-	modelI4, _ := genModelI()
+func NewElasticSearchAdminPage(parentPage *AdminPage, modelI interface{}, generateForm func(modelI interface{}, ctx IAdminContext) *Form) *AdminPage {
 	modelName := ""
-	if modelI4 != nil {
-		modelName = reflect.TypeOf(modelI4).Name()
-	}
 	var form *Form
 	var listDisplay *ListDisplayRegistry
 	var searchFieldRegistry *SearchFieldRegistry
-	if modelI4 != nil {
-		form = NewFormFromModelFromGinContext(&AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
-		listDisplay = NewListDisplayRegistryFromGormModel(modelI4)
-		searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
+	genModelI := func() (interface{}, interface{}) { return nil, nil}
+	if modelI != nil {
+		modelDesc := ProjectModels.GetModelFromInterface(modelI)
+		genModelI = modelDesc.GenerateModelI
+		modelI4, _ := genModelI()
+		if modelI4 != nil {
+			modelName = reflect.TypeOf(modelI4).Name()
+		}
+		if modelI4 != nil {
+			form = NewFormFromModelFromGinContext(&AdminContext{}, modelI4, make([]string, 0), []string{"ID"}, true, "")
+			listDisplay = NewListDisplayRegistryFromGormModel(modelI4)
+			searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
+		}
+
 	}
 	return &AdminPage{
 		Form:           form,
 		SubPages:       NewAdminPageRegistry(),
-		GenerateModelI: genModelI,
 		ParentPage:     parentPage,
 		GetQueryset: func(adminContext IAdminContext, adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
@@ -66,7 +71,6 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, genModelI func() (interfac
 				PaginatedESQuerySet: paginatedQuerySet1,
 				Model:               modelI3,
 				UadminDatabase:      uadminDatabase,
-				GenerateModelI:      genModelI,
 				SearchBy:            make([]*ESSearchParam, 0),
 			}
 			if adminRequestParams != nil && adminRequestParams.RequestURL != "" {
@@ -124,7 +128,7 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, genModelI func() (interfac
 			}
 			return ret
 		},
-		Model:                   modelI4,
+		Model:                   modelI,
 		ModelName:               modelName,
 		Validators:              NewValidatorRegistry(),
 		ExcludeFields:           NewFieldRegistry(),
@@ -149,8 +153,9 @@ type ElasticSearchPersistenceStorage struct {
 	LastError error
 }
 
-func NewElasticSearchPersistenceStorage(elasticClient *elastic.Client, indexName string, genModelI func() (interface{}, interface{})) *ElasticSearchPersistenceStorage {
-	return &ElasticSearchPersistenceStorage{ESClient: elasticClient, GenModelI: genModelI, IndexName: indexName}
+func NewElasticSearchPersistenceStorage(elasticClient *elastic.Client, indexName string, modelI interface{}) *ElasticSearchPersistenceStorage {
+	modelDesc := ProjectModels.GetModelFromInterface(modelI)
+	return &ElasticSearchPersistenceStorage{ESClient: elasticClient, GenModelI: modelDesc.GenerateModelI, IndexName: indexName}
 }
 
 func (gps *ElasticSearchPersistenceStorage) Association(column string) IPersistenceAssociation {
@@ -561,7 +566,6 @@ type ElasticSearchAdminFilterObjects struct {
 	PaginatedESQuerySet IPersistenceStorage
 	Model               interface{}
 	UadminDatabase      *UadminDatabase
-	GenerateModelI      func() (interface{}, interface{})
 	SearchBy            []*ESSearchParam
 	SearchString        string
 	LastError           error
@@ -628,10 +632,6 @@ func (afo *ElasticSearchAdminFilterObjects) SetFullQuerySet(storage IPersistence
 	afo.ESQuerySet = storage
 }
 
-func (afo *ElasticSearchAdminFilterObjects) GenerateModelInterface() (interface{}, interface{}) {
-	return afo.GenerateModelI()
-}
-
 func (afo *ElasticSearchAdminFilterObjects) GetInitialQuerySet() IPersistenceStorage {
 	return afo.InitialESQuerySet
 }
@@ -695,10 +695,11 @@ func (afo *ElasticSearchAdminFilterObjects) RemoveModelPermanently(model interfa
 }
 
 func (afo *ElasticSearchAdminFilterObjects) GetDB() IPersistenceStorage {
+	modelDesc := ProjectModels.GetModelFromInterface(afo.Model)
 	return NewElasticSearchPersistenceStorage(
 		afo.InitialESQuerySet.(*ElasticSearchPersistenceStorage).ESClient,
 		afo.InitialESQuerySet.(*ElasticSearchPersistenceStorage).IndexName,
-		afo.GenerateModelI,
+		modelDesc.GenerateModelI,
 	)
 }
 
@@ -712,7 +713,8 @@ func (afo *ElasticSearchAdminFilterObjects) GetPaginated() <-chan *IterateAdminO
 			}
 			close(chnl)
 		}()
-		_, models := afo.GenerateModelI()
+		modelDesc := ProjectModels.GetModelFromInterface(afo.Model)
+		_, models := modelDesc.GenerateModelI()
 		afo.PaginatedESQuerySet.Find(models)
 		afo.SetLastError(afo.PaginatedESQuerySet.GetLastError())
 		s := reflect.Indirect(reflect.ValueOf(models))
@@ -742,7 +744,8 @@ func (afo *ElasticSearchAdminFilterObjects) IterateThroughWholeQuerySet() <-chan
 			}
 			close(chnl)
 		}()
-		_, models := afo.GenerateModelI()
+		modelDesc := ProjectModels.GetModelFromInterface(afo.Model)
+		_, models := modelDesc.GenerateModelI()
 		afo.ESQuerySet.Find(models)
 		afo.SetLastError(afo.ESQuerySet.GetLastError())
 		s := reflect.Indirect(reflect.ValueOf(models))
