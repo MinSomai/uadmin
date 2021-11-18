@@ -200,4 +200,8 @@ func init() {
 		Name:       "EmailFieldOptions",
 		WidgetType: "email",
 	})
+	UadminFormCongirurableOptionInstance.AddFieldFormOptions(&FieldFormOptions{
+		Name:       "URLFieldOptions",
+		WidgetType: "url",
+	})
 }

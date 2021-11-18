@@ -109,6 +109,8 @@ func GetWidgetByWidgetType(widgetType string, fieldOptions IFieldFormOptions) IW
 	//	return &core.DateTimeWidget{}
 	//
 	switch widgetType {
+	case "url":
+		widget = &URLWidget{}
 	case "file":
 		widget = &FileWidget{}
 	case "boolean":
