@@ -10,7 +10,7 @@ type FieldFormOptions struct {
 	WidgetType      string
 	ReadOnly        bool
 	Required        bool
-	WidgetPopulate  func(renderContext *FormRenderContext, currentField *Field) interface{}
+	WidgetPopulate  func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{}
 	IsFk            bool
 	Autocomplete    bool
 	ListFieldWidget string
@@ -32,7 +32,7 @@ func (ffo *FieldFormOptions) GetIsAutocomplete() bool {
 	return ffo.Autocomplete
 }
 
-func (ffo *FieldFormOptions) GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{} {
+func (ffo *FieldFormOptions) GetWidgetPopulate() func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{} {
 	return ffo.WidgetPopulate
 }
 

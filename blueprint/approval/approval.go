@@ -56,7 +56,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				Value:    "2",
 			})
 			// populate ApprovalAction field value
-			approvalField.FieldConfig.Widget.SetPopulate(func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+			approvalField.FieldConfig.Widget.SetPopulate(func(w core.IWidget, renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
 				a := renderContext.Model.(*models.Approval).ApprovalAction
 				return strconv.Itoa(int(a))
 			})

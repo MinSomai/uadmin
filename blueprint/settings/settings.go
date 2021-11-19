@@ -79,7 +79,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			//return "unknown"
 			//}
 
-			dataTypeWidget.Populate = func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+			dataTypeWidget.Populate = func(w core.IWidget, renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
 				if renderContext.Context.GetCtx() != nil && renderContext.Context.GetCtx().Query("widgetType") != "" {
 					dataType := settingmodel.DataTypeFromString(renderContext.Context.GetCtx().Query("widgetType"))
 					return strconv.Itoa(int(dataType))

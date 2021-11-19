@@ -149,7 +149,7 @@ type IFieldFormOptions interface {
 	GetWidgetType() string
 	GetReadOnly() bool
 	GetIsRequired() bool
-	GetWidgetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{}
+	GetWidgetPopulate() func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{}
 	IsItFk() bool
 	GetIsAutocomplete() bool
 	GetListFieldWidget() string

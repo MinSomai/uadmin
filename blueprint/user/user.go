@@ -683,7 +683,7 @@ func (b Blueprint) InitApp(app core.IApp) {
 	core.UadminFormCongirurableOptionInstance.AddFieldFormOptions(&core.FieldFormOptions{
 		WidgetType: "image",
 		Name:       "UserPhotoFormOptions",
-		WidgetPopulate: func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+		WidgetPopulate: func(w core.IWidget, renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
 			fsStorage := core.NewFsStorage()
 			photo := renderContext.Model.(core.IUser).GetPhoto()
 			if photo == "" {

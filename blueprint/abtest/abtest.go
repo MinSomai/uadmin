@@ -58,7 +58,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 				OptLabel: "model",
 				Value:    "2",
 			})
-			typeField.FieldConfig.Widget.SetPopulate(func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+			typeField.FieldConfig.Widget.SetPopulate(func(w core.IWidget, renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
 				a := renderContext.Model.(*abtestmodel.ABTest).Type
 				return strconv.Itoa(int(a))
 			})

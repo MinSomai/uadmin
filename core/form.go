@@ -175,7 +175,7 @@ func (f *Form) Render() template.HTML {
 	FieldValue := func(fieldName string, currentField *Field) interface{} {
 		field, _ := f.FieldRegistry.GetByName(fieldName)
 		if field.FieldConfig.Widget.GetPopulate() != nil {
-			return field.FieldConfig.Widget.GetPopulate()(f.RenderContext, currentField)
+			return field.FieldConfig.Widget.GetPopulate()(field.FieldConfig.Widget, f.RenderContext, currentField)
 		}
 		return field.FieldConfig.Widget.GetValue()
 	}

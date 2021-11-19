@@ -37,7 +37,7 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 			form.ExtraStatic.ExtraJS = append(form.ExtraStatic.ExtraJS, "/static-inbuilt/uadmin/assets/js/initialize.highlight.js")
 			form.ExtraStatic.ExtraCSS = append(form.ExtraStatic.ExtraCSS, "/static-inbuilt/uadmin/assets/highlight.js/styles/default.css")
 			actionField, _ := form.FieldRegistry.GetByName("Action")
-			actionField.FieldConfig.Widget.SetPopulate(func(renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
+			actionField.FieldConfig.Widget.SetPopulate(func(w core.IWidget, renderContext *core.FormRenderContext, currentField *core.Field) interface{} {
 				a := renderContext.Model.(*logmodel.Log).Action
 				return logmodel.HumanizeAction(a)
 			})

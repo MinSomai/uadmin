@@ -74,10 +74,10 @@ type IWidget interface {
 	RenderForAdmin()
 	SetHelpText(helpText string)
 	IsValueChanged() bool
-	SetPopulate(func(renderContext *FormRenderContext, currentField *Field) interface{})
+	SetPopulate(func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{})
 	SetPrefix(prefix string)
 	GetHTMLInputName() string
-	GetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{}
+	GetPopulate() func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{}
 	IsReadOnly() bool
 	IsValueConfigured() bool
 	SetValueConfigured()
@@ -143,7 +143,7 @@ func GetWidgetByWidgetType(widgetType string, fieldOptions IFieldFormOptions) IW
 	case "fklink":
 		widget = &FkLinkWidget{}
 		widget.SetReadonly(true)
-		widget.SetPopulate(func(renderContext *FormRenderContext, currentField *Field) interface{} {
+		widget.SetPopulate(func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{} {
 			gormModelV := reflect.Indirect(reflect.ValueOf(renderContext.Model))
 			if gormModelV.FieldByName(currentField.Name).IsZero() {
 				return ""
@@ -190,7 +190,7 @@ type Widget struct {
 	IsForAdmin        bool
 	HelpText          string
 	ValueChanged      bool
-	Populate          func(renderContext *FormRenderContext, currentField *Field) interface{}
+	Populate          func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{}
 	Prefix            string
 	ValueConfigured   bool
 }
@@ -232,11 +232,11 @@ func (w *Widget) IsValueChanged() bool {
 	return w.ValueChanged
 }
 
-func (w *Widget) SetPopulate(pFunc func(renderContext *FormRenderContext, currentField *Field) interface{}) {
+func (w *Widget) SetPopulate(pFunc func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{}) {
 	w.Populate = pFunc
 }
 
-func (w *Widget) GetPopulate() func(renderContext *FormRenderContext, currentField *Field) interface{} {
+func (w *Widget) GetPopulate() func(widget IWidget, renderContext *FormRenderContext, currentField *Field) interface{} {
 	return w.Populate
 }
 
@@ -368,7 +368,7 @@ func (w *Widget) GetDataForRendering(formRenderContext *FormRenderContext, curre
 	var value interface{}
 	var valueStr string
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext, currentField)
+		value = w.Populate(w, formRenderContext, currentField)
 		valueStr = value.(string)
 	} else {
 		value = TransformValueForWidget(w.Value)
@@ -523,7 +523,7 @@ func (w *FkLinkWidget) GetTemplateName() string {
 
 func (w *FkLinkWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	if w.IsReadOnly() && w.Context != "edit" {
-		return template.HTML(w.Populate(formRenderContext, currentField).(string))
+		return template.HTML(w.Populate(w, formRenderContext, currentField).(string))
 	}
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
 	data["Type"] = w.GetWidgetType()
@@ -896,7 +896,7 @@ func (w *DateTimeWidget) Render(formRenderContext *FormRenderContext, currentFie
 	var value interface{}
 	var valueStr string
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext, currentField)
+		value = w.Populate(w, formRenderContext, currentField)
 		valueStr = value.(string)
 	} else {
 		value = TransformDateTimeValueForWidget(w.Value)
@@ -1130,7 +1130,7 @@ func (w *SelectWidget) GetDataForRendering(formRenderContext *FormRenderContext,
 	var value interface{}
 	realV := make([]string, 0)
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext, currentField)
+		value = w.Populate(w, formRenderContext, currentField)
 	} else {
 		value = TransformValueForWidget(w.Value)
 	}
@@ -1188,6 +1188,9 @@ func (w *SelectWidget) Render(formRenderContext *FormRenderContext, currentField
 func (w *SelectWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
 	if w.ReadOnly {
 		return nil
+	}
+	if w.Populate != nil {
+		w.Populate(w, renderContext, nil)
 	}
 	v, ok := form.Value[w.GetHTMLInputName()]
 	if !ok {
@@ -1264,7 +1267,7 @@ func (w *ForeignKeyWidget) CloneAllOtherImportantSettings(widget IWidget) {
 func (w *ForeignKeyWidget) GetDataForRendering(formRenderContext *FormRenderContext, currentField *Field) WidgetData {
 	var value interface{}
 	if w.Populate != nil {
-		value = w.Populate(formRenderContext, currentField)
+		value = w.Populate(w, formRenderContext, currentField)
 	} else {
 		if !reflect.ValueOf(w.Value).IsZero() {
 			value = GetID(reflect.Indirect(reflect.ValueOf(w.Value)))
