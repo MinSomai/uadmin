@@ -1060,9 +1060,21 @@ func (w *CheckboxWidget) SetValue(v interface{}) {
 
 func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentField *Field) template.HTML {
 	// spew.Dump("12", w.FieldDisplayName)
-	value := TransformValueForWidget(w.Value)
-	if value != "" && value != "false" {
-		w.Attrs["checked"] = "checked"
+	var value interface{}
+	if w.Populate != nil {
+		value = w.Populate(w, formRenderContext, currentField)
+	} else {
+		value = TransformValueForWidget(w.Value)
+	}
+	if valueS, ok := value.(string); ok {
+		if valueS != "" && valueS != "false" {
+			w.Attrs["checked"] = "checked"
+		}
+	}
+	if valueB, ok := value.(bool); ok {
+		if valueB {
+			w.Attrs["checked"] = "checked"
+		}
 	}
 	// w.Value = nil
 	data := w.Widget.GetDataForRendering(formRenderContext, currentField)
@@ -1072,6 +1084,9 @@ func (w *CheckboxWidget) Render(formRenderContext *FormRenderContext, currentFie
 }
 
 func (w *CheckboxWidget) ProceedForm(form *multipart.Form, afo IAdminFilterObjects, renderContext *FormRenderContext) error {
+	if w.Populate != nil {
+		w.Populate(w, renderContext, nil)
+	}
 	if w.ReadOnly {
 		return nil
 	}
