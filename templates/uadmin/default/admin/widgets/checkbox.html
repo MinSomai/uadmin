@@ -29,8 +29,8 @@
                     </div>
                 {{ end }}
             {{ end }}
-            <div onclick="$(this).find('input').attr('checked', 'checked');" class="material-switch" style="padding-left:15px;padding-top:5px">
-                <input name="{{ .Name }}" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} type="checkbox">
+            <div onclick="$(this).find('input').attr('checked') === 'checked' ? $(this).find('input').removeAttr('checked') : $(this).find('input').attr('checked', 'checked');" class="material-switch" style="padding-left:15px;padding-top:5px">
+                <input name="{{ .Name }}" {{ range $k, $v := .Attrs }} {{ attr $k }}="{{ safe $v }}"{{ end }} type="checkbox" {{if .ReadOnly}} readonly {{end}}>
                 <label class="label-primary"></label>
             </div>
 {{ if not .ShowOnlyHtmlInput }}
