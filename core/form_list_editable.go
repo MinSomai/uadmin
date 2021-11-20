@@ -73,7 +73,7 @@ func (f *FormListEditable) ProceedRequest(form *multipart.Form, gormModel interf
 		FieldError:    make(map[string]ValidationError),
 		GeneralErrors: make(ValidationError, 0),
 	}
-	renderContext := &FormRenderContext{Context: adminContext}
+	renderContext := &FormRenderContext{Context: adminContext, Model: gormModel}
 	for fieldName, field := range f.FieldRegistry.GetAllFields() {
 		errors1 := field.ProceedForm(form, nil, renderContext)
 		if len(errors1) == 0 {
