@@ -42,7 +42,7 @@ func (lf *ListFilter) IsThatOptionActive(option *FieldChoice, fullURL *url.URL) 
 	qs := fullURL.Query()
 	value := qs.Get(lf.URLFilteringParam)
 	if value != "" {
-		optionValue := TransformValueForListDisplay(option.Value)
+		optionValue := TransformValueForListDisplay(option.Value, true)
 		if optionValue == value {
 			return true
 		}
@@ -53,7 +53,7 @@ func (lf *ListFilter) IsThatOptionActive(option *FieldChoice, fullURL *url.URL) 
 func (lf *ListFilter) GetURLForOption(option *FieldChoice, fullURL *url.URL) string {
 	clonedURL := CloneNetURL(fullURL)
 	qs := clonedURL.Query()
-	qs.Set(lf.URLFilteringParam, TransformValueForListDisplay(option.Value))
+	qs.Set(lf.URLFilteringParam, TransformValueForListDisplay(option.Value, true))
 	clonedURL.RawQuery = qs.Encode()
 	return clonedURL.String()
 }
