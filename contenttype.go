@@ -43,6 +43,7 @@ type SyncContentTypes struct {
 }
 
 func (command SyncContentTypes) Proceed(subaction string, args []string) error {
+	appInstance.InitializeRouter()
 	uadminDatabase := core.NewUadminDatabase()
 	defer uadminDatabase.Close()
 	db := uadminDatabase.Db
