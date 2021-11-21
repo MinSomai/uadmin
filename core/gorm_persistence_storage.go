@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/url"
@@ -674,6 +675,7 @@ func (afo *GormAdminFilterObjects) FilterQs(filterString string) {
 
 func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 	fieldType := field.FieldType.Kind()
+	spew.Dump(field.Name, fieldType)
 	if fieldType == reflect.Ptr {
 		fieldType = field.FieldType.Elem().Kind()
 	}
@@ -721,6 +723,7 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 		paginatedGormOperatorContext := NewGormOperatorContext(afo.GetPaginatedQuerySet(), model1)
 		for searchField := range adminPage.SearchFields.GetAll() {
 			fieldType1 := searchField.Field.FieldType.Kind()
+			spew.Dump(searchField.Field.Name, fieldType1)
 			if searchField.Field.FieldType.Kind() == reflect.Struct {
 				afo.Search(searchField.Field, searchString)
 				continue
