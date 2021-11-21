@@ -732,8 +732,17 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 		afo.SetFullQuerySet(fullGormOperatorContext.Tx)
 		afo.SetPaginatedQuerySet(fullGormOperatorContext.Tx)
 		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
-	} else {
+	} else if (fieldType == reflect.Uint) || (fieldType == reflect.Uint64) || (fieldType == reflect.Uint32) || (fieldType == reflect.Int64) || (fieldType == reflect.Int) || (fieldType == reflect.Int32) || (fieldType == reflect.Float32) || (fieldType == reflect.Float64){
 		operator := IContainsGormOperator{}
+		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
+		afo.SetFullQuerySet(gormOperatorContext.Tx)
+		gormOperatorContext = NewGormOperatorContext(afo.GetPaginatedQuerySet(), afo.GetCurrentModel())
+		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
+		afo.SetPaginatedQuerySet(gormOperatorContext.Tx)
+		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
+	} else {
+		operator := ExactGormOperator{}
 		gormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), afo.GetCurrentModel())
 		operator.Build(afo.GetUadminDatabase().Adapter, gormOperatorContext, field, searchString, &SQLConditionBuilder{Type: "or"})
 		afo.SetFullQuerySet(gormOperatorContext.Tx)
