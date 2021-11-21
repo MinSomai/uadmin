@@ -193,7 +193,7 @@ func NewAdminPageInline(
 		Classes:           make([]string, 0),
 		InlineType:        inlineType,
 		ListDisplay:       ld,
-		GenerateModelI: generateModelI,
+		GenerateModelI:    generateModelI,
 		GetQueryset:       getQuerySet,
 		VerboseNamePlural: inlineIden,
 	}

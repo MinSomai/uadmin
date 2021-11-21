@@ -173,7 +173,7 @@ type AdminPage struct {
 	NoPermissionToAddNew               bool
 	NoPermissionToEdit                 bool
 	PermissionName                     CustomPermission
-	EnhanceQuerySet                        func(afo IAdminFilterObjects)                                                                `json:"-"`
+	EnhanceQuerySet                    func(afo IAdminFilterObjects)                                                                `json:"-"`
 	CustomizeQuerySet                  func(adminContext IAdminContext, afo IAdminFilterObjects, requestParams *AdminRequestParams) `json:"-"`
 }
 

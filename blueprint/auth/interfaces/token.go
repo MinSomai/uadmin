@@ -46,9 +46,9 @@ type TokenSignupParams struct {
 
 // A UserApiResponse is a serialized view of the user
 // swagger:response userApiResponse
-type UserApiResponse struct {
-	Name    string
-	ID uint
+type UserAPIResponse struct {
+	Name string
+	ID   uint
 }
 
 // swagger:route POST /auth/token/signin auth token tokenSignin

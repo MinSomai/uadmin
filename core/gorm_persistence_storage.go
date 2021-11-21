@@ -18,7 +18,7 @@ func NewGormAdminPage(parentPage *AdminPage, modelI interface{}, generateForm fu
 	var form *Form
 	var listDisplay *ListDisplayRegistry
 	var searchFieldRegistry *SearchFieldRegistry
-	generateModelI := func() (interface{}, interface{}) {return nil, nil}
+	generateModelI := func() (interface{}, interface{}) { return nil, nil }
 	if modelI != nil {
 		modelDesc := ProjectModels.GetModelFromInterface(modelI)
 		generateModelI = modelDesc.GenerateModelI
@@ -34,9 +34,9 @@ func NewGormAdminPage(parentPage *AdminPage, modelI interface{}, generateForm fu
 		searchFieldRegistry = NewSearchFieldRegistryFromGormModel(modelI4)
 	}
 	return &AdminPage{
-		Form:           form,
-		SubPages:       NewAdminPageRegistry(),
-		ParentPage:     parentPage,
+		Form:       form,
+		SubPages:   NewAdminPageRegistry(),
+		ParentPage: parentPage,
 		GetQueryset: func(adminContext IAdminContext, adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
 			db := uadminDatabase.Db
@@ -744,7 +744,7 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 		afo.SetFullQuerySet(fullGormOperatorContext.Tx)
 		afo.SetPaginatedQuerySet(fullGormOperatorContext.Tx)
 		afo.SetLastError(afo.PaginatedGormQuerySet.GetLastError())
-	} else if (fieldType == reflect.Uint) || (fieldType == reflect.Uint64) || (fieldType == reflect.Uint32) || (fieldType == reflect.Int64) || (fieldType == reflect.Int) || (fieldType == reflect.Int32){
+	} else if (fieldType == reflect.Uint) || (fieldType == reflect.Uint64) || (fieldType == reflect.Uint32) || (fieldType == reflect.Int64) || (fieldType == reflect.Int) || (fieldType == reflect.Int32) {
 		searchID, err1 := strconv.Atoi(searchString)
 		if err1 != nil {
 			return
@@ -808,7 +808,7 @@ func (afo *GormAdminFilterObjects) GetDB() IPersistenceStorage {
 func (afo *GormAdminFilterObjects) WithTransaction(handler func(afo1 IAdminFilterObjects) error) error {
 	afo.UadminDatabase.Db.Session(&gorm.Session{FullSaveAssociations: true}).Transaction(func(tx *gorm.DB) error {
 		ret := handler(&GormAdminFilterObjects{
-			UadminDatabase: &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter},
+			UadminDatabase:      &UadminDatabase{Db: tx, Adapter: afo.UadminDatabase.Adapter},
 			InitialGormQuerySet: NewGormPersistenceStorage(tx),
 		})
 		afo.SetLastError(ret)

@@ -32,7 +32,7 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, modelI interface{}, genera
 	var form *Form
 	var listDisplay *ListDisplayRegistry
 	var searchFieldRegistry *SearchFieldRegistry
-	genModelI := func() (interface{}, interface{}) { return nil, nil}
+	genModelI := func() (interface{}, interface{}) { return nil, nil }
 	if modelI != nil {
 		modelDesc := ProjectModels.GetModelFromInterface(modelI)
 		genModelI = modelDesc.GenerateModelI
@@ -48,9 +48,9 @@ func NewElasticSearchAdminPage(parentPage *AdminPage, modelI interface{}, genera
 
 	}
 	return &AdminPage{
-		Form:           form,
-		SubPages:       NewAdminPageRegistry(),
-		ParentPage:     parentPage,
+		Form:       form,
+		SubPages:   NewAdminPageRegistry(),
+		ParentPage: parentPage,
 		GetQueryset: func(adminContext IAdminContext, adminPage *AdminPage, adminRequestParams *AdminRequestParams) IAdminFilterObjects {
 			uadminDatabase := NewUadminDatabase()
 			var paginatedQuerySet IPersistenceStorage

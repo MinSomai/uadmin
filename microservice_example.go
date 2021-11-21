@@ -65,7 +65,7 @@ type ValidationError struct {
 // A GeneralError is an error that is used when something strange happened
 // swagger:response generalError
 type GeneralError struct {
-	Error    string
+	Error string
 }
 
 type MicroserviceExampleCommand struct {
@@ -122,10 +122,9 @@ func (command MicroserviceExampleStartCommand) Proceed(subaction string, args []
 	}}
 	if opts.StartSwagger {
 		return microservice.StartSwagger(appInstance)
-	} else {
-		r := microservice.RegisterEndpoints(appInstance)
-		microservice.Start(r)
 	}
+	r := microservice.RegisterEndpoints(appInstance)
+	microservice.Start(r)
 	return nil
 }
 

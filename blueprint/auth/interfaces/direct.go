@@ -219,8 +219,6 @@ func (ap *DirectAuthProvider) IsAuthenticated(c *gin.Context) {
 	c.JSON(http.StatusOK, GetUserForAPI(sessionAdapter.GetUser()))
 }
 
-
-
 var GetUserForAPI = func(user core.IUser) *gin.H {
 	if user == nil {
 		return &gin.H{}

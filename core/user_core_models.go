@@ -530,9 +530,9 @@ func (m *OneTimeAction) String() string {
 
 type UserAuthToken struct {
 	Model
-	User            User
-	UserID          uint `gorm:"uniqueIndex"`
-	Token           string `gorm:"uniqueIndex,size:40"`
+	User             User
+	UserID           uint   `gorm:"uniqueIndex"`
+	Token            string `gorm:"uniqueIndex,size:40"`
 	SessionExpiresAt sql.NullInt64
 }
 

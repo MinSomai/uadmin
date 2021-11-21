@@ -206,7 +206,9 @@ func (b Blueprint) InitRouter(app core.IApp, group *gin.RouterGroup) {
 
 func (b Blueprint) InitApp(app core.IApp) {
 	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &settingmodel.Setting{}, &[]*settingmodel.Setting{} })
-	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) { return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{} })
+	core.ProjectModels.RegisterModel(func() (interface{}, interface{}) {
+		return &settingmodel.SettingCategory{}, &[]*settingmodel.SettingCategory{}
+	})
 }
 
 var ConcreteBlueprint = Blueprint{
