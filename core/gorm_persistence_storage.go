@@ -723,11 +723,17 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 			if searchField.Field.FieldType.Kind() == reflect.Struct {
 				afo.Search(searchField.Field, searchString)
 				continue
+			} else if (fieldType == reflect.Uint) || (fieldType == reflect.Uint64) || (fieldType == reflect.Uint32) || (fieldType == reflect.Int64) || (fieldType == reflect.Int) || (fieldType == reflect.Int32) || (fieldType == reflect.Float32) || (fieldType == reflect.Float64) {
+				operator := ExactGormOperator{}
+				operator.Build(afo.GetUadminDatabase().Adapter, fullGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
+				operator = ExactGormOperator{}
+				operator.Build(afo.GetUadminDatabase().Adapter, paginatedGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
+			} else {
+				operator := IContainsGormOperator{}
+				operator.Build(afo.GetUadminDatabase().Adapter, fullGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
+				operator = IContainsGormOperator{}
+				operator.Build(afo.GetUadminDatabase().Adapter, paginatedGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
 			}
-			operator := IContainsGormOperator{}
-			operator.Build(afo.GetUadminDatabase().Adapter, fullGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
-			operator = IContainsGormOperator{}
-			operator.Build(afo.GetUadminDatabase().Adapter, paginatedGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
 		}
 		afo.SetFullQuerySet(fullGormOperatorContext.Tx)
 		afo.SetPaginatedQuerySet(fullGormOperatorContext.Tx)
