@@ -720,10 +720,11 @@ func (afo *GormAdminFilterObjects) Search(field *Field, searchString string) {
 		fullGormOperatorContext := NewGormOperatorContext(afo.GetFullQuerySet(), model)
 		paginatedGormOperatorContext := NewGormOperatorContext(afo.GetPaginatedQuerySet(), model1)
 		for searchField := range adminPage.SearchFields.GetAll() {
+			fieldType1 := searchField.Field.FieldType.Kind()
 			if searchField.Field.FieldType.Kind() == reflect.Struct {
 				afo.Search(searchField.Field, searchString)
 				continue
-			} else if (fieldType == reflect.Uint) || (fieldType == reflect.Uint64) || (fieldType == reflect.Uint32) || (fieldType == reflect.Int64) || (fieldType == reflect.Int) || (fieldType == reflect.Int32) || (fieldType == reflect.Float32) || (fieldType == reflect.Float64) {
+			} else if (fieldType1 == reflect.Uint) || (fieldType1 == reflect.Uint64) || (fieldType1 == reflect.Uint32) || (fieldType1 == reflect.Int64) || (fieldType1 == reflect.Int) || (fieldType1 == reflect.Int32) || (fieldType1 == reflect.Float32) || (fieldType1 == reflect.Float64) {
 				operator := ExactGormOperator{}
 				operator.Build(afo.GetUadminDatabase().Adapter, fullGormOperatorContext, searchField.Field, searchString, &SQLConditionBuilder{Type: "or"})
 				operator = ExactGormOperator{}
