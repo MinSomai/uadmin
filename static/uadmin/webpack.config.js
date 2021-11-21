@@ -14,10 +14,10 @@ module.exports = {
   }],  
   },
   entry: [
-       './node_modules/jquery/dist/jquery.min.js', './node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js', './js/sprintf.js', './assets/js/tether.min.js', './assets/bootstrap/3.3.7/js/bootstrap.min.js',
+       './node_modules/jquery/dist/jquery.min.js', './node_modules/jquery-ui-bundle/jquery-ui.min.js', './node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js', './js/sprintf.js', './assets/js/tether.min.js', './assets/bootstrap/3.3.7/js/bootstrap.min.js',
        './assets/js/wow.js', './assets/spinner/src/jRoll.js', './assets/js/floatHead.min.js', './assets/js/staticdata.js',
        './js/notify.min.js', './assets/chosen/docsupport/prism.js', './assets/cropper/cropper.min.js'
-   ],  
+   ],
   // Chosen mode tells webpack to use its built-in optimizations accordingly.
   // defaults to ./src
   // Here the application starts executing
